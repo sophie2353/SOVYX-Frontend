@@ -1,9 +1,5 @@
-// Configuración de Tokens y Llaves del Frontend
-const CONFIG = {
-  SOVYX_ADMIN_KEY: 'admin23555'
-};
-
 const API_URL = 'https://sovyx-backend.onrender.com';
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', META_APP_ID: '' };
 
 function getOrCreateSessionId() {
   let id = localStorage.getItem('sovyx_session_id');
@@ -19,6 +15,7 @@ const state = {
   sessionId: getOrCreateSessionId(),
   cicloInicio: null,
   timerInterval: null,
+  statusPollInterval: null,
   selectedFile: null
 };
 
@@ -57,15 +54,157 @@ function runSplashScreen(nextView) {
   }, 40);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  // 1. Cargar variables de entorno dinámicas desde Render
+  try {
+    const res = await fetch(`${API_URL}/api/config`);
+    const data = await res.json();
+    Object.assign(CONFIG, data);
+  } catch (err) {
+    console.error('Error cargando configuración dinámica:', err);
+  }
+
+  // 2. Inicializar la app
   const targetView = state.email ? 'postPayPreMeta' : 'landing';
   runSplashScreen(targetView);
+  setupOnboardingFlow();
   setupDataFileUploaders();
   setupChatListeners();
   initAdminMode();
+  setupCookieBanner();
 });
 
-// LÓGICA MODO ADMIN & SEGURIDAD
+// PASO 1 Y 2 DEL ONBOARDING (TESTER + POLLING)
+function setupOnboardingFlow() {
+  const btnSaveFbUser = document.getElementById('btn-save-fb-user');
+
+  btnSaveFbUser?.addEventListener('click', async () => {
+    const fbUser = document.getElementById('input-fb-user').value.trim();
+    if (!fbUser) return alert('Por favor ingresa tu usuario o correo de Facebook 🤠');
+
+    try {
+      await fetch(`${API_URL}/api/onboarding/tester-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: state.sessionId, fbUser })
+      });
+
+      document.getElementById('step-fb-user').classList.add('hidden');
+      document.getElementById('step-waiting-admin').classList.remove('hidden');
+
+      startStatusPolling();
+    } catch (err) {
+      console.error('Error enviando datos de FB:', err);
+      // Fallback local en caso de fallar backend inicial
+      document.getElementById('step-fb-user').classList.add('hidden');
+      document.getElementById('step-waiting-admin').classList.remove('hidden');
+      startStatusPolling();
+    }
+  });
+}
+
+function startStatusPolling() {
+  if (state.statusPollInterval) clearInterval(state.statusPollInterval);
+
+  state.statusPollInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/onboarding/status?sessionId=${state.sessionId}`);
+      const data = await res.json();
+
+      if (data.status === 'READY') {
+        clearInterval(state.statusPollInterval);
+        document.getElementById('step-waiting-admin').classList.add('hidden');
+        document.getElementById('step-connect-and-upload').classList.remove('hidden');
+        alert('¡Acceso concedido! Acepta la invitación en Meta y continúa 👺');
+      }
+    } catch (err) {
+      console.error('Error en polling de estado:', err);
+    }
+  }, 3000);
+}
+
+// PASO 3: ARCHIVOS + OAUTH META
+function setupDataFileUploaders() {
+  const fileInput = document.getElementById('input-csv-file');
+  const selectFileBtn = document.getElementById('btn-select-file');
+  const fileNameDisplay = document.getElementById('file-name-display');
+
+  selectFileBtn?.addEventListener('click', () => fileInput?.click());
+
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      state.selectedFile = file;
+      if (fileNameDisplay) fileNameDisplay.innerText = `📄 Archivo listo: ${file.name}`;
+    }
+  });
+
+  document.getElementById('btn-connect-meta-csv')?.addEventListener('click', async () => {
+    if (!state.selectedFile) {
+      alert('Por favor sube la hoja de cálculo (.csv o .xlsx) con tus clientes previos primero 🤠');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', state.selectedFile);
+    formData.append('sessionId', state.sessionId);
+
+    try {
+      await fetch(`${API_URL}/api/upload-csv`, {
+        method: 'POST',
+        body: formData
+      });
+
+      // Redirección OAuth Meta Real
+      const redirectUri = encodeURIComponent(`${API_URL}/api/auth/facebook/callback`);
+      const metaAuthUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${CONFIG.FB_APP_ID}&redirect_uri=${redirectUri}&scope=ads_management,email&state=${state.sessionId}`;
+
+      window.location.href = metaAuthUrl;
+
+    } catch (err) {
+      console.error('Error procesando archivo:', err);
+      setView('dashboard');
+    }
+  });
+
+  // BOTÓN DASHBOARD: ACTIVAR BORRADOR
+  document.getElementById('btn-activate-draft')?.addEventListener('click', async () => {
+    try {
+      await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          sessionId: state.sessionId,
+          borradorNombre: "Prueba Hora 24"
+        })
+      });
+
+      state.cicloInicio = new Date();
+      start48hTimer(state.cicloInicio);
+
+      const instructionCard = document.getElementById('card-draft-instruction');
+      if (instructionCard) {
+        instructionCard.style.borderColor = 'var(--neon-green)';
+        instructionCard.innerHTML = `
+          <h3 style="font-size: 1rem; color: var(--neon-green);">¡Borrador Vinculado Activo! 👺</h3>
+          <p style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">
+            SOVYX inyectó la audiencia en "Prueba Hora 24". Se re-optimizará automáticamente a las 24h.
+          </p>
+        `;
+      }
+
+      alert('¡Sistema SOVYX activado en Meta Ads! 🚀');
+
+    } catch (err) {
+      console.error('Error iniciando el ciclo:', err);
+      state.cicloInicio = new Date();
+      start48hTimer(state.cicloInicio);
+      alert('¡Modo de prueba iniciado! Temporizador de 48h corriendo 🤠');
+    }
+  });
+}
+
+// MODO ADMIN Y APROBACIÓN DE TESTERS
 function initAdminMode() {
   const hamburgerBtn = document.getElementById('btn-hamburger');
   const isAlreadyAuthenticated = sessionStorage.getItem('sovyx_admin_auth') === 'true';
@@ -105,6 +244,26 @@ function initAdminMode() {
     }
   });
 
+  // Botón Admin para aprobar Tester
+  document.getElementById('btn-admin-approve-tester')?.addEventListener('click', async () => {
+    const targetSessionId = document.getElementById('input-admin-target-session').value.trim();
+    if (!targetSessionId) return alert('Ingresa la Session ID del cliente 🤠');
+
+    try {
+      await fetch(`${API_URL}/api/admin/tester-approved`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          sessionId: targetSessionId,
+          adminKey: CONFIG.SOVYX_ADMIN_KEY 
+        })
+      });
+      alert(`Session ${targetSessionId} aprobada exitosamente 👺`);
+    } catch (err) {
+      console.error('Error aprobando desde admin:', err);
+    }
+  });
+
   setupSidebarEvents();
 }
 
@@ -136,110 +295,6 @@ function setupSidebarEvents() {
   document.getElementById('btn-menu-dashboard')?.addEventListener('click', () => {
     toggleSidebar(false);
     setView('dashboard');
-  });
-}
-
-// RESERVAR SLOT / PAGO
-document.getElementById('btn-pay')?.addEventListener('click', async () => {
-  try {
-    const res = await fetch(`${API_URL}/api/pagos/link`);
-    const data = await res.json();
-    if (data.paymentUrl) {
-      window.location.href = data.paymentUrl;
-    }
-  } catch (err) {
-    console.error('Error al solicitar link de pago:', err);
-  }
-});
-
-// GESTIÓN DE SUBIDA DE CSV Y CONEXIÓN META
-function setupDataFileUploaders() {
-  const fileInput = document.getElementById('input-csv-file');
-  const selectFileBtn = document.getElementById('btn-select-file');
-  const fileNameDisplay = document.getElementById('file-name-display');
-
-  selectFileBtn?.addEventListener('click', () => fileInput?.click());
-
-  fileInput?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      state.selectedFile = file;
-      if (fileNameDisplay) fileNameDisplay.innerText = `📄 Archivo listo: ${file.name}`;
-    }
-  });
-
-  document.getElementById('btn-connect-meta-csv')?.addEventListener('click', async () => {
-    if (!state.selectedFile) {
-      alert('Por favor sube la hoja de cálculo (.csv o .xlsx) con tus clientes previos primero 🤠');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', state.selectedFile);
-    formData.append('sessionId', state.sessionId);
-    formData.append('email', state.email);
-
-    try {
-      // 1. Enviar archivo de datos al backend para análisis
-      await fetch(`${API_URL}/api/upload-csv`, {
-        method: 'POST',
-        body: formData
-      });
-
-      // 2. Conectar Facebook (Simulación / Token)
-      const userToken = 'EAAB_MOCK_TOKEN_META';
-      await fetch(`${API_URL}/api/pagos/conectar-meta`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: state.email, userToken })
-      });
-
-      setView('dashboard');
-      alert('Data de clientes procesada exitosamente por SOVYX. Ahora activa tu borrador "Prueba Hora 24" en Meta 👺');
-
-    } catch (err) {
-      console.error('Error al procesar la data o conectar Facebook:', err);
-      alert('Se procesó la conexión. Redirigiendo al Dashboard...');
-      setView('dashboard');
-    }
-  });
-
-  // BOTÓN DENTRO DEL DASHBOARD: ACTIVAR BORRADOR
-  document.getElementById('btn-activate-draft')?.addEventListener('click', async () => {
-    try {
-      await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: state.email, 
-          sessionId: state.sessionId,
-          borradorNombre: "Prueba Hora 24"
-        })
-      });
-
-      state.cicloInicio = new Date();
-      start48hTimer(state.cicloInicio);
-
-      const instructionCard = document.getElementById('card-draft-instruction');
-      if (instructionCard) {
-        instructionCard.style.borderColor = 'var(--neon-green)';
-        instructionCard.innerHTML = `
-          <h3 style="font-size: 1rem; color: var(--neon-green);">¡Borrador Vinculado Activo! 👺</h3>
-          <p style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">
-            SOVYX ha inyectado la audiencia segmentada en "Prueba Hora 24". Se re-optimizará a las 24h.
-          </p>
-        `;
-      }
-
-      alert('¡Sistema SOVYX activado con éxito en tu borrador! 🚀');
-
-    } catch (err) {
-      console.error('Error iniciando el ciclo:', err);
-      // Fallback local para continuar la prueba si el endpoint aún no está expuesto
-      state.cicloInicio = new Date();
-      start48hTimer(state.cicloInicio);
-      alert('¡Modo de prueba iniciado! Temporizador de 48h corriendo 🤠');
-    }
   });
 }
 
@@ -322,4 +377,18 @@ function appendMessage(text, type) {
   chatBox.appendChild(msgDiv);
   
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function setupCookieBanner() {
+  const cookieBanner = document.getElementById('cookie-banner');
+  const btnAccept = document.getElementById('btn-accept-cookies');
+
+  if (localStorage.getItem('sovyx_cookies_accepted') === 'true') {
+    if (cookieBanner) cookieBanner.style.display = 'none';
+  }
+
+  btnAccept?.addEventListener('click', () => {
+    localStorage.setItem('sovyx_cookies_accepted', 'true');
+    if (cookieBanner) cookieBanner.style.display = 'none';
+  });
 }
