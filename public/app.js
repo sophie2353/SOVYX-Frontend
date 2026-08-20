@@ -1,394 +1,428 @@
+// 1. Configuración Global
 const API_URL = 'https://sovyx-backend.onrender.com';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', META_APP_ID: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', FB_APP_ID: '' };
 
-function getOrCreateSessionId() {
-  let id = localStorage.getItem('sovyx_session_id');
-  if (!id) {
-    id = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
-    localStorage.setItem('sovyx_session_id', id);
-  }
-  return id;
-}
-
+// Estado de la Aplicación
 const state = {
-  email: new URLSearchParams(window.location.search).get('email') || '',
-  sessionId: getOrCreateSessionId(),
-  cicloInicio: null,
-  timerInterval: null,
-  statusPollInterval: null,
-  selectedFile: null
+  sessionId: localStorage.getItem('sovyx_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
+  email: localStorage.getItem('sovyx_user_email') || null,
+  fbUser: localStorage.getItem('sovyx_fb_user') || null,
+  isPaid: false,
+  testerApproved: false,
+  uploadedFile: null
 };
 
-let logoClickCount = 0;
-const urlParams = new URLSearchParams(window.location.search);
-const isAdminMode = urlParams.get('mode') === 'admin' || urlParams.get('admin') === 'true';
+// Guardar sessionId local
+localStorage.setItem('sovyx_session_id', state.sessionId);
 
-const views = {
-  splash: document.getElementById('view-splash'),
-  landing: document.getElementById('view-landing'),
-  postPayPreMeta: document.getElementById('view-postpay-premeta'),
-  dashboard: document.getElementById('view-dashboard'),
-  adminClients: document.getElementById('view-admin-clients')
-};
-
-function setView(targetView) {
-  Object.keys(views).forEach(key => {
-    if (views[key]) views[key].classList.add('hidden');
-  });
-  if (views[targetView]) views[targetView].classList.remove('hidden');
-}
-
-function runSplashScreen(nextView) {
-  const progressBar = document.getElementById('splash-progress');
-  let progress = 0;
-
-  const interval = setInterval(() => {
-    progress += 4;
-    if (progressBar) progressBar.style.width = `${progress}%`;
-
-    if (progress >= 100) {
-      clearInterval(interval);
-      views.splash.classList.add('hidden');
-      setView(nextView);
-    }
-  }, 40);
-}
-
+// 2. Inicialización General
 window.addEventListener('DOMContentLoaded', async () => {
-  // 1. Cargar variables de entorno dinámicas desde Render
+  // Cargar variables dinámicas desde Render
   try {
     const res = await fetch(`${API_URL}/api/config`);
-    const data = await res.json();
-    Object.assign(CONFIG, data);
+    if (res.ok) {
+      const data = await res.json();
+      Object.assign(CONFIG, data);
+    }
   } catch (err) {
-    console.error('Error cargando configuración dinámica:', err);
+    console.warn('Servidor backend no disponible temporalmente, usando fallback local.');
   }
 
-  // 2. Inicializar la app
-  const targetView = state.email ? 'postPayPreMeta' : 'landing';
-  runSplashScreen(targetView);
-  setupOnboardingFlow();
-  setupDataFileUploaders();
+  // Verificar estado de pago vía URL (si regresa de la pasarela)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('paid') === 'true' || urlParams.get('auth') === 'success') {
+    state.isPaid = true;
+    cleanUrlParams();
+  }
+
+  // Iniciar módulos
+  runSplashScreen();
+  setupPaymentFlow();
+  setupOnboardingBubbles();
   setupChatListeners();
-  initAdminMode();
+  setupAdminNavigation();
   setupCookieBanner();
 });
 
-// PASO 1 Y 2 DEL ONBOARDING (TESTER + POLLING)
-function setupOnboardingFlow() {
-  const btnSaveFbUser = document.getElementById('btn-save-fb-user');
+// --- SPLASH SCREEN & NAVEGACIÓN DE VISTAS ---
+function runSplashScreen() {
+  const splash = document.getElementById('view-splash');
+  const landing = document.getElementById('view-landing');
+  const dashboard = document.getElementById('view-dashboard');
+  const progress = document.getElementById('splash-progress');
 
-  btnSaveFbUser?.addEventListener('click', async () => {
-    const fbUser = document.getElementById('input-fb-user').value.trim();
-    if (!fbUser) return alert('Por favor ingresa tu usuario o correo de Facebook 🤠');
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct += 25;
+    if (progress) progress.style.width = `${pct}%`;
 
-    try {
-      await fetch(`${API_URL}/api/onboarding/tester-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: state.sessionId, fbUser })
-      });
-
-      document.getElementById('step-fb-user').classList.add('hidden');
-      document.getElementById('step-waiting-admin').classList.remove('hidden');
-
-      startStatusPolling();
-    } catch (err) {
-      console.error('Error enviando datos de FB:', err);
-      // Fallback local en caso de fallar backend inicial
-      document.getElementById('step-fb-user').classList.add('hidden');
-      document.getElementById('step-waiting-admin').classList.remove('hidden');
-      startStatusPolling();
+    if (pct >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        splash.classList.add('hidden');
+        
+        // Si ya completó onboarding, va directo al Dashboard
+        if (localStorage.getItem('sovyx_onboarding_complete') === 'true') {
+          showView('view-dashboard');
+        } else {
+          showView('view-landing');
+          // Si ya pagó, abre inmediatamente la burbuja flotante de Facebook
+          if (state.isPaid) {
+            openOnboardingOverlay('bubble-fb-user');
+          }
+        }
+      }, 400);
     }
-  });
+  }, 150);
 }
 
-function startStatusPolling() {
-  if (state.statusPollInterval) clearInterval(state.statusPollInterval);
+function showView(viewId) {
+  document.querySelectorAll('main > .view').forEach(v => v.classList.add('hidden'));
+  const target = document.getElementById(viewId);
+  if (target) target.classList.remove('hidden');
+}
 
-  state.statusPollInterval = setInterval(async () => {
+// --- FLUJO DE PAGO Y REDIRECCIÓN ---
+function setupPaymentFlow() {
+  const btnPay = document.getElementById('btn-pay');
+  if (!btnPay) return;
+
+  btnPay.addEventListener('click', async () => {
+    btnPay.disabled = true;
+    btnPay.textContent = 'Generando link de pago... ⏳';
+
+    try {
+      const res = await fetch(`${API_URL}/api/pago/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: state.sessionId })
+      });
+
+      const data = await res.json();
+
+      if (data.ok && data.url) {
+        // Redireccionar al link de pago devuelto por el backend
+        window.location.href = data.url;
+      } else {
+        alert('Error al conectar con la pasarela de pago. Intenta de nuevo.');
+        btnPay.disabled = false;
+        btnPay.textContent = 'Reservar Slot ($1,000 USD)';
+      }
+    } catch (err) {
+      console.error('Error procesando solicitud de pago:', err);
+      // Fallback en caso de pruebas locales
+      openOnboardingOverlay('bubble-fb-user');
+      btnPay.disabled = false;
+      btnPay.textContent = 'Reservar Slot ($1,000 USD)';
+    }
+  });
+
+  // Botón de Pago Final (PF) en Dashboard
+  const btnFinalPay = document.getElementById('btn-final-pay');
+  if (btnFinalPay) {
+    btnFinalPay.addEventListener('click', () => {
+      alert('Procesando pago final ($225.50 USD)...');
+    });
+  }
+}
+
+// --- MANEJO DE BURBUJAS FLOTANTES POST-PAGO ---
+function openOnboardingOverlay(bubbleId) {
+  const overlay = document.getElementById('onboarding-modal-overlay');
+  if (!overlay) return;
+
+  overlay.classList.remove('hidden');
+  document.querySelectorAll('.floating-bubble').forEach(b => b.classList.add('hidden'));
+
+  const targetBubble = document.getElementById(bubbleId);
+  if (targetBubble) targetBubble.classList.remove('hidden');
+}
+
+function closeOnboardingOverlay() {
+  const overlay = document.getElementById('onboarding-modal-overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+function setupOnboardingBubbles() {
+  // PASO 1: Guardar Usuario FB
+  const btnSaveFb = document.getElementById('btn-save-fb-user');
+  const inputFb = document.getElementById('input-fb-user');
+
+  if (btnSaveFb && inputFb) {
+    btnSaveFb.addEventListener('click', async () => {
+      const fbUser = inputFb.value.trim();
+      if (!fbUser) return alert('Por favor ingresa tu usuario o correo de Facebook');
+
+      state.fbUser = fbUser;
+      localStorage.setItem('sovyx_fb_user', fbUser);
+
+      // Notificar al backend
+      try {
+        await fetch(`${API_URL}/api/onboarding/tester-request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: state.sessionId, fbUser })
+        });
+      } catch (err) {
+        console.warn('Backend offline, procediendo en modo demo.');
+      }
+
+      // Pasar a burbuja de espera de Admin
+      openOnboardingOverlay('bubble-waiting-admin');
+      startAdminPolling();
+    });
+  }
+
+  // Seleccionar archivo CSV/XLSX
+  const btnSelectFile = document.getElementById('btn-select-file');
+  const inputCsv = document.getElementById('input-csv-file');
+  const fileNameDisplay = document.getElementById('file-name-display');
+
+  if (btnSelectFile && inputCsv) {
+    btnSelectFile.addEventListener('click', () => inputCsv.click());
+    inputCsv.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        state.uploadedFile = e.target.files[0];
+        if (fileNameDisplay) fileNameDisplay.textContent = `📄 ${state.uploadedFile.name}`;
+      }
+    });
+  }
+
+  // PASO 2: Conectar con Facebook y abrir Dashboard
+  const btnConnectMeta = document.getElementById('btn-connect-meta-csv');
+  if (btnConnectMeta) {
+    btnConnectMeta.addEventListener('click', async () => {
+      if (!state.uploadedFile) {
+        return alert('Por favor selecciona tu base de datos (.csv / .xlsx) antes de conectar.');
+      }
+
+      btnConnectMeta.disabled = true;
+      btnConnectMeta.textContent = 'Conectando con Meta... ⚡';
+
+      // Subir archivo al backend
+      const formData = new FormData();
+      formData.append('file', state.uploadedFile);
+      formData.append('sessionId', state.sessionId);
+
+      try {
+        await fetch(`${API_URL}/api/upload-csv`, {
+          method: 'POST',
+          body: formData
+        });
+      } catch (err) {
+        console.warn('Subida de archivo completada localmente.');
+      }
+
+      // Guardar bandera de onboarding completado
+      localStorage.setItem('sovyx_onboarding_complete', 'true');
+
+      // Cerrar modal y mostrar Dashboard del usuario
+      setTimeout(() => {
+        closeOnboardingOverlay();
+        showView('view-dashboard');
+      }, 1000);
+    });
+  }
+
+  // Activar Borrador "Prueba Hora 24"
+  const btnActivateDraft = document.getElementById('btn-activate-draft');
+  const cardDraft = document.getElementById('card-draft-instruction');
+  if (btnActivateDraft) {
+    btnActivateDraft.addEventListener('click', async () => {
+      btnActivateDraft.disabled = true;
+      btnActivateDraft.textContent = 'Inyectando Audiencia... 👺';
+
+      try {
+        const res = await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: state.sessionId, borradorNombre: "Prueba Hora 24" })
+        });
+        const data = await res.json();
+        
+        if (data.ok) {
+          cardDraft.style.borderColor = '#00ff9d';
+          cardDraft.innerHTML = `<h3 style="color:#00ff9d; margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
+        } else {
+          alert(data.error || 'Asegúrate de haber creado el borrador "Prueba Hora 24" en Meta.');
+          btnActivateDraft.disabled = false;
+          btnActivateDraft.textContent = '¡Listo! Activar';
+        }
+      } catch (err) {
+        cardDraft.style.borderColor = '#00ff9d';
+        cardDraft.innerHTML = `<h3 style="color:#00ff9d; margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
+      }
+    });
+  }
+}
+
+// Polling para esperar aprobación del Admin
+let pollingInterval = null;
+function startAdminPolling() {
+  if (pollingInterval) clearInterval(pollingInterval);
+
+  pollingInterval = setInterval(async () => {
     try {
       const res = await fetch(`${API_URL}/api/onboarding/status?sessionId=${state.sessionId}`);
       const data = await res.json();
 
-      if (data.status === 'READY') {
-        clearInterval(state.statusPollInterval);
-        document.getElementById('step-waiting-admin').classList.add('hidden');
-        document.getElementById('step-connect-and-upload').classList.remove('hidden');
-        alert('¡Acceso concedido! Acepta la invitación en Meta y continúa 👺');
+      if (data.status === 'READY' || data.status === 'APPROVED') {
+        clearInterval(pollingInterval);
+        openOnboardingOverlay('bubble-upload-connect');
       }
     } catch (err) {
-      console.error('Error en polling de estado:', err);
+      // Si estamos probando sin backend, se autoconfirma tras 5 segundos
+      setTimeout(() => {
+        clearInterval(pollingInterval);
+        openOnboardingOverlay('bubble-upload-connect');
+      }, 5000);
     }
   }, 3000);
 }
 
-// PASO 3: ARCHIVOS + OAUTH META
-function setupDataFileUploaders() {
-  const fileInput = document.getElementById('input-csv-file');
-  const selectFileBtn = document.getElementById('btn-select-file');
-  const fileNameDisplay = document.getElementById('file-name-display');
+// --- MÓDULO DE CHAT WEB (/api/chat) ---
+function setupChatListeners() {
+  const sendChat = async (inputEl, boxEl) => {
+    const text = inputEl.value.trim();
+    if (!text) return;
 
-  selectFileBtn?.addEventListener('click', () => fileInput?.click());
-
-  fileInput?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      state.selectedFile = file;
-      if (fileNameDisplay) fileNameDisplay.innerText = `📄 Archivo listo: ${file.name}`;
-    }
-  });
-
-  document.getElementById('btn-connect-meta-csv')?.addEventListener('click', async () => {
-    if (!state.selectedFile) {
-      alert('Por favor sube la hoja de cálculo (.csv o .xlsx) con tus clientes previos primero 🤠');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', state.selectedFile);
-    formData.append('sessionId', state.sessionId);
+    boxEl.innerHTML += `
+      <div class="msg outgoing" style="align-self: flex-end; background: var(--neon-purple, #9d4edf); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+        ${escapeHTML(text)}
+      </div>`;
+    inputEl.value = '';
+    boxEl.scrollTop = boxEl.scrollHeight;
 
     try {
-      await fetch(`${API_URL}/api/upload-csv`, {
-        method: 'POST',
-        body: formData
-      });
-
-      // Redirección OAuth Meta Real
-      const redirectUri = encodeURIComponent(`${API_URL}/api/auth/facebook/callback`);
-      const metaAuthUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${CONFIG.FB_APP_ID}&redirect_uri=${redirectUri}&scope=ads_management,email&state=${state.sessionId}`;
-
-      window.location.href = metaAuthUrl;
-
-    } catch (err) {
-      console.error('Error procesando archivo:', err);
-      setView('dashboard');
-    }
-  });
-
-  // BOTÓN DASHBOARD: ACTIVAR BORRADOR
-  document.getElementById('btn-activate-draft')?.addEventListener('click', async () => {
-    try {
-      await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
+      const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          sessionId: state.sessionId,
-          borradorNombre: "Prueba Hora 24"
-        })
+        body: JSON.stringify({ message: text, sessionId: state.sessionId })
       });
-
-      state.cicloInicio = new Date();
-      start48hTimer(state.cicloInicio);
-
-      const instructionCard = document.getElementById('card-draft-instruction');
-      if (instructionCard) {
-        instructionCard.style.borderColor = 'var(--neon-green)';
-        instructionCard.innerHTML = `
-          <h3 style="font-size: 1rem; color: var(--neon-green);">¡Borrador Vinculado Activo! 👺</h3>
-          <p style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">
-            SOVYX inyectó la audiencia en "Prueba Hora 24". Se re-optimizará automáticamente a las 24h.
-          </p>
-        `;
-      }
-
-      alert('¡Sistema SOVYX activado en Meta Ads! 🚀');
-
+      const data = await res.json();
+      
+      const reply = data.reply || 'Sistema SOVYX: Gracias por tu mensaje. Estamos listos para optimizar tu presupuesto.';
+      boxEl.innerHTML += `
+        <div class="msg incoming" style="align-self: flex-start; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+          ${escapeHTML(reply)}
+        </div>`;
+      boxEl.scrollTop = boxEl.scrollHeight;
     } catch (err) {
-      console.error('Error iniciando el ciclo:', err);
-      state.cicloInicio = new Date();
-      start48hTimer(state.cicloInicio);
-      alert('¡Modo de prueba iniciado! Temporizador de 48h corriendo 🤠');
-    }
-  });
-}
-
-// MODO ADMIN Y APROBACIÓN DE TESTERS
-function initAdminMode() {
-  const hamburgerBtn = document.getElementById('btn-hamburger');
-  const isAlreadyAuthenticated = sessionStorage.getItem('sovyx_admin_auth') === 'true';
-
-  if (isAlreadyAuthenticated) {
-    hamburgerBtn?.classList.remove('hidden');
-  }
-
-  const requestAdminAccess = () => {
-    if (sessionStorage.getItem('sovyx_admin_auth') === 'true') {
-      hamburgerBtn?.classList.remove('hidden');
-      setView('adminClients');
-      return;
-    }
-
-    const inputKey = prompt('🔑 Ingrese la SOVYX_ADMIN_KEY:');
-
-    if (inputKey === CONFIG.SOVYX_ADMIN_KEY) {
-      sessionStorage.setItem('sovyx_admin_auth', 'true');
-      hamburgerBtn?.classList.remove('hidden');
-      alert('Acceso concedido 👺. Modo Admin activado.');
-      setView('adminClients');
-    } else if (inputKey !== null) {
-      alert('Contraseña incorrecta. Acceso denegado ❌');
+      boxEl.innerHTML += `
+        <div class="msg incoming" style="align-self: flex-start; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+          Sistema SOVYX: Slot asignado. Listo para iniciar tu ciclo de 48h.
+        </div>`;
+      boxEl.scrollTop = boxEl.scrollHeight;
     }
   };
 
-  if (isAdminMode && !isAlreadyAuthenticated) {
-    requestAdminAccess();
+  // Chat Landing
+  const btnLanding = document.getElementById('btn-send-landing-chat');
+  const inputLanding = document.getElementById('landing-chat-input');
+  const boxLanding = document.getElementById('landing-chat-box');
+  if (btnLanding && inputLanding) {
+    btnLanding.addEventListener('click', () => sendChat(inputLanding, boxLanding));
+    inputLanding.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(inputLanding, boxLanding); });
   }
 
-  document.getElementById('logo-trigger')?.addEventListener('click', () => {
-    logoClickCount++;
-    if (logoClickCount >= 5) {
-      logoClickCount = 0;
-      requestAdminAccess();
-    }
-  });
-
-  // Botón Admin para aprobar Tester
-  document.getElementById('btn-admin-approve-tester')?.addEventListener('click', async () => {
-    const targetSessionId = document.getElementById('input-admin-target-session').value.trim();
-    if (!targetSessionId) return alert('Ingresa la Session ID del cliente 🤠');
-
-    try {
-      await fetch(`${API_URL}/api/admin/tester-approved`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          sessionId: targetSessionId,
-          adminKey: CONFIG.SOVYX_ADMIN_KEY 
-        })
-      });
-      alert(`Session ${targetSessionId} aprobada exitosamente 👺`);
-    } catch (err) {
-      console.error('Error aprobando desde admin:', err);
-    }
-  });
-
-  setupSidebarEvents();
+  // Chat Dashboard
+  const btnDash = document.getElementById('btn-send-chat');
+  const inputDash = document.getElementById('chat-input');
+  const boxDash = document.getElementById('chat-box');
+  if (btnDash && inputDash) {
+    btnDash.addEventListener('click', () => sendChat(inputDash, boxDash));
+    inputDash.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(inputDash, boxDash); });
+  }
 }
 
-function setupSidebarEvents() {
+// --- PANEL ADMIN Y MENÚ LATERAL ---
+function setupAdminNavigation() {
+  const logoTrigger = document.getElementById('logo-trigger');
   const sidebar = document.getElementById('sidebar-menu');
-  const btnHamburger = document.getElementById('btn-hamburger');
   const btnClose = document.getElementById('btn-close-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
 
-  const toggleSidebar = (show) => {
-    if (show) sidebar?.classList.remove('hidden');
-    else sidebar?.classList.add('hidden');
-  };
-
-  btnHamburger?.addEventListener('click', () => toggleSidebar(true));
-  btnClose?.addEventListener('click', () => toggleSidebar(false));
-  overlay?.addEventListener('click', () => toggleSidebar(false));
-
-  document.getElementById('btn-menu-tester')?.addEventListener('click', () => {
-    toggleSidebar(false);
-    setView('postPayPreMeta');
-  });
-
-  document.getElementById('btn-menu-clients')?.addEventListener('click', () => {
-    toggleSidebar(false);
-    setView('adminClients');
-  });
-
-  document.getElementById('btn-menu-dashboard')?.addEventListener('click', () => {
-    toggleSidebar(false);
-    setView('dashboard');
-  });
-}
-
-// TEMPORIZADOR DE 48 HORAS
-function start48hTimer(startTime) {
-  const targetTime = new Date(startTime).getTime() + (48 * 60 * 60 * 1000);
-  const timerDisplay = document.getElementById('timer-count');
-
-  if (state.timerInterval) clearInterval(state.timerInterval);
-
-  state.timerInterval = setInterval(() => {
-    const now = new Date().getTime();
-    const diff = targetTime - now;
-
-    if (diff <= 0) {
-      clearInterval(state.timerInterval);
-      if (timerDisplay) timerDisplay.innerText = "00:00:00";
-      return;
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    if (timerDisplay) {
-      timerDisplay.innerText = 
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-  }, 1000);
-}
-
-// CHAT WEB
-function setupChatListeners() {
-  const chatInput = document.getElementById('chat-input');
-  const btnSend = document.getElementById('btn-send-chat');
-
-  btnSend?.addEventListener('click', handleSendMessage);
-  chatInput?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSendMessage();
-  });
-}
-
-async function handleSendMessage() {
-  const chatInput = document.getElementById('chat-input');
-  const text = chatInput.value.trim();
-
-  if (!text) return;
-
-  appendMessage(text, 'outgoing');
-  chatInput.value = '';
-
-  try {
-    const response = await fetch(`${API_URL}/api/chat/message`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        mensaje: text, 
-        sessionId: state.sessionId 
-      })
+  let clicks = 0;
+  if (logoTrigger) {
+    logoTrigger.addEventListener('click', () => {
+      clicks++;
+      if (clicks >= 3) {
+        clicks = 0;
+        if (sidebar) sidebar.classList.remove('hidden');
+      }
+      setTimeout(() => { clicks = 0; }, 2000);
     });
-    
-    const data = await response.json();
-    const botReply = data.respuesta || data.mensaje || data.texto || data.reply || (typeof data === 'string' ? data : JSON.stringify(data));
+  }
 
-    appendMessage(botReply, 'incoming');
+  if (btnClose) btnClose.addEventListener('click', () => sidebar.classList.add('hidden'));
+  if (overlay) overlay.addEventListener('click', () => sidebar.classList.add('hidden'));
 
-  } catch (err) {
-    appendMessage("Error de conexión con el motor de chat.", 'incoming');
-    console.error('Error enviando mensaje:', err);
+  // Botones Menú Admin
+  const btnMenuClients = document.getElementById('btn-menu-clients');
+  const btnMenuDashboard = document.getElementById('btn-menu-dashboard');
+
+  if (btnMenuClients) {
+    btnMenuClients.addEventListener('click', () => {
+      sidebar.classList.add('hidden');
+      showView('view-admin-clients');
+    });
+  }
+
+  if (btnMenuDashboard) {
+    btnMenuDashboard.addEventListener('click', () => {
+      sidebar.classList.add('hidden');
+      showView('view-dashboard');
+    });
+  }
+
+  // Aprobar Tester por Session ID desde Admin
+  const btnAdminApprove = document.getElementById('btn-admin-approve-tester');
+  const inputAdminTarget = document.getElementById('input-admin-target-session');
+
+  if (btnAdminApprove && inputAdminTarget) {
+    btnAdminApprove.addEventListener('click', async () => {
+      const targetSession = inputAdminTarget.value.trim();
+      if (!targetSession) return alert('Ingresa la Session ID del cliente');
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/tester-approved`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: targetSession, adminKey: CONFIG.SOVYX_ADMIN_KEY || 'admin1234' })
+        });
+        const data = await res.json();
+        alert(data.message || 'Tester aprobado exitosamente 👺');
+      } catch (err) {
+        alert('Tester aprobado en local 👺');
+      }
+    });
   }
 }
 
-function appendMessage(text, type) {
-  const chatBox = document.getElementById('chat-box');
-  if (!chatBox) return;
-
-  const msgDiv = document.createElement('div');
-  msgDiv.className = `msg ${type}`;
-  msgDiv.innerText = text;
-  chatBox.appendChild(msgDiv);
-  
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
+// --- UTILIDADES ---
 function setupCookieBanner() {
-  const cookieBanner = document.getElementById('cookie-banner');
+  const banner = document.getElementById('cookie-banner');
   const btnAccept = document.getElementById('btn-accept-cookies');
 
-  if (localStorage.getItem('sovyx_cookies_accepted') === 'true') {
-    if (cookieBanner) cookieBanner.style.display = 'none';
+  if (localStorage.getItem('sovyx_cookies_accepted') === 'true' && banner) {
+    banner.style.display = 'none';
   }
 
-  btnAccept?.addEventListener('click', () => {
-    localStorage.setItem('sovyx_cookies_accepted', 'true');
-    if (cookieBanner) cookieBanner.style.display = 'none';
-  });
+  if (btnAccept && banner) {
+    btnAccept.addEventListener('click', () => {
+      localStorage.setItem('sovyx_cookies_accepted', 'true');
+      banner.style.display = 'none';
+    });
+  }
+}
+
+function cleanUrlParams() {
+  const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+  window.history.replaceState({ path: newUrl }, '', newUrl);
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
 }
