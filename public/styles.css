@@ -144,15 +144,75 @@ body {
   box-shadow: 0 0 30px rgba(157, 78, 223, 0.25);
 }
 
-.data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.data-chip {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 10px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.modal-card.modal-scroll {
+  max-height: 85vh;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 420px;
 }
-.data-chip span { color: var(--text-sub); display: block; font-size: 0.75rem; }
+
+/* Formularios */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  text-align: left;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  color: var(--neon-green);
+  font-weight: 600;
+}
+
+.form-group input, 
+.form-group select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.form-group select {
+  background: #160f29;
+  cursor: pointer;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 8px rgba(32, 227, 155, 0.3);
+}
+
+.action-block {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action-block.full-width {
+  grid-column: span 2;
+}
+
+.action-desc {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  text-align: center;
+}
 
 /* Dashboard UI */
 .metrics-grid { display: flex; justify-content: space-between; }
