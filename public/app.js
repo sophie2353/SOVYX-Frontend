@@ -7,7 +7,7 @@ const API_URL = 'https://sovyx-backend.onrender.com';
 
 // Genera o recupera un sessionId único en localStorage
 function getOrCreateSessionId() {
-  let id = localStorage.getItem('sovyx_session_id');
+  let id = localStorage.getItem('./sovyxDatabase');
   if (!id) {
     id = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
     localStorage.setItem('sovyx_session_id', id);
