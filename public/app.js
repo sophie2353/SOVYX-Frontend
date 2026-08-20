@@ -1,7 +1,18 @@
 const API_URL = 'https://sovyx-backend.onrender.com';
 
+// Genera o recupera un sessionId persistente en el navegador
+function getOrCreateSessionId() {
+  let id = localStorage.getItem('sovyx_session_id');
+  if (!id) {
+    id = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+    localStorage.setItem('sovyx_session_id', id);
+  }
+  return id;
+}
+
 const state = {
   email: new URLSearchParams(window.location.search).get('email') || '',
+  sessionId: getOrCreateSessionId(),
   cicloInicio: null,
   timerInterval: null
 };
@@ -112,7 +123,7 @@ function start48hTimer(startTime) {
   }, 1000);
 }
 
-// LÓGICA DE CHAT WEB
+// LÓGICA DE CHAT WEB CONECTADO A /api/chat/message
 function setupChatListeners() {
   const chatInput = document.getElementById('chat-input');
   const btnSend = document.getElementById('btn-send-chat');
@@ -129,26 +140,31 @@ async function handleSendMessage() {
 
   if (!text) return;
 
-  // 1. Renderizar mensaje enviado
+  // 1. Mostrar mensaje en pantalla
   appendMessage(text, 'outgoing');
   chatInput.value = '';
 
-  // 2. Petición POST a /api/chat
+  // 2. Enviar a /api/chat/message con mensaje y sessionId
   try {
-    const response = await fetch(`${API_URL}/api/chat`, {
+    const response = await fetch(`${API_URL}/api/chat/message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, email: state.email })
+      body: JSON.stringify({ 
+        mensaje: text, 
+        sessionId: state.sessionId 
+      })
     });
     
     const data = await response.json();
     
-    // 3. Renderizar respuesta del servidor
-    appendMessage(data.reply || 'Respuesta recibida sin texto.', 'incoming');
+    // Extrae la respuesta sea cual sea la propiedad devuelta por SOVYXIA2
+    const botReply = data.respuesta || data.mensaje || data.texto || data.reply || (typeof data === 'string' ? data : JSON.stringify(data));
+
+    appendMessage(botReply, 'incoming');
 
   } catch (err) {
-    appendMessage("Error de conexión al enviar el mensaje.", 'incoming');
-    console.error('Error enviando mensaje al chat:', err);
+    appendMessage("Error de conexión al procesar el mensaje.", 'incoming');
+    console.error('Error enviando mensaje al motor de chat:', err);
   }
 }
 
@@ -161,6 +177,6 @@ function appendMessage(text, type) {
   msgDiv.innerText = text;
   chatBox.appendChild(msgDiv);
   
-  // Auto-scroll
+  // Auto-scroll al último mensaje
   chatBox.scrollTop = chatBox.scrollHeight;
 }
