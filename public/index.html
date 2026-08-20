@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOVYX - Core OS</title>
+  <title>SOVYX</title>
   <link rel="stylesheet" href="styles.css">
   
   <!-- Meta Pixel SDK -->
@@ -25,19 +25,36 @@
 
   <!-- Top Bar Global -->
   <header class="top-bar">
-    <div class="logo">
+    <div class="logo" id="logo-trigger" style="cursor: pointer;">
       <span class="logo-icon">🦁</span>
       <span class="logo-text">SOVYX</span>
     </div>
-    <div class="user-profile">
-      <span class="status-dot"></span>
+    <div class="top-bar-right">
       <img src="https://via.placeholder.com/35" alt="User Avatar" class="avatar">
+      <!-- Botón Hamburger (3 Barras Admin) -->
+      <button id="btn-hamburger" class="hamburger-btn hidden">☰</button>
     </div>
   </header>
 
+  <!-- MENÚ LATERAL (SIDEBAR DRAWER ADMIN) -->
+  <aside id="sidebar-menu" class="sidebar hidden">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="sidebar-content">
+      <div class="sidebar-header">
+        <h3>Modo Admin 🗿</h3>
+        <button id="btn-close-sidebar" class="btn-close">✕</button>
+      </div>
+      <nav class="sidebar-nav">
+        <button id="btn-menu-tester" class="sidebar-item">🧪 Modo Probador (Form + Meta)</button>
+        <button id="btn-menu-clients" class="sidebar-item">👥 Clientes (Métricas 4 Slots)</button>
+        <button id="btn-menu-dashboard" class="sidebar-item">📊 Mi Dashboard</button>
+      </nav>
+    </div>
+  </aside>
+
   <main id="app-container">
 
-    <!-- SPLASH SCREEN (Pre-ingreso / Carga) -->
+    <!-- SPLASH SCREEN (Carga Inicial) -->
     <section id="view-splash" class="view full-screen">
       <div class="splash-content">
         <div class="logo-glow">
@@ -173,7 +190,94 @@
 
     </section>
 
+    <!-- VISTA ADMINISTRADOR: MONITOREO DE CLIENTES (4 SECCIONES) -->
+    <section id="view-admin-clients" class="view hidden">
+      <div class="card admin-header-card">
+        <h2>Monitoreo de Clientes</h2>
+        <p class="subtitle">Estado global de los 4 slots publicitarios</p>
+      </div>
+
+      <!-- CLIENTE 1 -->
+      <div class="card client-admin-card">
+        <div class="client-header">
+          <span class="client-title">Cliente 1: Fitness Ops</span>
+          <span class="badge-status active">48h Activo</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item"><span class="label">Alcance</span><span class="value">24.500</span><span class="trend green">+18%</span></div>
+          <div class="metric-item"><span class="label">Inversión</span><span class="value">15$</span><span class="trend red">-0.5%</span></div>
+          <div class="metric-item"><span class="label">Leads</span><span class="value">142</span><span class="trend green">+24%</span></div>
+        </div>
+      </div>
+
+      <!-- CLIENTE 2 -->
+      <div class="card client-admin-card">
+        <div class="client-header">
+          <span class="client-title">Cliente 2: Agency Growth</span>
+          <span class="badge-status active">Fase 24h</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item"><span class="label">Alcance</span><span class="value">8.200</span><span class="trend green">+5%</span></div>
+          <div class="metric-item"><span class="label">Inversión</span><span class="value">10$</span><span class="trend green">+2%</span></div>
+          <div class="metric-item"><span class="label">Leads</span><span class="value">45</span><span class="trend green">+8%</span></div>
+        </div>
+      </div>
+
+      <!-- CLIENTE 3 -->
+      <div class="card client-admin-card">
+        <div class="client-header">
+          <span class="client-title">Cliente 3: E-Commerce Neón</span>
+          <span class="badge-status pending">Pendiente Meta</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item"><span class="label">Alcance</span><span class="value">0</span><span class="trend">0%</span></div>
+          <div class="metric-item"><span class="label">Inversión</span><span class="value">0$</span><span class="trend">0%</span></div>
+          <div class="metric-item"><span class="label">Leads</span><span class="value">0</span><span class="trend">0%</span></div>
+        </div>
+      </div>
+
+      <!-- CLIENTE 4 -->
+      <div class="card client-admin-card">
+        <div class="client-header">
+          <span class="client-title">Cliente 4: Mi Prueba (Probador)</span>
+          <span class="badge-status active">Modo Test</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item"><span class="label">Alcance</span><span class="value">15.000</span><span class="trend green">+13%</span></div>
+          <div class="metric-item"><span class="label">Inversión</span><span class="value">15$</span><span class="trend red">-1.5%</span></div>
+          <div class="metric-item"><span class="label">Leads</span><span class="value">100</span><span class="trend green">+12%</span></div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- BANNER FLOTANTE DE COOKIES -->
+  <div id="cookie-banner" class="card" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; z-index: 2000; text-align: center; border-color: var(--neon-purple); background: rgba(18, 9, 31, 0.95);">
+    <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 8px;">
+      Usamos cookies y almacenamiento local para optimizar tu experiencia y medir el rendimiento con Meta Ads. 🦁
+    </p>
+    <button id="btn-accept-cookies" class="btn-primary" style="padding: 8px 18px; font-size: 0.8rem; border-radius: 10px; width: 100%;">
+      Entendido
+    </button>
+  </div>
+
+  <script>
+    // Lógica para ocultar el banner si ya fue aceptado antes
+    document.addEventListener('DOMContentLoaded', () => {
+      const cookieBanner = document.getElementById('cookie-banner');
+      const btnAccept = document.getElementById('btn-accept-cookies');
+
+      if (localStorage.getItem('sovyx_cookies_accepted') === 'true') {
+        cookieBanner.style.display = 'none';
+      }
+
+      btnAccept?.addEventListener('click', () => {
+        localStorage.setItem('sovyx_cookies_accepted', 'true');
+        cookieBanner.style.display = 'none';
+      });
+    });
+  </script>
 
   <script src="app.js"></script>
 </body>
