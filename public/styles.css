@@ -1,0 +1,275 @@
+:root {
+  --bg-dark: #07030d;
+  --bg-galaxy: radial-gradient(circle at 50% 30%, #2d0b5a 0%, #0d041a 60%, #050208 100%);
+  --card-bg: rgba(22, 12, 38, 0.55);
+  --card-border: rgba(32, 227, 155, 0.25);
+  --card-glow: 0 0 20px rgba(32, 227, 155, 0.08);
+  --neon-green: #20e39b;
+  --neon-purple: #9d4edf;
+  --text-main: #ffffff;
+  --text-sub: #a79cb8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: var(--bg-dark);
+  background-image: var(--bg-galaxy);
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hidden { display: none !important; }
+
+/* Top Bar */
+.top-bar {
+  width: 100%;
+  max-width: 440px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.2rem; }
+.avatar { border-radius: 50%; border: 1px solid var(--neon-green); width: 35px; height: 35px; }
+
+/* Layout Móvil Container */
+#app-container {
+  width: 100%;
+  max-width: 440px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Splash Screen Overlay */
+.full-screen {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: var(--bg-dark);
+  background-image: var(--bg-galaxy);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.logo-glow { display: flex; align-items: center; gap: 10px; }
+.logo-icon-large { font-size: 2.8rem; filter: drop-shadow(0 0 10px var(--neon-purple)); }
+.logo-title {
+  font-size: 2.2rem;
+  letter-spacing: 3px;
+  font-weight: 800;
+  background: linear-gradient(180deg, #fff 0%, #b8a3e0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-text { font-size: 1.2rem; color: var(--text-sub); letter-spacing: 1px; }
+
+.progress-bar-container {
+  width: 200px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+.progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-purple), var(--neon-green));
+  border-radius: 10px;
+  transition: width 0.05s ease;
+  box-shadow: 0 0 10px var(--neon-green);
+}
+
+.loading-status { font-size: 0.75rem; color: var(--text-sub); }
+
+/* Card Component Design */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-glow);
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Modales */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(7, 3, 13, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal-card {
+  background: rgba(22, 12, 38, 0.95);
+  border: 1px solid var(--neon-purple);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 0 30px rgba(157, 78, 223, 0.25);
+}
+
+.data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.data-chip {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.data-chip span { color: var(--text-sub); display: block; font-size: 0.75rem; }
+
+/* Dashboard UI */
+.metrics-grid { display: flex; justify-content: space-between; }
+.metric-item { display: flex; flex-direction: column; gap: 4px; }
+.metric-item .value { font-size: 1.4rem; font-weight: bold; color: var(--neon-green); }
+.green { color: var(--neon-green); font-size: 0.8rem; }
+.red { color: #ff4d4d; font-size: 0.8rem; }
+
+/* Estilos de Chat */
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.msg {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  max-width: 85%;
+  word-break: break-word;
+}
+
+.msg.outgoing {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--neon-purple) 0%, #7028e4 100%);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(157, 78, 223, 0.3);
+}
+
+.msg.incoming {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2dcf0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+#chat-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px;
+  border-radius: 12px;
+  color: #fff;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+#chat-input:focus {
+  border-color: var(--neon-green);
+}
+
+.btn-icon {
+  background: var(--neon-green);
+  color: #05140d;
+  border: none;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+
+.btn-icon:active { transform: scale(0.95); }
+
+/* Temporizador Neón */
+.timer-card {
+  text-align: center;
+  border-color: rgba(32, 227, 155, 0.4);
+  background: rgba(15, 25, 35, 0.6);
+}
+
+.timer-display {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--neon-green);
+  text-shadow: 0 0 15px rgba(32, 227, 155, 0.5);
+  font-family: monospace;
+  margin: 6px 0;
+}
+
+.timer-title { font-size: 0.9rem; color: var(--text-sub); }
+.timer-status { font-size: 0.7rem; color: var(--neon-green); letter-spacing: 1.5px; opacity: 0.9; }
+
+/* Botones */
+.btn-primary {
+  background: linear-gradient(135deg, #20e39b 0%, #10a36c 100%);
+  color: #05140d;
+  font-weight: 700;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(32, 227, 155, 0.3);
+}
+
+.btn-facebook {
+  background: #1877f2;
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  width: 100%;
+}
