@@ -1,3 +1,8 @@
+// Configuración de Tokens y Llaves del Frontend
+const CONFIG = {
+  SOVYX_ADMIN_KEY: 'admin23555' // Cambia esto por tu contraseña deseada
+};
+
 const API_URL = 'https://sovyx-backend.onrender.com';
 
 // Genera o recupera un sessionId único en localStorage
@@ -17,11 +22,16 @@ const state = {
   timerInterval: null
 };
 
+let logoClickCount = 0;
+const urlParams = new URLSearchParams(window.location.search);
+const isAdminMode = urlParams.get('mode') === 'admin' || urlParams.get('admin') === 'true';
+
 const views = {
   splash: document.getElementById('view-splash'),
   landing: document.getElementById('view-landing'),
   postPayPreMeta: document.getElementById('view-postpay-premeta'),
-  dashboard: document.getElementById('view-dashboard')
+  dashboard: document.getElementById('view-dashboard'),
+  adminClients: document.getElementById('view-admin-clients')
 };
 
 // Alterna visibilidad de vistas
@@ -54,7 +64,82 @@ window.addEventListener('DOMContentLoaded', () => {
   const targetView = state.email ? 'postPayPreMeta' : 'landing';
   runSplashScreen(targetView);
   setupChatListeners();
+  initAdminMode();
 });
+
+// LÓGICA DE ADMINISTRADOR Y MODOS
+function initAdminMode() {
+  const hamburgerBtn = document.getElementById('btn-hamburger');
+  const isAlreadyAuthenticated = sessionStorage.getItem('sovyx_admin_auth') === 'true';
+
+  if (isAlreadyAuthenticated) {
+    hamburgerBtn?.classList.remove('hidden');
+  }
+
+  const requestAdminAccess = () => {
+    if (sessionStorage.getItem('sovyx_admin_auth') === 'true') {
+      hamburgerBtn?.classList.remove('hidden');
+      setView('adminClients');
+      return;
+    }
+
+    const inputKey = prompt('🔑 Ingrese la SOVYX_ADMIN_KEY:');
+
+    if (inputKey === CONFIG.SOVYX_ADMIN_KEY) {
+      sessionStorage.setItem('sovyx_admin_auth', 'true');
+      hamburgerBtn?.classList.remove('hidden');
+      alert('Acceso concedido 👺. Modo Admin activado.');
+      setView('adminClients');
+    } else if (inputKey !== null) {
+      alert('Contraseña incorrecta. Acceso denegado ❌');
+    }
+  };
+
+  if (isAdminMode && !isAlreadyAuthenticated) {
+    requestAdminAccess();
+  }
+
+  document.getElementById('logo-trigger')?.addEventListener('click', () => {
+    logoClickCount++;
+    if (logoClickCount >= 5) {
+      logoClickCount = 0;
+      requestAdminAccess();
+    }
+  });
+
+  setupSidebarEvents();
+}
+
+function setupSidebarEvents() {
+  const sidebar = document.getElementById('sidebar-menu');
+  const btnHamburger = document.getElementById('btn-hamburger');
+  const btnClose = document.getElementById('btn-close-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  const toggleSidebar = (show) => {
+    if (show) sidebar?.classList.remove('hidden');
+    else sidebar?.classList.add('hidden');
+  };
+
+  btnHamburger?.addEventListener('click', () => toggleSidebar(true));
+  btnClose?.addEventListener('click', () => toggleSidebar(false));
+  overlay?.addEventListener('click', () => toggleSidebar(false));
+
+  document.getElementById('btn-menu-tester')?.addEventListener('click', () => {
+    toggleSidebar(false);
+    setView('postPayPreMeta');
+  });
+
+  document.getElementById('btn-menu-clients')?.addEventListener('click', () => {
+    toggleSidebar(false);
+    setView('adminClients');
+  });
+
+  document.getElementById('btn-menu-dashboard')?.addEventListener('click', () => {
+    toggleSidebar(false);
+    setView('dashboard');
+  });
+}
 
 // Acción: Reservar Slot / Obtener Link de Pago
 document.getElementById('btn-pay')?.addEventListener('click', async () => {
@@ -69,11 +154,10 @@ document.getElementById('btn-pay')?.addEventListener('click', async () => {
   }
 });
 
-// Manejo del Formulario Post-Pago -> Envío de respuestas a IA1 + Conectar Meta
+// Formulario Post-Pago -> Envío a IA1 + Conectar Meta
 document.getElementById('form-ia1-setup')?.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // Captura de los 8 parámetros del formulario
   const datosIA1 = {
     clientesObjetivo: document.getElementById('input-clientes').value,
     presupuestoDiario: document.getElementById('input-presupuesto').value,
@@ -88,14 +172,12 @@ document.getElementById('form-ia1-setup')?.addEventListener('submit', async (e) 
   const userToken = 'EAAB_MOCK_TOKEN_META';
 
   try {
-    // 1. Conectar Meta en Backend
     await fetch(`${API_URL}/api/pagos/conectar-meta`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: state.email, userToken })
     });
 
-    // 2. Enviar los datos del formulario a la IA1 e iniciar ciclo de 48h
     await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -106,7 +188,6 @@ document.getElementById('form-ia1-setup')?.addEventListener('submit', async (e) 
       })
     });
 
-    // 3. Pasar al Dashboard y arrancar temporizador
     state.cicloInicio = new Date();
     setView('dashboard');
     start48hTimer(state.cicloInicio);
@@ -162,11 +243,9 @@ async function handleSendMessage() {
 
   if (!text) return;
 
-  // Renderizar mensaje saliente
   appendMessage(text, 'outgoing');
   chatInput.value = '';
 
-  // Enviar a POST /api/chat/message con la estructura de tu router
   try {
     const response = await fetch(`${API_URL}/api/chat/message`, {
       method: 'POST',
