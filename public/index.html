@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOVYX - Core OS</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Meta Pixel SDK -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    fbq('init', window.ENV_PIXEL_ID || 'META_PIXEL_ID');
+    fbq('track', 'PageView');
+  </script>
+</head>
+<body>
+
+  <!-- Top Bar Global -->
+  <header class="top-bar">
+    <div class="logo">
+      <span class="logo-icon">🦁</span>
+      <span class="logo-text">SOVYX</span>
+    </div>
+    <div class="user-profile">
+      <span class="status-dot"></span>
+      <img src="https://via.placeholder.com/35" alt="User Avatar" class="avatar">
+    </div>
+  </header>
+
+  <main id="app-container">
+
+    <!-- SPLASH SCREEN (Pre-ingreso / Carga) -->
+    <section id="view-splash" class="view full-screen">
+      <div class="splash-content">
+        <div class="logo-glow">
+          <span class="logo-icon-large">🦁</span>
+          <h1 class="logo-title">SOVYX</h1>
+        </div>
+        
+        <div class="welcome-text">Bienvenido</div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="splash-progress"></div>
+        </div>
+        
+        <span class="loading-status">Cargando sistema...</span>
+      </div>
+    </section>
+
+    <!-- VISTA 1: Pre-Pago (Reserva de Slot) -->
+    <section id="view-landing" class="view hidden">
+      <div class="card landing-card">
+        <h1>Automatización en Meta Ads</h1>
+        <p>Garantiza el máximo rendimiento de tu presupuesto en un ciclo de 48 horas.</p>
+        <div class="slot-badge">Slots Disponibles: <span id="slots-count">4</span>/4</div>
+        <button id="btn-pay" class="btn-primary">Reservar Slot ($1,000 USD)</button>
+      </div>
+    </section>
+
+    <!-- VISTA 3: Post-Pago / Pre-Conectar Meta (Modal de Segmentación) -->
+    <section id="view-postpay-premeta" class="view hidden">
+      <div class="modal-overlay">
+        <div class="modal-card">
+          <h2>Datos Requeridos Post pago</h2>
+          <p class="subtitle">Segmentación preliminar recomendada por la IA:</p>
+          
+          <div class="data-grid">
+            <div class="data-chip"><span>Edad:</span> 25-34 años</div>
+            <div class="data-chip"><span>Región:</span> Latinoamérica</div>
+            <div class="data-chip"><span>Profesión:</span> Marketing Digital</div>
+            <div class="data-chip"><span>Ciudad:</span> Ciudad de México</div>
+          </div>
+
+          <div class="action-block">
+            <p>Conecta tu cuenta publicitaria para inyectar la segmentación y activar las 48h.</p>
+            <button id="btn-connect-meta" class="btn-facebook">Conectar con Facebook</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 2: Post-Pago + Post-Conectar Meta (Dashboard Activo) -->
+    <section id="view-dashboard" class="view hidden">
+      
+      <!-- Métricas Actuales -->
+      <div class="card metrics-card">
+        <h3>Métricas Actuales</h3>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <span class="label">Alcance</span>
+            <span class="value" id="val-reach">15.000</span>
+            <span class="trend green">+13.5%</span>
+          </div>
+          <div class="metric-item">
+            <span class="label">Inversión</span>
+            <span class="value" id="val-spend">15$</span>
+            <span class="trend red">-1.5%</span>
+          </div>
+          <div class="metric-item">
+            <span class="label">Goal / Objetivo</span>
+            <span class="value" id="val-goal">100 Leads</span>
+            <span class="trend green">+12%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Web Integrado e Interactivo -->
+      <div class="card chat-card">
+        <h3>Chat Web</h3>
+        <div class="chat-messages" id="chat-box">
+          <div class="msg incoming">Hola, ¿cómo va la optimización del anuncio?</div>
+          <div class="msg outgoing">Sistema SOVYX: Campaña en fase 1-24h activa.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Escribe un mensaje...">
+          <button id="btn-send-chat" class="btn-icon">➤</button>
+        </div>
+      </div>
+
+      <!-- Temporizador de 48 Horas -->
+      <div class="card timer-card">
+        <span class="timer-title">Tiempo Restante de Software</span>
+        <div class="timer-display" id="timer-count">47:59:59</div>
+        <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
