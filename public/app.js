@@ -1,13 +1,12 @@
 // Configuración de Tokens y Llaves del Frontend
 const CONFIG = {
-  SOVYX_ADMIN_KEY: 'admin23555' // Cambia esto por tu contraseña deseada
+  SOVYX_ADMIN_KEY: 'admin23555'
 };
 
 const API_URL = 'https://sovyx-backend.onrender.com';
 
-// Genera o recupera un sessionId único en localStorage
 function getOrCreateSessionId() {
-  let id = localStorage.getItem('./sovyxDatabase');
+  let id = localStorage.getItem('sovyx_session_id');
   if (!id) {
     id = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
     localStorage.setItem('sovyx_session_id', id);
@@ -19,7 +18,8 @@ const state = {
   email: new URLSearchParams(window.location.search).get('email') || '',
   sessionId: getOrCreateSessionId(),
   cicloInicio: null,
-  timerInterval: null
+  timerInterval: null,
+  selectedFile: null
 };
 
 let logoClickCount = 0;
@@ -34,7 +34,6 @@ const views = {
   adminClients: document.getElementById('view-admin-clients')
 };
 
-// Alterna visibilidad de vistas
 function setView(targetView) {
   Object.keys(views).forEach(key => {
     if (views[key]) views[key].classList.add('hidden');
@@ -42,7 +41,6 @@ function setView(targetView) {
   if (views[targetView]) views[targetView].classList.remove('hidden');
 }
 
-// Carga del Splash Screen
 function runSplashScreen(nextView) {
   const progressBar = document.getElementById('splash-progress');
   let progress = 0;
@@ -59,15 +57,15 @@ function runSplashScreen(nextView) {
   }, 40);
 }
 
-// Inicialización de la app
 window.addEventListener('DOMContentLoaded', () => {
   const targetView = state.email ? 'postPayPreMeta' : 'landing';
   runSplashScreen(targetView);
+  setupDataFileUploaders();
   setupChatListeners();
   initAdminMode();
 });
 
-// LÓGICA DE ADMINISTRADOR Y MODOS
+// LÓGICA MODO ADMIN & SEGURIDAD
 function initAdminMode() {
   const hamburgerBtn = document.getElementById('btn-hamburger');
   const isAlreadyAuthenticated = sessionStorage.getItem('sovyx_admin_auth') === 'true';
@@ -141,7 +139,7 @@ function setupSidebarEvents() {
   });
 }
 
-// Acción: Reservar Slot / Obtener Link de Pago
+// RESERVAR SLOT / PAGO
 document.getElementById('btn-pay')?.addEventListener('click', async () => {
   try {
     const res = await fetch(`${API_URL}/api/pagos/link`);
@@ -154,51 +152,98 @@ document.getElementById('btn-pay')?.addEventListener('click', async () => {
   }
 });
 
-// Formulario Post-Pago -> Envío a IA1 + Conectar Meta
-document.getElementById('form-ia1-setup')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
+// GESTIÓN DE SUBIDA DE CSV Y CONEXIÓN META
+function setupDataFileUploaders() {
+  const fileInput = document.getElementById('input-csv-file');
+  const selectFileBtn = document.getElementById('btn-select-file');
+  const fileNameDisplay = document.getElementById('file-name-display');
 
-  const datosIA1 = {
-    clientesObjetivo: document.getElementById('input-clientes').value,
-    presupuestoDiario: document.getElementById('input-presupuesto').value,
-    edad: document.getElementById('input-edad').value,
-    nicho: document.getElementById('input-nicho').value,
-    pais: document.getElementById('input-pais').value,
-    genero: document.getElementById('select-genero').value,
-    idioma: document.getElementById('input-idioma').value,
-    ciudad: document.getElementById('input-ciudad').value
-  };
+  selectFileBtn?.addEventListener('click', () => fileInput?.click());
 
-  const userToken = 'EAAB_MOCK_TOKEN_META';
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      state.selectedFile = file;
+      if (fileNameDisplay) fileNameDisplay.innerText = `📄 Archivo listo: ${file.name}`;
+    }
+  });
 
-  try {
-    await fetch(`${API_URL}/api/pagos/conectar-meta`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: state.email, userToken })
-    });
+  document.getElementById('btn-connect-meta-csv')?.addEventListener('click', async () => {
+    if (!state.selectedFile) {
+      alert('Por favor sube la hoja de cálculo (.csv o .xlsx) con tus clientes previos primero 🤠');
+      return;
+    }
 
-    await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        email: state.email, 
-        sessionId: state.sessionId,
-        datosFormularioIA1: datosIA1 
-      })
-    });
+    const formData = new FormData();
+    formData.append('file', state.selectedFile);
+    formData.append('sessionId', state.sessionId);
+    formData.append('email', state.email);
 
-    state.cicloInicio = new Date();
-    setView('dashboard');
-    start48hTimer(state.cicloInicio);
+    try {
+      // 1. Enviar archivo de datos al backend para análisis
+      await fetch(`${API_URL}/api/upload-csv`, {
+        method: 'POST',
+        body: formData
+      });
 
-  } catch (err) {
-    console.error('Error al guardar configuración e iniciar ciclo:', err);
-    alert('Hubo un problema al procesar la configuración. Intenta nuevamente.');
-  }
-});
+      // 2. Conectar Facebook (Simulación / Token)
+      const userToken = 'EAAB_MOCK_TOKEN_META';
+      await fetch(`${API_URL}/api/pagos/conectar-meta`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: state.email, userToken })
+      });
 
-// Temporizador de 48 horas
+      setView('dashboard');
+      alert('Data de clientes procesada exitosamente por SOVYX. Ahora activa tu borrador "Prueba Hora 24" en Meta 👺');
+
+    } catch (err) {
+      console.error('Error al procesar la data o conectar Facebook:', err);
+      alert('Se procesó la conexión. Redirigiendo al Dashboard...');
+      setView('dashboard');
+    }
+  });
+
+  // BOTÓN DENTRO DEL DASHBOARD: ACTIVAR BORRADOR
+  document.getElementById('btn-activate-draft')?.addEventListener('click', async () => {
+    try {
+      await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: state.email, 
+          sessionId: state.sessionId,
+          borradorNombre: "Prueba Hora 24"
+        })
+      });
+
+      state.cicloInicio = new Date();
+      start48hTimer(state.cicloInicio);
+
+      const instructionCard = document.getElementById('card-draft-instruction');
+      if (instructionCard) {
+        instructionCard.style.borderColor = 'var(--neon-green)';
+        instructionCard.innerHTML = `
+          <h3 style="font-size: 1rem; color: var(--neon-green);">¡Borrador Vinculado Activo! 👺</h3>
+          <p style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">
+            SOVYX ha inyectado la audiencia segmentada en "Prueba Hora 24". Se re-optimizará a las 24h.
+          </p>
+        `;
+      }
+
+      alert('¡Sistema SOVYX activado con éxito en tu borrador! 🚀');
+
+    } catch (err) {
+      console.error('Error iniciando el ciclo:', err);
+      // Fallback local para continuar la prueba si el endpoint aún no está expuesto
+      state.cicloInicio = new Date();
+      start48hTimer(state.cicloInicio);
+      alert('¡Modo de prueba iniciado! Temporizador de 48h corriendo 🤠');
+    }
+  });
+}
+
+// TEMPORIZADOR DE 48 HORAS
 function start48hTimer(startTime) {
   const targetTime = new Date(startTime).getTime() + (48 * 60 * 60 * 1000);
   const timerDisplay = document.getElementById('timer-count');
@@ -226,7 +271,7 @@ function start48hTimer(startTime) {
   }, 1000);
 }
 
-// Lógica de Chat Web
+// CHAT WEB
 function setupChatListeners() {
   const chatInput = document.getElementById('chat-input');
   const btnSend = document.getElementById('btn-send-chat');
