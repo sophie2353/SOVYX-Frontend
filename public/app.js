@@ -1,6 +1,6 @@
 const API_URL = 'https://sovyx-backend.onrender.com';
 
-// Genera o recupera un sessionId persistente en el navegador
+// Genera o recupera un sessionId único en localStorage
 function getOrCreateSessionId() {
   let id = localStorage.getItem('sovyx_session_id');
   if (!id) {
@@ -32,7 +32,7 @@ function setView(targetView) {
   if (views[targetView]) views[targetView].classList.remove('hidden');
 }
 
-// Ejecuta la barra de carga inicial
+// Carga del Splash Screen
 function runSplashScreen(nextView) {
   const progressBar = document.getElementById('splash-progress');
   let progress = 0;
@@ -49,14 +49,14 @@ function runSplashScreen(nextView) {
   }, 40);
 }
 
-// Inicialización del flujo
+// Inicialización de la app
 window.addEventListener('DOMContentLoaded', () => {
   const targetView = state.email ? 'postPayPreMeta' : 'landing';
   runSplashScreen(targetView);
   setupChatListeners();
 });
 
-// Acción: Obtener link de pago (Vista 1)
+// Acción: Reservar Slot / Obtener Link de Pago
 document.getElementById('btn-pay')?.addEventListener('click', async () => {
   try {
     const res = await fetch(`${API_URL}/api/pagos/link`);
@@ -69,33 +69,55 @@ document.getElementById('btn-pay')?.addEventListener('click', async () => {
   }
 });
 
-// Acción: Conectar Meta tras pagar (Vista 3)
-document.getElementById('btn-connect-meta')?.addEventListener('click', async () => {
-  const userToken = 'EAAB_MOCK_TOKEN_META'; 
+// Manejo del Formulario Post-Pago -> Envío de respuestas a IA1 + Conectar Meta
+document.getElementById('form-ia1-setup')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // Captura de los 8 parámetros del formulario
+  const datosIA1 = {
+    clientesObjetivo: document.getElementById('input-clientes').value,
+    presupuestoDiario: document.getElementById('input-presupuesto').value,
+    edad: document.getElementById('input-edad').value,
+    nicho: document.getElementById('input-nicho').value,
+    pais: document.getElementById('input-pais').value,
+    genero: document.getElementById('select-genero').value,
+    idioma: document.getElementById('input-idioma').value,
+    ciudad: document.getElementById('input-ciudad').value
+  };
+
+  const userToken = 'EAAB_MOCK_TOKEN_META';
 
   try {
+    // 1. Conectar Meta en Backend
     await fetch(`${API_URL}/api/pagos/conectar-meta`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: state.email, userToken })
     });
 
+    // 2. Enviar los datos del formulario a la IA1 e iniciar ciclo de 48h
     await fetch(`${API_URL}/api/pagos/iniciar-ciclo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: state.email, segmentacionInicial: {} })
+      body: JSON.stringify({ 
+        email: state.email, 
+        sessionId: state.sessionId,
+        datosFormularioIA1: datosIA1 
+      })
     });
 
+    // 3. Pasar al Dashboard y arrancar temporizador
     state.cicloInicio = new Date();
     setView('dashboard');
     start48hTimer(state.cicloInicio);
 
   } catch (err) {
-    console.error('Error durante la activación:', err);
+    console.error('Error al guardar configuración e iniciar ciclo:', err);
+    alert('Hubo un problema al procesar la configuración. Intenta nuevamente.');
   }
 });
 
-// Lógica del Temporizador de 48 Horas
+// Temporizador de 48 horas
 function start48hTimer(startTime) {
   const targetTime = new Date(startTime).getTime() + (48 * 60 * 60 * 1000);
   const timerDisplay = document.getElementById('timer-count');
@@ -123,7 +145,7 @@ function start48hTimer(startTime) {
   }, 1000);
 }
 
-// LÓGICA DE CHAT WEB CONECTADO A /api/chat/message
+// Lógica de Chat Web
 function setupChatListeners() {
   const chatInput = document.getElementById('chat-input');
   const btnSend = document.getElementById('btn-send-chat');
@@ -140,11 +162,11 @@ async function handleSendMessage() {
 
   if (!text) return;
 
-  // 1. Mostrar mensaje en pantalla
+  // Renderizar mensaje saliente
   appendMessage(text, 'outgoing');
   chatInput.value = '';
 
-  // 2. Enviar a /api/chat/message con mensaje y sessionId
+  // Enviar a POST /api/chat/message con la estructura de tu router
   try {
     const response = await fetch(`${API_URL}/api/chat/message`, {
       method: 'POST',
@@ -156,15 +178,13 @@ async function handleSendMessage() {
     });
     
     const data = await response.json();
-    
-    // Extrae la respuesta sea cual sea la propiedad devuelta por SOVYXIA2
     const botReply = data.respuesta || data.mensaje || data.texto || data.reply || (typeof data === 'string' ? data : JSON.stringify(data));
 
     appendMessage(botReply, 'incoming');
 
   } catch (err) {
-    appendMessage("Error de conexión al procesar el mensaje.", 'incoming');
-    console.error('Error enviando mensaje al motor de chat:', err);
+    appendMessage("Error de conexión con el motor de chat.", 'incoming');
+    console.error('Error enviando mensaje:', err);
   }
 }
 
@@ -177,6 +197,5 @@ function appendMessage(text, type) {
   msgDiv.innerText = text;
   chatBox.appendChild(msgDiv);
   
-  // Auto-scroll al último mensaje
   chatBox.scrollTop = chatBox.scrollHeight;
 }
