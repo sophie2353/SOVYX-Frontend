@@ -65,24 +65,63 @@
       </div>
     </section>
 
-    <!-- VISTA 3: Post-Pago / Pre-Conectar Meta (Modal de Segmentación) -->
+    <!-- VISTA 3: Formulario Post-Pago + Conexión Meta (Captura IA1) -->
     <section id="view-postpay-premeta" class="view hidden">
       <div class="modal-overlay">
-        <div class="modal-card">
-          <h2>Datos Requeridos Post pago</h2>
-          <p class="subtitle">Segmentación preliminar recomendada por la IA:</p>
+        <div class="modal-card modal-scroll">
+          <h2>Configuración Inicial de Campaña</h2>
+          <p class="subtitle">Datos requeridos por la IA1 para estructurar el borrador de 24h:</p>
           
-          <div class="data-grid">
-            <div class="data-chip"><span>Edad:</span> 25-34 años</div>
-            <div class="data-chip"><span>Región:</span> Latinoamérica</div>
-            <div class="data-chip"><span>Profesión:</span> Marketing Digital</div>
-            <div class="data-chip"><span>Ciudad:</span> Ciudad de México</div>
-          </div>
+          <form id="form-ia1-setup" class="form-grid">
+            <div class="form-group full-width">
+              <label for="input-clientes">1. Clientes Objetivo</label>
+              <input type="text" id="input-clientes" placeholder="Ej: Dueños de gimnasios, agencias..." required>
+            </div>
 
-          <div class="action-block">
-            <p>Conecta tu cuenta publicitaria para inyectar la segmentación y activar las 48h.</p>
-            <button id="btn-connect-meta" class="btn-facebook">Conectar con Facebook</button>
-          </div>
+            <div class="form-group">
+              <label for="input-presupuesto">2. Dinero diario a invertir (USD)</label>
+              <input type="number" id="input-presupuesto" placeholder="Ej: 15" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-edad">3. Edad</label>
+              <input type="text" id="input-edad" placeholder="Ej: 25-45" required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-nicho">4. Nicho (fitness, Marketing)</label>
+              <input type="text" id="input-nicho" placeholder="Ej: Fitness, Marketing..." required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-pais">5. País</label>
+              <input type="text" id="input-pais" placeholder="Ej: México, Colombia..." required>
+            </div>
+
+            <div class="form-group">
+              <label for="select-genero">7. Género</label>
+              <select id="select-genero" required>
+                <option value="Todos">Todos</option>
+                <option value="Hombres">Hombres</option>
+                <option value="Mujeres">Mujeres</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="input-idioma">8. Idioma</label>
+              <input type="text" id="input-idioma" placeholder="Ej: Español" value="Español" required>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="input-ciudad">9. Ciudad</label>
+              <input type="text" id="input-ciudad" placeholder="Ej: Ciudad de México o Todas" required>
+            </div>
+
+            <div class="action-block full-width">
+              <p class="action-desc">Al conectar, la IA1 inyectará estos datos en tu borrador publicitario.</p>
+              <button type="submit" id="btn-connect-meta" class="btn-facebook">Guardar y Conectar con Facebook</button>
+            </div>
+          </form>
         </div>
       </div>
     </section>
