@@ -31,12 +31,11 @@
     </div>
     <div class="top-bar-right">
       <img src="https://via.placeholder.com/35" alt="User Avatar" class="avatar">
-      <!-- Botón Hamburger (3 Barras Admin) -->
       <button id="btn-hamburger" class="hamburger-btn hidden">☰</button>
     </div>
   </header>
 
-  <!-- MENÚ LATERAL (SIDEBAR DRAWER ADMIN) -->
+  <!-- MENÚ LATERAL (SIDEBAR ADMIN) -->
   <aside id="sidebar-menu" class="sidebar hidden">
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="sidebar-content">
@@ -45,8 +44,8 @@
         <button id="btn-close-sidebar" class="btn-close">✕</button>
       </div>
       <nav class="sidebar-nav">
-        <button id="btn-menu-tester" class="sidebar-item">🧪 Modo Probador (Data + Meta)</button>
-        <button id="btn-menu-clients" class="sidebar-item">👥 Clientes (Métricas 4 Slots)</button>
+        <button id="btn-menu-tester" class="sidebar-item">🧪 Onboarding Tester</button>
+        <button id="btn-menu-clients" class="sidebar-item">👥 Clientes (Aprobar Testers)</button>
         <button id="btn-menu-dashboard" class="sidebar-item">📊 Mi Dashboard</button>
       </nav>
     </div>
@@ -54,25 +53,22 @@
 
   <main id="app-container">
 
-    <!-- SPLASH SCREEN (Carga Inicial) -->
+    <!-- SPLASH SCREEN -->
     <section id="view-splash" class="view full-screen">
       <div class="splash-content">
         <div class="logo-glow">
           <span class="logo-icon-large">🦁</span>
           <h1 class="logo-title">SOVYX</h1>
         </div>
-        
         <div class="welcome-text">Bienvenido</div>
-        
         <div class="progress-bar-container">
           <div class="progress-bar-fill" id="splash-progress"></div>
         </div>
-        
         <span class="loading-status">Cargando sistema...</span>
       </div>
     </section>
 
-    <!-- VISTA 1: Pre-Pago (Reserva de Slot) -->
+    <!-- VISTA 1: Pre-Pago -->
     <section id="view-landing" class="view hidden">
       <div class="card landing-card">
         <h1>Automatización en Meta Ads</h1>
@@ -82,73 +78,82 @@
       </div>
     </section>
 
-    <!-- VISTA 3: Subida de Data (CSV/XLSX) + Conexión Meta Ads -->
+    <!-- VISTA 3: Onboarding por Pasos (Meta Tester + Data + Facebook) -->
     <section id="view-postpay-premeta" class="view hidden">
       <div class="modal-overlay">
         <div class="modal-card">
-          <h2>Paso Final: Data y Conexión</h2>
-          <p class="subtitle">Sube tu base de compradores previos para que SOVYX extraiga los patrones de audiencia exactos.</p>
           
-          <div class="form-grid">
-            <!-- 1. Cargar Archivo -->
-            <div class="form-group full-width">
-              <label for="input-csv-file">1. Base de Datos de Clientes (.csv / .xlsx)</label>
-              <input type="file" id="input-csv-file" accept=".csv, .xlsx" style="display: none;">
-              <button type="button" id="btn-select-file" class="btn-primary" style="background: rgba(157, 78, 223, 0.2); border: 1px dashed var(--neon-purple); color: #fff;">
-                📁 Subir Data de Clientes
-              </button>
-              <span id="file-name-display" style="font-size: 0.75rem; color: var(--neon-green); text-align: center; display: block; margin-top: 4px;"></span>
-            </div>
+          <!-- PASO 1: Ingresar Usuario de FB -->
+          <div id="step-fb-user" class="onboarding-step">
+            <h2>Paso 1: Identificación Meta</h2>
+            <p class="subtitle">Ingresa tu usuario o correo de Facebook para añadirte como Tester autorizado en SOVYX.</p>
+            <input type="text" id="input-fb-user" placeholder="ej. usuario_facebook_o_email" class="input-text" style="width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: 1px solid var(--neon-purple); background: #000; color: #fff;">
+            <button type="button" id="btn-save-fb-user" class="btn-primary" style="margin-top: 15px; width: 100%;">Enviar a Validación </button>
+          </div>
 
-            <!-- 2. Conectar Facebook -->
-            <div class="action-block full-width">
-              <label style="font-size: 0.75rem; color: var(--neon-green); font-weight: 600;">2. Vincular Meta Ads</label>
-              <p class="action-desc" style="margin-bottom: 6px;">SOVYX procesará la data y quedará listo para inyectarla en tu borrador.</p>
-              <button type="button" id="btn-connect-meta-csv" class="btn-facebook">Procesar Data y Conectar con Facebook</button>
+          <!-- PASO 2: Pantalla de Espera del Admin -->
+          <div id="step-waiting-admin" class="onboarding-step hidden" style="text-align: center;">
+            <h2>Validando Acceso</h2>
+            <p class="subtitle">Enviando solicitud al panel de Meta... Mantén esta pantalla abierta.</p>
+            <div style="font-size: 2rem; margin: 20px 0;">⏳</div>
+            <p style="font-size: 0.75rem; color: var(--text-sub);">El sistema se actualizará automáticamente cuando el admin apruebe tu acceso.</p>
+          </div>
+
+          <!-- PASO 3: Aceptar Invitación + Subir CSV + Conectar Meta -->
+          <div id="step-connect-and-upload" class="onboarding-step hidden">
+            <h2>Paso 2: Carga y Conexión</h2>
+            <p class="subtitle" style="color: var(--neon-green); margin-bottom: 12px;">
+              1. Ve a <a href="https://developers.facebook.com/requests" target="_blank" style="color:#fff; text-decoration: underline;">developers.facebook.com/requests</a> e inicia sesión para hacer clic en <strong>Aceptar Invitación</strong>.
+            </p>
+
+            <div class="form-grid">
+              <!-- Archivo CSV/XLSX -->
+              <div class="form-group full-width">
+                <label for="input-csv-file">2. Base de Datos de Clientes (.csv / .xlsx)</label>
+                <input type="file" id="input-csv-file" accept=".csv, .xlsx" style="display: none;">
+                <button type="button" id="btn-select-file" class="btn-primary" style="background: rgba(157, 78, 223, 0.2); border: 1px dashed var(--neon-purple); color: #fff; width: 100%; margin-top: 5px;">
+                  📁 Subir Data
+                </button>
+                <span id="file-name-display" style="font-size: 0.75rem; color: var(--neon-green); text-align: center; display: block; margin-top: 6px;"></span>
+              </div>
+
+              <!-- Conectar Meta -->
+              <div class="action-block full-width" style="margin-top: 10px;">
+                <button type="button" id="btn-connect-meta-csv" class="btn-facebook" style="width: 100%;">3. Conectar con Facebook</button>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- VISTA 2: Post-Pago + Post-Conectar Meta (Dashboard Activo) -->
+    <!-- VISTA 2: Dashboard Activo -->
     <section id="view-dashboard" class="view hidden">
       
       <!-- Banner Requerimiento de Borrador -->
       <div class="card" id="card-draft-instruction" style="border-color: var(--neon-purple); text-align: center;">
-        <h3 style="font-size: 1rem; color: #fff;">Paso Requerido en Meta Ads </h3>
+        <h3 style="font-size: 1rem; color: #fff;">Paso Requerido en Meta Ads 👺</h3>
         <p style="font-size: 0.8rem; color: var(--text-sub); margin: 6px 0;">
           Crea un borrador en tu Administrador de Anuncios llamado exactamente: <br>
           <strong style="color: var(--neon-green);">"Prueba Hora 24"</strong> con tu presupuesto y visuales.
         </p>
         <button id="btn-activate-draft" class="btn-primary" style="margin-top: 8px; width: 100%;">
-          ¡Borrador Listo! Activar SOVYX
+          ¡Listo! Activar
         </button>
       </div>
 
-      <!-- Métricas Actuales -->
+      <!-- Métricas -->
       <div class="card metrics-card">
         <h3>Métricas Actuales</h3>
         <div class="metrics-grid">
-          <div class="metric-item">
-            <span class="label">Alcance</span>
-            <span class="value" id="val-reach">15.000</span>
-            <span class="trend green">+13.5%</span>
-          </div>
-          <div class="metric-item">
-            <span class="label">Inversión</span>
-            <span class="value" id="val-spend">15$</span>
-            <span class="trend red">-1.5%</span>
-          </div>
-          <div class="metric-item">
-            <span class="label">Goal / Objetivo</span>
-            <span class="value" id="val-goal">100 Leads</span>
-            <span class="trend green">+12%</span>
-          </div>
+          <div class="metric-item"><span class="label">Alcance</span><span class="value" id="val-reach">15.000</span><span class="trend green">+13.5%</span></div>
+          <div class="metric-item"><span class="label">Inversión</span><span class="value" id="val-spend">15$</span><span class="trend red">-1.5%</span></div>
+          <div class="metric-item"><span class="label">Goal / Objetivo</span><span class="value" id="val-goal">100 Leads</span><span class="trend green">+12%</span></div>
         </div>
       </div>
 
-      <!-- Chat Web Integrado e Interactivo -->
+      <!-- Chat Web -->
       <div class="card chat-card">
         <h3>Chat Web</h3>
         <div class="chat-messages" id="chat-box">
@@ -161,7 +166,7 @@
         </div>
       </div>
 
-      <!-- Temporizador de 48 Horas -->
+      <!-- Temporizador -->
       <div class="card timer-card">
         <span class="timer-title">Tiempo Restante de Software</span>
         <div class="timer-display" id="timer-count">48:00:00</div>
@@ -170,93 +175,47 @@
 
     </section>
 
-    <!-- VISTA ADMINISTRADOR: MONITOREO DE CLIENTES (4 SECCIONES) -->
+    <!-- VISTA ADMINISTRADOR: CLIENTES Y APROBACIÓN DE TESTERS -->
     <section id="view-admin-clients" class="view hidden">
       <div class="card admin-header-card">
-        <h2>Monitoreo de Clientes</h2>
-        <p class="subtitle">Estado global de los 4 slots publicitarios</p>
+        <h2>Panel de Administración 👺</h2>
+        <p class="subtitle">Aprobación instantánea de Testers para los 4 slots</p>
       </div>
 
-      <!-- CLIENTE 1 -->
-      <div class="card client-admin-card">
-        <div class="client-header">
-          <span class="client-title">Cliente 1: Fitness Ops</span>
-          <span class="badge-status active">48h Activo</span>
-        </div>
-        <div class="metrics-grid">
-          <div class="metric-item"><span class="label">Alcance</span><span class="value">24.500</span><span class="trend green">+18%</span></div>
-          <div class="metric-item"><span class="label">Inversión</span><span class="value">15$</span><span class="trend red">-0.5%</span></div>
-          <div class="metric-item"><span class="label">Leads</span><span class="value">142</span><span class="trend green">+24%</span></div>
-        </div>
+      <!-- Acción Rápida Admin para Aprobar por SessionId -->
+      <div class="card" style="border-color: var(--neon-purple); margin-bottom: 15px;">
+        <h3>Aprobar Tester Pendiente</h3>
+        <p style="font-size: 0.75rem; color: var(--text-sub); margin: 4px 0 10px 0;">Copia la Session ID del cliente que ingresó su usuario de FB y presiona Aprobar:</p>
+        <input type="text" id="input-admin-target-session" placeholder="ej. sess_abc123_1700000" class="input-text" style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #444; background: #000; color: #fff;">
+        <button id="btn-admin-approve-tester" class="btn-primary" style="width: 100%;">Marcar Tester Como Listo 👺</button>
       </div>
 
-      <!-- CLIENTE 2 -->
+      <!-- Lista Monitoreo Slots -->
       <div class="card client-admin-card">
-        <div class="client-header">
-          <span class="client-title">Cliente 2: Agency Growth</span>
-          <span class="badge-status active">Fase 24h</span>
-        </div>
-        <div class="metrics-grid">
-          <div class="metric-item"><span class="label">Alcance</span><span class="value">8.200</span><span class="trend green">+5%</span></div>
-          <div class="metric-item"><span class="label">Inversión</span><span class="value">10$</span><span class="trend green">+2%</span></div>
-          <div class="metric-item"><span class="label">Leads</span><span class="value">45</span><span class="trend green">+8%</span></div>
-        </div>
+        <div class="client-header"><span class="client-title">Slot 1: Activo</span><span class="badge-status active">48h Activo</span></div>
       </div>
-
-      <!-- CLIENTE 3 -->
       <div class="card client-admin-card">
-        <div class="client-header">
-          <span class="client-title">Cliente 3: E-Commerce Neón</span>
-          <span class="badge-status pending">Pendiente Meta</span>
-        </div>
-        <div class="metrics-grid">
-          <div class="metric-item"><span class="label">Alcance</span><span class="value">0</span><span class="trend">0%</span></div>
-          <div class="metric-item"><span class="label">Inversión</span><span class="value">0$</span><span class="trend">0%</span></div>
-          <div class="metric-item"><span class="label">Leads</span><span class="value">0</span><span class="trend">0%</span></div>
-        </div>
+        <div class="client-header"><span class="client-title">Slot 2: Activo</span><span class="badge-status active">Fase 24h</span></div>
       </div>
-
-      <!-- CLIENTE 4 -->
       <div class="card client-admin-card">
-        <div class="client-header">
-          <span class="client-title">Cliente 4: Mi Prueba (Probador)</span>
-          <span class="badge-status active">Modo Test</span>
-        </div>
-        <div class="metrics-grid">
-          <div class="metric-item"><span class="label">Alcance</span><span class="value">15.000</span><span class="trend green">+13%</span></div>
-          <div class="metric-item"><span class="label">Inversión</span><span class="value">15$</span><span class="trend red">-1.5%</span></div>
-          <div class="metric-item"><span class="label">Leads</span><span class="value">100</span><span class="trend green">+12%</span></div>
-        </div>
+        <div class="client-header"><span class="client-title">Slot 3: En Espera</span><span class="badge-status pending">Pendiente Meta</span></div>
+      </div>
+      <div class="card client-admin-card">
+        <div class="client-header"><span class="client-title">Slot 4: Modo Test</span><span class="badge-status active">Modo Test</span></div>
       </div>
     </section>
 
   </main>
 
-  <!-- BANNER FLOTANTE DE COOKIES -->
+  <!-- COOKIE BANNER -->
   <div id="cookie-banner" class="card" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; z-index: 2000; text-align: center; border-color: var(--neon-purple); background: rgba(18, 9, 31, 0.95);">
     <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 8px;">
-      Usamos cookies y almacenamiento local para optimizar tu experiencia y medir el rendimiento con Meta Ads. 🦁
+      Usamos cookies para optimizar tu experiencia y medir el rendimiento con Meta Ads. 🦁
     </p>
     <button id="btn-accept-cookies" class="btn-primary" style="padding: 8px 18px; font-size: 0.8rem; border-radius: 10px; width: 100%;">
       Entendido
     </button>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const cookieBanner = document.getElementById('cookie-banner');
-      const btnAccept = document.getElementById('btn-accept-cookies');
-
-      if (localStorage.getItem('sovyx_cookies_accepted') === 'true') {
-        cookieBanner.style.display = 'none';
-      }
-
-      btnAccept?.addEventListener('click', () => {
-        localStorage.setItem('sovyx_cookies_accepted', 'true');
-        cookieBanner.style.display = 'none';
-      });
-    });
-  </script>
 
   <script src="app.js"></script>
 </body>
