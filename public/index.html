@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOVYX</title>
+  <title>SOVYX - Core OS</title>
   <link rel="stylesheet" href="styles.css">
   
   <!-- Meta Pixel SDK -->
@@ -41,11 +41,11 @@
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="sidebar-content">
       <div class="sidebar-header">
-        <h3>Modo Admin 🗿</h3>
+        <h3>Modo Admin 👺</h3>
         <button id="btn-close-sidebar" class="btn-close">✕</button>
       </div>
       <nav class="sidebar-nav">
-        <button id="btn-menu-tester" class="sidebar-item">🧪 Modo Probador (Form + Meta)</button>
+        <button id="btn-menu-tester" class="sidebar-item">🧪 Modo Probador (Data + Meta)</button>
         <button id="btn-menu-clients" class="sidebar-item">👥 Clientes (Métricas 4 Slots)</button>
         <button id="btn-menu-dashboard" class="sidebar-item">📊 Mi Dashboard</button>
       </nav>
@@ -82,63 +82,31 @@
       </div>
     </section>
 
-    <!-- VISTA 3: Formulario Post-Pago + Conexión Meta (Captura IA1) -->
+    <!-- VISTA 3: Subida de Data (CSV/XLSX) + Conexión Meta Ads -->
     <section id="view-postpay-premeta" class="view hidden">
       <div class="modal-overlay">
-        <div class="modal-card modal-scroll">
-          <h2>Configuración Inicial de Campaña</h2>
-          <p class="subtitle">Datos requeridos por la IA1 para estructurar el borrador de 24h:</p>
+        <div class="modal-card">
+          <h2>Paso Final: Data y Conexión</h2>
+          <p class="subtitle">Sube tu base de compradores previos para que SOVYX extraiga los patrones de audiencia exactos.</p>
           
-          <form id="form-ia1-setup" class="form-grid">
+          <div class="form-grid">
+            <!-- 1. Cargar Archivo -->
             <div class="form-group full-width">
-              <label for="input-clientes">1. Clientes Objetivo</label>
-              <input type="text" id="input-clientes" placeholder="Ej: Dueños de gimnasios, agencias..." required>
+              <label for="input-csv-file">1. Base de Datos de Clientes (.csv / .xlsx)</label>
+              <input type="file" id="input-csv-file" accept=".csv, .xlsx" style="display: none;">
+              <button type="button" id="btn-select-file" class="btn-primary" style="background: rgba(157, 78, 223, 0.2); border: 1px dashed var(--neon-purple); color: #fff;">
+                📁 Subir Data de Clientes
+              </button>
+              <span id="file-name-display" style="font-size: 0.75rem; color: var(--neon-green); text-align: center; display: block; margin-top: 4px;"></span>
             </div>
 
-            <div class="form-group">
-              <label for="input-presupuesto">2. Dinero diario a invertir (USD)</label>
-              <input type="number" id="input-presupuesto" placeholder="Ej: 15" min="1" required>
-            </div>
-
-            <div class="form-group">
-              <label for="input-edad">3. Edad</label>
-              <input type="text" id="input-edad" placeholder="Ej: 25-45" required>
-            </div>
-
-            <div class="form-group">
-              <label for="input-nicho">4. Nicho (fitness, Marketing)</label>
-              <input type="text" id="input-nicho" placeholder="Ej: Fitness, Marketing..." required>
-            </div>
-
-            <div class="form-group">
-              <label for="input-pais">5. País</label>
-              <input type="text" id="input-pais" placeholder="Ej: México, Colombia..." required>
-            </div>
-
-            <div class="form-group">
-              <label for="select-genero">7. Género</label>
-              <select id="select-genero" required>
-                <option value="Todos">Todos</option>
-                <option value="Hombres">Hombres</option>
-                <option value="Mujeres">Mujeres</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="input-idioma">8. Idioma</label>
-              <input type="text" id="input-idioma" placeholder="Ej: Español" value="Español" required>
-            </div>
-
-            <div class="form-group full-width">
-              <label for="input-ciudad">9. Ciudad</label>
-              <input type="text" id="input-ciudad" placeholder="Ej: Ciudad de México o Todas" required>
-            </div>
-
+            <!-- 2. Conectar Facebook -->
             <div class="action-block full-width">
-              <p class="action-desc">Al conectar, la IA1 inyectará estos datos en tu borrador publicitario.</p>
-              <button type="submit" id="btn-connect-meta" class="btn-facebook">Guardar y Conectar con Facebook</button>
+              <label style="font-size: 0.75rem; color: var(--neon-green); font-weight: 600;">2. Vincular Meta Ads</label>
+              <p class="action-desc" style="margin-bottom: 6px;">SOVYX procesará la data y quedará listo para inyectarla en tu borrador.</p>
+              <button type="button" id="btn-connect-meta-csv" class="btn-facebook">Procesar Data y Conectar con Facebook</button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </section>
@@ -146,6 +114,18 @@
     <!-- VISTA 2: Post-Pago + Post-Conectar Meta (Dashboard Activo) -->
     <section id="view-dashboard" class="view hidden">
       
+      <!-- Banner Requerimiento de Borrador -->
+      <div class="card" id="card-draft-instruction" style="border-color: var(--neon-purple); text-align: center;">
+        <h3 style="font-size: 1rem; color: #fff;">Paso Requerido en Meta Ads </h3>
+        <p style="font-size: 0.8rem; color: var(--text-sub); margin: 6px 0;">
+          Crea un borrador en tu Administrador de Anuncios llamado exactamente: <br>
+          <strong style="color: var(--neon-green);">"Prueba Hora 24"</strong> con tu presupuesto y visuales.
+        </p>
+        <button id="btn-activate-draft" class="btn-primary" style="margin-top: 8px; width: 100%;">
+          ¡Borrador Listo! Activar SOVYX
+        </button>
+      </div>
+
       <!-- Métricas Actuales -->
       <div class="card metrics-card">
         <h3>Métricas Actuales</h3>
@@ -173,7 +153,7 @@
         <h3>Chat Web</h3>
         <div class="chat-messages" id="chat-box">
           <div class="msg incoming">Hola, ¿cómo va la optimización del anuncio?</div>
-          <div class="msg outgoing">Sistema SOVYX: Campaña en fase 1-24h activa.</div>
+          <div class="msg outgoing">Sistema SOVYX: Campaña lista para inyección en borrador "Prueba Hora 24".</div>
         </div>
         <div class="chat-input-row">
           <input type="text" id="chat-input" placeholder="Escribe un mensaje...">
@@ -184,7 +164,7 @@
       <!-- Temporizador de 48 Horas -->
       <div class="card timer-card">
         <span class="timer-title">Tiempo Restante de Software</span>
-        <div class="timer-display" id="timer-count">47:59:59</div>
+        <div class="timer-display" id="timer-count">48:00:00</div>
         <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
       </div>
 
@@ -263,7 +243,6 @@
   </div>
 
   <script>
-    // Lógica para ocultar el banner si ya fue aceptado antes
     document.addEventListener('DOMContentLoaded', () => {
       const cookieBanner = document.getElementById('cookie-banner');
       const btnAccept = document.getElementById('btn-accept-cookies');
