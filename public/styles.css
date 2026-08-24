@@ -249,6 +249,15 @@ body {
   padding-right: 4px;
 }
 
+.chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--neon-purple);
+  border-radius: 4px;
+}
+
 .msg {
   padding: 10px 14px;
   border-radius: 16px;
@@ -310,6 +319,62 @@ body {
 
 .btn-icon:active { transform: scale(0.95); }
 
+/* Quick Replies / Chips de Conversación */
+.quick-replies-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 0;
+  margin-top: 4px;
+  scrollbar-width: none;
+}
+
+.quick-replies-container::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-btn {
+  background: rgba(157, 78, 223, 0.15);
+  border: 1px solid var(--neon-purple);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.chip-btn:hover,
+.chip-btn:active {
+  background: var(--neon-purple);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(157, 78, 223, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Badge de Alerta de Slots Disponibles (2 Cupos) */
+.slots-badge {
+  background: rgba(255, 77, 77, 0.15);
+  border: 1px solid #ff4d4d;
+  color: #ff4d4d;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 77, 77, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+}
+
 /* Temporizador Neón */
 .timer-card {
   text-align: center;
@@ -328,6 +393,37 @@ body {
 
 .timer-title { font-size: 0.9rem; color: var(--text-sub); }
 .timer-status { font-size: 0.7rem; color: var(--neon-green); letter-spacing: 1.5px; opacity: 0.9; }
+
+/* Grid y Tarjetas para las 14 Cápsulas de Onboarding */
+.capsules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.capsule-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  transition: all 0.2s;
+}
+
+.capsule-item.completed {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+  background: rgba(32, 227, 155, 0.08);
+}
+
+.capsule-item.active {
+  border-color: var(--neon-purple);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(157, 78, 223, 0.3);
+}
 
 /* Menú Lateral Drawer */
 .sidebar {
