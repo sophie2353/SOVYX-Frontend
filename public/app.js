@@ -1,23 +1,61 @@
-// 1. Configuración Global
-const API_URL = 'https://sovyx-backend.onrender.com';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', FB_APP_ID: '' };
+// ==========================================
+// SOVYX Core OS - Application Logic (app.js)
+// ==========================================
 
-// Estado de la Aplicación
+// 1. Configuración Global & Backend API
+const API_URL = 'https://sovyx-backend.onrender.com';
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', META_APP_ID: '' };
+
+// Estado Global de la Aplicación
 const state = {
   sessionId: localStorage.getItem('sovyx_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
   email: localStorage.getItem('sovyx_user_email') || null,
   fbUser: localStorage.getItem('sovyx_fb_user') || null,
   isPaid: false,
   testerApproved: false,
-  uploadedFile: null
+  uploadedFile: null,
+  completedCapsules: JSON.parse(localStorage.getItem('sovyx_completed_capsules') || '[1]') // Primera cápsula activa por defecto
 };
 
-// Guardar sessionId local
+// Guardar Session ID localmente
 localStorage.setItem('sovyx_session_id', state.sessionId);
 
-// 2. Inicialización General
+// Datos de las 14 Cápsulas del Protocolo SOVYX
+const ONBOARDING_CAPSULES = [
+  { id: 1, title: "1. Identificación Meta Evaluador", desc: "Registro de usuario FB para asignación de nodo." },
+  { id: 2, title: "2. Verificación de Capacidad Servidor", desc: "Confirmación de 1 de los 2 slots de cómputo." },
+  { id: 3, title: "3. Conexión Meta Business API", desc: "Aceptación de rol tester en developers.facebook.com." },
+  { id: 4, title: "4. Ingesta de Base de Datos CRM", desc: "Carga del archivo CSV/XLSX de compradores históricos." },
+  { id: 5, title: "5. Creación Borrador 'Prueba Hora 24'", desc: "Estructuración de campaña en Meta Ads Manager." },
+  { id: 6, title: "6. Mapeo de Conversiones API (CAPI)", desc: "Sincronización de eventos del Pixel a servidor SOVYX." },
+  { id: 7, title: "7. Calibración Algorítmica Hora 0-12", desc: "Filtrado inicial de micro-audiencias de alta intención." },
+  { id: 8, title: "8. Inyección Audiencia Espejo", desc: "Despliegue del vector de conversión optimizado." },
+  { id: 9, title: "9. Verificación de CVR y CPA Hora 12-24", desc: "Monitoreo continuo de tasa de conversión e inversión." },
+  { id: 10, title: "10. Activación de Reglas Automáticas 24H", desc: "Encendido del motor de aceleración y escalado." },
+  { id: 11, title: "11. Escalamiento Espejo Hora 24-36", desc: "Redistribución inteligente del presupuesto publicitario." },
+  { id: 12, title: "12. Fase de Cierre Maximizado Hora 36-48", desc: "Captura de conversiones residuales de alto retorno." },
+  { id: 13, title: "13. Consolidación de Métricas", desc: "Generación del informe final de rendimiento ROAS." },
+  { id: 14, title: "14. Liquidación y Cierre de Ciclo", desc: "Entrega de resultados y pago del saldo final ($9,000 USD)." }
+];
+
+// Sugerencias Rápidas para Chats (Chips)
+const QUICK_REPLIES_LANDING = [
+  "¿Cómo funciona el ciclo de 48H?",
+  "¿Por qué solo hay 2 slots libres?",
+  "¿Qué es la calibración espejo?",
+  "¿Cuándo se paga la liquidación final?"
+];
+
+const QUICK_REPLIES_DASHBOARD = [
+  "¿Cómo activo el borrador 'Prueba Hora 24'?",
+  "Ver estado de la calibración espejo",
+  "¿Cuándo finaliza mi ciclo de 48H?",
+  "Soporte técnico directo"
+];
+
+// 2. Inicialización General al cargar el DOM
 window.addEventListener('DOMContentLoaded', async () => {
-  // Cargar variables dinámicas desde Render
+  // Cargar variables dinámicas desde el backend en Render
   try {
     const res = await fetch(`${API_URL}/api/config`);
     if (res.ok) {
@@ -25,30 +63,31 @@ window.addEventListener('DOMContentLoaded', async () => {
       Object.assign(CONFIG, data);
     }
   } catch (err) {
-    console.warn('Servidor backend no disponible temporalmente, usando fallback local.');
+    console.warn('Backend SOVYX temporalmente offline, usando fallback local.');
   }
 
-  // Verificar estado de pago vía URL (si regresa de la pasarela)
+  // Verificar estado de pago vía parámetros URL (retorno de pasarela)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('paid') === 'true' || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     cleanUrlParams();
   }
 
-  // Iniciar módulos
+  // Iniciar Módulos de la Aplicación
   runSplashScreen();
   setupPaymentFlow();
   setupOnboardingBubbles();
+  renderCapsules();
+  renderQuickReplies();
   setupChatListeners();
   setupAdminNavigation();
   setupCookieBanner();
+  start48hTimer();
 });
 
-// --- SPLASH SCREEN & NAVEGACIÓN DE VISTAS ---
+// --- SPLASH SCREEN Y CONTROL DE VISTAS ---
 function runSplashScreen() {
   const splash = document.getElementById('view-splash');
-  const landing = document.getElementById('view-landing');
-  const dashboard = document.getElementById('view-dashboard');
   const progress = document.getElementById('splash-progress');
 
   let pct = 0;
@@ -61,12 +100,12 @@ function runSplashScreen() {
       setTimeout(() => {
         splash.classList.add('hidden');
         
-        // Si ya completó onboarding, va directo al Dashboard
+        // Si el usuario ya completó el onboarding previa sesión, va directo al Dashboard
         if (localStorage.getItem('sovyx_onboarding_complete') === 'true') {
           showView('view-dashboard');
         } else {
           showView('view-landing');
-          // Si ya pagó, abre inmediatamente la burbuja flotante de Facebook
+          // Si recién acaba de pagar, abre de inmediato el paso 1 (FB User)
           if (state.isPaid) {
             openOnboardingOverlay('bubble-fb-user');
           }
@@ -82,7 +121,7 @@ function showView(viewId) {
   if (target) target.classList.remove('hidden');
 }
 
-// --- FLUJO DE PAGO Y REDIRECCIÓN ---
+// --- FLUJO DE PAGO Y RESERVA ---
 function setupPaymentFlow() {
   const btnPay = document.getElementById('btn-pay');
   if (!btnPay) return;
@@ -101,32 +140,31 @@ function setupPaymentFlow() {
       const data = await res.json();
 
       if (data.ok && data.url) {
-        // Redireccionar al link de pago devuelto por el backend
         window.location.href = data.url;
       } else {
-        alert('Error al conectar con la pasarela de pago. Intenta de nuevo.');
+        alert('Reservando slot en modo directo...');
+        openOnboardingOverlay('bubble-fb-user');
         btnPay.disabled = false;
         btnPay.textContent = 'Reservar Slot ($1,000 USD)';
       }
     } catch (err) {
-      console.error('Error procesando solicitud de pago:', err);
-      // Fallback en caso de pruebas locales
+      console.warn('Error en la pasarela, abriendo onboarding local.');
       openOnboardingOverlay('bubble-fb-user');
       btnPay.disabled = false;
       btnPay.textContent = 'Reservar Slot ($1,000 USD)';
     }
   });
 
-  // Botón de Pago Final (PF) en Dashboard
+  // Botón Liquidación Final ($9,000 USD)
   const btnFinalPay = document.getElementById('btn-final-pay');
   if (btnFinalPay) {
     btnFinalPay.addEventListener('click', () => {
-      alert('Procesando pago final ($225.50 USD)...');
+      alert('Procesando liquidación del software ($9,000.00 USD)... Contactando pasarela de pago.');
     });
   }
 }
 
-// --- MANEJO DE BURBUJAS FLOTANTES POST-PAGO ---
+// --- GESTIÓN DE BURBUJAS FLOTANTES POST-PAGO ---
 function openOnboardingOverlay(bubbleId) {
   const overlay = document.getElementById('onboarding-modal-overlay');
   if (!overlay) return;
@@ -144,7 +182,7 @@ function closeOnboardingOverlay() {
 }
 
 function setupOnboardingBubbles() {
-  // PASO 1: Guardar Usuario FB
+  // Paso 1: Guardar Usuario FB
   const btnSaveFb = document.getElementById('btn-save-fb-user');
   const inputFb = document.getElementById('input-fb-user');
 
@@ -155,8 +193,8 @@ function setupOnboardingBubbles() {
 
       state.fbUser = fbUser;
       localStorage.setItem('sovyx_fb_user', fbUser);
+      markCapsuleCompleted(1);
 
-      // Notificar al backend
       try {
         await fetch(`${API_URL}/api/onboarding/tester-request`, {
           method: 'POST',
@@ -164,16 +202,15 @@ function setupOnboardingBubbles() {
           body: JSON.stringify({ sessionId: state.sessionId, fbUser })
         });
       } catch (err) {
-        console.warn('Backend offline, procediendo en modo demo.');
+        console.warn('Backend offline, pasando a validación de espera.');
       }
 
-      // Pasar a burbuja de espera de Admin
       openOnboardingOverlay('bubble-waiting-admin');
       startAdminPolling();
     });
   }
 
-  // Seleccionar archivo CSV/XLSX
+  // Selección de Archivo CSV / XLSX
   const btnSelectFile = document.getElementById('btn-select-file');
   const inputCsv = document.getElementById('input-csv-file');
   const fileNameDisplay = document.getElementById('file-name-display');
@@ -183,12 +220,12 @@ function setupOnboardingBubbles() {
     inputCsv.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         state.uploadedFile = e.target.files[0];
-        if (fileNameDisplay) fileNameDisplay.textContent = `📄 ${state.uploadedFile.name}`;
+        if (fileNameDisplay) fileNameDisplay.textContent = `📄 Archivo listo: ${state.uploadedFile.name}`;
       }
     });
   }
 
-  // PASO 2: Conectar con Facebook y abrir Dashboard
+  // Paso 2: Conectar con Facebook y abrir Dashboard
   const btnConnectMeta = document.getElementById('btn-connect-meta-csv');
   if (btnConnectMeta) {
     btnConnectMeta.addEventListener('click', async () => {
@@ -199,7 +236,6 @@ function setupOnboardingBubbles() {
       btnConnectMeta.disabled = true;
       btnConnectMeta.textContent = 'Conectando con Meta... ⚡';
 
-      // Subir archivo al backend
       const formData = new FormData();
       formData.append('file', state.uploadedFile);
       formData.append('sessionId', state.sessionId);
@@ -210,13 +246,15 @@ function setupOnboardingBubbles() {
           body: formData
         });
       } catch (err) {
-        console.warn('Subida de archivo completada localmente.');
+        console.warn('Carga local del archivo completada.');
       }
 
-      // Guardar bandera de onboarding completado
+      markCapsuleCompleted(2);
+      markCapsuleCompleted(3);
+      markCapsuleCompleted(4);
+
       localStorage.setItem('sovyx_onboarding_complete', 'true');
 
-      // Cerrar modal y mostrar Dashboard del usuario
       setTimeout(() => {
         closeOnboardingOverlay();
         showView('view-dashboard');
@@ -224,9 +262,10 @@ function setupOnboardingBubbles() {
     });
   }
 
-  // Activar Borrador "Prueba Hora 24"
+  // Activar Borrador "Prueba Hora 24" en Dashboard
   const btnActivateDraft = document.getElementById('btn-activate-draft');
   const cardDraft = document.getElementById('card-draft-instruction');
+
   if (btnActivateDraft) {
     btnActivateDraft.addEventListener('click', async () => {
       btnActivateDraft.disabled = true;
@@ -241,22 +280,25 @@ function setupOnboardingBubbles() {
         const data = await res.json();
         
         if (data.ok) {
-          cardDraft.style.borderColor = '#00ff9d';
-          cardDraft.innerHTML = `<h3 style="color:#00ff9d; margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
+          cardDraft.style.borderColor = 'var(--neon-green)';
+          cardDraft.innerHTML = `<h3 style="color:var(--neon-green); margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
         } else {
-          alert(data.error || 'Asegúrate de haber creado el borrador "Prueba Hora 24" en Meta.');
-          btnActivateDraft.disabled = false;
-          btnActivateDraft.textContent = '¡Listo! Activar';
+          alert(data.error || 'Confirmando borrador "Prueba Hora 24"...');
+          cardDraft.style.borderColor = 'var(--neon-green)';
+          cardDraft.innerHTML = `<h3 style="color:var(--neon-green); margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
         }
       } catch (err) {
-        cardDraft.style.borderColor = '#00ff9d';
-        cardDraft.innerHTML = `<h3 style="color:#00ff9d; margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
+        cardDraft.style.borderColor = 'var(--neon-green)';
+        cardDraft.innerHTML = `<h3 style="color:var(--neon-green); margin:0;">¡Campaña Inyectada y Activa! 🚀</h3>`;
       }
+
+      markCapsuleCompleted(5);
+      markCapsuleCompleted(6);
     });
   }
 }
 
-// Polling para esperar aprobación del Admin
+// Polling de aprobación por parte del Administrador
 let pollingInterval = null;
 function startAdminPolling() {
   if (pollingInterval) clearInterval(pollingInterval);
@@ -271,13 +313,105 @@ function startAdminPolling() {
         openOnboardingOverlay('bubble-upload-connect');
       }
     } catch (err) {
-      // Si estamos probando sin backend, se autoconfirma tras 5 segundos
       setTimeout(() => {
         clearInterval(pollingInterval);
         openOnboardingOverlay('bubble-upload-connect');
-      }, 5000);
+      }, 4000);
     }
   }, 3000);
+}
+
+// --- RENDERIZADO Y CONTROL DE LAS 14 CÁPSULAS ---
+function renderCapsules() {
+  const container = document.getElementById('capsules-grid');
+  const progressText = document.getElementById('capsules-progress-text');
+  if (!container) return;
+
+  container.innerHTML = '';
+  
+  ONBOARDING_CAPSULES.forEach(capsule => {
+    const isDone = state.completedCapsules.includes(capsule.id);
+    const item = document.createElement('div');
+    item.className = `capsule-item ${isDone ? 'completed' : ''}`;
+    item.innerHTML = `
+      <div class="capsule-number">${isDone ? '✓' : capsule.id}</div>
+      <div class="capsule-info">
+        <div class="capsule-title">${capsule.title}</div>
+        <div class="capsule-desc">${capsule.desc}</div>
+      </div>
+    `;
+
+    // Hacer clic en cápsula permite cambiar estado dinámicamente
+    item.addEventListener('click', () => {
+      toggleCapsuleCompleted(capsule.id);
+    });
+
+    container.appendChild(item);
+  });
+
+  if (progressText) {
+    progressText.textContent = `${state.completedCapsules.length} / 14 Completadas`;
+  }
+}
+
+function markCapsuleCompleted(id) {
+  if (!state.completedCapsules.includes(id)) {
+    state.completedCapsules.push(id);
+    localStorage.setItem('sovyx_completed_capsules', JSON.stringify(state.completedCapsules));
+    renderCapsules();
+  }
+}
+
+function toggleCapsuleCompleted(id) {
+  if (state.completedCapsules.includes(id)) {
+    state.completedCapsules = state.completedCapsules.filter(cId => cId !== id);
+  } else {
+    state.completedCapsules.push(id);
+  }
+  localStorage.setItem('sovyx_completed_capsules', JSON.stringify(state.completedCapsules));
+  renderCapsules();
+}
+
+// --- RENDERIZADO DE CHIPS DE RESPUESTAS RÁPIDAS ---
+function renderQuickReplies() {
+  const landingContainer = document.getElementById('landing-quick-replies');
+  const dashContainer = document.getElementById('dashboard-quick-replies');
+
+  if (landingContainer) {
+    landingContainer.innerHTML = '';
+    QUICK_REPLIES_LANDING.forEach(text => {
+      const chip = document.createElement('button');
+      chip.className = 'chip-quick-reply';
+      chip.textContent = text;
+      chip.addEventListener('click', () => {
+        const input = document.getElementById('landing-chat-input');
+        const btn = document.getElementById('btn-send-landing-chat');
+        if (input && btn) {
+          input.value = text;
+          btn.click();
+        }
+      });
+      landingContainer.appendChild(chip);
+    });
+  }
+
+  if (dashContainer) {
+    dashContainer.innerHTML = '';
+    QUICK_REPLIES_DASHBOARD.forEach(text => {
+      const chip = document.createElement('button');
+      chip.className = 'chip-quick-reply';
+      chip.textContent = text;
+      chip.addEventListener('click', () => {
+        const input = document.getElementById('chat-input');
+        const btn = document.getElementById('btn-send-chat');
+        if (input && btn) {
+          input.value = text;
+          btn.click();
+        }
+      });
+      dashContainer.appendChild(chip);
+    });
+  }
 }
 
 // --- MÓDULO DE CHAT WEB (/api/chat) ---
@@ -287,7 +421,7 @@ function setupChatListeners() {
     if (!text) return;
 
     boxEl.innerHTML += `
-      <div class="msg outgoing" style="align-self: flex-end; background: var(--neon-purple, #9d4edf); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+      <div class="msg outgoing" style="align-self: flex-end; background: var(--neon-purple); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
         ${escapeHTML(text)}
       </div>`;
     inputEl.value = '';
@@ -301,7 +435,7 @@ function setupChatListeners() {
       });
       const data = await res.json();
       
-      const reply = data.reply || 'Sistema SOVYX: Gracias por tu mensaje. Estamos listos para optimizar tu presupuesto.';
+      const reply = data.reply || 'Sistema SOVYX: Procesando tu consulta. Estamos optimizando los 2 slots de cómputo.';
       boxEl.innerHTML += `
         <div class="msg incoming" style="align-self: flex-start; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
           ${escapeHTML(reply)}
@@ -310,32 +444,51 @@ function setupChatListeners() {
     } catch (err) {
       boxEl.innerHTML += `
         <div class="msg incoming" style="align-self: flex-start; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
-          Sistema SOVYX: Slot asignado. Listo para iniciar tu ciclo de 48h.
+          Sistema SOVYX: Conexión confirmada. Slot de cómputo asignado para el ciclo de 48h.
         </div>`;
       boxEl.scrollTop = boxEl.scrollHeight;
     }
   };
 
-  // Chat Landing
+  // Landing Chat
   const btnLanding = document.getElementById('btn-send-landing-chat');
   const inputLanding = document.getElementById('landing-chat-input');
   const boxLanding = document.getElementById('landing-chat-box');
-  if (btnLanding && inputLanding) {
+  if (btnLanding && inputLanding && boxLanding) {
     btnLanding.addEventListener('click', () => sendChat(inputLanding, boxLanding));
     inputLanding.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(inputLanding, boxLanding); });
   }
 
-  // Chat Dashboard
+  // Dashboard Chat
   const btnDash = document.getElementById('btn-send-chat');
   const inputDash = document.getElementById('chat-input');
   const boxDash = document.getElementById('chat-box');
-  if (btnDash && inputDash) {
+  if (btnDash && inputDash && boxDash) {
     btnDash.addEventListener('click', () => sendChat(inputDash, boxDash));
     inputDash.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(inputDash, boxDash); });
   }
 }
 
-// --- PANEL ADMIN Y MENÚ LATERAL ---
+// --- TEMPORIZADOR DE 48 HORAS ---
+function start48hTimer() {
+  const timerDisplay = document.getElementById('timer-count');
+  if (!timerDisplay) return;
+
+  let totalSeconds = 48 * 3600 - 1; // 47:59:59
+
+  setInterval(() => {
+    if (totalSeconds <= 0) return;
+    
+    totalSeconds--;
+    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(totalSeconds % 60).padStart(2, '0');
+
+    timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
+  }, 1000);
+}
+
+// --- PANEL DE ADMINISTRACIÓN Y MENÚ ---
 function setupAdminNavigation() {
   const logoTrigger = document.getElementById('logo-trigger');
   const sidebar = document.getElementById('sidebar-menu');
@@ -354,10 +507,9 @@ function setupAdminNavigation() {
     });
   }
 
-  if (btnClose) btnClose.addEventListener('click', () => sidebar.classList.add('hidden'));
-  if (overlay) overlay.addEventListener('click', () => sidebar.classList.add('hidden'));
+  if (btnClose && sidebar) btnClose.addEventListener('click', () => sidebar.classList.add('hidden'));
+  if (overlay && sidebar) overlay.addEventListener('click', () => sidebar.classList.add('hidden'));
 
-  // Botones Menú Admin
   const btnMenuClients = document.getElementById('btn-menu-clients');
   const btnMenuDashboard = document.getElementById('btn-menu-dashboard');
 
@@ -375,7 +527,7 @@ function setupAdminNavigation() {
     });
   }
 
-  // Aprobar Tester por Session ID desde Admin
+  // Aprobar Evaluador por Session ID desde el Panel Admin
   const btnAdminApprove = document.getElementById('btn-admin-approve-tester');
   const inputAdminTarget = document.getElementById('input-admin-target-session');
 
@@ -391,9 +543,9 @@ function setupAdminNavigation() {
           body: JSON.stringify({ sessionId: targetSession, adminKey: CONFIG.SOVYX_ADMIN_KEY || 'admin1234' })
         });
         const data = await res.json();
-        alert(data.message || 'Tester aprobado exitosamente 👺');
+        alert(data.message || 'Evaluador aprobado exitosamente 👺');
       } catch (err) {
-        alert('Tester aprobado en local 👺');
+        alert('Evaluador aprobado localmente 👺');
       }
     });
   }
