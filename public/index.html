@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOVYX - Core OS</title>
+  <title>SOVYX</title>
   <link rel="stylesheet" href="styles.css">
   
   <!-- Meta Pixel SDK -->
@@ -70,6 +70,12 @@
 
     <!-- 1. VISTA INICIAL: LANDING CON CHAT DE CIERRE (PRE-PAGO) -->
     <section id="view-landing" class="view hidden">
+      
+      <!-- BADGE DE URGENCIA / ESPECTADORES EN TIEMPO REAL -->
+      <div id="live-viewers-badge" style="width: 100%; text-align: center; margin-bottom: 12px;">
+        <!-- Se llena automáticamente con app.js -->
+      </div>
+
       <!-- Chat Web para cerrar al cliente mientras decide/paga -->
       <div class="card chat-card landing-chat-card" style="border-color: var(--neon-purple); margin-bottom: 15px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -130,7 +136,7 @@
 
       <!-- BURBUJA 2: Subir Archivo + Conectar con Facebook -->
       <div id="bubble-upload-connect" class="modal-card floating-bubble hidden">
-        <h2 style="font-size: 1.2rem; color: #fff; margin-bottom: 8px;">Paso 2: Datos y Conexión ⚡</h2>
+        <h2 style="font-size: 1.2rem; color: #fff; margin-bottom: 8px;">Paso 2: Datos y Conexión</h2>
         <p style="font-size: 0.8rem; color: var(--neon-green); margin-bottom: 12px;">
           1. Confirma en <a href="https://developers.facebook.com/requests" target="_blank" style="color:#fff; text-decoration: underline;">developers.facebook.com/requests</a> para aceptar la invitación.
         </p>
@@ -167,7 +173,7 @@
 
       <!-- Requerimiento del Borrador en Meta Ads -->
       <div class="card" id="card-draft-instruction" style="border-color: var(--neon-purple); text-align: center; background: rgba(157, 78, 223, 0.1);">
-        <h3 style="font-size: 1rem; color: #fff;">Paso Requerido en Meta Ads 👺</h3>
+        <h3 style="font-size: 1rem; color: #fff;">Paso Requerido en Meta Ads</h3>
         <p style="font-size: 0.8rem; color: #ccc; margin: 6px 0;">
           Crea un borrador en tu Administrador de Anuncios llamado exactamente: <br>
           <strong style="color: var(--neon-green);">"Prueba Hora 24"</strong> con tu presupuesto y visuales.
@@ -177,24 +183,29 @@
         </button>
       </div>
 
-      <!-- Métricas Personales -->
+      <!-- Métricas Personales y Globales (Sincronizadas con app.js) -->
       <div class="card metrics-card">
-        <h3>Metrics</h3>
-        <div class="metrics-grid">
+        <h3>Métricas del Motor SOVYX</h3>
+        <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;">
           <div class="metric-item">
             <span class="label">Alcance</span>
-            <span class="value" id="val-reach">15.000</span>
+            <span class="value" id="metric-reach">0</span>
             <span class="trend green">+13.5%</span>
           </div>
           <div class="metric-item">
             <span class="label">Inversión</span>
-            <span class="value" id="val-spend">15$</span>
-            <span class="trend red">-1.5%</span>
+            <span class="value" id="metric-spend">$0.00</span>
+            <span class="trend green">Optimizado</span>
           </div>
           <div class="metric-item">
-            <span class="label">G.O / C.O</span>
-            <span class="value" id="val-goal">3.3%</span>
-            <span class="trend green">+3.3%</span>
+            <span class="label">Clientes Objetivo</span>
+            <span class="value" id="metric-target-clients" style="font-size: 0.95rem; color: var(--neon-purple);">2 Slots</span>
+            <span class="trend green">Capacidad Servidor</span>
+          </div>
+          <div class="metric-item">
+            <span class="label">Clientes Alcanzados</span>
+            <span class="value" id="metric-reached-clients" style="font-size: 0.95rem; color: var(--neon-green);">0 / 2</span>
+            <span class="trend green">Activos</span>
           </div>
         </div>
       </div>
