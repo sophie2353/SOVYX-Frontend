@@ -2,11 +2,11 @@
   --bg-dark: #07030d;
   --bg-galaxy: radial-gradient(circle at 50% 30%, #2d0b5a 0%, #0d041a 60%, #050208 100%);
   --card-bg: rgba(22, 12, 38, 0.55);
-  --card-border: rgba(32, 227, 155, 0.25);
-  --card-glow: 0 0 20px rgba(32, 227, 155, 0.08);
-  --neon-green: #20e39b;
+  --card-border: rgba(102, 205, 170, 0.25);
+  --card-glow: 0 0 20px rgba(102, 205, 170, 0.08);
+  --neon-green: #66cdaa;
   --neon-purple: #9d4edf;
-  --neon-magenta: #ff007f;
+  --neon-magenta: #e0115f;
   --text-main: #ffffff;
   --text-sub: #a79cb8;
 }
@@ -155,13 +155,13 @@ body {
 .green-gauge {
   border: 2px solid var(--neon-green);
   color: var(--neon-green);
-  box-shadow: 0 0 15px rgba(32, 227, 155, 0.25);
+  box-shadow: 0 0 15px rgba(102, 205, 170, 0.25);
 }
 
 .magenta-gauge {
   border: 2px solid var(--neon-magenta);
   color: var(--neon-magenta);
-  box-shadow: 0 0 15px rgba(255, 0, 127, 0.25);
+  box-shadow: 0 0 15px rgba(224, 17, 95, 0.25);
 }
 
 .btn-glass-welcome {
@@ -213,6 +213,7 @@ body {
 /* Metrics Elements */
 .metrics-grid { display: flex; justify-content: space-between; gap: 12px; }
 .metric-item { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.metric-item.single-full { margin-top: 4px; }
 .metric-label { font-size: 0.75rem; color: var(--text-sub); }
 .value { font-size: 1.1rem; font-weight: bold; }
 .value-large { font-size: 1.2rem; font-weight: bold; color: #fff; }
@@ -223,7 +224,15 @@ body {
   height: 25px;
   width: 100%;
   border-bottom: 2px solid var(--neon-green);
-  background: linear-gradient(180deg, rgba(32, 227, 155, 0.15) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(102, 205, 170, 0.15) 0%, transparent 100%);
+  border-radius: 4px;
+}
+
+.bar-chart-placeholder {
+  height: 35px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(102, 205, 170, 0.2) 0%, rgba(224, 17, 95, 0.2) 100%);
+  border-bottom: 2px solid var(--neon-green);
   border-radius: 4px;
 }
 
@@ -233,6 +242,9 @@ body {
   overflow-x: auto;
   padding-bottom: 6px;
 }
+
+.carousel-metrics::-webkit-scrollbar { display: none; }
+.carousel-metrics { -ms-overflow-style: none; scrollbar-width: none; }
 
 .metric-card-sub {
   min-width: 110px;
@@ -245,7 +257,33 @@ body {
   gap: 4px;
 }
 
-/* Chat Web (Sin fotos de avatar) */
+/* Chat Web Live Banner & Controls */
+.live-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(102, 205, 170, 0.2);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--neon-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--neon-green);
+  display: inline-block;
+}
+
+.highlight-slots {
+  color: var(--neon-magenta);
+  font-weight: 700;
+}
+
 .card-header-row {
   display: flex;
   justify-content: space-between;
@@ -267,7 +305,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-width: 82%;
+  max-width: 85%;
 }
 
 .incoming-wrap { align-self: flex-start; }
@@ -299,7 +337,7 @@ body {
 }
 
 .msg.incoming.msg-green {
-  background: rgba(32, 227, 155, 0.25);
+  background: rgba(102, 205, 170, 0.2);
   border: 1px solid var(--neon-green);
 }
 
@@ -307,6 +345,38 @@ body {
   background: #5b28b0;
   color: #fff;
   border-top-right-radius: 2px;
+}
+
+/* Carrusel de Preguntas Deslizables */
+.chat-questions-carousel {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-questions-carousel::-webkit-scrollbar { display: none; }
+.chat-questions-carousel { -ms-overflow-style: none; scrollbar-width: none; }
+
+.question-chip {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(102, 205, 170, 0.3);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: 18px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.question-chip:hover,
+.question-chip:active {
+  background: rgba(102, 205, 170, 0.18);
+  border-color: var(--neon-green);
 }
 
 .chat-input-row {
@@ -365,6 +435,11 @@ body {
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-primary-action:hover {
+  background: rgba(102, 205, 170, 0.15);
 }
 
 .pf-link {
@@ -377,14 +452,14 @@ body {
 .timer-card {
   text-align: center;
   align-items: center;
-  border-color: rgba(32, 227, 155, 0.4);
+  border-color: rgba(102, 205, 170, 0.4);
 }
 
 .timer-display {
   font-size: 2.8rem;
   font-weight: 800;
   color: var(--neon-green);
-  text-shadow: 0 0 15px rgba(32, 227, 155, 0.5);
+  text-shadow: 0 0 15px rgba(102, 205, 170, 0.4);
   font-family: monospace;
 }
 
