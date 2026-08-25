@@ -19,7 +19,7 @@
       </div>
       <span class="loading-status">65%</span>
 
-      <!-- Indicadores Circulares Neón -->
+      <!-- Indicadores Circulares Neón (Menta + Magenta) -->
       <div class="splash-gauges">
         <div class="gauge-circle green-gauge">
           <span class="gauge-label">DATOS PROCESADOS:</span>
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  <!-- Top Bar (Sin buscador ni campana) -->
+  <!-- Top Bar -->
   <header class="top-bar">
     <div class="logo" id="brand-logo">
       <span class="logo-icon">🦁</span>
@@ -96,70 +96,72 @@
       </div>
     </section>
 
-    <!-- Card 3: Chat Web (Sin fotos de perfil dentro de los mensajes) -->
+    <!-- Card 3: Chat Web (Cierre SOVYX) con Banner Live + Carrusel de Preguntas -->
     <section class="card">
+      <!-- Indicador Live en tiempo real -->
+      <div class="live-status-bar">
+        <span class="live-dot"></span>
+        <span><strong>22 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
+      </div>
+
       <div class="card-header-row">
-        <h2 class="card-title">Chat Web</h2>
+        <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
         <span class="dots-menu">⋮</span>
       </div>
 
+      <!-- Área de Mensajes de la IA -->
       <div class="chat-messages" id="chat-box">
         <div class="msg-wrapper incoming-wrap">
-          <span class="sender-name">Julante Beguer</span>
           <div class="msg incoming">
-            Hi, Be, sés oscotos qya ootomien ccom celamca moreames en enito?
+            ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
           </div>
-          <span class="msg-time">10.00 AM</span>
-        </div>
-
-        <div class="msg-wrapper outgoing-wrap">
-          <span class="sender-name">Jure Giong</span>
-          <div class="msg outgoing">
-            How anes pago aquí?
-          </div>
-          <span class="msg-time">6:00 PM</span>
-        </div>
-
-        <div class="msg-wrapper incoming-wrap">
-          <span class="sender-name">Jcfenice Beguer</span>
-          <div class="msg incoming msg-green">
-            You!
-          </div>
-          <span class="msg-time">10:00 AM</span>
         </div>
       </div>
 
+      <!-- Carrusel Deslizable de 4 Preguntas Predefinidas -->
+      <div class="chat-questions-carousel" id="questions-carousel">
+        <button class="question-chip" data-query="ciclo">¿Cómo funciona el ciclo de 48H?</button>
+        <button class="question-chip" data-query="slots">¿Por qué solo hay 2 slots libres?</button>
+        <button class="question-chip" data-query="espejo">¿Qué es la calibración espejo?</button>
+        <button class="question-chip" data-query="pago">¿Cuándo se paga la liquidación final?</button>
+      </div>
+
+      <!-- Input de Mensajes -->
       <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Escribe un mensaje...">
+        <input type="text" id="chat-input" placeholder="Pregunta lo que quieras antes de reservar...">
         <button id="btn-send-chat" class="btn-icon">➤</button>
       </div>
     </section>
 
-    <!-- Card 4: P.F (Pago Final) -->
+    <!-- Card 4: P.F (Pago Final) con montos desglosados -->
     <section class="card card-pf">
       <h2 class="card-title">P.F (Pago Final)</h2>
       <div class="pf-details">
         <p class="pf-client">Rusmario</p>
         <div class="pf-row">
-          <span>Resume</span>
-          <span>$ 1.000.00</span>
+          <span>Reserva Inicial</span>
+          <span>$ 1.000,00</span>
+        </div>
+        <div class="pf-row">
+          <span>Tras Resultados</span>
+          <span>$ 9.000,00</span>
         </div>
         <div class="pf-row total-row">
-          <span>Total</span>
-          <strong>$ 10.000</strong>
+          <span>Total Proyecto</span>
+          <strong>$ 10.000,00</strong>
         </div>
       </div>
 
       <div class="pf-actions">
-        <button class="btn-primary-action">Haga su pago aquí.</button>
+        <button class="btn-primary-action" id="btn-payment-trigger">Haga su pago aquí.</button>
         <a href="#" class="pf-link">Ver Métodos de pago</a>
       </div>
     </section>
 
-    <!-- Card 5: Temporizador de Software -->
+    <!-- Card 5: Temporizador de Software (Formato 48 Horas) -->
     <section class="card timer-card">
-      <span class="timer-title">45:50 (Tiempo Restante)</span>
-      <div class="timer-display" id="timer-count">45:50</div>
+      <span class="timer-title">47:59:59 (Tiempo Restante)</span>
+      <div class="timer-display" id="timer-count">47:59:59</div>
       <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
     </section>
 
