@@ -13,13 +13,18 @@
   --text-sub: #a497b8;
 }
 
-/* RESET GENERAL: Evita deformaciones y fondos blancos nativos */
+/* RESET GENERAL SCOPED */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: 'Rajdhani', 'Inter', sans-serif;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Excluir SVGs del restyle masivo para preservar coordenadas vectoriales */
+svg, svg * {
+  box-sizing: content-box;
 }
 
 button, input, textarea, select {
@@ -432,4 +437,57 @@ body {
 .ring-percentage {
   font-size: 1.2rem;
   font-weight: 800;
+}
+
+/* ISOLATION FIX FOR SPLASH SVG ELEMENTS */
+.splash-container svg,
+.splash-screen svg,
+#splash svg {
+  max-width: initial;
+  max-height: initial;
+  display: block;
+}
+
+/* Forzar tamaño de íconos dentro de las cápsulas de carga */
+.hud-nodes-bar svg,
+.node-cell svg {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  margin: auto;
+}
+
+/* Reseteo de relleno para SVGs vectoriales de estado */
+.node-cell svg path,
+.node-cell svg circle,
+.node-cell svg rect {
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/* Fix para los Gauges Circulares Inferiores */
+.progress-rings-container svg,
+.ring-item svg {
+  width: 120px !important;
+  height: 120px !important;
+  min-width: 120px !important;
+  min-height: 120px !important;
+  background: transparent !important;
+}
+
+.ring-bg {
+  fill: none !important;
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ring-fill-green {
+  fill: none !important;
+  stroke: var(--neon-green) !important;
+}
+
+.ring-fill-magenta {
+  fill: none !important;
+  stroke: var(--neon-magenta) !important;
 }
