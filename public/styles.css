@@ -33,8 +33,23 @@ body {
 .magenta-txt { color: var(--neon-magenta); }
 .green-txt { color: var(--neon-green); }
 
-/* ========================================== */
-/* 1. SPLASH SCREEN HUD OVERLAY              */
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
+  z-index: 9999;
+  background: var(--bg-dark);
+  background-image: 
+    radial-gradient(circle at 50% 35%, #2e084d 0%, #0d021c 65%, #030007 100%),
+    linear-gradient(rgba(0, 255, 204, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 204, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+  /* ========================================== */
+/* 1. SPLASH SCREEN HUD OVERLAY (FIXED)      */
 /* ========================================== */
 
 .full-screen {
@@ -58,40 +73,41 @@ body {
 
 .splash-content {
   width: 100%;
-  max-width: 410px;
-  height: 100vh;
-  max-height: 760px;
-  padding: 18px 16px;
+  max-width: 380px;
+  height: 100%;
+  max-height: 680px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly; /* Distribución uniforme */
   text-align: center;
+  box-sizing: border-box;
 }
 
 /* LOGO SOVYX */
 .logo-title {
   font-family: 'Cinzel', serif;
-  font-size: 3.4rem;
+  font-size: 2.8rem;
   letter-spacing: 3px;
   font-weight: 700;
   background: linear-gradient(180deg, #FFFFFF 15%, #D0D5E0 65%, #8A92A3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95));
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 5px;
+  margin: 0;
 }
 
 .logo-title .serif-s {
   font-family: 'Cinzel', serif;
-  font-size: 4.2rem;
+  font-size: 3.6rem;
   color: var(--neon-magenta);
   -webkit-text-fill-color: var(--neon-magenta);
   font-weight: 800;
-  filter: drop-shadow(0 0 20px rgba(255, 0, 122, 0.9));
+  filter: drop-shadow(0 0 16px rgba(255, 0, 122, 0.9));
   margin-right: 1px;
 }
 
@@ -100,18 +116,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: -4px;
+  margin: 0;
 }
 
 .hud-pointer-line {
   width: 1.5px;
-  height: 10px;
+  height: 8px;
   background: linear-gradient(180deg, transparent, var(--neon-green));
   box-shadow: 0 0 6px var(--neon-green);
 }
 
 .splash-pct-num {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: var(--neon-green);
   letter-spacing: 1.5px;
@@ -121,7 +137,6 @@ body {
 /* NÚCLEO DE CÁPSULAS */
 .processor-core-frame {
   width: 100%;
-  max-width: 378px;
   position: relative;
   display: flex;
   justify-content: center;
@@ -129,7 +144,7 @@ body {
   background: rgba(13, 5, 26, 0.88);
   border: 1.5px solid rgba(224, 17, 95, 0.45);
   border-radius: 14px;
-  padding: 6px;
+  padding: 5px;
   box-shadow: 
     inset 0 0 18px rgba(0, 0, 0, 0.9),
     0 0 20px rgba(224, 17, 95, 0.2),
@@ -142,15 +157,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 3.5px;
+  gap: 3px;
   width: 100%;
 }
 
 .capsule {
   flex: 1;
-  max-width: 22px; 
-  height: 48px;
-  border-radius: 6px;
+  height: 42px;
+  border-radius: 5px;
   background: rgba(22, 10, 36, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -158,7 +172,6 @@ body {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
 }
 
 .capsule::after {
@@ -167,13 +180,13 @@ body {
   top: 0; left: 0; right: 0;
   height: 42%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 5px 5px 0 0;
+  border-radius: 4px 4px 0 0;
   pointer-events: none;
 }
 
 .capsule .cap-icon {
-  width: 11px !important;
-  height: 11px !important;
+  width: 10px !important;
+  height: 10px !important;
   z-index: 3;
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95));
 }
@@ -181,17 +194,13 @@ body {
 .capsule.cap-green.active {
   background: linear-gradient(180deg, #50f2c3 0%, #009975 60%, #004d3b 100%);
   border: 1px solid #73ffd6;
-  box-shadow: 
-    0 0 10px rgba(0, 255, 204, 0.7),
-    inset 0 2px 3px rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.7), inset 0 2px 3px rgba(255, 255, 255, 0.85);
 }
 
 .capsule.cap-magenta.active {
   background: linear-gradient(180deg, #ff66b2 0%, #cc0066 60%, #59002c 100%);
   border: 1px solid #ff99cc;
-  box-shadow: 
-    0 0 10px rgba(255, 0, 122, 0.75),
-    inset 0 2px 3px rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 10px rgba(255, 0, 122, 0.75), inset 0 2px 3px rgba(255, 255, 255, 0.85);
 }
 
 /* GAUGES Y ORBE CENTRAL */
@@ -200,9 +209,9 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 350px;
-  margin: 6px 0;
+  max-width: 320px;
   position: relative;
+  margin: 0;
 }
 
 .splash-gauges::after {
@@ -211,19 +220,17 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--neon-magenta);
-  box-shadow: 
-    0 0 12px var(--neon-magenta),
-    0 0 24px var(--neon-magenta);
+  box-shadow: 0 0 10px var(--neon-magenta), 0 0 20px var(--neon-magenta);
 }
 
 .gauge-card {
   position: relative;
-  width: 98px;
-  height: 98px;
+  width: 86px;
+  height: 86px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -233,7 +240,7 @@ body {
 .gauge-card::before {
   content: '';
   position: absolute;
-  inset: -5px;
+  inset: -4px;
   border: 1px dashed rgba(0, 255, 204, 0.35);
   border-radius: 50%;
 }
@@ -243,8 +250,8 @@ body {
 }
 
 .gauge-ring {
-  width: 98px !important;
-  height: 98px !important;
+  width: 86px !important;
+  height: 86px !important;
   transform: rotate(-90deg);
 }
 
@@ -276,22 +283,21 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 0 4px;
 }
 
 .gauge-label {
-  font-size: 0.5rem;
+  font-size: 0.45rem;
   color: var(--text-sub);
   letter-spacing: 0.5px;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1;
   text-transform: uppercase;
 }
 
 .gauge-val {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* BOTÓN BIENVENIDO */
@@ -299,31 +305,30 @@ body {
   pointer-events: auto;
   cursor: pointer;
   width: 100% !important;
-  max-width: 378px !important;
-  padding: 13px 0 !important;
+  padding: 11px 0 !important;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.25rem !important;
+  font-size: 1.15rem !important;
   font-weight: 700 !important;
-  letter-spacing: 6px !important;
+  letter-spacing: 5px !important;
   color: #ffffff !important;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.35) !important;
   border-top: 1.5px solid rgba(255, 255, 255, 0.75) !important;
-  border-radius: 16px !important;
+  border-radius: 14px !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 
     inset 0 1px 2px rgba(255, 255, 255, 0.8),
-    0 10px 30px rgba(0, 0, 0, 0.75),
-    0 0 20px rgba(0, 255, 204, 0.12) !important;
-  transition: all 0.25s ease;
-  margin-bottom: 5px;
+    0 8px 24px rgba(0, 0, 0, 0.75),
+    0 0 18px rgba(0, 255, 204, 0.12) !important;
+  transition: all 0.2s ease;
+  margin: 0;
 }
 
 .btn-glass-welcome:active {
   transform: scale(0.98);
   border-color: var(--neon-green) !important;
-  box-shadow: 0 0 25px rgba(0, 255, 204, 0.5) !important;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.5) !important;
 }
 
 /* ========================================== */
