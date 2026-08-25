@@ -141,16 +141,38 @@ function updateMetricsUI() {
   }
 }
 
-// --- VISTA SPLASH (HUD SCI-FI: 0% A 100% DINÁMICO) ---
+// --- VISTA SPLASH (AUTOCARGA AL 100% Y TRANSICIÓN DIRECTA) ---
 function runSplashScreen() {
   const splash = document.getElementById('view-splash');
   const pctTextHeader = document.getElementById('splash-percentage-text');
   const statusPctText = document.getElementById('status-pct');
   const btnWelcome = document.getElementById('btn-splash-welcome');
+  const capsulesTrack = document.getElementById('capsules-track');
+
+  // Convertir botón de bienvenida en un cartel puramente informativo (no clicleable)
+  if (btnWelcome) {
+    btnWelcome.style.pointerEvents = 'none';
+  }
+
+  // Generar dinámicamente las 10 cápsulas con sus clases correspondientes si no existen
+  if (capsulesTrack && capsulesTrack.children.length === 0) {
+    capsulesTrack.innerHTML = '';
+    for (let i = 0; i < 10; i++) {
+      const cap = document.createElement('div');
+      cap.className = 'capsule cap-off';
+      if (i === 0) {
+        cap.innerHTML = `<svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-5.45 9-12V5l-9-4z"/></svg>`;
+      } else if (i === 4) {
+        cap.innerHTML = `<svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7.44-7.93H7v-2h-1.44C6 6.05 9.05 3 13 2.56V4h-2v1.44c-3.95.49-7 3.85-7.44 7.93H5v2h1.44z"/></svg>`;
+      }
+      capsulesTrack.appendChild(cap);
+    }
+  }
+
   const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 4500; // Secuencia fluida de 4.5 segundos
+  const totalDurationMs = 3200; // Carga progresiva fluida de 3.2s
   const stepTime = totalDurationMs / 100;
 
   const interval = setInterval(() => {
@@ -159,12 +181,15 @@ function runSplashScreen() {
     if (pctTextHeader) pctTextHeader.textContent = `${pct}%`;
     if (statusPctText) statusPctText.textContent = `${pct}%`;
 
-    // Iluminación progresiva de las cápsulas en relación al porcentaje
+    // Encender progresivamente las 10 cápsulas hasta completar el 100%
     const activeCapsCount = Math.floor((pct / 100) * capsules.length);
     capsules.forEach((cap, index) => {
       if (index < activeCapsCount) {
-        cap.classList.add('active');
-        cap.classList.remove('cap-off');
+        if (index >= 4 && index <= 5) {
+          cap.className = 'capsule cap-magenta active';
+        } else {
+          cap.className = 'capsule cap-green active';
+        }
       }
     });
 
@@ -174,31 +199,25 @@ function runSplashScreen() {
         btnWelcome.style.boxShadow = "0 0 25px var(--neon-green)";
         btnWelcome.classList.add('pulse-ready');
       }
+      
+      // Salida automática hacia el dashboard tras 600ms de completar el 100%
+      setTimeout(() => {
+        finishSplash();
+      }, 600);
     }
   }, stepTime);
-
-  if (btnWelcome) {
-    btnWelcome.addEventListener('click', () => {
-      clearInterval(interval);
-      // Asegurar que marque 100% visualmente al hacer clic antes de salir
-      if (pctTextHeader) pctTextHeader.textContent = `100%`;
-      if (statusPctText) statusPctText.textContent = `100%`;
-      finishSplash();
-    });
-  }
 }
 
 function finishSplash() {
   const splash = document.getElementById('view-splash');
   if (splash) {
-    splash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    splash.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
     splash.style.opacity = '0';
-    splash.style.transform = 'scale(1.03)';
+    splash.style.transform = 'scale(1.04)';
     setTimeout(() => {
       splash.style.display = 'none';
-    }, 500);
+    }, 800);
   } else {
-    // Fallback de seguridad por si el ID cambia
     const fallbackSplash = document.querySelector('.full-screen');
     if (fallbackSplash) fallbackSplash.style.display = 'none';
   }
@@ -275,13 +294,13 @@ function setupPaymentFlow() {
           await confirmPaymentSuccess(1000.00);
           alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
           btnPagar.disabled = false;
-          btnPagar.textContent = 'Haga su pago aquí.';
+          btnPagar.textContent = 'Pagar';
         }
       } catch (err) {
         await confirmPaymentSuccess(1000.00);
         alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
         btnPagar.disabled = false;
-        btnPagar.textContent = 'Haga su pago aquí.';
+        btnPagar.textContent = 'Pagar';
       }
     });
   }
