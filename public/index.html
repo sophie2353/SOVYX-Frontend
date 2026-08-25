@@ -24,13 +24,15 @@
 <body>
 
   <!-- Top Bar Global -->
-  <header class="top-bar">
+  <header class="top-bar glass-header">
     <div class="logo" id="logo-trigger" style="cursor: pointer;">
       <span class="logo-icon">🦁</span>
       <span class="logo-text">SOVYX</span>
     </div>
     <div class="top-bar-right">
-      <img src="https://via.placeholder.com/35" alt="User Avatar" class="avatar">
+      <div class="avatar-wrapper">
+        <img src="https://via.placeholder.com/35" alt="User Avatar" class="avatar">
+      </div>
       <button id="btn-hamburger" class="hamburger-btn hidden">☰</button>
     </div>
   </header>
@@ -38,7 +40,7 @@
   <!-- MENÚ LATERAL (SIDEBAR ADMIN) -->
   <aside id="sidebar-menu" class="sidebar hidden">
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
-    <div class="sidebar-content">
+    <div class="sidebar-content glass-card">
       <div class="sidebar-header">
         <h3>Modo Admin 👺</h3>
         <button id="btn-close-sidebar" class="btn-close">✕</button>
@@ -53,36 +55,48 @@
 
   <main id="app-container">
 
-    <!-- SPLASH SCREEN -->
+    <!-- SPLASH SCREEN DE ALTO IMPACTO -->
     <section id="view-splash" class="view full-screen">
-      <div class="splash-content">
+      <div class="splash-content glass-card hud-box">
         <div class="logo-glow">
           <span class="logo-icon-large">🦁</span>
-          <h1 class="logo-title">SOVYX</h1>
+          <h1 class="logo-title"><span class="highlight">S</span>OVYX</h1>
         </div>
-        <div class="welcome-text">Bienvenido</div>
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="splash-progress"></div>
+        
+        <div class="hud-center">
+          <div class="welcome-text">Iniciando Núcleo...</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="splash-progress"></div>
+          </div>
+          <span class="loading-status">Cargando sistema...</span>
         </div>
-        <span class="loading-status">Cargando sistema...</span>
+
+        <div class="hud-gauges">
+          <div class="hud-gauge cyan">
+            <small>DATOS PROCESADOS</small>
+            <strong>82%</strong>
+          </div>
+          <div class="hud-gauge magenta">
+            <small>ANÁLISIS MERCADO</small>
+            <strong>90%</strong>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- 1. VISTA INICIAL: LANDING CON CHAT DE CIERRE (PRE-PAGO) -->
     <section id="view-landing" class="view hidden">
       
-      <!-- BADGE DE URGENCIA / ESPECTADORES EN TIEMPO REAL -->
-      <div id="live-viewers-badge" style="width: 100%; text-align: center; margin-bottom: 12px;">
-        <!-- Se llena automáticamente con app.js -->
+      <!-- BADGE DE URGENCIA -->
+      <div id="live-viewers-badge" class="badge-live-container">
+        <!-- Renderizado dinámicamente por app.js -->
       </div>
 
-      <!-- Chat Web para cerrar al cliente mientras decide/paga -->
-      <div class="card chat-card landing-chat-card" style="border-color: var(--neon-purple); margin-bottom: 15px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h3 style="margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
-            Chat Web (Cierre SOVYX)
-          </h3>
-          <span class="badge-status active" style="font-size: 0.7rem; background: rgba(32, 227, 155, 0.15); color: var(--neon-green); padding: 2px 8px; border-radius: 12px; border: 1px solid var(--neon-green);">Online</span>
+      <!-- Chat Web de Cierre -->
+      <div class="card glass-card chat-card landing-chat-card">
+        <div class="chat-header-row">
+          <h3>Chat Web (Cierre SOVYX)</h3>
+          <span class="badge-status active">Online</span>
         </div>
         
         <div class="chat-messages" id="landing-chat-box">
@@ -91,63 +105,62 @@
           </div>
         </div>
 
-        <!-- Chips de Respuestas Rápidas -->
         <div class="quick-replies-container" id="landing-quick-replies">
-          <!-- Renderizados dinámicamente por app.js -->
+          <!-- Renderizados por app.js -->
         </div>
 
-        <div class="chat-input-row" style="margin-top: 8px;">
+        <div class="chat-input-row">
           <input type="text" id="landing-chat-input" placeholder="Pregunta lo que quieras antes de reservar...">
           <button id="btn-send-landing-chat" class="btn-icon">➤</button>
         </div>
       </div>
 
       <!-- Tarjeta de Pago / Reserva -->
-      <div class="card landing-card">
+      <div class="card glass-card landing-card glow-magenta">
         <h1>Aceleración en Meta Ads</h1>
         <p>Garantiza el máximo rendimiento de tu presupuesto en un ciclo validado de 48 horas.</p>
         
-        <div class="slots-badge" style="margin: 12px 0; justify-content: center;">
-          Capacidad Servidor: <span id="slots-count">2</span>/2 Slots Libres
+        <div class="slots-badge">
+          Capacidad Servidor: <span id="slots-count">2</span> / 2 Slots Libres
         </div>
         
-        <button id="btn-pay" class="btn-primary" style="width: 100%; font-weight: bold;">Reservar Slot ($1,000 USD)</button>
+        <button id="btn-pay" class="btn-primary btn-glow">Reservar Slot ($1,000 USD)</button>
       </div>
     </section>
 
-    <!-- 2. EXPERIENCIA POST-PAGO: BURBUJAS FLOTANTES SOBREPUESTAS -->
+    <!-- 2. EXPERIENCIA POST-PAGO: BURBUJAS FLOTANTES -->
     <div id="onboarding-modal-overlay" class="modal-overlay hidden">
       
       <!-- BURBUJA 1: Enviar Usuario de Facebook -->
-      <div id="bubble-fb-user" class="modal-card floating-bubble">
-        <h2 style="font-size: 1.2rem; color: #fff; margin-bottom: 8px;">Paso 1: Identificación en Meta 🦁</h2>
-        <p style="font-size: 0.82rem; color: var(--text-sub); margin-bottom: 15px;">Ingresa tu usuario o correo de Facebook para registrarte como Evaluador autorizado de SOVYX.</p>
-        <input type="text" id="input-fb-user" placeholder="ej. usuario_facebook_o_email" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--neon-purple); background: #000; color: #fff; font-size: 0.9rem;">
-        <button type="button" id="btn-save-fb-user" class="btn-primary" style="margin-top: 15px; width: 100%;">Validar Usuario 🚀</button>
+      <div id="bubble-fb-user" class="modal-card floating-bubble glass-card glow-cyan">
+        <h2>Paso 1: Identificación en Meta 🦁</h2>
+        <p class="modal-sub">Ingresa tu usuario o correo de Facebook para registrarte como Evaluador autorizado de SOVYX.</p>
+        <input type="text" id="input-fb-user" placeholder="ej. usuario_facebook_o_email" class="input-styled">
+        <button type="button" id="btn-save-fb-user" class="btn-primary" style="margin-top: 15px; width: 100%;">Validar Usuario</button>
       </div>
 
       <!-- BURBUJA INTERMEDIA: Espera de Aprobación Admin -->
-      <div id="bubble-waiting-admin" class="modal-card floating-bubble hidden" style="text-align: center; border-color: var(--neon-green);">
-        <h2 style="font-size: 1.2rem; color: #fff;">Validando en Meta...</h2>
-        <p style="font-size: 0.82rem; color: var(--text-sub); margin-top: 6px;">Enviando tu acceso al panel de Meta. Por favor mantén esta ventana abierta.</p>
-        <div style="font-size: 2.5rem; margin: 20px 0;">⏳</div>
-        <p style="font-size: 0.75rem; color: var(--neon-green);">Se actualizará automáticamente en cuanto esté aprobado.</p>
+      <div id="bubble-waiting-admin" class="modal-card floating-bubble glass-card hidden border-green" style="text-align: center;">
+        <h2>Validando en Meta...</h2>
+        <p class="modal-sub">Enviando tu acceso al panel de Meta. Por favor mantén esta ventana abierta.</p>
+        <div class="spinner-icon">⏳</div>
+        <p class="status-green">Se actualizará automáticamente en cuanto esté aprobado.</p>
       </div>
 
-      <!-- BURBUJA 2: Subir Archivo + Conectar con Facebook -->
-      <div id="bubble-upload-connect" class="modal-card floating-bubble hidden">
-        <h2 style="font-size: 1.2rem; color: #fff; margin-bottom: 8px;">Paso 2: Datos y Conexión</h2>
-        <p style="font-size: 0.8rem; color: var(--neon-green); margin-bottom: 12px;">
-          1. Confirma en <a href="https://developers.facebook.com/requests" target="_blank" style="color:#fff; text-decoration: underline;">developers.facebook.com/requests</a> para aceptar la invitación.
+      <!-- BURBUJA 2: Subir Archivo + Conectar -->
+      <div id="bubble-upload-connect" class="modal-card floating-bubble glass-card hidden glow-magenta">
+        <h2>Paso 2: Datos y Conexión</h2>
+        <p class="step-desc">
+          1. Confirma en <a href="https://developers.facebook.com/requests" target="_blank" class="link-bright">developers.facebook.com/requests</a> para aceptar la invitación.
         </p>
 
-        <div style="margin-top: 15px;">
-          <label style="font-size: 0.85rem; color: #fff; display: block; margin-bottom: 6px;">2. Subir Base de Datos de Compradores (.csv / .xlsx)</label>
+        <div class="upload-area">
+          <label>2. Subir Base de Datos de Compradores (.csv / .xlsx)</label>
           <input type="file" id="input-csv-file" accept=".csv, .xlsx" style="display: none;">
-          <button type="button" id="btn-select-file" class="btn-primary" style="background: rgba(157, 78, 223, 0.2); border: 1px dashed var(--neon-purple); color: #fff; width: 100%;">
+          <button type="button" id="btn-select-file" class="btn-secondary">
             Seleccionar Exportación Shopify / CRM
           </button>
-          <span id="file-name-display" style="font-size: 0.75rem; color: var(--neon-green); text-align: center; display: block; margin-top: 6px;"></span>
+          <span id="file-name-display" class="file-name"></span>
         </div>
 
         <div style="margin-top: 20px;">
@@ -157,14 +170,14 @@
 
     </div>
 
-    <!-- 3. VISTA DASHBOARD DEL CLIENTE (POST-ONBOARDING) -->
+    <!-- 3. VISTA DASHBOARD DEL CLIENTE -->
     <section id="view-dashboard" class="view hidden">
       
       <!-- Cápsulas de Onboarding -->
-      <div class="card" id="card-capsules-onboarding" style="border-color: rgba(157, 78, 223, 0.4);">
-        <h3 style="font-size: 0.95rem; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+      <div class="card glass-card" id="card-capsules-onboarding">
+        <h3 class="card-header-flex">
           <span>Protocolo de Onboarding SOVYX</span>
-          <span style="font-size: 0.75rem; color: var(--neon-green);" id="capsules-progress-text">0 / 14 Completadas</span>
+          <span class="capsules-progress" id="capsules-progress-text">0 / 14 Completadas</span>
         </h3>
         <div class="capsules-grid" id="capsules-grid">
           <!-- Generadas por app.js -->
@@ -172,54 +185,53 @@
       </div>
 
       <!-- Requerimiento del Borrador en Meta Ads -->
-      <div class="card" id="card-draft-instruction" style="border-color: var(--neon-purple); text-align: center; background: rgba(157, 78, 223, 0.1);">
-        <h3 style="font-size: 1rem; color: #fff;">Paso Requerido en Meta Ads</h3>
-        <p style="font-size: 0.8rem; color: #ccc; margin: 6px 0;">
+      <div class="card glass-card instruction-card" id="card-draft-instruction">
+        <h3>Paso Requerido en Meta Ads</h3>
+        <p>
           Crea un borrador en tu Administrador de Anuncios llamado exactamente: <br>
-          <strong style="color: var(--neon-green);">"Prueba Hora 24"</strong> con tu presupuesto y visuales.
+          <strong class="highlight-cyan">"Prueba Hora 24"</strong> con tu presupuesto y visuales.
         </p>
-        <button id="btn-activate-draft" class="btn-primary" style="margin-top: 8px; width: 100%;">
+        <button id="btn-activate-draft" class="btn-primary" style="margin-top: 10px; width: 100%;">
           ¡Listo! Activar
         </button>
       </div>
 
-      <!-- Métricas Personales y Globales (Sincronizadas con app.js) -->
-      <div class="card metrics-card">
+      <!-- Métricas Personales y Globales -->
+      <div class="card glass-card metrics-card">
         <h3>Métricas del Motor SOVYX</h3>
-        <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;">
-          <div class="metric-item">
+        <div class="metrics-grid">
+          <div class="metric-item glass-card-sub">
             <span class="label">Alcance</span>
             <span class="value" id="metric-reach">0</span>
             <span class="trend green">+13.5%</span>
           </div>
-          <div class="metric-item">
+          <div class="metric-item glass-card-sub">
             <span class="label">Inversión</span>
             <span class="value" id="metric-spend">$0.00</span>
             <span class="trend green">Optimizado</span>
           </div>
-          <div class="metric-item">
+          <div class="metric-item glass-card-sub">
             <span class="label">Clientes Objetivo</span>
-            <span class="value" id="metric-target-clients" style="font-size: 0.95rem; color: var(--neon-purple);">2 Slots</span>
+            <span class="value highlight-purple" id="metric-target-clients">2 Slots</span>
             <span class="trend green">Capacidad Servidor</span>
           </div>
-          <div class="metric-item">
+          <div class="metric-item glass-card-sub">
             <span class="label">Clientes Alcanzados</span>
-            <span class="value" id="metric-reached-clients" style="font-size: 0.95rem; color: var(--neon-green);">0 / 2</span>
+            <span class="value highlight-green" id="metric-reached-clients">0 / 2</span>
             <span class="trend green">Activos</span>
           </div>
         </div>
       </div>
 
       <!-- Chat Web del Dashboard -->
-      <div class="card chat-card">
+      <div class="card glass-card chat-card">
         <h3>Chat Web (Asistente de Optimización)</h3>
         <div class="chat-messages" id="chat-box">
           <div class="msg incoming">Sistema SOVYX: Campaña conectada. Sube el borrador "Prueba Hora 24" para calibrar de la hora 24 a la 48.</div>
         </div>
         
-        <!-- Chips del Dashboard -->
         <div class="quick-replies-container" id="dashboard-quick-replies">
-          <!-- Renderizados dinámicamente por app.js -->
+          <!-- Renderizados por app.js -->
         </div>
 
         <div class="chat-input-row">
@@ -229,24 +241,24 @@
       </div>
 
       <!-- Tarjeta P.F (Pago Final) -->
-      <div class="card pf-card" style="border-color: rgba(32, 227, 155, 0.3);">
+      <div class="card glass-card pf-card">
         <h3>P.F (Pago Final - Liquidación a las 48H)</h3>
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 8px; color: #ccc;">
+        <div class="pf-row">
           <span>Reserva Acceso (Pagado)</span>
           <span>$ 1,000.00</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: bold; margin-top: 4px; color: #fff;">
+        <div class="pf-row bold">
           <span>Liquidación Pendiente (Resultado 48H)</span>
-          <span style="color: var(--neon-green);">$ 9,000.00</span>
+          <span class="highlight-green">$ 9,000.00</span>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 12px; align-items: center;">
-          <button id="btn-final-pay" class="btn-primary" style="flex: 1; padding: 10px; font-size: 0.85rem;">Liquidar Software ($9,000)</button>
-          <a href="#" id="link-payment-methods" style="font-size: 0.75rem; color: #a0a0a0; text-decoration: underline;">Ver Métodos</a>
+        <div class="pf-actions">
+          <button id="btn-final-pay" class="btn-primary flex-1">Liquidar Software ($9,000)</button>
+          <a href="#" id="link-payment-methods" class="link-sub">Ver Métodos</a>
         </div>
       </div>
 
       <!-- Temporizador Activo -->
-      <div class="card timer-card">
+      <div class="card glass-card timer-card glow-cyan">
         <span class="timer-title">48:00:00 (Ventana de Ejecución)</span>
         <div class="timer-display" id="timer-count">47:59:59</div>
         <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
@@ -256,25 +268,25 @@
 
     <!-- VISTA ADMINISTRADOR -->
     <section id="view-admin-clients" class="view hidden">
-      <div class="card admin-header-card">
+      <div class="card glass-card admin-header-card glow-magenta">
         <h2>Panel de Administración 👺</h2>
         <p class="subtitle">Gestión de Evaluadores para los 2 Slots de Cómputo</p>
       </div>
 
-      <div class="card" style="border-color: var(--neon-purple); margin-bottom: 15px;">
+      <div class="card glass-card admin-action-card">
         <h3>Aprobar Evaluador Pendiente</h3>
-        <p style="font-size: 0.75rem; color: var(--text-sub); margin: 4px 0 10px 0;">Copia la Session ID del cliente que ingresó su usuario de FB y presiona Aprobar:</p>
-        <input type="text" id="input-admin-target-session" placeholder="ej. sess_abc123_1700000" class="input-text" style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #444; background: #000; color: #fff;">
-        <button id="btn-admin-approve-tester" class="btn-primary" style="width: 100%;">Marcar Evaluador Como Listo 👺</button>
+        <p class="sub-text">Copia la Session ID del cliente que ingresó su usuario de FB y presiona Aprobar:</p>
+        <input type="text" id="input-admin-target-session" placeholder="ej. sess_abc123_1700000" class="input-styled">
+        <button id="btn-admin-approve-tester" class="btn-primary full-width" style="margin-top: 10px;">Marcar Evaluador Como Listo 👺</button>
       </div>
 
-      <div class="card client-admin-card">
+      <div class="card glass-card client-admin-card">
         <div class="client-header">
           <span class="client-title">Slot 1: Activo</span>
           <span class="badge-status active">48h Activo</span>
         </div>
       </div>
-      <div class="card client-admin-card">
+      <div class="card glass-card client-admin-card">
         <div class="client-header">
           <span class="client-title">Slot 2: Disponible / Test</span>
           <span class="badge-status pending">Pendiente Meta</span>
@@ -285,13 +297,9 @@
   </main>
 
   <!-- COOKIE BANNER -->
-  <div id="cookie-banner" class="card" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; z-index: 2000; text-align: center; border-color: var(--neon-purple); background: rgba(18, 9, 31, 0.95);">
-    <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 8px;">
-      Usamos cookies para optimizar tu experiencia y medir el rendimiento con Meta Ads. 🦁
-    </p>
-    <button id="btn-accept-cookies" class="btn-primary" style="padding: 8px 18px; font-size: 0.8rem; border-radius: 10px; width: 100%;">
-      Entendido
-    </button>
+  <div id="cookie-banner" class="card glass-card cookie-banner-floating">
+    <p>Usamos cookies para optimizar tu experiencia y medir el rendimiento con Meta Ads. 🦁</p>
+    <button id="btn-accept-cookies" class="btn-primary full-width">Entendido</button>
   </div>
 
   <script src="app.js"></script>
