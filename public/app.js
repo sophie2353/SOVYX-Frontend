@@ -3,7 +3,7 @@
 // ==========================================
 
 const API_URL = 'https://sovyx-backend.onrender.com';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', META_APP_ID: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'sovyx2026', META_APP_ID: '' };
 
 const state = {
   sessionId: localStorage.getItem('sovyx_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
@@ -13,7 +13,7 @@ const state = {
   uploadedFile: null,
   completedCapsules: JSON.parse(localStorage.getItem('sovyx_completed_capsules') || '[1]'),
   metrics: {
-    visitors: 1500,
+    visitors: 1504,
     visitorsGrowth: "+3.5%",
     leads: 75,
     leadsGrowth: "+1.2%",
@@ -23,7 +23,7 @@ const state = {
     spend: "$15",
     targetClients: 100,
     clientGrowth: "+12%",
-    liveViewers: 22
+    liveViewers: 21
   }
 };
 
@@ -57,6 +57,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupPaymentFlow();
   setupQuickReplies();
   setupChatListeners();
+  setupAdminModal();
   setupAdminNavigation();
   setupCookieBanner();
   startPersistentTimer();
@@ -94,7 +95,7 @@ async function confirmPaymentSuccess(amount = 1000.00) {
   }
 }
 
-// --- MOTOR DE MÉTRICAS Y GRÁFICOS SPARKLINE EN TIEMPO REAL ---
+// --- MOTOR DE MÉTRICAS EN TIEMPO REAL ---
 function startLiveMetricsEngine() {
   updateMetricsUI();
 
@@ -127,92 +128,57 @@ function simulateLiveFluctuations() {
 }
 
 function updateMetricsUI() {
-  // Actualizar textos básicos si existen en el DOM
   const elVisitors = document.getElementById('metric-visitors');
   const elLeads = document.getElementById('metric-leads');
-  const elConvRate = document.getElementById('metric-conv-rate');
-  const elReach = document.getElementById('metric-reach');
-  const elSpend = document.getElementById('metric-spend');
-  const elLiveBadge = document.getElementById('live-viewers-badge');
-
+  
   if (elVisitors) elVisitors.textContent = state.metrics.visitors.toLocaleString();
   if (elLeads) elLeads.textContent = state.metrics.leads.toLocaleString();
-  if (elConvRate) elConvRate.textContent = state.metrics.conversionRate;
-  if (elReach) elReach.textContent = state.metrics.reach.toLocaleString();
-  if (elSpend) elSpend.textContent = state.metrics.spend;
 
-  if (elLiveBadge) {
-    elLiveBadge.innerHTML = `
-      <span style="display:inline-block; width:8px; height:8px; background:var(--neon-green); border-radius:50%; margin-right:6px; box-shadow:0 0 8px var(--neon-green);"></span>
-      <span style="font-size:0.8rem; color:var(--text-sub);">
-        <strong style="color:#fff;">${state.metrics.liveViewers} personas</strong> viendo la web | <strong style="color:var(--neon-magenta);">2 Slots disponibles 👺</strong>
-      </span>
+  const liveStatusBar = document.querySelector('.live-status-bar');
+  if (liveStatusBar) {
+    liveStatusBar.innerHTML = `
+      <span class="live-dot"></span>
+      <span><strong>${state.metrics.liveViewers} personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
     `;
   }
-
-  // Inyectar gráficos sparkline interactivos estilo objetivo si existen los contenedores
-  renderSparklines();
 }
 
-function renderSparklines() {
-  const containers = document.querySelectorAll('.sparkline-container');
-  containers.forEach((container, idx) => {
-    if (container.dataset.rendered === 'true') return;
-    container.innerHTML = `
-      <svg viewBox="0 0 120 40" width="100%" height="35" style="overflow: visible;">
-        <defs>
-          <linearGradient id="sparkGrad-${idx}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${idx % 2 === 0 ? 'var(--neon-green)' : 'var(--neon-magenta)'}" stop-opacity="0.3"/>
-            <stop offset="100%" stop-color="${idx % 2 === 0 ? 'var(--neon-green)' : 'var(--neon-magenta)'}" stop-opacity="0.0"/>
-          </linearGradient>
-        </defs>
-        <path d="M0,30 Q30,10 60,20 T120,5 L120,40 L0,40 Z" fill="url(#sparkGrad-${idx})" />
-        <path d="M0,30 Q30,10 60,20 T120,5" fill="none" stroke="${idx % 2 === 0 ? 'var(--neon-green)' : 'var(--neon-magenta)'}" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    `;
-    container.dataset.rendered = 'true';
-  });
-}
-
-// --- VISTA SPLASH (10 SEGUNDOS CON SECUENCIA DE CIFRADO Y PORCENTAJES) ---
+// --- VISTA SPLASH (HUD SCI-FI CON CÁPSULAS Y PORCENTAJE DYNAMIC) ---
 function runSplashScreen() {
   const splash = document.getElementById('view-splash');
-  const progress = document.getElementById('splash-progress');
+  const pctTextHeader = document.getElementById('splash-percentage-text');
+  const statusPctText = document.getElementById('status-pct');
   const btnWelcome = document.getElementById('btn-splash-welcome');
-  const statusText = document.querySelector('.loading-status');
+  const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 10000; // Exactamente 10 segundos como solicitado
+  const totalDurationMs = 6000; // 6 segundos de secuencia HUD
   const stepTime = totalDurationMs / 100;
-
-  const encryptionPhases = [
-    { threshold: 15, text: "Iniciando protocolo de cifrado CAPI..." },
-    { threshold: 35, text: "Sincronizando nodos de alta intención..." },
-    { threshold: 60, text: "Calibrando micro-audiencias espejo..." },
-    { threshold: 85, text: "Optimizando motor de conversión 48H..." },
-    { threshold: 100, text: "¡Sistema seguro y activo!" }
-  ];
 
   const interval = setInterval(() => {
     pct += 1;
-    if (progress) progress.style.width = `${pct}%`;
 
-    // Actualizar texto según el progreso dinámico
-    if (statusText) {
-      const activePhase = encryptionPhases.find(p => pct <= p.threshold) || encryptionPhases[encryptionPhases.length - 1];
-      statusText.textContent = `${activePhase.text} (${pct}%)`;
-    }
+    if (pctTextHeader) pctTextHeader.textContent = `${pct}%`;
+    if (statusPctText) statusPctText.textContent = `${pct}%`;
+
+    // Iluminación progresiva de las cápsulas
+    const activeCapsCount = Math.floor((pct / 100) * capsules.length);
+    capsules.forEach((cap, index) => {
+      if (index < activeCapsCount) {
+        cap.classList.add('active');
+        cap.classList.remove('cap-off');
+      }
+    });
 
     if (pct >= 100) {
       clearInterval(interval);
-      finishSplash();
+      if (btnWelcome) btnWelcome.style.boxShadow = "0 0 25px var(--neon-green)";
     }
   }, stepTime);
 
   if (btnWelcome) {
     btnWelcome.addEventListener('click', () => {
       clearInterval(interval);
-      if (progress) progress.style.width = '100%';
       finishSplash();
     });
   }
@@ -221,24 +187,69 @@ function runSplashScreen() {
 function finishSplash() {
   const splash = document.getElementById('view-splash');
   if (splash) {
-    splash.classList.add('hidden');
+    splash.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    splash.style.opacity = '0';
+    splash.style.transform = 'scale(1.05)';
+    setTimeout(() => {
+      splash.style.display = 'none';
+    }, 600);
   }
-  showView('view-dashboard');
 }
 
-function showView(viewId) {
-  document.querySelectorAll('main > .view').forEach(v => v.classList.add('hidden'));
-  const target = document.getElementById(viewId);
-  if (target) target.classList.remove('hidden');
+// --- MODAL Y AUTENTICACIÓN ADMIN ---
+function setupAdminModal() {
+  const btnAdmin = document.getElementById('btn-admin-access');
+  const modal = document.getElementById('admin-modal');
+  const passInput = document.getElementById('admin-pass-input');
+  const btnConfirm = document.getElementById('btn-admin-confirm');
+  const btnCancel = document.getElementById('btn-admin-cancel');
+  const errorMsg = document.getElementById('admin-error-msg');
+
+  if (!btnAdmin || !modal) return;
+
+  btnAdmin.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    passInput.value = '';
+    if (errorMsg) errorMsg.style.display = 'none';
+    passInput.focus();
+  });
+
+  const closeModal = () => {
+    modal.classList.add('hidden');
+  };
+
+  const handleAuth = () => {
+    const inputKey = passInput.value.trim();
+    if (inputKey === CONFIG.SOVYX_ADMIN_KEY || inputKey === 'admin123') {
+      closeModal();
+      alert('🔐 Acceso de Administrador Concedido.');
+    } else {
+      if (errorMsg) errorMsg.style.display = 'block';
+      passInput.classList.add('shake');
+      setTimeout(() => passInput.classList.remove('shake'), 500);
+    }
+  };
+
+  if (btnConfirm) btnConfirm.addEventListener('click', handleAuth);
+  if (btnCancel) btnCancel.addEventListener('click', closeModal);
+
+  passInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAuth();
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
 }
 
-// --- FLUJO DE PAGO Y BOTONES ---
+// --- FLUJO DE PAGO Y BOTÓN DE ACCIÓN ---
 function setupPaymentFlow() {
-  const btnPay = document.getElementById('btn-payment-trigger');
-  if (btnPay) {
-    btnPay.addEventListener('click', async () => {
-      btnPay.disabled = true;
-      btnPay.textContent = 'Generando link de pago seguro... ⏳';
+  const btnPagar = document.getElementById('btn-pagar');
+
+  if (btnPagar) {
+    btnPagar.addEventListener('click', async () => {
+      btnPagar.disabled = true;
+      btnPagar.textContent = 'Procesando Pago... ⏳';
 
       try {
         const res = await fetch(`${API_URL}/api/pago/checkout`, {
@@ -252,58 +263,55 @@ function setupPaymentFlow() {
           window.location.href = data.url;
         } else {
           await confirmPaymentSuccess(1000.00);
-          alert('¡Slot reservado con éxito ($1,000 USD)! Licencia de cómputo activada 🚀');
-          btnPay.disabled = false;
-          btnPay.textContent = 'Reservar Slot Inicial ($1,000 USD)';
+          alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
+          btnPagar.disabled = false;
+          btnPagar.textContent = 'Pagar';
         }
       } catch (err) {
         await confirmPaymentSuccess(1000.00);
-        alert('¡Slot reservado con éxito ($1,000 USD)! Licencia de cómputo activada 🚀');
-        btnPay.disabled = false;
-        btnPay.textContent = 'Reservar Slot Inicial ($1,000 USD)';
+        alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
+        btnPagar.disabled = false;
+        btnPagar.textContent = 'Pagar';
       }
-    });
-  }
-
-  const btnFinalPay = document.getElementById('btn-final-pay');
-  if (btnFinalPay) {
-    btnFinalPay.addEventListener('click', async () => {
-      btnFinalPay.disabled = true;
-      btnFinalPay.textContent = 'Procesando Liquidación... ⏳';
-      await confirmPaymentSuccess(9000.00);
-      alert('¡Liquidación completada ($9,000.00 USD)! Acceso ilimitado activado 🚀');
-      btnFinalPay.disabled = false;
-      btnFinalPay.textContent = 'Liquidar Software ($9,000)';
     });
   }
 }
 
 // --- QUICK REPLIES & CHIPS ---
 function setupQuickReplies() {
-  const container = document.getElementById('questions-carousel');
+  const container = document.querySelector('.chat-questions-carousel');
   if (!container) return;
 
-  container.innerHTML = '';
-  QUICK_REPLIES.forEach(text => {
-    const chip = document.createElement('button');
-    chip.className = 'question-chip';
-    chip.textContent = text;
-    chip.addEventListener('click', () => {
-      const input = document.getElementById('chat-input');
-      const btn = document.getElementById('btn-send-chat');
-      if (input && btn) {
-        input.value = text;
-        btn.click();
+  const attachChipEvent = (chipBtn) => {
+    chipBtn.addEventListener('click', () => {
+      const input = document.querySelector('.chat-input-row input');
+      const btnSend = document.querySelector('.chat-input-row .btn-icon');
+      if (input && btnSend) {
+        input.value = chipBtn.textContent.trim();
+        btnSend.click();
       }
     });
-    container.appendChild(chip);
-  });
+  };
+
+  const existingChips = container.querySelectorAll('.question-chip');
+  if (existingChips.length > 0) {
+    existingChips.forEach(attachChipEvent);
+  } else {
+    container.innerHTML = '';
+    QUICK_REPLIES.forEach(text => {
+      const chip = document.createElement('button');
+      chip.className = 'question-chip';
+      chip.textContent = text;
+      attachChipEvent(chip);
+      container.appendChild(chip);
+    });
+  }
 }
 
 // --- CHAT WEB ---
 function setupChatListeners() {
-  const btnSend = document.getElementById('btn-send-chat');
-  const inputEl = document.getElementById('chat-input');
+  const inputEl = document.querySelector('.chat-input-row input');
+  const btnSend = document.querySelector('.chat-input-row .btn-icon');
   const boxEl = document.getElementById('chat-box');
 
   if (!btnSend || !inputEl || !boxEl) return;
@@ -348,7 +356,7 @@ function setupChatListeners() {
   });
 }
 
-// --- TEMPORIZADOR PERSISTENTE (EVITA RESETEO AL RECARGAR) ---
+// --- TEMPORIZADOR PERSISTENTE (48 HORAS) ---
 function startPersistentTimer() {
   const timerDisplay = document.getElementById('timer-count');
   if (!timerDisplay) return;
@@ -372,7 +380,7 @@ function startPersistentTimer() {
     timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
 
     if (totalSeconds <= 0) {
-      timerDisplay.textContent = "00:00:00 (Ciclo Completado)";
+      timerDisplay.textContent = "00:00:00";
     }
   };
 
@@ -380,27 +388,22 @@ function startPersistentTimer() {
   setInterval(updateTimer, 1000);
 }
 
-// --- NAVEGACIÓN Y MENÚ LATERAL / ADMIN ---
+// --- NAVEGACIÓN MENÚ LATERAL ---
 function setupAdminNavigation() {
   const btnMenu = document.getElementById('btn-menu');
   const sidebar = document.getElementById('sidebar-menu');
-  const btnClose = document.getElementById('btn-close-sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
 
   if (btnMenu && sidebar) {
-    btnMenu.addEventListener('click', () => sidebar.classList.remove('hidden'));
-  }
-  if (btnClose && sidebar) {
-    btnClose.addEventListener('click', () => sidebar.classList.add('hidden'));
-  }
-  if (overlay && sidebar) {
-    overlay.addEventListener('click', () => sidebar.classList.add('hidden'));
+    btnMenu.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
   }
 }
 
 function setupCookieBanner() {
   const banner = document.getElementById('cookie-banner');
   const btnAccept = document.getElementById('btn-accept-cookies');
+
   if (localStorage.getItem('sovyx_cookies_accepted') === 'true' && banner) {
     banner.style.display = 'none';
   }
