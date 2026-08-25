@@ -2,11 +2,9 @@
 // SOVYX Core OS - Application Logic (app.js)
 // ==========================================
 
-// 1. Configuración Global & Backend API
 const API_URL = 'https://sovyx-backend.onrender.com';
 const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '', META_APP_ID: '' };
 
-// Estado Global de la Aplicación
 const state = {
   sessionId: localStorage.getItem('sovyx_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
   email: localStorage.getItem('sovyx_user_email') || null,
@@ -14,19 +12,17 @@ const state = {
   isPaid: false,
   uploadedFile: null,
   completedCapsules: JSON.parse(localStorage.getItem('sovyx_completed_capsules') || '[1]'),
-  // Métricas en Tiempo Real
   metrics: {
-    reach: 14280,          // Alcance
-    spend: 1850.50,        // Inversión
-    targetClients: 2,      // Clientes Objetivo (Slots)
-    reachedClients: 1,     // Clientes Alcanzados
-    liveViewers: 20        // Personas viendo en tiempo real 👺
+    reach: 14280,
+    spend: 1850.50,
+    targetClients: 2,
+    reachedClients: 1,
+    liveViewers: 20
   }
 };
 
 localStorage.setItem('sovyx_session_id', state.sessionId);
 
-// Datos de las 14 Cápsulas
 const ONBOARDING_CAPSULES = [
   { id: 1, title: "1. Identificación Meta Evaluador", desc: "Registro de usuario FB para asignación de nodo." },
   { id: 2, title: "2. Verificación de Capacidad Servidor", desc: "Confirmación de 1 de los 2 slots de cómputo." },
@@ -67,11 +63,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn('Backend SOVYX local fallback.');
   }
 
-  // Verificar si viene de una pasarela de pago aprobada
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('paid') === 'true' || urlParams.get('auth') === 'success') {
     state.isPaid = true;
-    confirmPaymentSuccess(10000.00); // Notificar Pixel y CAPI
+    confirmPaymentSuccess(1000.00);
     cleanUrlParams();
   }
 
@@ -84,16 +79,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAdminNavigation();
   setupCookieBanner();
   start48hTimer();
-
-  // Iniciar Motor de Métricas en Tiempo Real y Espectadores en Vivo
   startLiveMetricsEngine();
 });
 
 // --- CONFIRMACIÓN DE PAGO (PIXEL + CAPI BACKEND) ---
-async function confirmPaymentSuccess(amount = 10000.00) {
+async function confirmPaymentSuccess(amount = 1000.00) {
   state.isPaid = true;
 
-  // 1. Disparar Meta Pixel desde el Navegador
   if (window.fbq) {
     window.fbq('track', 'Purchase', {
       value: amount,
@@ -104,7 +96,6 @@ async function confirmPaymentSuccess(amount = 10000.00) {
     console.log(`✅ Meta Pixel: Evento Purchase de $${amount} USD enviado.`);
   }
 
-  // 2. Disparar CAPI en el Backend (Notificación OK)
   try {
     await fetch(`${API_URL}/api/pago/confirmar`, {
       method: 'POST',
@@ -125,7 +116,6 @@ async function confirmPaymentSuccess(amount = 10000.00) {
 function startLiveMetricsEngine() {
   updateMetricsUI();
 
-  // Actualización periódica cada 4 segundos (Simula WebSocket / Live Polling)
   setInterval(async () => {
     try {
       const res = await fetch(`${API_URL}/api/metrics`);
@@ -148,16 +138,12 @@ function startLiveMetricsEngine() {
 }
 
 function simulateLiveFluctuations() {
-  // Variación orgánica de espectadores (ej: 18 - 22 personas)
-  const deltaViewers = Math.floor(Math.random() * 3) - 1; // -1, 0, +1
+  const deltaViewers = Math.floor(Math.random() * 3) - 1;
   state.metrics.liveViewers = Math.max(18, Math.min(24, state.metrics.liveViewers + deltaViewers));
-
-  // Incremento progresivo de alcance
   state.metrics.reach += Math.floor(Math.random() * 5) + 1;
 }
 
 function updateMetricsUI() {
-  // Update UI Elements si existen en el HTML
   const elReach = document.getElementById('metric-reach');
   const elSpend = document.getElementById('metric-spend');
   const elTarget = document.getElementById('metric-target-clients');
@@ -169,11 +155,12 @@ function updateMetricsUI() {
   if (elTarget) elTarget.textContent = `${state.metrics.targetClients} Slots (Objetivo)`;
   if (elReached) elReached.textContent = `${state.metrics.reachedClients} / ${state.metrics.targetClients} Adquiridos`;
 
-  // Actualizar el Badge de Urgencia en el Chat
   if (elLiveBadge) {
     elLiveBadge.innerHTML = `
-      <span style="display:inline-block; width:8px; height:8px; background:#00ff88; border-radius:50%; margin-right:6px; box-shadow:0 0 8px #00ff88; animation: pulse 1.5s infinite;"></span>
-      <strong>${state.metrics.liveViewers} personas</strong> viendo la web ahora mismo | <strong>2 Slots disponibles 👺</strong>
+      <span style="display:inline-block; width:8px; height:8px; background:var(--neon-green); border-radius:50%; margin-right:6px; box-shadow:0 0 8px var(--neon-green);"></span>
+      <span style="font-size:0.8rem; color:var(--text-sub);">
+        <strong style="color:#fff;">${state.metrics.liveViewers} personas</strong> viendo la web | <strong style="color:var(--neon-magenta);">2 Slots disponibles 👺</strong>
+      </span>
     `;
   }
 }
@@ -185,7 +172,7 @@ function runSplashScreen() {
 
   let pct = 0;
   const interval = setInterval(() => {
-    pct += 25;
+    pct += 20;
     if (progress) progress.style.width = `${pct}%`;
 
     if (pct >= 100) {
@@ -198,9 +185,9 @@ function runSplashScreen() {
           showView('view-landing');
           if (state.isPaid) openOnboardingOverlay('bubble-fb-user');
         }
-      }, 400);
+      }, 300);
     }
-  }, 150);
+  }, 100);
 }
 
 function showView(viewId) {
@@ -212,45 +199,45 @@ function showView(viewId) {
 // --- FLUJO DE PAGO Y BOTONES ---
 function setupPaymentFlow() {
   const btnPay = document.getElementById('btn-pay');
-  if (!btnPay) return;
+  if (btnPay) {
+    btnPay.addEventListener('click', async () => {
+      btnPay.disabled = true;
+      btnPay.textContent = 'Generando link de pago... ⏳';
 
-  btnPay.addEventListener('click', async () => {
-    btnPay.disabled = true;
-    btnPay.textContent = 'Generando link de pago... ⏳';
+      try {
+        const res = await fetch(`${API_URL}/api/pago/checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: state.sessionId })
+        });
+        const data = await res.json();
 
-    try {
-      const res = await fetch(`${API_URL}/api/pago/checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: state.sessionId })
-      });
-      const data = await res.json();
-
-      if (data.ok && data.url) {
-        window.location.href = data.url;
-      } else {
-        await confirmPaymentSuccess(1000.00); // Simulador Reserva $1k
+        if (data.ok && data.url) {
+          window.location.href = data.url;
+        } else {
+          await confirmPaymentSuccess(1000.00);
+          openOnboardingOverlay('bubble-fb-user');
+          btnPay.disabled = false;
+          btnPay.textContent = 'Reservar Slot ($1,000 USD)';
+        }
+      } catch (err) {
+        await confirmPaymentSuccess(1000.00);
         openOnboardingOverlay('bubble-fb-user');
         btnPay.disabled = false;
         btnPay.textContent = 'Reservar Slot ($1,000 USD)';
       }
-    } catch (err) {
-      await confirmPaymentSuccess(1000.00);
-      openOnboardingOverlay('bubble-fb-user');
-      btnPay.disabled = false;
-      btnPay.textContent = 'Reservar Slot ($1,000 USD)';
-    }
-  });
+    });
+  }
 
   const btnFinalPay = document.getElementById('btn-final-pay');
   if (btnFinalPay) {
     btnFinalPay.addEventListener('click', async () => {
       btnFinalPay.disabled = true;
       btnFinalPay.textContent = 'Procesando Liquidación... ⏳';
-      await confirmPaymentSuccess(9000.00); // Liquidación Final $9k
-      alert('¡Liquidación completada ($9,000.00 USD)! Ticket notificado a Meta Ads 🚀');
+      await confirmPaymentSuccess(9000.00);
+      alert('¡Liquidación completada ($9,000.00 USD)! Acceso ilimitado activado 🚀');
       btnFinalPay.disabled = false;
-      btnFinalPay.textContent = 'Pagar Liquidación Final ($9,000 USD)';
+      btnFinalPay.textContent = 'Liquidar Software ($9,000)';
     });
   }
 }
@@ -291,7 +278,7 @@ function setupOnboardingBubbles() {
           body: JSON.stringify({ sessionId: state.sessionId, fbUser })
         });
       } catch (err) {
-        console.warn('Backend offline, pasando a espera.');
+        console.warn('Backend offline, pasando a espera local.');
       }
 
       openOnboardingOverlay('bubble-waiting-admin');
@@ -308,7 +295,7 @@ function setupOnboardingBubbles() {
     inputCsv.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         state.uploadedFile = e.target.files[0];
-        if (fileNameDisplay) fileNameDisplay.textContent = `📄 Archivo listo: ${state.uploadedFile.name}`;
+        if (fileNameDisplay) fileNameDisplay.textContent = `📄 Listo: ${state.uploadedFile.name}`;
       }
     });
   }
@@ -382,12 +369,18 @@ function renderCapsules() {
   ONBOARDING_CAPSULES.forEach(capsule => {
     const isDone = state.completedCapsules.includes(capsule.id);
     const item = document.createElement('div');
-    item.className = `capsule-item ${isDone ? 'completed' : ''}`;
+    item.style.cssText = `
+      display: flex; gap: 10px; align-items: center; padding: 10px;
+      border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid ${isDone ? 'var(--neon-green)' : 'var(--glass-border)'};
+      cursor: pointer; margin-bottom: 6px; transition: all 0.2s;
+    `;
     item.innerHTML = `
-      <div class="capsule-number">${isDone ? '✓' : capsule.id}</div>
-      <div class="capsule-info">
-        <div class="capsule-title">${capsule.title}</div>
-        <div class="capsule-desc">${capsule.desc}</div>
+      <div style="width: 24px; height: 24px; border-radius: 50%; background: ${isDone ? 'var(--neon-green)' : 'rgba(255,255,255,0.1)'}; color: ${isDone ? '#000' : '#fff'}; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">
+        ${isDone ? '✓' : capsule.id}
+      </div>
+      <div style="flex: 1;">
+        <div style="font-size: 0.8rem; font-weight: 600; color: ${isDone ? 'var(--neon-green)' : '#fff'};">${capsule.title}</div>
+        <div style="font-size: 0.7rem; color: var(--text-sub);">${capsule.desc}</div>
       </div>
     `;
     item.addEventListener('click', () => toggleCapsuleCompleted(capsule.id));
@@ -422,9 +415,10 @@ function renderQuickReplies() {
   const attachChips = (container, replies, inputId, btnId) => {
     if (!container) return;
     container.innerHTML = '';
+    container.style.cssText = 'display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px;';
     replies.forEach(text => {
       const chip = document.createElement('button');
-      chip.className = 'chip-quick-reply';
+      chip.style.cssText = 'background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); padding: 6px 10px; border-radius: 20px; color: var(--text-sub); font-size: 0.7rem; white-space: nowrap; cursor: pointer;';
       chip.textContent = text;
       chip.addEventListener('click', () => {
         const input = document.getElementById(inputId);
@@ -449,7 +443,7 @@ function setupChatListeners() {
     if (!text) return;
 
     boxEl.innerHTML += `
-      <div class="msg outgoing" style="align-self: flex-end; background: var(--neon-purple); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+      <div class="msg outgoing">
         ${escapeHTML(text)}
       </div>`;
     inputEl.value = '';
@@ -465,13 +459,13 @@ function setupChatListeners() {
       const reply = data.reply || 'Sistema SOVYX: Solicitud procesada. Asignando recursos de cómputo en nodo principal.';
 
       boxEl.innerHTML += `
-        <div class="msg incoming" style="align-self: flex-start; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+        <div class="msg incoming">
           ${escapeHTML(reply)}
         </div>`;
       boxEl.scrollTop = boxEl.scrollHeight;
     } catch (err) {
       boxEl.innerHTML += `
-        <div class="msg incoming" style="align-self: flex-start; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-top: 4px; font-size: 0.85rem; color: #fff;">
+        <div class="msg incoming">
           Sistema SOVYX: Operación confirmada. Monitoreando métricas del nodo activo.
         </div>`;
       boxEl.scrollTop = boxEl.scrollHeight;
@@ -495,7 +489,7 @@ function setupChatListeners() {
   }
 }
 
-// --- TEMPORIZADOR Y NAVEGACIÓN ADMIN ---
+// --- TEMPORIZADOR Y NAVIGATION ADMIN ---
 function start48hTimer() {
   const timerDisplay = document.getElementById('timer-count');
   if (!timerDisplay) return;
@@ -517,6 +511,12 @@ function setupAdminNavigation() {
   const btnClose = document.getElementById('btn-close-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
 
+  const btnTester = document.getElementById('btn-menu-tester');
+  const btnClients = document.getElementById('btn-menu-clients');
+  const btnDashMenu = document.getElementById('btn-menu-dashboard');
+  const btnApproveAdmin = document.getElementById('btn-admin-approve-tester');
+  const inputTargetSession = document.getElementById('input-admin-target-session');
+
   let clicks = 0;
   if (logoTrigger) {
     logoTrigger.addEventListener('click', () => {
@@ -531,6 +531,45 @@ function setupAdminNavigation() {
 
   if (btnClose && sidebar) btnClose.addEventListener('click', () => sidebar.classList.add('hidden'));
   if (overlay && sidebar) overlay.addEventListener('click', () => sidebar.classList.add('hidden'));
+
+  if (btnTester) {
+    btnTester.addEventListener('click', () => {
+      if (sidebar) sidebar.classList.add('hidden');
+      openOnboardingOverlay('bubble-fb-user');
+    });
+  }
+
+  if (btnClients) {
+    btnClients.addEventListener('click', () => {
+      if (sidebar) sidebar.classList.add('hidden');
+      showView('view-admin-clients');
+    });
+  }
+
+  if (btnDashMenu) {
+    btnDashMenu.addEventListener('click', () => {
+      if (sidebar) sidebar.classList.add('hidden');
+      showView('view-dashboard');
+    });
+  }
+
+  if (btnApproveAdmin && inputTargetSession) {
+    btnApproveAdmin.addEventListener('click', async () => {
+      const targetSess = inputTargetSession.value.trim();
+      if (!targetSess) return alert('Ingresa la Session ID del cliente');
+
+      try {
+        await fetch(`${API_URL}/api/admin/approve-tester`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetSessionId: targetSess })
+        });
+        alert(`Evaluador de la sesión ${targetSess} aprobado exitosamente`);
+      } catch (err) {
+        alert('Simulación Local: Evaluador marcado como LISTO.');
+      }
+    });
+  }
 }
 
 function setupCookieBanner() {
