@@ -3,57 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SOVYX</title>
+  <title>SOVYX Core OS</title>
+
+  <!-- Fuentes Futuristas / Elegantes idénticas al objetivo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- SPLASH SCREEN OVERLAY (10s ENCRYPTION ANIM)-->
+  <!-- SPLASH SCREEN OVERLAY (HUD SCI-FI EXACTO)  -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
+    <div class="splash-cyber-bg"></div>
     <div class="splash-content">
-      <h1 class="logo-title"><span class="magenta-txt">S</span>OVYX</h1>
       
-      <!-- Porcentaje dinámico y estado de cifrado -->
-      <div class="percentage-badge">
-        <span id="splash-percentage-text" class="splash-pct">0%</span>
+      <!-- Logo Serif Sovyx -->
+      <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
+      
+      <!-- Indicador Porcentaje 65% superior con líneas HUD -->
+      <div class="hud-percentage-wrapper">
+        <span class="hud-pointer-line"></span>
+        <span id="splash-percentage-text" class="splash-pct-num">65%</span>
       </div>
 
-      <!-- Barra central de carga segmentada estilo cibernético -->
-      <div class="progress-bar-container">
-        <div id="splash-progress" class="progress-bar-fill" style="width: 0%;"></div>
-        <div class="progress-grid-overlay"></div>
+      <!-- NÚCLEO CIBERNÉTICO SEGMENTADO EN 10 CÁPSULAS -->
+      <div class="processor-core-frame">
+        <div class="capsules-track">
+          <!-- Verdes Activas -->
+          <div class="capsule cap-green active">
+            <svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-5.45 9-12V5l-9-4z"/></svg>
+          </div>
+          <div class="capsule cap-green active"></div>
+          <div class="capsule cap-green active"></div>
+          <div class="capsule cap-green active"></div>
+          
+          <!-- Magenta / Target Focus (65%) -->
+          <div class="capsule cap-magenta active target-focus">
+            <svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7.44-7.93H7v-2h-1.44C6 6.05 9.05 3 13 2.56V4h-2v1.44c-3.95.49-7 3.85-7.44 7.93H5v2h1.44z"/></svg>
+          </div>
+          <div class="capsule cap-magenta active"></div>
+
+          <!-- Púrpura / Inactivas -->
+          <div class="capsule cap-off"></div>
+          <div class="capsule cap-off"></div>
+          <div class="capsule cap-off"></div>
+          <div class="capsule cap-off"></div>
+        </div>
       </div>
       
-      <span class="loading-status">Iniciando protocolo de cifrado CAPI...</span>
+      <span class="loading-status">¡Sistema seguro y activo! (<span id="status-pct">93%</span>)</span>
 
-      <!-- Indicadores Circulares Neón (Menta + Magenta) -->
+      <!-- INDICADORES CIRCULARES NEÓN PERFECTOS (SIN DEFORMACIÓN) -->
       <div class="splash-gauges">
-        <div class="gauge-circle green-gauge">
-          <svg class="gauge-svg" viewBox="0 0 36 36">
-            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            <path class="circle-fill" stroke-dasharray="82, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        <div class="gauge-card green-gauge">
+          <svg class="gauge-ring" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="ring-fill green-fill" cx="50" cy="50" r="42" stroke-dasharray="216 264"/>
           </svg>
-          <div class="gauge-data">
+          <div class="gauge-content">
+            <span class="gauge-icon">📊</span>
             <span class="gauge-label">DATOS PROCESADOS:</span>
             <strong class="gauge-val green-txt">82%</strong>
           </div>
         </div>
 
-        <div class="gauge-circle magenta-gauge">
-          <svg class="gauge-svg" viewBox="0 0 36 36">
-            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            <path class="circle-fill" stroke-dasharray="90, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        <div class="gauge-card magenta-gauge">
+          <svg class="gauge-ring" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="ring-fill magenta-fill" cx="50" cy="50" r="42" stroke-dasharray="237 264"/>
           </svg>
-          <div class="gauge-data">
+          <div class="gauge-content">
+            <span class="gauge-icon">📈</span>
             <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
             <strong class="gauge-val magenta-txt">90%</strong>
           </div>
         </div>
       </div>
 
-      <!-- Botón de Entrada Neón Glossy -->
+      <!-- BOTÓN DE ENTRADA CRISTAL GLASSMORPHISM -->
       <button id="btn-splash-welcome" class="btn-glass-welcome">BIENVENIDO</button>
     </div>
   </div>
@@ -63,8 +94,8 @@
   <!-- ========================================== -->
   <header class="top-bar">
     <div class="logo" id="brand-logo">
-      <span class="logo-icon">🦁</span>
-      <span><span class="magenta-txt">S</span>OVYX</span>
+      <div class="lion-avatar-badge">🦁</div>
+      <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
     </div>
     <div class="top-bar-right">
       <button class="top-icon-btn" aria-label="Buscar">🔍</button>
@@ -72,35 +103,19 @@
         🔔<span class="icon-dot"></span>
       </button>
       <div class="user-avatar">
-        <img src="https://ui-avatars.com/api/?name=User&background=1f1b2e&color=fff" alt="Avatar">
+        <span>US</span>
       </div>
       <button id="btn-menu" class="hamburger-btn" aria-label="Menú">☰</button>
     </div>
   </header>
 
   <!-- ========================================== -->
-  <!-- SIDEBAR MENU & OVERLAY ADMIN               -->
-  <!-- ========================================== -->
-  <div id="sidebar-overlay" class="overlay-backdrop hidden"></div>
-  <aside id="sidebar-menu" class="sidebar hidden">
-    <div class="sidebar-header">
-      <h3>Panel de Control</h3>
-      <button id="btn-close-sidebar" class="btn-close">✕</button>
-    </div>
-    <nav class="sidebar-links">
-      <button id="btn-menu-dashboard" class="sidebar-btn active">📊 Dashboard Cliente</button>
-      <button id="btn-menu-tester" class="sidebar-btn">🧪 Configurar Meta Tester</button>
-      <button id="btn-menu-clients" class="sidebar-btn">👥 Gestión de Clientes</button>
-    </nav>
-  </aside>
-
-  <!-- ========================================== -->
   <!-- DASHBOARD PRINCIPAL DEL CLIENTE            -->
   <!-- ========================================== -->
-  <main id="app-container" class="view">
+  <main id="app-container">
 
-    <!-- Card 1: Métricas Actuales (Gráficos Sparkline) -->
-    <section class="card metric-card-glow">
+    <!-- Card 1: Métricas Actuales -->
+    <section class="card neon-card">
       <div class="live-side-badge">• live view...</div>
       <h2 class="card-title">Métricas Actuales</h2>
       
@@ -108,11 +123,17 @@
         <!-- Metric Item: Visitantes -->
         <div class="metric-item">
           <span class="metric-label">Visitantes:</span>
-          <span class="value"><strong id="metric-visitors">1,500</strong> <small class="green">(+3.5%)</small></span>
-          <div class="sparkline-container chart-green" data-sparkline="visitors">
-            <svg viewBox="0 0 120 40" class="sparkline-svg">
-              <path d="M0,30 Q20,5 40,25 T80,10 T120,5 L120,40 L0,40 Z" fill="rgba(0, 255, 163, 0.15)"/>
-              <path d="M0,30 Q20,5 40,25 T80,10 T120,5" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+          <span class="value"><strong id="metric-visitors">1,504</strong> <small class="green">(+3.5%)</small></span>
+          <div class="sparkline-box">
+            <svg viewBox="0 0 120 40" class="spark-svg">
+              <defs>
+                <linearGradient id="grad-green" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#66cdaa" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#66cdaa" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,32 Q25,10 50,22 T100,8 L120,5 L120,40 L0,40 Z" fill="url(#grad-green)"/>
+              <path d="M0,32 Q25,10 50,22 T100,8 L120,5" fill="none" stroke="#66cdaa" stroke-width="2.5"/>
             </svg>
           </div>
         </div>
@@ -121,78 +142,82 @@
         <div class="metric-item">
           <span class="metric-label">Nuevos Leads:</span>
           <span class="value"><strong id="metric-leads">75</strong> <small class="green">(+1.2%)</small></span>
-          <div class="sparkline-container chart-green" data-sparkline="leads">
-            <svg viewBox="0 0 120 40" class="sparkline-svg">
-              <path d="M0,35 Q30,15 60,25 T120,8 L120,40 L0,40 Z" fill="rgba(0, 255, 163, 0.15)"/>
-              <path d="M0,35 Q30,15 60,25 T120,8" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+          <div class="sparkline-box">
+            <svg viewBox="0 0 120 40" class="spark-svg">
+              <defs>
+                <linearGradient id="grad-magenta" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#e0115f" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#e0115f" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,35 Q30,12 60,25 T120,8 L120,40 L0,40 Z" fill="url(#grad-magenta)"/>
+              <path d="M0,35 Q30,12 60,25 T120,8" fill="none" stroke="#e0115f" stroke-width="2.5"/>
             </svg>
           </div>
         </div>
       </div>
 
-      <!-- Tasa de Conversión (Gráfico de Barras Estilo Objetivo) -->
+      <!-- Tasa de Conversión (Ecualizador cibernético) -->
       <div class="metric-item single-full">
         <span class="metric-label">Tasa de Conversión:</span>
-        <span class="value"><strong id="metric-conv-rate">4.8%</strong></span>
-        <div class="bar-chart-placeholder">
-          <div class="bar-col" style="height: 35%;"></div>
-          <div class="bar-col" style="height: 50%;"></div>
-          <div class="bar-col" style="height: 40%;"></div>
-          <div class="bar-col" style="height: 75%;"></div>
-          <div class="bar-col" style="height: 60%;"></div>
-          <div class="bar-col highlight" style="height: 90%;"></div>
+        <span class="value-highlight">4.8%</span>
+        <div class="equalizer-bar-chart">
+          <div class="eq-bar" style="height: 30%;"></div>
+          <div class="eq-bar" style="height: 45%;"></div>
+          <div class="eq-bar" style="height: 38%;"></div>
+          <div class="eq-bar" style="height: 75%;"></div>
+          <div class="eq-bar" style="height: 55%;"></div>
+          <div class="eq-bar highlight-magenta" style="height: 90%;"></div>
         </div>
       </div>
     </section>
 
-    <!-- Card 2: Métricas Objetivo (Carrusel deslizable) -->
-    <section class="card">
+    <!-- Card 2: Métricas Objetivo -->
+    <section class="card neon-card">
       <h2 class="card-title">Métricas Objetivo</h2>
       <div class="carousel-metrics">
-        <!-- Sub-card 1 -->
+        
         <div class="metric-card-sub">
           <span class="metric-label">Clientes Obtenidos</span>
           <span class="value-large">Goal: 100</span>
           <span class="green">Incremento: +12%</span>
-          <div class="sparkline-mini">
-            <svg viewBox="0 0 100 30">
-              <path d="M0,25 Q25,5 50,15 T100,2" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+          <div class="mini-spark">
+            <svg viewBox="0 0 100 25">
+              <path d="M0,20 Q25,5 50,15 T100,2" fill="none" stroke="#66cdaa" stroke-width="2"/>
             </svg>
           </div>
         </div>
 
-        <!-- Sub-card 2 -->
         <div class="metric-card-sub">
           <span class="metric-label">Alcance</span>
-          <span class="value-large" id="metric-reach">15,000</span>
+          <span class="value-large">15,000</span>
           <span class="red">-1.30%</span>
-          <div class="sparkline-mini">
-            <svg viewBox="0 0 100 30">
-              <path d="M0,10 Q25,25 50,12 T100,20" fill="none" stroke="var(--neon-magenta)" stroke-width="2"/>
+          <div class="mini-spark">
+            <svg viewBox="0 0 100 25">
+              <path d="M0,8 Q25,22 50,10 T100,18" fill="none" stroke="#e0115f" stroke-width="2"/>
             </svg>
           </div>
         </div>
 
-        <!-- Sub-card 3 -->
         <div class="metric-card-sub">
           <span class="metric-label">Inversión</span>
-          <span class="value-large" id="metric-spend">15$</span>
+          <span class="value-large">$15</span>
           <span class="green">Optimizado</span>
-          <div class="sparkline-mini">
-            <svg viewBox="0 0 100 30">
-              <path d="M0,20 Q30,5 60,18 T100,8" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+          <div class="mini-spark">
+            <svg viewBox="0 0 100 25">
+              <path d="M0,18 Q30,5 60,15 T100,8" fill="none" stroke="#66cdaa" stroke-width="2"/>
             </svg>
           </div>
         </div>
+
       </div>
     </section>
 
-    <!-- Card 3: Chat Web (Cierre SOVYX) con Indicadores en Tiempo Real -->
-    <section class="card chat-card-wrapper">
-      <!-- Indicador Live en tiempo real -->
-      <div class="live-status-bar" id="live-viewers-badge">
+    <!-- Card 3: Chat Web (Cierre SOVYX) -->
+    <section class="card neon-card">
+      <div class="live-status-bar">
         <span class="live-dot"></span>
-        <span><strong>22 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
+        <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
       </div>
 
       <div class="card-header-row">
@@ -200,7 +225,6 @@
         <span class="dots-menu">⋮</span>
       </div>
 
-      <!-- Área de Mensajes de la IA -->
       <div class="chat-messages" id="chat-box">
         <div class="msg-wrapper incoming-wrap">
           <div class="msg incoming">
@@ -209,23 +233,19 @@
         </div>
       </div>
 
-      <!-- Carrusel Deslizable de 4 Preguntas Predefinidas -->
-      <div class="chat-questions-carousel" id="questions-carousel">
+      <div class="chat-questions-carousel">
         <button class="question-chip" data-query="ciclo">¿Cómo funciona el ciclo de 48H?</button>
         <button class="question-chip" data-query="slots">¿Por qué solo hay 2 slots libres?</button>
-        <button class="question-chip" data-query="espejo">¿Qué es la calibración espejo?</button>
-        <button class="question-chip" data-query="pago">¿Cuándo se paga la liquidación final?</button>
       </div>
 
-      <!-- Input de Mensajes -->
       <div class="chat-input-row">
         <input type="text" id="chat-input" placeholder="Pregunta lo que quieras antes de reservar...">
-        <button id="btn-send-chat" class="btn-icon" aria-label="Enviar">➤</button>
+        <button id="btn-send-chat" class="btn-icon">➤</button>
       </div>
     </section>
 
-    <!-- Card 4: P.F (Pago Final) con montos desglosados -->
-    <section class="card card-pf">
+    <!-- Card 4: Pago Final -->
+    <section class="card neon-card card-pf">
       <h2 class="card-title">P.F (Pago Final)</h2>
       <div class="pf-details">
         <p class="pf-client">Rusmario</p>
@@ -249,20 +269,14 @@
       </div>
     </section>
 
-    <!-- Card 5: Temporizador de Software (Formato 48 Horas Persistente) -->
+    <!-- Card 5: Temporizador -->
     <section class="card timer-card">
       <span class="timer-title">47:59:59 (Tiempo Restante)</span>
-      <div class="timer-display" id="timer-count">47:57:42</div>
+      <div class="timer-display" id="timer-count">47:43:27</div>
       <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
     </section>
 
   </main>
-
-  <!-- BANNER DE COOKIES -->
-  <div id="cookie-banner" class="cookie-banner-bar">
-    <span>Utilizamos cookies para calibrar la conexión CAPI de Meta.</span>
-    <button id="btn-accept-cookies" class="btn-small-accept">Aceptar</button>
-  </div>
 
   <script src="app.js"></script>
 </body>
