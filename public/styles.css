@@ -35,7 +35,12 @@ button, input, textarea, select {
 
 body {
   background: var(--bg-dark);
-  background-image: var(--bg-galaxy);
+  /* RETÍCULA HUD SCI-FI EN EL FONDO GENERAL */
+  background-image: 
+    radial-gradient(circle at 50% 25%, #2a0845 0%, #120524 55%, #05010b 100%),
+    linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 35px 35px, 35px 35px;
   background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
@@ -52,7 +57,7 @@ body {
   font-family: 'Cinzel', serif;
   color: var(--neon-magenta);
   font-weight: 800;
-  text-shadow: 0 0 12px rgba(224, 17, 95, 0.6);
+  text-shadow: 0 0 25px rgba(224, 17, 95, 0.9), 0 0 50px rgba(224, 17, 95, 0.5);
 }
 
 /* ========================================== */
@@ -65,7 +70,12 @@ body {
   width: 100vw; height: 100vh;
   z-index: 9999;
   background: var(--bg-dark);
-  background-image: var(--bg-galaxy);
+  /* FONDO ESPACIAL + GRILLA SCI-FI */
+  background-image: 
+    radial-gradient(circle at 50% 35%, #2a0845 0%, #0c041a 65%, #04010a 100%),
+    linear-gradient(rgba(0, 255, 204, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -84,15 +94,19 @@ body {
   position: relative;
 }
 
-/* LOGO CREADO EN CINZEL EXACTO AL DISEÑO */
+/* LOGO SOVYX PROMINENTE Y 3D */
 .logo-title {
   font-family: 'Cinzel', serif;
-  font-size: 3.2rem;
-  letter-spacing: 4px;
+  font-size: 3.8rem;
+  letter-spacing: 6px;
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   color: #ffffff;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+}
+
+.logo-title .serif-s {
+  font-size: 4.6rem;
 }
 
 /* INDICADOR PORCENTAJE CON LÍNEAS HUD */
@@ -140,15 +154,15 @@ body {
 .capsule {
   flex: 1;
   height: 48px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 8, 28, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease-in-out;
 }
 
 .capsule .cap-icon {
@@ -160,18 +174,18 @@ body {
 
 /* Estado Cápsula Verde */
 .capsule.cap-green.active {
-  background: linear-gradient(180deg, rgba(0, 255, 204, 0.45) 0%, rgba(0, 180, 140, 0.15) 100%);
+  background: linear-gradient(180deg, rgba(0, 255, 204, 0.8) 0%, rgba(0, 180, 140, 0.3) 100%);
   border-color: var(--neon-green);
   color: var(--neon-green);
-  box-shadow: 0 0 14px rgba(0, 255, 204, 0.6), inset 0 0 8px rgba(0, 255, 204, 0.3);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.6);
 }
 
 /* Estado Cápsula Magenta / Target Focus */
 .capsule.cap-magenta.active {
-  background: linear-gradient(180deg, rgba(224, 17, 95, 0.5) 0%, rgba(140, 10, 60, 0.2) 100%);
+  background: linear-gradient(180deg, rgba(224, 17, 95, 0.8) 0%, rgba(140, 10, 60, 0.3) 100%);
   border-color: var(--neon-magenta);
   color: var(--neon-magenta);
-  box-shadow: 0 0 14px rgba(224, 17, 95, 0.7), inset 0 0 8px rgba(224, 17, 95, 0.4);
+  box-shadow: 0 0 12px rgba(224, 17, 95, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.6);
 }
 
 .capsule.cap-off {
@@ -185,12 +199,12 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* INDICADORES CIRCULARES (GAUGES NEÓN MENTA Y MAGENTA) */
+/* INDICADORES CIRCULARES CON ANILLO TIPO RADAR HUD */
 .splash-gauges {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin: 6px 0;
+  margin: 8px 0;
   gap: 28px;
 }
 
@@ -201,6 +215,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,255,204,0.06) 0%, transparent 70%);
+}
+
+/* Anillo punteado HUD exterior */
+.gauge-card::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 1px dashed rgba(0, 255, 204, 0.35);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.gauge-card.gauge-magenta::before {
+  border-color: rgba(224, 17, 95, 0.4);
 }
 
 .gauge-ring {
@@ -256,34 +286,28 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* BOTÓN BIENVENIDO GLASSMORPHISM (COMO EN MOCKUP) */
-/* Cartel BIENVENIDO (Informativo, sin interacción) */
+/* CARTEL "BIENVENIDO" GIGANTE GLASSMORPHISM (SIN INTERACCIÓN) */
 .btn-glass-welcome {
   pointer-events: none; /* Desactiva clics */
   user-select: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
-  border: 1.5px solid rgba(0, 255, 204, 0.6) !important;
-  box-shadow: 0 0 20px rgba(0, 255, 204, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-/* Efecto de Relieve 3D en Cápsulas HUD */
-.capsule {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 8, 28, 0.8);
-  transition: all 0.2s ease-in-out;
-}
-
-.capsule.cap-green.active {
-  background: linear-gradient(180deg, rgba(0, 255, 204, 0.8) 0%, rgba(0, 180, 140, 0.3) 100%);
-  border-color: #00ffcc;
-  box-shadow: 0 0 12px rgba(0, 255, 204, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.6);
-}
-
-.capsule.cap-magenta.active {
-  background: linear-gradient(180deg, rgba(224, 17, 95, 0.8) 0%, rgba(140, 10, 60, 0.3) 100%);
-  border-color: #e0115f;
-  box-shadow: 0 0 12px rgba(224, 17, 95, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  width: 92% !important;
+  max-width: 380px !important;
+  padding: 16px 0 !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 4px !important;
+  color: #ffffff !important;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  border: 1.5px solid rgba(0, 255, 204, 0.7) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+              inset 0 1px 2px rgba(255, 255, 255, 0.7),
+              0 0 25px rgba(0, 255, 204, 0.4) !important;
+  margin-top: 18px !important;
+  text-align: center;
 }
 
 /* ========================================== */
@@ -392,6 +416,7 @@ body {
 .sparkline-box { height: 42px; width: 100%; margin-top: 4px; }
 .spark-svg { width: 100%; height: 100%; }
 
+/* RESPLANDOR NEÓN EN BARRAS DE CONVERSIÓN */
 .equalizer-bar-chart {
   height: 48px; width: 100%;
   background: rgba(0, 0, 0, 0.4);
@@ -406,11 +431,12 @@ body {
   flex: 1;
   background: linear-gradient(180deg, var(--neon-green) 0%, rgba(0, 255, 204, 0.2) 100%);
   border-radius: 4px 4px 0 0;
+  box-shadow: 0 -4px 12px rgba(0, 255, 204, 0.5);
 }
 
 .eq-bar.highlight-magenta {
   background: linear-gradient(180deg, var(--neon-magenta) 0%, rgba(224, 17, 95, 0.4) 100%);
-  box-shadow: 0 0 12px var(--neon-magenta);
+  box-shadow: 0 -4px 14px var(--neon-magenta);
 }
 
 /* MÉTRICAS OBJETIVO DESLIZABLES */
