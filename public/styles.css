@@ -117,7 +117,7 @@ body {
 }
 
 /* ========================================== */
-/* 14 CÁPSULAS MÁS DELGADAS Y EFECTO VIDRIO   */
+/* CÁPSULAS MÁS ALTAS Y ESTILIZADAS           */
 /* ========================================== */
 
 .processor-core-frame {
@@ -134,10 +134,10 @@ body {
   justify-content: space-between;
   gap: 3px;
   width: 100%;
-  padding: 4px 6px;
+  padding: 8px 8px; /* Padding vertical ajustado para alojar la nueva altura */
   background: rgba(14, 6, 28, 0.85);
   border: 1.5px solid rgba(180, 100, 255, 0.35);
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: 
     inset 0 0 15px rgba(0, 0, 0, 0.85),
     0 0 15px rgba(180, 100, 255, 0.15),
@@ -146,12 +146,12 @@ body {
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Cápsula Individual Estilizada y Delgada */
+/* Cápsula Individual Más Alta */
 .capsule {
   flex: 1;
-  max-width: 21px; /* Más delgadas para acomodar las 14 */
-  height: 44px;    /* Más compactas verticalmente */
-  border-radius: 4px;
+  max-width: 21px; 
+  height: 68px; /* ¡Altura aumentada para que se vean bien altas y estilizadas! */
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,14 +159,14 @@ body {
   overflow: hidden;
 }
 
-/* Reflejo vidrioso superior común en todas las cápsulas */
+/* Reflejo vidrioso superior adaptado a la nueva altura */
 .capsule::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-radius: 4px 4px 0 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border-radius: 5px 5px 0 0;
   pointer-events: none;
 }
 
@@ -177,24 +177,24 @@ body {
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95));
 }
 
-/* 8 Cápsulas Verdes Activas (Efecto Cristal 3D) */
+/* 8 Cápsulas Verdes Activas */
 .capsule.cap-green.active {
   background: linear-gradient(180deg, #6affce 0%, #1db882 55%, #065437 100%);
   border: 1px solid #9effdc;
   box-shadow: 
     0 0 10px rgba(60, 254, 186, 0.75),
-    inset 0 2px 3px rgba(255, 255, 255, 0.9),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.6);
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
 }
 
-/* 6 Cápsulas Magenta Activas (Efecto Cristal 3D) */
+/* 6 Cápsulas Magenta Activas */
 .capsule.cap-magenta.active {
   background: linear-gradient(180deg, #ff7abf 0%, #d60066 55%, #61002c 100%);
   border: 1px solid #ffb3d9;
   box-shadow: 
     0 0 10px rgba(255, 0, 122, 0.75),
-    inset 0 2px 3px rgba(255, 255, 255, 0.9),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.6);
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
 }
 
 /* ========================================== */
