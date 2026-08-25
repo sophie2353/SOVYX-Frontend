@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SOVYX</title>
 
-  <!-- Fuentes Futuristas / Elegantes idénticas al objetivo -->
+  <!-- Fuentes Futuristas / Elegantes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- SPLASH SCREEN OVERLAY (HUD SCI-FI EXACTO)  -->
+  <!-- SPLASH SCREEN OVERLAY (HUD SCI-FI)         -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-cyber-bg"></div>
@@ -24,7 +24,7 @@
       <!-- Logo Serif Sovyx -->
       <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
       
-      <!-- Indicador Porcentaje 65% superior con líneas HUD -->
+      <!-- Indicador Porcentaje superior con líneas HUD -->
       <div class="hud-percentage-wrapper">
         <span class="hud-pointer-line"></span>
         <span id="splash-percentage-text" class="splash-pct-num">65%</span>
@@ -32,8 +32,8 @@
 
       <!-- NÚCLEO CIBERNÉTICO SEGMENTADO EN 10 CÁPSULAS -->
       <div class="processor-core-frame">
-        <div class="capsules-track">
-          <!-- Verdes Activas -->
+        <div class="capsules-track" id="capsules-track">
+          <!-- Cápsulas 1 a 10 controladas dinámicamente -->
           <div class="capsule cap-green active">
             <svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-5.45 9-12V5l-9-4z"/></svg>
           </div>
@@ -41,13 +41,11 @@
           <div class="capsule cap-green active"></div>
           <div class="capsule cap-green active"></div>
           
-          <!-- Magenta / Target Focus (65%) -->
           <div class="capsule cap-magenta active target-focus">
             <svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7.44-7.93H7v-2h-1.44C6 6.05 9.05 3 13 2.56V4h-2v1.44c-3.95.49-7 3.85-7.44 7.93H5v2h1.44z"/></svg>
           </div>
           <div class="capsule cap-magenta active"></div>
 
-          <!-- Púrpura / Inactivas -->
           <div class="capsule cap-off"></div>
           <div class="capsule cap-off"></div>
           <div class="capsule cap-off"></div>
@@ -55,9 +53,9 @@
         </div>
       </div>
       
-      <span class="loading-status">¡Sistema seguro y activo! (<span id="status-pct">93%</span>)</span>
+      <span class="loading-status">¡Sistema seguro y activo! (<span id="status-pct">100%</span>)</span>
 
-      <!-- INDICADORES CIRCULARES NEÓN PERFECTOS (SIN DEFORMACIÓN) -->
+      <!-- INDICADORES CIRCULARES COMPACTOS NEÓN MENTA -->
       <div class="splash-gauges">
         <div class="gauge-card green-gauge">
           <svg class="gauge-ring" viewBox="0 0 100 100">
@@ -65,7 +63,6 @@
             <circle class="ring-fill green-fill" cx="50" cy="50" r="42" stroke-dasharray="216 264"/>
           </svg>
           <div class="gauge-content">
-            <span class="gauge-icon"></span>
             <span class="gauge-label">DATOS PROCESADOS:</span>
             <strong class="gauge-val green-txt">82%</strong>
           </div>
@@ -77,7 +74,6 @@
             <circle class="ring-fill magenta-fill" cx="50" cy="50" r="42" stroke-dasharray="237 264"/>
           </svg>
           <div class="gauge-content">
-            <span class="gauge-icon"></span>
             <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
             <strong class="gauge-val magenta-txt">90%</strong>
           </div>
@@ -98,13 +94,16 @@
       <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
     </div>
     <div class="top-bar-right">
-      <button class="top-icon-btn" aria-label="Buscar">🔍</button>
+      <button class="top-icon-btn" aria-label="Buscar"></button>
       <button class="top-icon-btn badge-rel" aria-label="Notificaciones">
         <span class="icon-dot"></span>
       </button>
-      <div class="user-avatar">
+      
+      <!-- BOTÓN ADMIN (AL HACER CLIC PIDE CONTRASEÑA) -->
+      <div class="user-avatar" id="btn-admin-access" title="Acceso Admin">
         <span>US</span>
       </div>
+      
       <button id="btn-menu" class="hamburger-btn" aria-label="Menú">☰</button>
     </div>
   </header>
@@ -128,12 +127,12 @@
             <svg viewBox="0 0 120 40" class="spark-svg">
               <defs>
                 <linearGradient id="grad-green" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#66cdaa" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#66cdaa" stop-opacity="0.0"/>
+                  <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#00ffcc" stop-opacity="0.0"/>
                 </linearGradient>
               </defs>
               <path d="M0,32 Q25,10 50,22 T100,8 L120,5 L120,40 L0,40 Z" fill="url(#grad-green)"/>
-              <path d="M0,32 Q25,10 50,22 T100,8 L120,5" fill="none" stroke="#66cdaa" stroke-width="2.5"/>
+              <path d="M0,32 Q25,10 50,22 T100,8 L120,5" fill="none" stroke="#00ffcc" stroke-width="2.5"/>
             </svg>
           </div>
         </div>
@@ -157,7 +156,7 @@
         </div>
       </div>
 
-      <!-- Tasa de Conversión (Ecualizador cibernético) -->
+      <!-- Tasa de Conversión -->
       <div class="metric-item single-full">
         <span class="metric-label">Tasa de Conversión:</span>
         <span class="value-highlight">4.8%</span>
@@ -172,7 +171,7 @@
       </div>
     </section>
 
-    <!-- Card 2: Métricas Objetivo -->
+    <!-- Card 2: Métricas Objetivo (Deslizables) -->
     <section class="card neon-card">
       <h2 class="card-title">Métricas Objetivo</h2>
       <div class="carousel-metrics">
@@ -183,7 +182,7 @@
           <span class="green">Incremento: +12%</span>
           <div class="mini-spark">
             <svg viewBox="0 0 100 25">
-              <path d="M0,20 Q25,5 50,15 T100,2" fill="none" stroke="#66cdaa" stroke-width="2"/>
+              <path d="M0,20 Q25,5 50,15 T100,2" fill="none" stroke="#00ffcc" stroke-width="2"/>
             </svg>
           </div>
         </div>
@@ -205,7 +204,7 @@
           <span class="green">Optimizado</span>
           <div class="mini-spark">
             <svg viewBox="0 0 100 25">
-              <path d="M0,18 Q30,5 60,15 T100,8" fill="none" stroke="#66cdaa" stroke-width="2"/>
+              <path d="M0,18 Q30,5 60,15 T100,8" fill="none" stroke="#00ffcc" stroke-width="2"/>
             </svg>
           </div>
         </div>
@@ -213,57 +212,57 @@
       </div>
     </section>
 
-<!-- Card 3: Chat Web -->
-<section class="card neon-card">
-  <div class="live-status-bar">
-    <span class="live-dot"></span>
-    <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
-  </div>
+    <!-- Card 3: Chat Web -->
+    <section class="card neon-card">
+      <div class="live-status-bar">
+        <span class="live-dot"></span>
+        <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
+      </div>
 
-  <div class="card-header-row">
-    <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
-    <span class="dots-menu">&#8478;</span>
-  </div>
+      <div class="card-header-row">
+        <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
+        <span class="dots-menu">&#8478;</span>
+      </div>
 
-  <div class="chat-messages" id="chat-box">
-    <div class="msg incoming">
-      ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
-    </div>
-  </div>
+      <div class="chat-messages" id="chat-box">
+        <div class="msg incoming">
+          ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
+        </div>
+      </div>
 
-  <div class="chat-questions-carousel">
-    <button class="question-chip">¿Cómo funciona el ciclo de 48H?</button>
-    <button class="question-chip">¿Por qué solo hay 2 slots libres?</button>
-  </div>
+      <div class="chat-questions-carousel">
+        <button class="question-chip">¿Cómo funciona el ciclo de 48H?</button>
+        <button class="question-chip">¿Por qué solo hay 2 slots libres?</button>
+      </div>
 
-  <div class="chat-input-row">
-    <input type="text" placeholder="Pregunta lo que quieras antes de reservar...">
-    <button class="btn-icon">➤</button>
-  </div>
-</section>
+      <div class="chat-input-row">
+        <input type="text" placeholder="Pregunta lo que quieras antes de reservar...">
+        <button class="btn-icon">➤</button>
+      </div>
+    </section>
 
-<!-- Card 4: Pago Final -->
-<section class="card neon-card">
-  <h2 class="card-title">P.F (Pago Final)</h2>
-  <div class="pf-details">
-    <div class="pf-client">Rusmario</div>
-    <div class="pf-row">
-      <span>Reserva Inicial</span>
-      <strong>$ 1.000,00</strong>
-    </div>
-    <div class="pf-row">
-      <span>Tras Resultados</span>
-      <strong>$ 9.000,00</strong>
-    </div>
-    <div class="pf-row total-row">
-      <span>Total Proyecto</span>
-      <strong class="green-txt">$ 10.000,00</strong>
-    </div>
-  </div>
+    <!-- Card 4: Pago Final -->
+    <section class="card neon-card">
+      <h2 class="card-title">P.F (Pago Final)</h2>
+      <div class="pf-details">
+        <div class="pf-client">Rusmario</div>
+        <div class="pf-row">
+          <span>Reserva Inicial</span>
+          <strong>$ 1.000,00</strong>
+        </div>
+        <div class="pf-row">
+          <span>Tras Resultados</span>
+          <strong>$ 9.000,00</strong>
+        </div>
+        <div class="pf-row total-row">
+          <span>Total Proyecto</span>
+          <strong class="green-txt">$ 10.000,00</strong>
+        </div>
+      </div>
 
-  <button class="btn-primary-action">Haga su pago aquí.</button>
-  <a href="#" class="pf-link">Ver Métodos de pago</a>
-</section>
+      <!-- Botón simplificado a "Pagar" -->
+      <button class="btn-primary-action" id="btn-pagar">Pagar</button>
+    </section>
 
     <!-- Card 5: Temporizador -->
     <section class="card timer-card">
@@ -273,6 +272,22 @@
     </section>
 
   </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL AUTENTICACIÓN ADMIN                  -->
+  <!-- ========================================== -->
+  <div id="admin-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 class="card-title" style="color: var(--neon-green);">Acceso Admin</h3>
+      <p style="font-size: 0.85rem; color: var(--text-sub);">Ingresa la contraseña para continuar:</p>
+      <input type="password" id="admin-pass-input" class="admin-input" placeholder="••••••••">
+      <p id="admin-error-msg" style="color: var(--neon-magenta); font-size: 0.78rem; display: none;">Contraseña incorrecta</p>
+      <div class="modal-actions">
+        <button id="btn-admin-cancel" class="btn-modal-cancel">Cancelar</button>
+        <button id="btn-admin-confirm" class="btn-modal-confirm">Ingresar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
