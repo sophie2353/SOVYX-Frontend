@@ -13,10 +13,16 @@ const state = {
   uploadedFile: null,
   completedCapsules: JSON.parse(localStorage.getItem('sovyx_completed_capsules') || '[1]'),
   metrics: {
-    reach: 14280,
-    spend: 1850.50,
-    targetClients: 2,
-    reachedClients: 1,
+    visitors: 1500,
+    visitorsGrowth: "+3.5%",
+    leads: 75,
+    leadsGrowth: "+1.2%",
+    conversionRate: "4.8%",
+    reach: 15000,
+    reachDelta: "-1.30%",
+    spend: "$15",
+    targetClients: 100,
+    clientGrowth: "+12%",
     liveViewers: 22
   }
 };
@@ -88,7 +94,7 @@ async function confirmPaymentSuccess(amount = 1000.00) {
   }
 }
 
-// --- MOTOR DE MÉTRICAS Y ESPECTADORES EN TIEMPO REAL ---
+// --- MOTOR DE MÉTRICAS Y GRÁFICOS SPARKLINE EN TIEMPO REAL ---
 function startLiveMetricsEngine() {
   updateMetricsUI();
 
@@ -97,10 +103,11 @@ function startLiveMetricsEngine() {
       const res = await fetch(`${API_URL}/api/metrics`);
       if (res.ok) {
         const data = await res.json();
+        state.metrics.visitors = data.visitors || state.metrics.visitors;
+        state.metrics.leads = data.leads || state.metrics.leads;
+        state.metrics.conversionRate = data.conversionRate || state.metrics.conversionRate;
         state.metrics.reach = data.reach || state.metrics.reach;
         state.metrics.spend = data.spend || state.metrics.spend;
-        state.metrics.targetClients = data.targetClients || 2;
-        state.metrics.reachedClients = data.reachedClients || 1;
         state.metrics.liveViewers = data.liveViewers || state.metrics.liveViewers;
       } else {
         simulateLiveFluctuations();
@@ -116,20 +123,23 @@ function startLiveMetricsEngine() {
 function simulateLiveFluctuations() {
   const deltaViewers = Math.floor(Math.random() * 3) - 1;
   state.metrics.liveViewers = Math.max(18, Math.min(26, state.metrics.liveViewers + deltaViewers));
-  state.metrics.reach += Math.floor(Math.random() * 5) + 1;
+  state.metrics.visitors += Math.floor(Math.random() * 3);
 }
 
 function updateMetricsUI() {
+  // Actualizar textos básicos si existen en el DOM
+  const elVisitors = document.getElementById('metric-visitors');
+  const elLeads = document.getElementById('metric-leads');
+  const elConvRate = document.getElementById('metric-conv-rate');
   const elReach = document.getElementById('metric-reach');
   const elSpend = document.getElementById('metric-spend');
-  const elTarget = document.getElementById('metric-target-clients');
-  const elReached = document.getElementById('metric-reached-clients');
   const elLiveBadge = document.getElementById('live-viewers-badge');
 
+  if (elVisitors) elVisitors.textContent = state.metrics.visitors.toLocaleString();
+  if (elLeads) elLeads.textContent = state.metrics.leads.toLocaleString();
+  if (elConvRate) elConvRate.textContent = state.metrics.conversionRate;
   if (elReach) elReach.textContent = state.metrics.reach.toLocaleString();
-  if (elSpend) elSpend.textContent = `$${state.metrics.spend.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  if (elTarget) elTarget.textContent = `${state.metrics.targetClients} Slots (Objetivo)`;
-  if (elReached) elReached.textContent = `${state.metrics.reachedClients} / ${state.metrics.targetClients} Adquiridos`;
+  if (elSpend) elSpend.textContent = state.metrics.spend;
 
   if (elLiveBadge) {
     elLiveBadge.innerHTML = `
@@ -139,9 +149,32 @@ function updateMetricsUI() {
       </span>
     `;
   }
+
+  // Inyectar gráficos sparkline interactivos estilo objetivo si existen los contenedores
+  renderSparklines();
 }
 
-// --- VISTA SPLASH (30 SEGUNDOS DE TIMING EXTENDIDO) ---
+function renderSparklines() {
+  const containers = document.querySelectorAll('.sparkline-container');
+  containers.forEach((container, idx) => {
+    if (container.dataset.rendered === 'true') return;
+    container.innerHTML = `
+      <svg viewBox="0 0 120 40" width="100%" height="35" style="overflow: visible;">
+        <defs>
+          <linearGradient id="sparkGrad-${idx}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${idx % 2 === 0 ? 'var(--neon-green)' : 'var(--neon-magenta)'}" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="${idx % 2 === 0 ? 'var(--neon-green)' : 'var(--neon-magenta)'}" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,30 Q30,10 60,20 T120,5 L120,40 L0,40 Z" fill="url(#sparkGrad-${idx})" />
+        <path d="M0,30 Q30,10 60,20 T120,5" fill="none" stroke="${idx % 2 === 0 ? 'var(--neon-green)' : 'var(--neon-magenta)'}" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
+    container.dataset.rendered = 'true';
+  });
+}
+
+// --- VISTA SPLASH (10 SEGUNDOS CON SECUENCIA DE CIFRADO Y PORCENTAJES) ---
 function runSplashScreen() {
   const splash = document.getElementById('view-splash');
   const progress = document.getElementById('splash-progress');
@@ -149,26 +182,25 @@ function runSplashScreen() {
   const statusText = document.querySelector('.loading-status');
 
   let pct = 0;
-  // 30 segundos totales (30000ms / 100 pasos = 300ms por 1%)
-  const totalDurationMs = 30000;
+  const totalDurationMs = 10000; // Exactamente 10 segundos como solicitado
   const stepTime = totalDurationMs / 100;
 
-  const statuses = [
-    "Inicializando nodo de cómputo seguro...",
-    "Conectando con Meta Business API...",
-    "Calibrando micro-audiencias de alta intención...",
-    "Estableciendo canal cifrado CAPI...",
-    "Sincronizando base de datos histórica...",
-    "Optimizando motor de conversión 48H..."
+  const encryptionPhases = [
+    { threshold: 15, text: "Iniciando protocolo de cifrado CAPI..." },
+    { threshold: 35, text: "Sincronizando nodos de alta intención..." },
+    { threshold: 60, text: "Calibrando micro-audiencias espejo..." },
+    { threshold: 85, text: "Optimizando motor de conversión 48H..." },
+    { threshold: 100, text: "¡Sistema seguro y activo!" }
   ];
 
   const interval = setInterval(() => {
     pct += 1;
     if (progress) progress.style.width = `${pct}%`;
 
-    if (statusText && pct % 18 === 0) {
-      const statusIdx = Math.floor(pct / 18) % statuses.length;
-      statusText.textContent = statuses[statusIdx];
+    // Actualizar texto según el progreso dinámico
+    if (statusText) {
+      const activePhase = encryptionPhases.find(p => pct <= p.threshold) || encryptionPhases[encryptionPhases.length - 1];
+      statusText.textContent = `${activePhase.text} (${pct}%)`;
     }
 
     if (pct >= 100) {
@@ -325,7 +357,6 @@ function startPersistentTimer() {
   const now = Date.now();
 
   if (!endTime || Number(endTime) < now) {
-    // 48 horas en milisegundos
     endTime = now + (48 * 3600 * 1000);
     localStorage.setItem('sovyx_timer_end', endTime);
   }
