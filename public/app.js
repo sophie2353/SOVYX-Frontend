@@ -76,7 +76,6 @@ async function confirmPaymentSuccess(amount = 1000.00) {
       content_name: 'SOVYX Software License - Slot de Cómputo',
       content_type: 'product'
     });
-    console.log(`✅ Meta Pixel: Evento Purchase de $${amount} USD enviado.`);
   }
 
   try {
@@ -89,7 +88,6 @@ async function confirmPaymentSuccess(amount = 1000.00) {
         amount: amount
       })
     });
-    console.log('✅ Backend: Confirmación OK notificada a CAPI.');
   } catch (err) {
     console.warn('Backend CAPI offline, evento procesado en local.');
   }
@@ -143,7 +141,7 @@ function updateMetricsUI() {
   }
 }
 
-// --- VISTA SPLASH (HUD SCI-FI CON CÁPSULAS Y PORCENTAJE DYNAMIC) ---
+// --- VISTA SPLASH (HUD SCI-FI: 0% A 100% DINÁMICO) ---
 function runSplashScreen() {
   const splash = document.getElementById('view-splash');
   const pctTextHeader = document.getElementById('splash-percentage-text');
@@ -152,7 +150,7 @@ function runSplashScreen() {
   const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 6000; // 6 segundos de secuencia HUD
+  const totalDurationMs = 4500; // Secuencia fluida de 4.5 segundos
   const stepTime = totalDurationMs / 100;
 
   const interval = setInterval(() => {
@@ -161,7 +159,7 @@ function runSplashScreen() {
     if (pctTextHeader) pctTextHeader.textContent = `${pct}%`;
     if (statusPctText) statusPctText.textContent = `${pct}%`;
 
-    // Iluminación progresiva de las cápsulas
+    // Iluminación progresiva de las cápsulas en relación al porcentaje
     const activeCapsCount = Math.floor((pct / 100) * capsules.length);
     capsules.forEach((cap, index) => {
       if (index < activeCapsCount) {
@@ -172,13 +170,19 @@ function runSplashScreen() {
 
     if (pct >= 100) {
       clearInterval(interval);
-      if (btnWelcome) btnWelcome.style.boxShadow = "0 0 25px var(--neon-green)";
+      if (btnWelcome) {
+        btnWelcome.style.boxShadow = "0 0 25px var(--neon-green)";
+        btnWelcome.classList.add('pulse-ready');
+      }
     }
   }, stepTime);
 
   if (btnWelcome) {
     btnWelcome.addEventListener('click', () => {
       clearInterval(interval);
+      // Asegurar que marque 100% visualmente al hacer clic antes de salir
+      if (pctTextHeader) pctTextHeader.textContent = `100%`;
+      if (statusPctText) statusPctText.textContent = `100%`;
       finishSplash();
     });
   }
@@ -187,12 +191,16 @@ function runSplashScreen() {
 function finishSplash() {
   const splash = document.getElementById('view-splash');
   if (splash) {
-    splash.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    splash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
     splash.style.opacity = '0';
-    splash.style.transform = 'scale(1.05)';
+    splash.style.transform = 'scale(1.03)';
     setTimeout(() => {
       splash.style.display = 'none';
-    }, 600);
+    }, 500);
+  } else {
+    // Fallback de seguridad por si el ID cambia
+    const fallbackSplash = document.querySelector('.full-screen');
+    if (fallbackSplash) fallbackSplash.style.display = 'none';
   }
 }
 
@@ -209,16 +217,17 @@ function setupAdminModal() {
 
   btnAdmin.addEventListener('click', () => {
     modal.classList.remove('hidden');
-    passInput.value = '';
+    if (passInput) {
+      passInput.value = '';
+      passInput.focus();
+    }
     if (errorMsg) errorMsg.style.display = 'none';
-    passInput.focus();
   });
 
-  const closeModal = () => {
-    modal.classList.add('hidden');
-  };
+  const closeModal = () => modal.classList.add('hidden');
 
   const handleAuth = () => {
+    if (!passInput) return;
     const inputKey = passInput.value.trim();
     if (inputKey === CONFIG.SOVYX_ADMIN_KEY || inputKey === 'admin123') {
       closeModal();
@@ -232,10 +241,11 @@ function setupAdminModal() {
 
   if (btnConfirm) btnConfirm.addEventListener('click', handleAuth);
   if (btnCancel) btnCancel.addEventListener('click', closeModal);
-
-  passInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleAuth();
-  });
+  if (passInput) {
+    passInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleAuth();
+    });
+  }
 
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
@@ -265,13 +275,13 @@ function setupPaymentFlow() {
           await confirmPaymentSuccess(1000.00);
           alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
           btnPagar.disabled = false;
-          btnPagar.textContent = 'Pagar';
+          btnPagar.textContent = 'Haga su pago aquí.';
         }
       } catch (err) {
         await confirmPaymentSuccess(1000.00);
         alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
         btnPagar.disabled = false;
-        btnPagar.textContent = 'Pagar';
+        btnPagar.textContent = 'Haga su pago aquí.';
       }
     });
   }
