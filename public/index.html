@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SOVYX Core OS</title>
+  <title>SOVYX</title>
 
   <!-- Fuentes Futuristas / Elegantes idénticas al objetivo -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,7 +65,7 @@
             <circle class="ring-fill green-fill" cx="50" cy="50" r="42" stroke-dasharray="216 264"/>
           </svg>
           <div class="gauge-content">
-            <span class="gauge-icon">📊</span>
+            <span class="gauge-icon"></span>
             <span class="gauge-label">DATOS PROCESADOS:</span>
             <strong class="gauge-val green-txt">82%</strong>
           </div>
@@ -77,7 +77,7 @@
             <circle class="ring-fill magenta-fill" cx="50" cy="50" r="42" stroke-dasharray="237 264"/>
           </svg>
           <div class="gauge-content">
-            <span class="gauge-icon">📈</span>
+            <span class="gauge-icon"></span>
             <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
             <strong class="gauge-val magenta-txt">90%</strong>
           </div>
@@ -100,7 +100,7 @@
     <div class="top-bar-right">
       <button class="top-icon-btn" aria-label="Buscar">🔍</button>
       <button class="top-icon-btn badge-rel" aria-label="Notificaciones">
-        🔔<span class="icon-dot"></span>
+        <span class="icon-dot"></span>
       </button>
       <div class="user-avatar">
         <span>US</span>
@@ -213,61 +213,57 @@
       </div>
     </section>
 
-    <!-- Card 3: Chat Web (Cierre SOVYX) -->
-    <section class="card neon-card">
-      <div class="live-status-bar">
-        <span class="live-dot"></span>
-        <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
-      </div>
+<!-- Card 3: Chat Web -->
+<section class="card neon-card">
+  <div class="live-status-bar">
+    <span class="live-dot"></span>
+    <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
+  </div>
 
-      <div class="card-header-row">
-        <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
-        <span class="dots-menu">⋮</span>
-      </div>
+  <div class="card-header-row">
+    <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
+    <span class="dots-menu">&#8478;</span>
+  </div>
 
-      <div class="chat-messages" id="chat-box">
-        <div class="msg-wrapper incoming-wrap">
-          <div class="msg incoming">
-            ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
-          </div>
-        </div>
-      </div>
+  <div class="chat-messages" id="chat-box">
+    <div class="msg incoming">
+      ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
+    </div>
+  </div>
 
-      <div class="chat-questions-carousel">
-        <button class="question-chip" data-query="ciclo">¿Cómo funciona el ciclo de 48H?</button>
-        <button class="question-chip" data-query="slots">¿Por qué solo hay 2 slots libres?</button>
-      </div>
+  <div class="chat-questions-carousel">
+    <button class="question-chip">¿Cómo funciona el ciclo de 48H?</button>
+    <button class="question-chip">¿Por qué solo hay 2 slots libres?</button>
+  </div>
 
-      <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Pregunta lo que quieras antes de reservar...">
-        <button id="btn-send-chat" class="btn-icon">➤</button>
-      </div>
-    </section>
+  <div class="chat-input-row">
+    <input type="text" placeholder="Pregunta lo que quieras antes de reservar...">
+    <button class="btn-icon">➤</button>
+  </div>
+</section>
 
-    <!-- Card 4: Pago Final -->
-    <section class="card neon-card card-pf">
-      <h2 class="card-title">P.F (Pago Final)</h2>
-      <div class="pf-details">
-        <p class="pf-client">Rusmario</p>
-        <div class="pf-row">
-          <span>Reserva Inicial</span>
-          <span>$ 1.000,00</span>
-        </div>
-        <div class="pf-row">
-          <span>Tras Resultados</span>
-          <span>$ 9.000,00</span>
-        </div>
-        <div class="pf-row total-row">
-          <span>Total Proyecto</span>
-          <strong>$ 10.000,00</strong>
-        </div>
-      </div>
+<!-- Card 4: Pago Final -->
+<section class="card neon-card">
+  <h2 class="card-title">P.F (Pago Final)</h2>
+  <div class="pf-details">
+    <div class="pf-client">Rusmario</div>
+    <div class="pf-row">
+      <span>Reserva Inicial</span>
+      <strong>$ 1.000,00</strong>
+    </div>
+    <div class="pf-row">
+      <span>Tras Resultados</span>
+      <strong>$ 9.000,00</strong>
+    </div>
+    <div class="pf-row total-row">
+      <span>Total Proyecto</span>
+      <strong class="green-txt">$ 10.000,00</strong>
+    </div>
+  </div>
 
-      <div class="pf-actions">
-        <button class="btn-primary-action" id="btn-payment-trigger">Haga su pago aquí.</button>
-        <a href="#" class="pf-link">Ver Métodos de pago</a>
-      </div>
-    </section>
+  <button class="btn-primary-action">Haga su pago aquí.</button>
+  <a href="#" class="pf-link">Ver Métodos de pago</a>
+</section>
 
     <!-- Card 5: Temporizador -->
     <section class="card timer-card">
