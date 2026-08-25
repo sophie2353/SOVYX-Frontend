@@ -1,5 +1,5 @@
 /* ========================================== */
-/* SOVYX Core OS - UI Futurista Definitiva   */
+/* SOVYX Core OS - UI Futurista & HUD Fix    */
 /* ========================================== */
 
 :root {
@@ -20,11 +20,6 @@
   padding: 0;
   font-family: 'Rajdhani', 'Inter', sans-serif;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Excluir SVGs del restyle masivo para preservar coordenadas vectoriales */
-svg, svg * {
-  box-sizing: content-box;
 }
 
 button, input, textarea, select {
@@ -58,7 +53,218 @@ body {
   font-weight: 800;
 }
 
-/* --- TOP BAR --- */
+/* ========================================== */
+/* SPLASH SCREEN OVERLAY & SCI-FI HUD FIX     */
+/* ========================================== */
+
+.full-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 9999;
+  background: var(--bg-dark);
+  background-image: var(--bg-galaxy);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.splash-content {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.logo-title {
+  font-size: 2.2rem;
+  letter-spacing: 4px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+/* Indicador Porcentaje 65% */
+.hud-percentage-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.splash-pct-num {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--neon-green);
+  letter-spacing: 1px;
+}
+
+/* NÚCLEO Y CÁPSULAS DE CARGA */
+.processor-core-frame {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(102, 205, 170, 0.3);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+.capsules-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+
+.capsule {
+  flex: 1;
+  height: 44px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* SVGs dentro de cápsulas aislados completamente */
+.capsule .cap-icon {
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  display: block;
+}
+
+.capsule.cap-green.active {
+  background: rgba(102, 205, 170, 0.25);
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(102, 205, 170, 0.4);
+}
+
+.capsule.cap-magenta.active {
+  background: rgba(224, 17, 95, 0.25);
+  border-color: var(--neon-magenta);
+  color: var(--neon-magenta);
+  box-shadow: 0 0 10px rgba(224, 17, 95, 0.4);
+}
+
+.capsule.cap-off {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.loading-status {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+
+/* INDICADORES CIRCULARES (GAUGES NEÓN) */
+.splash-gauges {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin: 10px 0;
+  gap: 16px;
+}
+
+.gauge-card {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-ring {
+  width: 140px !important;
+  height: 140px !important;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 7;
+}
+
+.ring-fill {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.green-fill {
+  stroke: var(--neon-green);
+  filter: drop-shadow(0 0 6px var(--neon-green));
+}
+
+.magenta-fill {
+  stroke: var(--neon-magenta);
+  filter: drop-shadow(0 0 6px var(--neon-magenta));
+}
+
+.gauge-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+}
+
+.gauge-label {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.gauge-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+/* BOTÓN BIENVENIDO GLASSMORPHISM */
+.btn-glass-welcome {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff !important;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  margin-top: 10px;
+  transition: all 0.2s ease;
+}
+
+.btn-glass-welcome:active {
+  background: rgba(102, 205, 170, 0.2) !important;
+  border-color: var(--neon-green) !important;
+}
+
+/* ========================================== */
+/* DASHBOARD & COMPONENTES EXISTENTES         */
+/* ========================================== */
+
 .top-bar {
   width: 100%;
   max-width: 440px;
@@ -80,9 +286,9 @@ body {
 }
 
 .brand-text { font-size: 1.35rem; font-weight: 700; letter-spacing: 2px; }
-
 .top-bar-right { display: flex; align-items: center; gap: 12px; }
 .top-icon-btn { cursor: pointer; font-size: 1.1rem; }
+
 .user-avatar {
   width: 28px; height: 28px;
   background: rgba(255,255,255,0.1);
@@ -98,7 +304,6 @@ body {
   padding: 4px 10px; border-radius: 8px; font-size: 1.1rem;
 }
 
-/* --- MAIN CONTAINER & CARDS --- */
 #app-container {
   width: 100%; max-width: 440px;
   padding: 0 16px 40px 16px;
@@ -127,7 +332,6 @@ body {
   font-size: 0.65rem; color: var(--neon-green); letter-spacing: 1.5px;
 }
 
-/* MÉTRICAS & SPARK LINES */
 .metrics-grid { display: flex; gap: 14px; }
 .metric-item { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .metric-label { font-size: 0.78rem; color: var(--text-sub); }
@@ -139,7 +343,6 @@ body {
 .sparkline-box { height: 42px; width: 100%; margin-top: 4px; }
 .spark-svg { width: 100%; height: 100%; }
 
-/* ECUALIZADOR TASA DE CONVERSIÓN */
 .equalizer-bar-chart {
   height: 48px; width: 100%;
   background: rgba(0, 0, 0, 0.4);
@@ -161,7 +364,6 @@ body {
   box-shadow: 0 0 12px var(--neon-magenta);
 }
 
-/* CARRUSEL MÉTRICAS OBJETIVO */
 .carousel-metrics { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
 .carousel-metrics::-webkit-scrollbar { display: none; }
 
@@ -175,7 +377,6 @@ body {
 
 .value-large { font-size: 1.2rem; font-weight: 700; color: #fff; }
 
-/* CHAT WEB */
 .live-status-bar {
   font-size: 0.78rem; background: rgba(0, 0, 0, 0.35);
   padding: 8px 12px; border-radius: 10px;
@@ -243,7 +444,6 @@ body {
   font-weight: bold; cursor: pointer;
 }
 
-/* PAGO FINAL (P.F) */
 .pf-details { display: flex; flex-direction: column; gap: 8px; }
 
 .pf-client {
@@ -281,7 +481,6 @@ body {
   display: block; margin-top: 10px;
 }
 
-/* TEMPORIZADOR */
 .timer-card {
   text-align: center; align-items: center;
   border-color: rgba(102, 205, 170, 0.5);
@@ -297,197 +496,3 @@ body {
 
 .timer-title { font-size: 0.82rem; color: var(--text-sub); }
 .timer-status { font-size: 0.7rem; color: var(--neon-green); letter-spacing: 2px; font-weight: 700; }
-
-/* ========================================== */
-/* SPLASH SCREEN & PROGRESS RINGS (NUEVO/FIJADO) */
-/* ========================================== */
-
-.splash-container {
-  width: 100%;
-  max-width: 440px;
-  min-height: 100vh;
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Forzar tamaño adecuado para íconos SVG de carga */
-.splash-icon, .node-icon, .hud-icon {
-  width: 24px !important;
-  height: 24px !important;
-  max-width: 24px !important;
-  max-height: 24px !important;
-  display: inline-block;
-  fill: none;
-  stroke: currentColor;
-}
-
-/* Control del contenedor de la barra HUD de nodos */
-.hud-nodes-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(102, 205, 170, 0.3);
-  border-radius: 14px;
-  padding: 10px 14px;
-  width: 100%;
-}
-
-.node-cell {
-  width: 28px;
-  height: 38px;
-  border-radius: 6px;
-  border: 1px solid rgba(102, 205, 170, 0.3);
-  background: rgba(102, 205, 170, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.node-cell.active-green {
-  background: rgba(102, 205, 170, 0.4);
-  border-color: var(--neon-green);
-  box-shadow: 0 0 10px rgba(102, 205, 170, 0.5);
-}
-
-.node-cell.active-magenta {
-  background: rgba(224, 17, 95, 0.4);
-  border-color: var(--neon-magenta);
-  box-shadow: 0 0 10px rgba(224, 17, 95, 0.5);
-}
-
-.splash-status-text {
-  font-size: 0.85rem;
-  color: var(--text-sub);
-  text-align: center;
-  margin-top: 8px;
-}
-
-/* ANILLOS DE PROGRESO SVG (CIRCULAR GAUGES) */
-.progress-rings-container {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin: 20px 0;
-}
-
-.ring-item {
-  position: relative;
-  width: 130px;
-  height: 130px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.ring-svg {
-  width: 130px !important;
-  height: 130px !important;
-  transform: rotate(-90deg);
-}
-
-.ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 8;
-}
-
-.ring-fill-green {
-  fill: none;
-  stroke: var(--neon-green);
-  stroke-width: 8;
-  stroke-dasharray: 314;
-  stroke-dashoffset: 56; /* 82% */
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 6px var(--neon-green));
-}
-
-.ring-fill-magenta {
-  fill: none;
-  stroke: var(--neon-magenta);
-  stroke-width: 8;
-  stroke-dasharray: 314;
-  stroke-dashoffset: 31; /* 90% */
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 6px var(--neon-magenta));
-}
-
-.ring-content {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.ring-label {
-  font-size: 0.65rem;
-  color: var(--text-sub);
-  letter-spacing: 1px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.ring-percentage {
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-/* ISOLATION FIX FOR SPLASH SVG ELEMENTS */
-.splash-container svg,
-.splash-screen svg,
-#splash svg {
-  max-width: initial;
-  max-height: initial;
-  display: block;
-}
-
-/* Forzar tamaño de íconos dentro de las cápsulas de carga */
-.hud-nodes-bar svg,
-.node-cell svg {
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
-  margin: auto;
-}
-
-/* Reseteo de relleno para SVGs vectoriales de estado */
-.node-cell svg path,
-.node-cell svg circle,
-.node-cell svg rect {
-  fill: none !important;
-  stroke: currentColor;
-  stroke-width: 2;
-}
-
-/* Fix para los Gauges Circulares Inferiores */
-.progress-rings-container svg,
-.ring-item svg {
-  width: 120px !important;
-  height: 120px !important;
-  min-width: 120px !important;
-  min-height: 120px !important;
-  background: transparent !important;
-}
-
-.ring-bg {
-  fill: none !important;
-  stroke: rgba(255, 255, 255, 0.1) !important;
-}
-
-.ring-fill-green {
-  fill: none !important;
-  stroke: var(--neon-green) !important;
-}
-
-.ring-fill-magenta {
-  fill: none !important;
-  stroke: var(--neon-magenta) !important;
-}
