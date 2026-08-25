@@ -1,14 +1,14 @@
 /* ========================================== */
-/* SOVYX Core OS - Estilos Refinados          */
+/* SOVYX Core OS - Master Stylesheet (styles.css) */
 /* ========================================== */
 
 :root {
   --bg-dark: #05010a;
-  --bg-galaxy: radial-gradient(circle at 50% 30%, #2e084f 0%, #110426 60%, #040008 100%);
-  --neon-green: #3CFEBA;
-  --neon-magenta: #FF007A;
+  --bg-galaxy: radial-gradient(circle at 50% 30%, #2b0648 0%, #100323 60%, #040008 100%);
+  --neon-green: #00ffcc;
+  --neon-magenta: #ff007a;
   --text-main: #ffffff;
-  --text-sub: #a698be;
+  --text-sub: #b2a4cd;
 }
 
 *, *::before, *::after {
@@ -21,12 +21,7 @@
 
 body {
   background: var(--bg-dark);
-  background-image: 
-    var(--bg-galaxy),
-    linear-gradient(rgba(60, 254, 186, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(60, 254, 186, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 36px 36px, 36px 36px;
-  background-attachment: fixed;
+  background-image: var(--bg-galaxy);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -39,59 +34,65 @@ body {
 .green-txt { color: var(--neon-green); }
 
 /* ========================================== */
-/* SPLASH SCREEN                              */
+/* 1. SPLASH SCREEN HUD OVERLAY              */
 /* ========================================== */
 
 .full-screen {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
   z-index: 9999;
   background: var(--bg-dark);
   background-image: 
-    radial-gradient(circle at 50% 32%, #320a56 0%, #0d031c 65%, #030007 100%),
-    linear-gradient(rgba(60, 254, 186, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(60, 254, 186, 0.035) 1px, transparent 1px);
-  background-size: 100% 100%, 32px 32px, 32px 32px;
+    radial-gradient(circle at 50% 35%, #2e084d 0%, #0d021c 65%, #030007 100%),
+    linear-gradient(rgba(0, 255, 204, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 204, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .splash-content {
   width: 100%;
-  max-width: 420px;
-  padding: 24px 16px;
+  max-width: 410px;
+  height: 100vh;
+  max-height: 760px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   text-align: center;
 }
 
-/* LOGO SOVYX CON EFECTO SERIF 3D */
+/* LOGO SOVYX */
 .logo-title {
   font-family: 'Cinzel', serif;
-  font-size: 3.8rem;
-  letter-spacing: 4px;
+  font-size: 3.4rem;
+  letter-spacing: 3px;
   font-weight: 700;
-  background: linear-gradient(180deg, #FFFFFF 20%, #B2B8C6 70%, #6E7585 100%);
+  background: linear-gradient(180deg, #FFFFFF 15%, #D0D5E0 65%, #8A92A3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.9));
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.95));
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 5px;
 }
 
 .logo-title .serif-s {
   font-family: 'Cinzel', serif;
-  font-size: 4.5rem;
+  font-size: 4.2rem;
   color: var(--neon-magenta);
   -webkit-text-fill-color: var(--neon-magenta);
   font-weight: 800;
-  filter: drop-shadow(0 0 18px rgba(255, 0, 122, 0.85));
-  margin-right: 2px;
+  filter: drop-shadow(0 0 20px rgba(255, 0, 122, 0.9));
+  margin-right: 1px;
 }
 
 /* PORCENTAJE HUD SUPERIOR */
@@ -99,136 +100,130 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: -2px;
+  margin-bottom: -4px;
 }
 
 .hud-pointer-line {
   width: 1.5px;
-  height: 12px;
+  height: 10px;
   background: linear-gradient(180deg, transparent, var(--neon-green));
+  box-shadow: 0 0 6px var(--neon-green);
 }
 
 .splash-pct-num {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--neon-green);
-  letter-spacing: 2px;
-  text-shadow: 0 0 12px rgba(60, 254, 186, 0.9);
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.9);
 }
 
-/* ========================================== */
-/* CÁPSULAS MÁS ALTAS Y ESTILIZADAS           */
-/* ========================================== */
-
+/* NÚCLEO DE CÁPSULAS */
 .processor-core-frame {
   width: 100%;
-  max-width: 380px;
+  max-width: 378px;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: rgba(13, 5, 26, 0.88);
+  border: 1.5px solid rgba(224, 17, 95, 0.45);
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 
+    inset 0 0 18px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(224, 17, 95, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .capsules-track {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 3px;
+  gap: 3.5px;
   width: 100%;
-  padding: 8px 8px; /* Padding vertical ajustado para alojar la nueva altura */
-  background: rgba(14, 6, 28, 0.85);
-  border: 1.5px solid rgba(180, 100, 255, 0.35);
-  border-radius: 14px;
-  box-shadow: 
-    inset 0 0 15px rgba(0, 0, 0, 0.85),
-    0 0 15px rgba(180, 100, 255, 0.15),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 
-/* Cápsula Individual Más Alta */
 .capsule {
   flex: 1;
-  max-width: 21px; 
-  height: 68px; /* ¡Altura aumentada para que se vean bien altas y estilizadas! */
-  border-radius: 5px;
+  max-width: 22px; 
+  height: 48px;
+  border-radius: 6px;
+  background: rgba(22, 10, 36, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-/* Reflejo vidrioso superior adaptado a la nueva altura */
 .capsule::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 40%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.04) 100%);
+  height: 42%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.02) 100%);
   border-radius: 5px 5px 0 0;
   pointer-events: none;
 }
 
 .capsule .cap-icon {
-  width: 10px !important;
-  height: 10px !important;
+  width: 11px !important;
+  height: 11px !important;
   z-index: 3;
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95));
 }
 
-/* 8 Cápsulas Verdes Activas */
 .capsule.cap-green.active {
-  background: linear-gradient(180deg, #6affce 0%, #1db882 55%, #065437 100%);
-  border: 1px solid #9effdc;
+  background: linear-gradient(180deg, #50f2c3 0%, #009975 60%, #004d3b 100%);
+  border: 1px solid #73ffd6;
   box-shadow: 
-    0 0 10px rgba(60, 254, 186, 0.75),
-    inset 0 2px 4px rgba(255, 255, 255, 0.9),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+    0 0 10px rgba(0, 255, 204, 0.7),
+    inset 0 2px 3px rgba(255, 255, 255, 0.85);
 }
 
-/* 6 Cápsulas Magenta Activas */
 .capsule.cap-magenta.active {
-  background: linear-gradient(180deg, #ff7abf 0%, #d60066 55%, #61002c 100%);
-  border: 1px solid #ffb3d9;
+  background: linear-gradient(180deg, #ff66b2 0%, #cc0066 60%, #59002c 100%);
+  border: 1px solid #ff99cc;
   box-shadow: 
     0 0 10px rgba(255, 0, 122, 0.75),
-    inset 0 2px 4px rgba(255, 255, 255, 0.9),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+    inset 0 2px 3px rgba(255, 255, 255, 0.85);
 }
 
-/* ========================================== */
-/* CÍRCULOS DE MÉTRICAS (MÁS SEPARADOS)       */
-/* ========================================== */
-
+/* GAUGES Y ORBE CENTRAL */
 .splash-gauges {
   display: flex;
-  justify-content: space-between; /* Mayor separación lateral */
+  justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 360px; /* Expande la distancia entre ambos */
-  margin: 12px 0;
+  max-width: 350px;
+  margin: 6px 0;
   position: relative;
 }
 
-/* Pequeño indicador central entre los círculos */
 .splash-gauges::after {
   content: '';
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--neon-magenta) 0%, transparent 70%);
-  box-shadow: 0 0 10px var(--neon-magenta);
-  opacity: 0.8;
+  background: var(--neon-magenta);
+  box-shadow: 
+    0 0 12px var(--neon-magenta),
+    0 0 24px var(--neon-magenta);
 }
 
 .gauge-card {
   position: relative;
-  width: 104px;
-  height: 104px;
+  width: 98px;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,24 +233,24 @@ body {
 .gauge-card::before {
   content: '';
   position: absolute;
-  inset: -6px;
-  border: 1px dashed rgba(60, 254, 186, 0.35);
+  inset: -5px;
+  border: 1px dashed rgba(0, 255, 204, 0.35);
   border-radius: 50%;
 }
 
 .gauge-card.gauge-magenta::before {
-  border-color: rgba(255, 0, 122, 0.4);
+  border-color: rgba(255, 0, 122, 0.45);
 }
 
 .gauge-ring {
-  width: 104px !important;
-  height: 104px !important;
+  width: 98px !important;
+  height: 98px !important;
   transform: rotate(-90deg);
 }
 
 .ring-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: rgba(255, 255, 255, 0.05);
   stroke-width: 6;
 }
 
@@ -267,12 +262,12 @@ body {
 
 .green-fill {
   stroke: var(--neon-green);
-  filter: drop-shadow(0 0 8px var(--neon-green));
+  filter: drop-shadow(0 0 6px var(--neon-green));
 }
 
 .magenta-fill {
   stroke: var(--neon-magenta);
-  filter: drop-shadow(0 0 8px var(--neon-magenta));
+  filter: drop-shadow(0 0 6px var(--neon-magenta));
 }
 
 .gauge-content {
@@ -281,42 +276,381 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: 0 4px;
 }
 
 .gauge-label {
-  font-size: 0.52rem;
+  font-size: 0.5rem;
   color: var(--text-sub);
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
   font-weight: 700;
-  margin-bottom: 2px;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .gauge-val {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
+  margin-top: 1px;
 }
 
 /* BOTÓN BIENVENIDO */
 .btn-glass-welcome {
-  pointer-events: none;
-  user-select: none;
-  width: 94% !important;
-  max-width: 380px !important;
-  padding: 15px 0 !important;
+  pointer-events: auto;
+  cursor: pointer;
+  width: 100% !important;
+  max-width: 378px !important;
+  padding: 13px 0 !important;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.35rem !important;
+  font-size: 1.25rem !important;
   font-weight: 700 !important;
-  letter-spacing: 5px !important;
+  letter-spacing: 6px !important;
   color: #ffffff !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.7) !important;
-  border-radius: 18px !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.8),
-              0 12px 35px rgba(0, 0, 0, 0.7),
-              0 0 25px rgba(60, 254, 186, 0.18) !important;
-  margin-top: 10px !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.75) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    0 10px 30px rgba(0, 0, 0, 0.75),
+    0 0 20px rgba(0, 255, 204, 0.12) !important;
+  transition: all 0.25s ease;
+  margin-bottom: 5px;
+}
+
+.btn-glass-welcome:active {
+  transform: scale(0.98);
+  border-color: var(--neon-green) !important;
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.5) !important;
+}
+
+/* ========================================== */
+/* 2. DASHBOARD MAIN LAYOUT & HEADER          */
+/* ========================================== */
+
+.dashboard-container {
+  width: 100%;
+  max-width: 410px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 auto;
+}
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.dash-menu-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ========================================== */
+/* 3. MÉTRICAS CAROUSEL SLIDER                */
+/* ========================================== */
+
+.metrics-section {
+  width: 100%;
+}
+
+.metrics-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.metrics-slider-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.metrics-slider {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 4px 2px;
+  width: 100%;
+}
+
+.metrics-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.metric-card {
+  flex: 0 0 120px;
+  scroll-snap-align: start;
+  background: rgba(18, 8, 30, 0.8);
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  border-radius: 12px;
+  padding: 10px 8px;
+  box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 4px 12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.metric-card-title {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.metric-card-val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 2px 0;
+}
+
+.metric-wave-svg {
+  width: 100%;
+  height: 24px;
+  stroke: var(--neon-green);
+  fill: none;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 4px var(--neon-green));
+}
+
+.metric-card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  color: var(--text-sub);
+}
+
+.metrics-pagination-dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.metrics-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.metrics-dot.active {
+  background: var(--neon-green);
+  box-shadow: 0 0 6px var(--neon-green);
+}
+
+/* ========================================== */
+/* 4. CHAT WEB EMBED CARD                     */
+/* ========================================== */
+
+.dashboard-card {
+  background: rgba(18, 8, 30, 0.85);
+  border: 1px solid rgba(180, 100, 255, 0.3);
+  border-radius: 16px;
+  padding: 14px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+}
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.chat-embed-container {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.msg-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.msg-row.outgoing {
+  justify-content: flex-end;
+}
+
+.msg-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.msg-bubble {
+  max-width: 82%;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.msg-bubble.incoming {
+  background: #a2f2d0;
+  color: #062b1d;
+  border-bottom-left-radius: 2px;
+}
+
+.msg-bubble.outgoing {
+  background: #462554;
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+}
+
+.chat-input-bar {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chat-input-field {
+  flex: 1;
+  background: #412f5a;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 0.78rem;
+  outline: none;
+}
+
+.chat-input-field::placeholder {
+  color: #9d8db5;
+}
+
+.chat-send-btn {
+  background: var(--neon-green);
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #05010a;
+}
+
+/* ========================================== */
+/* 5. TARJETA DE PAGO FINAL (P.F)             */
+/* ========================================== */
+
+.payment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payment-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.payment-info-row.total {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.payment-action-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-pay-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  border-radius: 10px;
+  padding: 9px;
+  color: #ffffff;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
   text-align: center;
+  transition: all 0.2s ease;
+}
+
+.btn-pay-card:active {
+  background: rgba(0, 255, 204, 0.2);
+}
+
+.pay-methods-link {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ========================================== */
+/* 6. TEMPORIZADOR (TIEMPO RESTANTE)          */
+/* ========================================== */
+
+.timer-card {
+  border: 1.5px solid var(--neon-green);
+  box-shadow: 0 0 18px rgba(0, 255, 204, 0.25), inset 0 0 12px rgba(0, 255, 204, 0.08);
+  text-align: center;
+  padding: 14px;
+}
+
+.timer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.timer-digital {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--neon-green);
+  text-shadow: 0 0 15px rgba(0, 255, 204, 0.85);
+  letter-spacing: 2px;
+  line-height: 1.1;
+  margin: 4px 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.timer-sub-text {
+  font-size: 0.68rem;
+  letter-spacing: 1.2px;
+  color: var(--text-sub);
+  font-weight: 700;
+  text-transform: uppercase;
 }
