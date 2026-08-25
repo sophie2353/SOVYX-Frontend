@@ -1,5 +1,5 @@
 /* ========================================== */
-/* SOVYX Core OS - UI Futurista Corregida    */
+/* SOVYX Core OS - UI Futurista Definitiva   */
 /* ========================================== */
 
 :root {
@@ -13,7 +13,7 @@
   --text-sub: #a497b8;
 }
 
-/* RESET GENERAL: Elimina el fondo blanco nativo de navegadores móviles */
+/* RESET GENERAL: Evita deformaciones y fondos blancos nativos */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -170,7 +170,7 @@ body {
 
 .value-large { font-size: 1.2rem; font-weight: 700; color: #fff; }
 
-/* CHAT WEB CORREGIDO */
+/* CHAT WEB */
 .live-status-bar {
   font-size: 0.78rem; background: rgba(0, 0, 0, 0.35);
   padding: 8px 12px; border-radius: 10px;
@@ -198,7 +198,6 @@ body {
   font-size: 0.85rem; line-height: 1.4; color: #e2d9f3;
 }
 
-/* CHIPS DE PREGUNTAS SIN FONDO BLANCO */
 .chat-questions-carousel {
   display: flex; gap: 8px; overflow-x: auto; margin: 6px 0;
 }
@@ -217,7 +216,6 @@ body {
   border-color: var(--neon-green) !important;
 }
 
-/* INPUT Y BOTÓN ENVIAR SIN FONDO BLANCO */
 .chat-input-row {
   display: flex; gap: 8px; align-items: center;
   background: rgba(0, 0, 0, 0.45);
@@ -240,7 +238,7 @@ body {
   font-weight: bold; cursor: pointer;
 }
 
-/* PAGO FINAL (P.F) CORREGIDO CON FLEXBOX */
+/* PAGO FINAL (P.F) */
 .pf-details { display: flex; flex-direction: column; gap: 8px; }
 
 .pf-client {
@@ -268,6 +266,7 @@ body {
   font-weight: 700; font-size: 1rem; cursor: pointer;
   box-shadow: 0 0 15px rgba(102, 205, 170, 0.2);
   margin-top: 8px;
+  text-align: center;
 }
 
 .pf-link {
@@ -293,3 +292,144 @@ body {
 
 .timer-title { font-size: 0.82rem; color: var(--text-sub); }
 .timer-status { font-size: 0.7rem; color: var(--neon-green); letter-spacing: 2px; font-weight: 700; }
+
+/* ========================================== */
+/* SPLASH SCREEN & PROGRESS RINGS (NUEVO/FIJADO) */
+/* ========================================== */
+
+.splash-container {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Forzar tamaño adecuado para íconos SVG de carga */
+.splash-icon, .node-icon, .hud-icon {
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  display: inline-block;
+  fill: none;
+  stroke: currentColor;
+}
+
+/* Control del contenedor de la barra HUD de nodos */
+.hud-nodes-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(102, 205, 170, 0.3);
+  border-radius: 14px;
+  padding: 10px 14px;
+  width: 100%;
+}
+
+.node-cell {
+  width: 28px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid rgba(102, 205, 170, 0.3);
+  background: rgba(102, 205, 170, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.node-cell.active-green {
+  background: rgba(102, 205, 170, 0.4);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(102, 205, 170, 0.5);
+}
+
+.node-cell.active-magenta {
+  background: rgba(224, 17, 95, 0.4);
+  border-color: var(--neon-magenta);
+  box-shadow: 0 0 10px rgba(224, 17, 95, 0.5);
+}
+
+.splash-status-text {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ANILLOS DE PROGRESO SVG (CIRCULAR GAUGES) */
+.progress-rings-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.ring-item {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-svg {
+  width: 130px !important;
+  height: 130px !important;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 8;
+}
+
+.ring-fill-green {
+  fill: none;
+  stroke: var(--neon-green);
+  stroke-width: 8;
+  stroke-dasharray: 314;
+  stroke-dashoffset: 56; /* 82% */
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px var(--neon-green));
+}
+
+.ring-fill-magenta {
+  fill: none;
+  stroke: var(--neon-magenta);
+  stroke-width: 8;
+  stroke-dasharray: 314;
+  stroke-dashoffset: 31; /* 90% */
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px var(--neon-magenta));
+}
+
+.ring-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ring-label {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  letter-spacing: 1px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.ring-percentage {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
