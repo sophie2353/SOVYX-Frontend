@@ -9,46 +9,48 @@
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (LIQUID GLASS TRANSPARENTE) -->
+  <!-- 1. SPLASH SCREEN (BORDE CRISTAL BLANCO)   -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- TITULO CENTRADO CON S SERIFADA FUCSIA -->
+      <!-- LOGO CON S SERIFADA -->
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
       </div>
 
-      <!-- PORCENTAJE DE CARGA UNIDO A LÍNEA HUD -->
+      <!-- PORCENTAJE DE CARGA -->
       <div class="hud-percentage-wrapper">
-        <span id="splash-pct" class="splash-pct-num">0%</span>
+        <span id="splash-pct" class="splash-pct-num">65%</span>
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- HARDWARE CPU BASE CON 14 PILAS/CÁPSULAS LIQUID GLASS -->
-      <div class="cpu-hardware-base">
-        <div class="cpu-glass-cover">
+      <!-- CPU HARDWARE CONTAINER (SOCKET CON PINES Y CIRCUITO) -->
+      <div class="cpu-hardware-socket">
+        <div class="cpu-pins-top"></div>
+        <div class="cpu-inner-circuit">
           <div class="capsules-track">
-            <!-- 14 Pilas (Clases dinámicas para app.js) -->
-            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
-            <div class="capsule cap-fuchsia active"><div class="cap-core"></div></div>
-            <div class="capsule cap-fuchsia active"><div class="cap-core"></div></div>
-            <div class="capsule cap-fuchsia active"><div class="cap-core"></div></div>
-            <div class="capsule cap-off"><div class="cap-core"></div></div>
-            <div class="capsule cap-off"><div class="cap-core"></div></div>
-            <div class="capsule cap-off"><div class="cap-core"></div></div>
-            <div class="capsule cap-off"><div class="cap-core"></div></div>
-            <div class="capsule cap-off"><div class="cap-core"></div></div>
+            <!-- 14 Pilas (6 Verde Menta, 3 Fucsia, 5 Negras/Apagadas) -->
+            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-fuchsia active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-fuchsia active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-fuchsia active"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
           </div>
         </div>
+        <div class="cpu-pins-bottom"></div>
       </div>
 
-      <!-- CÍRCULOS DE BORDES DELGADOS CONECTADOS -->
+      <!-- GAUGES DE BORDES DELGADOS -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -56,12 +58,11 @@
             <circle class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="82, 100" />
           </svg>
           <div class="gauge-content">
-            <span class="gauge-label">DATOS PROCESADOS</span>
+            <span class="gauge-label">DATOS PROCESADOS:</span>
             <span class="gauge-val mint-txt">82%</span>
           </div>
         </div>
 
-        <!-- ORBE CENTRAL CONECTOR -->
         <div class="hud-center-node"></div>
 
         <div class="gauge-card">
@@ -70,27 +71,26 @@
             <circle class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="90, 100" />
           </svg>
           <div class="gauge-content">
-            <span class="gauge-label">ANÁLISIS MERCADO</span>
+            <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
             <span class="gauge-val fuchsia-txt">90%</span>
           </div>
         </div>
       </div>
 
-      <!-- CARTEL BIENVENIDOS LIQUID GLASS TRANSPARENTE -->
-      <div class="banner-glass-welcome">BIENVENIDO</div>
+      <!-- BOTON BIENVENIDO VIDRIO BLANCO -->
+      <button class="btn-glass-white">BIENVENIDO</button>
     </div>
   </div>
 
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD PRINCIPAL (VERDE MENTA GLASS) -->
+  <!-- 2. DASHBOARD MAIN (BORDE VERDE MENTA)     -->
   <!-- ========================================== -->
   <main class="dashboard-container">
 
-    <!-- BARRA SUPERIOR CON AVATAR LEÓN -->
     <header class="dash-header">
       <div class="dash-header-left">
-        <div class="lion-avatar-frame">🦁</div>
+        <div class="lion-avatar-frame"></div>
         <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
       </div>
       <div class="dash-header-right">
@@ -98,92 +98,57 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS: TARJETAS DESLIZABLES VERDE MENTA LIQUID GLASS -->
+    <!-- MÉTRICAS -->
     <section class="metrics-section">
       <h3 class="section-title">Metrics</h3>
-      
       <div class="metrics-slider">
-        
-        <!-- Slide 1 -->
-        <article class="glass-card-mint">
-          <div class="card-head">
-            <span>Alcance</span>
-            <span class="dots">•••</span>
-          </div>
+        <article class="glass-card-dash">
+          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
           <div class="card-value">15.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 50" preserveAspectRatio="none">
               <path d="M0,35 Q50,5 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="2.5" />
             </svg>
           </div>
-          <div class="card-foot">
-            <span>Incremento</span>
-            <span class="mint-txt">+12.5%</span>
-          </div>
+          <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
         </article>
 
-        <!-- Slide 2 -->
-        <article class="glass-card-mint">
-          <div class="card-head">
-            <span>Inversión</span>
-            <span class="dots">•••</span>
-          </div>
+        <article class="glass-card-dash">
+          <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
           <div class="card-value">15$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 50" preserveAspectRatio="none">
               <path d="M0,15 Q50,45 100,20 T200,35" fill="none" stroke="#00ffcc" stroke-width="2.5" />
             </svg>
           </div>
-          <div class="card-foot">
-            <span>Variación</span>
-            <span class="fuchsia-txt">-1.50%</span>
-          </div>
+          <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
         </article>
-
-        <!-- Slide 3 -->
-        <article class="glass-card-mint">
-          <div class="card-head">
-            <span>C.O</span>
-            <span class="dots">•••</span>
-          </div>
-          <div class="card-value">3.3%</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 50" preserveAspectRatio="none">
-              <path d="M0,40 Q50,20 100,35 T200,5" fill="none" stroke="#00ffcc" stroke-width="2.5" />
-            </svg>
-          </div>
-          <div class="card-foot">
-            <span>Rendimiento</span>
-            <span class="mint-txt">Estable</span>
-          </div>
-        </article>
-
       </div>
     </section>
 
-    <!-- CHAT WEB: VERDE MENTA & PÚRPURA LIQUID GLASS -->
-    <section class="glass-card-mint chat-section">
+    <!-- CHAT WEB SIMPLIFICADO CON 4 OPCIONES ABAJO -->
+    <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
         <span class="dots">•••</span>
       </div>
 
-      <div id="chat-messages" class="chat-body">
-        <div class="chat-bubble incoming">
-          <div class="chat-avatar"></div>
-          <div class="bubble-content">
-            Hola, ¿los costos incluyen la calibración de la IA?
-            <span class="chat-time">19:00 AM</span>
-          </div>
+      <div class="chat-body">
+        <div class="chat-bubble incoming-simple">
+          <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
         </div>
 
-        <div class="chat-bubble outgoing">
-          <div class="bubble-content">
-            ¡Sí! Incluye calibración espejo y ciclo 48H.
-            <span class="chat-time">6:00 PM</span>
-          </div>
-          <div class="chat-avatar user"></div>
+        <div class="chat-bubble outgoing-simple">
+          <p>¡Sí! Incluye calibración espejo y ciclo 48H.</p>
         </div>
+      </div>
+
+      <!-- 4 OPCIONES DESLIZABLES DEBAJO DEL MENSAJE -->
+      <div class="chat-quick-options">
+        <button class="opt-btn">1. Ver Planes</button>
+        <button class="opt-btn">2. Calibración IA</button>
+        <button class="opt-btn">3. Soporte 24/7</button>
+        <button class="opt-btn">4. Métodos de Pago</button>
       </div>
 
       <div class="chat-input-bar">
@@ -192,28 +157,19 @@
       </div>
     </section>
 
-    <!-- PAGO FINAL (P.F) DESGLOSADO -->
-    <section class="glass-card-mint pf-section">
+    <!-- PAGO FINAL -->
+    <section class="glass-card-dash pf-section">
       <h3 class="section-title">P.F (Pago Final)</h3>
       <div class="pf-summary-list">
-        <div class="pf-row">
-          <span>Pago inicial</span>
-          <strong>1.000$</strong>
-        </div>
-        <div class="pf-row">
-          <span>Pago después de resultados</span>
-          <strong>9.000$</strong>
-        </div>
-        <div class="pf-row pf-total">
-          <span>Total</span>
-          <strong class="mint-txt">10.000$</strong>
-        </div>
+        <div class="pf-row"><span>Pago inicial</span><strong>1.000$</strong></div>
+        <div class="pf-row"><span>Pago después de resultados</span><strong>9.000$</strong></div>
+        <div class="pf-row pf-total"><span>Total</span><strong class="mint-txt">10.000$</strong></div>
       </div>
       <button class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- TIMER DE CUENTA REGRESIVA -->
-    <section class="glass-card-mint timer-section">
+    <!-- TIMER -->
+    <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO RESTANTE</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
       <span class="timer-sub">TIEMPO CON SOFTWARE ACTIVO</span>
@@ -221,6 +177,5 @@
 
   </main>
 
-  <script src="app.js"></script>
 </body>
 </html>
