@@ -5,6 +5,7 @@
   --bg-dark: #05010a;
   --neon-mint: #00ffcc;
   --neon-fuchsia: #ff007a;
+  --neon-purple: #d230ff;
   --text-main: #ffffff;
   --text-sub: #b2a4cd;
 }
@@ -236,7 +237,6 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
-/* Relleno líquido animado */
 .welcome-fill {
   position: absolute;
   bottom: 0;
@@ -262,7 +262,7 @@ body {
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN (INTACTO)                               */
+/* 2. DASHBOARD MAIN                                         */
 /* ========================================================= */
 
 .dashboard-container {
@@ -293,6 +293,7 @@ body {
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 
+/* MÉTRICAS & CARRUSEL */
 .metrics-slider { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; }
 .metrics-slider::-webkit-scrollbar { display: none; }
 .metrics-slider .metric-square { flex: 0 0 148px; height: 158px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 18px; }
@@ -302,6 +303,62 @@ body {
 .card-chart { width: 100%; height: 42px; }
 .card-chart svg { width: 100%; height: 100%; filter: drop-shadow(0 0 6px var(--neon-mint)); }
 .card-foot { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-sub); }
+
+/* PUNTOS INDICADORES DEL CARRUSEL */
+.slider-dots-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.slider-dots-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: all 0.3s ease;
+}
+
+.slider-dots-indicator .dot.active {
+  width: 18px;
+  border-radius: 10px;
+  background: var(--neon-mint);
+  box-shadow: 0 0 8px var(--neon-mint);
+}
+
+/* CHAT WEB HEADER & CUPOS BADGE */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cupos-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(180, 0, 255, 0.12);
+  border: 1px solid rgba(210, 80, 255, 0.4);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.purple-neon-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neon-purple);
+  box-shadow: 0 0 10px var(--neon-purple), 0 0 18px var(--neon-purple);
+}
+
+.cupos-text {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #e588ff;
+  letter-spacing: 0.5px;
+}
 
 .chat-body { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
 .incoming-simple p { background: rgba(0, 255, 204, 0.12); border: 1px solid rgba(0, 255, 204, 0.4); border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 0.85rem; color: #fff; max-width: 85%; }
