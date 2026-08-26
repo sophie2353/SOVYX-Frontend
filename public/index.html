@@ -3,33 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE</title>
+  <title>SOVYX</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (HUD SCI-FI LIQUID GLASS) -->
+  <!-- 1. SPLASH SCREEN (HUD SCI-FI COMPLETO)     -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO SODIE MÁS ABAJO CERCANO AL PORCENTAJE -->
+      <!-- LOGO SOVYX -->
       <div class="logo-wrapper">
-        <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
+        <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
       </div>
 
-      <!-- PORCENTAJE DINÁMICO HUD -->
+      <!-- PORCENTAJE HUD CON LÍNEA CONECTADA AL CPU -->
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- CPU LIQUID GLASS CONTENEDOR PRINCIPAL -->
-      <div class="cpu-liquid-chip">
-        <div class="cpu-inner-circuit">
+      <!-- BLOQUE CENTRAL: SOCKET CPU SCI-FI + BARRA DE CÁPSULAS -->
+      <div class="cpu-scifi-container">
+        <!-- SVG TÉCNICO DE FONDO (CIRCUITOS, PINS Y LÍNEAS) -->
+        <svg class="cpu-tech-bg" viewBox="0 0 340 180" preserveAspectRatio="none">
+          <!-- Marco exterior del chip -->
+          <rect x="25" y="15" width="290" height="150" rx="14" fill="rgba(15, 3, 30, 0.65)" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.5" stroke-dasharray="5,3" />
+          <rect x="35" y="25" width="270" height="130" rx="10" fill="none" stroke="rgba(0, 255, 204, 0.25)" stroke-width="1" />
+          
+          <!-- Pines superiores e inferiores del procesador -->
+          <path d="M 60 15 L 60 25 M 90 15 L 90 25 M 120 15 L 120 25 M 150 15 L 150 25 M 180 15 L 180 25 M 210 15 L 210 25 M 240 15 L 240 25 M 270 15 L 270 25" stroke="rgba(255,255,255,0.6)" stroke-width="2" />
+          <path d="M 60 155 L 60 165 M 90 155 L 90 165 M 120 155 L 120 165 M 150 155 L 150 165 M 180 155 L 180 165 M 210 155 L 210 165 M 240 155 L 240 165 M 270 155 L 270 165" stroke="rgba(255,255,255,0.6)" stroke-width="2" />
+          
+          <!-- Líneas conectoras hacia los círculos inferiores -->
+          <path d="M 170 145 L 120 175 M 170 145 L 220 175" fill="none" stroke="rgba(255, 0, 122, 0.7)" stroke-width="1.5" />
+        </svg>
+
+        <!-- BARRA LIQUID GLASS Y CÁPSULAS SUPERPUESTAS -->
+        <div class="cpu-liquid-box">
           <div id="capsules-track" class="capsules-track">
-            <!-- 14 Pilas vacías -->
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
@@ -48,7 +62,7 @@
         </div>
       </div>
 
-      <!-- GAUGES HUD DE BORDES GLOW (PEGADOS ABAJO DEL CPU) -->
+      <!-- GAUGES HUD INFERIORES CON NODO CENTRAL -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -75,7 +89,7 @@
         </div>
       </div>
 
-      <!-- BOTÓN BIENVENIDO LIQUID GLASS (AJUSTADO EN POSICIÓN) -->
+      <!-- CARTEL BIENVENIDO -->
       <div class="welcome-sign-glass">BIENVENIDO</div>
 
     </div>
@@ -85,17 +99,15 @@
   <!-- 2. DASHBOARD MAIN                          -->
   <!-- ========================================== -->
   <main class="dashboard-container">
-
     <header class="dash-header">
       <div class="dash-header-left">
-        <span class="brand-text"><span class="serif-s">S</span>ODIE</span>
+        <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
       </div>
       <div class="dash-header-right">
         <span class="dash-menu-icon">☰</span>
       </div>
     </header>
 
-    <!-- MÉTRICAS SLIDER CUADRADAS -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider">
@@ -123,32 +135,25 @@
       </div>
     </section>
 
-    <!-- CHAT WEB -->
     <section class="glass-card-dash chat-section">
-      <div class="chat-header">
-        <h3 class="section-title">Chat Web</h3>
-      </div>
-
+      <div class="chat-header"><h3 class="section-title">Chat Web</h3></div>
       <div id="chat-body" class="chat-body">
         <div class="chat-bubble incoming-simple">
           <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
         </div>
       </div>
-
       <div class="chat-quick-options">
         <button class="opt-btn" onclick="sendQuickMsg('Ver Planes')">1. Ver Planes</button>
         <button class="opt-btn" onclick="sendQuickMsg('Calibración IA')">2. Calibración IA</button>
         <button class="opt-btn" onclick="sendQuickMsg('Soporte 24/7')">3. Soporte 24/7</button>
         <button class="opt-btn" onclick="sendQuickMsg('Métodos de Pago')">4. Métodos de Pago</button>
       </div>
-
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
         <button id="chat-send" class="chat-send-btn" onclick="sendInputMsg()">➤</button>
       </div>
     </section>
 
-    <!-- PAGO FINAL -->
     <section class="glass-card-dash pf-section">
       <h3 class="section-title">P.F (Pago Final)</h3>
       <div class="pf-summary-list">
@@ -159,13 +164,11 @@
       <button class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- TIMER 48H -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO RESTANTE</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
       <span class="timer-sub">TIEMPO CON SOFTWARE ACTIVO</span>
     </section>
-
   </main>
 
   <script>
@@ -194,16 +197,12 @@
         } else {
           clearInterval(loadInterval);
           pctText.textContent = '100%';
-          
-          setTimeout(() => {
-            splash.classList.add('hidden');
-          }, 400);
+          setTimeout(() => { splash.classList.add('hidden'); }, 400);
         }
       }, 30);
 
       let totalSeconds = 48 * 3600;
       const timerDisplay = document.getElementById('timer-display');
-
       setInterval(() => {
         if (totalSeconds > 0) {
           totalSeconds--;
@@ -227,18 +226,12 @@
       chatBody.appendChild(msgBubble);
       chatBody.scrollTop = chatBody.scrollHeight;
     }
-
     function sendQuickMsg(text) { appendMessage(text); }
-
     function sendInputMsg() {
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
-      if (text) {
-        appendMessage(text);
-        input.value = '';
-      }
+      if (text) { appendMessage(text); input.value = ''; }
     }
   </script>
-
 </body>
 </html>
