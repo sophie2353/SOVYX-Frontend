@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE</title>
+  <title>SOVYX</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
 
@@ -14,9 +15,9 @@
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO SODIE -->
+      <!-- LOGO -->
       <div class="logo-wrapper">
-        <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
+        <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
       </div>
 
       <!-- PORCENTAJE HUD -->
@@ -73,7 +74,7 @@
       </div>
 
       <!-- CARTEL BIENVENIDO AMPLIADO -->
-      <div class="welcome-sign-glass">BIENVENIDO</div>
+      <div id="btn-welcome" class="welcome-sign-glass">BIENVENIDO</div>
 
     </div>
   </div>
@@ -84,7 +85,7 @@
   <main class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
-        <span class="brand-text"><span class="serif-s">S</span>ODIE</span>
+        <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
       </div>
       <div class="dash-header-right">
         <span class="dash-menu-icon">☰</span>
@@ -154,67 +155,5 @@
     </section>
   </main>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const splash = document.getElementById('view-splash');
-      const pctText = document.getElementById('splash-pct');
-      const capsules = document.querySelectorAll('#capsules-track .capsule');
-
-      let currentPct = 0;
-      const targetPct = 100;
-
-      const loadInterval = setInterval(() => {
-        if (currentPct < targetPct) {
-          currentPct++;
-          pctText.textContent = `${currentPct}%`;
-
-          const activeCapsulesCount = Math.floor((currentPct / 100) * capsules.length);
-          capsules.forEach((cap, index) => {
-            if (index < activeCapsulesCount) {
-              const colorClass = index < 8 ? 'cap-mint' : 'cap-fuchsia';
-              cap.className = `capsule ${colorClass}`;
-            } else {
-              cap.className = 'capsule cap-dark';
-            }
-          });
-        } else {
-          clearInterval(loadInterval);
-          pctText.textContent = '100%';
-          setTimeout(() => { splash.classList.add('hidden'); }, 400);
-        }
-      }, 30);
-
-      let totalSeconds = 48 * 3600;
-      const timerDisplay = document.getElementById('timer-display');
-      setInterval(() => {
-        if (totalSeconds > 0) {
-          totalSeconds--;
-          const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-          const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-          const secs = String(totalSeconds % 60).padStart(2, '0');
-          timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
-        }
-      }, 1000);
-
-      document.getElementById('chat-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendInputMsg();
-      });
-    });
-
-    function appendMessage(text) {
-      const chatBody = document.getElementById('chat-body');
-      const msgBubble = document.createElement('div');
-      msgBubble.className = 'chat-bubble outgoing-simple';
-      msgBubble.innerHTML = `<p>${text}</p>`;
-      chatBody.appendChild(msgBubble);
-      chatBody.scrollTop = chatBody.scrollHeight;
-    }
-    function sendQuickMsg(text) { appendMessage(text); }
-    function sendInputMsg() {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (text) { appendMessage(text); input.value = ''; }
-    }
-  </script>
 </body>
 </html>
