@@ -2,295 +2,567 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SOVYX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOVYX - Liquid Glass UI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================== */
+    /* SOVYX LIQUID GLASS & NEON SYSTEM           */
+    /* ========================================== */
+    :root {
+      --bg-dark: #070112;
+      --card-glass: rgba(22, 10, 42, 0.65);
+      --card-border: rgba(0, 255, 204, 0.25);
+      --neon-cyan: #00ffcc;
+      --neon-magenta: #ff007a;
+      --cyan-glow: 0 0 20px rgba(0, 255, 204, 0.35);
+      --magenta-glow: 0 0 25px rgba(255, 0, 122, 0.7);
+      --text-white: #ffffff;
+      --text-muted: #9c8eb9;
+    }
 
-  <!-- Fuentes Futuristas / Elegantes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="styles.css">
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 15%, #3a085c 0%, #100221 60%, #05000a 100%);
+      color: var(--text-white);
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 12px 8px;
+    }
+
+    /* PREVENCIÓN ESTRICTA DE TRASLAPE Y DESBORDE */
+    .app-viewport {
+      width: 100%;
+      max-width: 412px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      display: none !important; /* Esconde pantallas inactivas para evitar traslapes */
+      width: 100%;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .screen.active {
+      display: flex !important; /* Muestra solo la pantalla activa */
+    }
+
+    /* ========================================== */
+    /* 1. SPLASH SCREEN (Boceto Liquid Glass)     */
+    /* ========================================== */
+
+    .splash-content {
+      min-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 10px;
+    }
+
+    .logo-sovyx {
+      font-family: 'Cinzel', serif;
+      font-size: 4.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .logo-sovyx .s-pink {
+      font-family: 'Cinzel', serif;
+      color: var(--neon-magenta);
+      text-shadow: 0 0 20px var(--neon-magenta), 0 0 40px var(--neon-magenta);
+    }
+
+    .progress-percent {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    /* MARCO CÁPSULAS LIQUID GLASS */
+    .capsules-glass-frame {
+      width: 100%;
+      background: rgba(12, 4, 28, 0.7);
+      border: 1px solid rgba(0, 255, 204, 0.4);
+      border-radius: 18px;
+      padding: 12px 10px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--cyan-glow), inset 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+
+    .capsules-grid {
+      display: flex;
+      gap: 4px;
+      justify-content: space-between;
+    }
+
+    .capsule-item {
+      flex: 1;
+      height: 56px;
+      border-radius: 8px;
+      border: 1px solid var(--neon-cyan);
+      background: rgba(0, 255, 204, 0.12);
+      box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .capsule-item.pink {
+      border-color: var(--neon-magenta);
+      background: rgba(255, 0, 122, 0.3);
+      box-shadow: 0 0 12px rgba(255, 0, 122, 0.8);
+    }
+
+    .capsule-item.dark {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(10, 5, 20, 0.6);
+      box-shadow: none;
+    }
+
+    /* MEDIDORES CIRCULARES CON GLOW */
+    .meters-row {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .circle-meter-box {
+      width: 115px;
+      height: 115px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .circle-meter-box.cyan {
+      border: 2px solid var(--neon-cyan);
+      background: rgba(0, 255, 204, 0.05);
+      box-shadow: var(--cyan-glow), inset 0 0 15px rgba(0, 255, 204, 0.2);
+    }
+
+    .circle-meter-box.magenta {
+      border: 2px solid var(--neon-magenta);
+      background: rgba(255, 0, 122, 0.05);
+      box-shadow: var(--magenta-glow), inset 0 0 15px rgba(255, 0, 122, 0.2);
+    }
+
+    .meter-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #ffffff;
+    }
+
+    .meter-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    /* BOTÓN LIQUID GLASS "BIENVENIDO" */
+    .btn-bienvenido-liquid {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(20,8,38,0.85) 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      border-top: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 16px;
+      color: #ffffff;
+      font-family: 'Cinzel', serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-bienvenido-liquid:active {
+      transform: scale(0.98);
+    }
+
+    /* ========================================== */
+    /* 2. DASHBOARD (Glassmorphism Completo)      */
+    /* ========================================== */
+
+    .dash-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 4px 0;
+    }
+
+    .brand-lion {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+      background: rgba(0, 255, 204, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    .dash-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: -6px;
+      margin-bottom: 4px;
+    }
+
+    /* TARJETAS GLASS */
+    .glass-card {
+      background: var(--card-glass);
+      border: var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 255, 204, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-heading {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* CARRUSEL DE MÉTRICAS */
+    .metrics-carousel {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .metric-mini-tile {
+      flex: 0 0 115px;
+      background: rgba(10, 4, 22, 0.6);
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .metric-tile-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .metric-tile-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+
+    /* CHAT WEB */
+    .chat-inner-white {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #000000;
+    }
+
+    .chat-bubble-in {
+      background: #a3f7dd;
+      color: #083b2d;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border-bottom-left-radius: 2px;
+      font-size: 0.8rem;
+      max-width: 85%;
+      align-self: flex-start;
+      font-weight: 600;
+    }
+
+    .chat-bubble-out {
+      background: #47266b;
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border-bottom-right-radius: 2px;
+      font-size: 0.8rem;
+      max-width: 85%;
+      align-self: flex-end;
+      font-weight: 600;
+    }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .chat-input-bar input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .chat-input-bar button {
+      background: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* SECCIÓN PAGO FINAL */
+    .pf-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .btn-pay-action {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: var(--cyan-glow);
+    }
+
+    /* TIMER GIGANTE */
+    .timer-val-giant {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      text-shadow: var(--cyan-glow);
+      text-align: center;
+      margin: 2px 0;
+    }
+
+    /* BOTÓN SWITCH DE DEMO (Para probar cambio de pantalla) */
+    .demo-toggle-btn {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      background: var(--neon-magenta);
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      box-shadow: 0 0 12px rgba(255, 0, 122, 0.8);
+      cursor: pointer;
+      z-index: 10000;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ========================================== -->
-  <!-- SPLASH SCREEN OVERLAY (HUD SCI-FI)         -->
-  <!-- ========================================== -->
-  <div id="view-splash" class="full-screen">
-    <div class="splash-cyber-bg"></div>
-    <div class="splash-content">
-      
-      <!-- Logo Serif Sovyx -->
-      <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
-      
-      <!-- Indicador Porcentaje superior con líneas HUD -->
-      <div class="hud-percentage-wrapper">
-        <span class="hud-pointer-line"></span>
-        <span id="splash-percentage-text" class="splash-pct-num">65%</span>
-      </div>
+  <div class="app-viewport">
 
-      <!-- CONTENEDOR DE 14 CÁPSULAS -->
-<div class="processor-core-frame">
-  <div class="capsules-track">
-    <!-- 8 Cápsulas Verdes Activas -->
-    <div class="capsule cap-green active">
-      <svg class="cap-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-    </div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-
-    <!-- 6 Cápsulas Magenta Activas -->
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active">
-      <svg class="cap-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>
-    </div>
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active"></div>
-  </div>
-</div>
-
-<!-- CÍRCULOS DE MÉTRICAS (MÁS SEPARADOS) -->
-<div class="splash-gauges">
-  <div class="gauge-card gauge-green">
-    <svg class="gauge-ring" viewBox="0 0 100 100">
-      <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-      <circle class="ring-fill green-fill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="47"></circle>
-    </svg>
-    <div class="gauge-content">
-      <span class="gauge-label">DATOS PROCESADOS:</span>
-      <span class="gauge-val green-txt">82%</span>
-    </div>
-  </div>
-
-  <div class="gauge-card gauge-magenta">
-    <svg class="gauge-ring" viewBox="0 0 100 100">
-      <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-      <circle class="ring-fill magenta-fill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="26"></circle>
-    </svg>
-    <div class="gauge-content">
-      <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
-      <span class="gauge-val magenta-txt">90%</span>
-    </div>
-  </div>
-</div>
-
-      <!-- BOTÓN DE ENTRADA CRISTAL GLASSMORPHISM -->
-      <button id="btn-splash-welcome" class="btn-glass-welcome">BIENVENIDO</button>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- TOP BAR / HEADER NAVEGACIÓN                -->
-  <!-- ========================================== -->
-  <header class="top-bar">
-    <div class="logo" id="brand-logo">
-      <div class="lion-avatar-badge">🦁</div>
-      <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
-    </div>
-    <div class="top-bar-right">
-      <button class="top-icon-btn" aria-label="Buscar"></button>
-      <button class="top-icon-btn badge-rel" aria-label="Notificaciones">
-        <span class="icon-dot"></span>
-      </button>
-      
-      <!-- BOTÓN ADMIN (AL HACER CLIC PIDE CONTRASEÑA) -->
-      <div class="user-avatar" id="btn-admin-access" title="Acceso Admin">
-        <span>US</span>
-      </div>
-      
-      <button id="btn-menu" class="hamburger-btn" aria-label="Menú">☰</button>
-    </div>
-  </header>
-
-  <!-- ========================================== -->
-  <!-- DASHBOARD PRINCIPAL DEL CLIENTE            -->
-  <!-- ========================================== -->
-  <main id="app-container">
-
-    <!-- Card 1: Métricas Actuales -->
-    <section class="card neon-card">
-      <div class="live-side-badge">• live view...</div>
-      <h2 class="card-title">Métricas Actuales</h2>
-      
-      <div class="metrics-grid">
-        <!-- Metric Item: Visitantes -->
-        <div class="metric-item">
-          <span class="metric-label">Visitantes:</span>
-          <span class="value"><strong id="metric-visitors">1,504</strong> <small class="green">(+3.5%)</small></span>
-          <div class="sparkline-box">
-            <svg viewBox="0 0 120 40" class="spark-svg">
-              <defs>
-                <linearGradient id="grad-green" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#00ffcc" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,32 Q25,10 50,22 T100,8 L120,5 L120,40 L0,40 Z" fill="url(#grad-green)"/>
-              <path d="M0,32 Q25,10 50,22 T100,8 L120,5" fill="none" stroke="#00ffcc" stroke-width="2.5"/>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Metric Item: Nuevos Leads -->
-        <div class="metric-item">
-          <span class="metric-label">Nuevos Leads:</span>
-          <span class="value"><strong id="metric-leads">75</strong> <small class="green">(+1.2%)</small></span>
-          <div class="sparkline-box">
-            <svg viewBox="0 0 120 40" class="spark-svg">
-              <defs>
-                <linearGradient id="grad-magenta" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#e0115f" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#e0115f" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,35 Q30,12 60,25 T120,8 L120,40 L0,40 Z" fill="url(#grad-magenta)"/>
-              <path d="M0,35 Q30,12 60,25 T120,8" fill="none" stroke="#e0115f" stroke-width="2.5"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tasa de Conversión -->
-      <div class="metric-item single-full">
-        <span class="metric-label">Tasa de Conversión:</span>
-        <span class="value-highlight">4.8%</span>
-        <div class="equalizer-bar-chart">
-          <div class="eq-bar" style="height: 30%;"></div>
-          <div class="eq-bar" style="height: 45%;"></div>
-          <div class="eq-bar" style="height: 38%;"></div>
-          <div class="eq-bar" style="height: 75%;"></div>
-          <div class="eq-bar" style="height: 55%;"></div>
-          <div class="eq-bar highlight-magenta" style="height: 90%;"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Card 2: Métricas Objetivo (Deslizables) -->
-    <section class="card neon-card">
-      <h2 class="card-title">Métricas Objetivo</h2>
-      <div class="carousel-metrics">
+    <!-- ========================================== -->
+    <!-- PANTALLA 1: SPLASH SCREEN (ACTIVA)          -->
+    <!-- ========================================== -->
+    <div id="splash-screen" class="screen active">
+      <div class="splash-content">
         
-        <div class="metric-card-sub">
-          <span class="metric-label">Clientes Obtenidos</span>
-          <span class="value-large">Goal: 100</span>
-          <span class="green">Incremento: +12%</span>
-          <div class="mini-spark">
-            <svg viewBox="0 0 100 25">
-              <path d="M0,20 Q25,5 50,15 T100,2" fill="none" stroke="#00ffcc" stroke-width="2"/>
-            </svg>
+        <div class="logo-sovyx"><span class="s-pink">S</span>OVYX</div>
+
+        <div class="progress-percent">100%</div>
+
+        <!-- CÁPSULAS PROCESADOR LIQUID GLASS -->
+        <div class="capsules-glass-frame">
+          <div class="capsules-grid">
+            <div class="capsule-item">🛡️</div>
+            <div class="capsule-item"></div>
+            <div class="capsule-item"></div>
+            <div class="capsule-item"></div>
+            <div class="capsule-item pink">🎯</div>
+            <div class="capsule-item pink"></div>
+            <div class="capsule-item dark"></div>
+            <div class="capsule-item dark"></div>
+            <div class="capsule-item dark"></div>
+            <div class="capsule-item dark"></div>
           </div>
         </div>
 
-        <div class="metric-card-sub">
-          <span class="metric-label">Alcance</span>
-          <span class="value-large">15,000</span>
-          <span class="red">-1.30%</span>
-          <div class="mini-spark">
-            <svg viewBox="0 0 100 25">
-              <path d="M0,8 Q25,22 50,10 T100,18" fill="none" stroke="#e0115f" stroke-width="2"/>
-            </svg>
+        <!-- MEDIDORES CIRCULARES CON RESPLANDOR NEÓN -->
+        <div class="meters-row">
+          <div class="circle-meter-box cyan">
+            <div class="meter-label">DATOS<br>PROCESADOS:</div>
+            <div class="meter-val">82%</div>
+          </div>
+          <div class="circle-meter-box magenta">
+            <div class="meter-label">ANÁLISIS DE<br>MERCADO:</div>
+            <div class="meter-val">90%</div>
           </div>
         </div>
 
-        <div class="metric-card-sub">
-          <span class="metric-label">Inversión</span>
-          <span class="value-large">$15</span>
-          <span class="green">Optimizado</span>
-          <div class="mini-spark">
-            <svg viewBox="0 0 100 25">
-              <path d="M0,18 Q30,5 60,15 T100,8" fill="none" stroke="#00ffcc" stroke-width="2"/>
-            </svg>
-          </div>
-        </div>
+        <!-- BOTÓN LIQUID GLASS "BIENVENIDO" -->
+        <button class="btn-bienvenido-liquid" onclick="switchToDashboard()">BIENVENIDO</button>
 
-      </div>
-    </section>
-
-    <!-- Card 3: Chat Web -->
-    <section class="card neon-card">
-      <div class="live-status-bar">
-        <span class="live-dot"></span>
-        <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
-      </div>
-
-      <div class="card-header-row">
-        <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
-        <span class="dots-menu">&#8478;</span>
-      </div>
-
-      <div class="chat-messages" id="chat-box">
-        <div class="msg incoming">
-          ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
-        </div>
-      </div>
-
-      <div class="chat-questions-carousel">
-        <button class="question-chip">¿Cómo funciona el ciclo de 48H?</button>
-        <button class="question-chip">¿Por qué solo hay 2 slots libres?</button>
-      </div>
-
-      <div class="chat-input-row">
-        <input type="text" placeholder="Pregunta lo que quieras antes de reservar...">
-        <button class="btn-icon">➤</button>
-      </div>
-    </section>
-
-    <!-- Card 4: Pago Final -->
-    <section class="card neon-card">
-      <h2 class="card-title">P.F (Pago Final)</h2>
-      <div class="pf-details">
-        <div class="pf-client">Rusmario</div>
-        <div class="pf-row">
-          <span>Reserva Inicial</span>
-          <strong>$ 1.000,00</strong>
-        </div>
-        <div class="pf-row">
-          <span>Tras Resultados</span>
-          <strong>$ 9.000,00</strong>
-        </div>
-        <div class="pf-row total-row">
-          <span>Total Proyecto</span>
-          <strong class="green-txt">$ 10.000,00</strong>
-        </div>
-      </div>
-
-      <!-- Botón simplificado a "Pagar" -->
-      <button class="btn-primary-action" id="btn-pagar">Pagar</button>
-    </section>
-
-    <!-- Card 5: Temporizador -->
-    <section class="card timer-card">
-      <span class="timer-title">47:59:59 (Tiempo Restante)</span>
-      <div class="timer-display" id="timer-count">47:59:59</div>
-      <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
-    </section>
-
-  </main>
-
-  <!-- ========================================== -->
-  <!-- MODAL AUTENTICACIÓN ADMIN                  -->
-  <!-- ========================================== -->
-  <div id="admin-modal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <h3 class="card-title" style="color: var(--neon-green);">Acceso Admin</h3>
-      <p style="font-size: 0.85rem; color: var(--text-sub);">Ingresa la contraseña para continuar:</p>
-      <input type="password" id="admin-pass-input" class="admin-input" placeholder="••••••••">
-      <p id="admin-error-msg" style="color: var(--neon-magenta); font-size: 0.78rem; display: none;">Contraseña incorrecta</p>
-      <div class="modal-actions">
-        <button id="btn-admin-cancel" class="btn-modal-cancel">Cancelar</button>
-        <button id="btn-admin-confirm" class="btn-modal-confirm">Ingresar</button>
       </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA 2: DASHBOARD                       -->
+    <!-- ========================================== -->
+    <div id="dashboard-screen" class="screen">
+      
+      <!-- Topbar -->
+      <div class="dash-topbar">
+        <div class="brand-lion">
+          <span style="color: var(--neon-cyan);">🦁</span> SOVYX
+        </div>
+        <div class="topbar-actions">
+          <span>🔍</span>
+          <span>🔔</span>
+          <div class="avatar-circle">US</div>
+        </div>
+      </div>
+      <div class="dash-subtitle">≡ Dashboard</div>
+
+      <!-- Card Metrics -->
+      <div class="glass-card">
+        <div class="card-heading">Metrics</div>
+        <div class="metrics-carousel">
+          <div class="metric-mini-tile">
+            <div class="metric-tile-title">Alcance</div>
+            <div class="metric-tile-val">15.000</div>
+          </div>
+          <div class="metric-mini-tile">
+            <div class="metric-tile-title">Inversión</div>
+            <div class="metric-tile-val">15$</div>
+          </div>
+          <div class="metric-mini-tile">
+            <div class="metric-tile-title">Conversión</div>
+            <div class="metric-tile-val">3.3%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Chat Web -->
+      <div class="glass-card">
+        <div class="card-heading">Chat Web</div>
+        <div class="chat-inner-white">
+          <div class="chat-bubble-in">Hi, Be, sés oscotos qya ootomien ccom celamca...</div>
+          <div class="chat-bubble-out">How anes pago aquí?</div>
+          <div class="chat-bubble-in">You!</div>
+        </div>
+        <div class="chat-input-bar">
+          <input type="text" placeholder="Escribe un mensaje...">
+          <button>➤</button>
+        </div>
+      </div>
+
+      <!-- Card Pago Final -->
+      <div class="glass-card">
+        <div class="card-heading">P.F (Pago Final)</div>
+        <div class="pf-row"><span>Rusmario</span></div>
+        <div class="pf-row"><span>Resume</span> <b>$ 155.00</b></div>
+        <div class="pf-row"><span>Total</span> <b>$ 225.50</b></div>
+        <button class="btn-pay-action">Haga su pago aquí.</button>
+      </div>
+
+      <!-- Card Timer -->
+      <div class="glass-card">
+        <div style="font-size:0.85rem; text-align:center; color: var(--text-muted);">45:50 (Tiempo Restante)</div>
+        <div class="timer-val-giant">45:50</div>
+        <div style="font-size:0.7rem; color: var(--text-muted); text-align:center; letter-spacing:1px;">TIEMPO CON SOFTWARE ACTIVO</div>
+      </div>
+
+    </div>
+
   </div>
 
-  <script src="app.js"></script>
+  <!-- Botón de flotante para alternar pantallas en pruebas -->
+  <button class="demo-toggle-btn" onclick="toggleScreens()">Cambiar Vista (Splash / Dash)</button>
+
+  <script>
+    function switchToDashboard() {
+      document.getElementById('splash-screen').classList.remove('active');
+      document.getElementById('dashboard-screen').classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function toggleScreens() {
+      const splash = document.getElementById('splash-screen');
+      const dash = document.getElementById('dashboard-screen');
+      if (splash.classList.contains('active')) {
+        splash.classList.remove('active');
+        dash.classList.add('active');
+      } else {
+        dash.classList.remove('active');
+        splash.classList.add('active');
+      }
+      window.scrollTo(0, 0);
+    }
+  </script>
 </body>
 </html>
+
