@@ -1,7 +1,3 @@
-/* ========================================== */
-/* SOVYX Core OS - Master Stylesheet (styles.css) */
-/* ========================================== */
-
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&display=swap');
 
 :root {
@@ -32,118 +28,96 @@ body {
   width: 100%;
 }
 
-/* Clases de Utilidad */
 .fuchsia-txt { color: var(--neon-fuchsia); }
 .mint-txt { color: var(--neon-mint); }
-.hidden { display: none !important; }
 
 /* ========================================== */
-/* 1. SPLASH SCREEN (TRANSPARENTE LIQUID GLASS) */
+/* 1. SPLASH SCREEN (BORDE LIQUID GLASS BLANCO) */
 /* ========================================== */
 
 .full-screen {
   position: fixed;
-  top: 0; 
-  left: 0;
-  width: 100vw; 
-  height: 100vh;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
   z-index: 9999;
-  background: #06010e;
-  background-image: 
-    radial-gradient(circle at 50% 35%, #340954 0%, #0e021e 65%, #030007 100%),
-    linear-gradient(rgba(0, 255, 204, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
-  background-size: 100% 100%, 24px 24px, 24px 24px;
+  background: radial-gradient(circle at 50% 35%, #2a0445 0%, #0d021c 65%, #030007 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
 }
 
 .splash-content {
   width: 100%;
   max-width: 380px;
   height: 100vh;
-  padding: 24px 16px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
   text-align: center;
-  box-sizing: border-box;
 }
 
-/* LOGO TITULO CON 'S' SERIFADA Y FUCSIA */
 .logo-title {
   font-family: 'Cinzel', serif !important;
   font-size: 4rem !important;
-  letter-spacing: 2px;
   font-weight: 800;
-  background: linear-gradient(180deg, #FFFFFF 20%, #D0D5E0 65%, #8A92A3 100%);
+  background: linear-gradient(180deg, #FFFFFF 20%, #B0B5C0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.95));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
 }
 
 .logo-title .serif-s {
-  font-family: 'Cinzel', serif !important;
   font-size: 5.2rem !important;
   color: var(--neon-fuchsia) !important;
   -webkit-text-fill-color: var(--neon-fuchsia) !important;
-  font-weight: 800;
-  filter: drop-shadow(0 0 22px rgba(255, 0, 122, 0.95));
-  margin-right: -2px;
+  filter: drop-shadow(0 0 18px rgba(255, 0, 122, 0.9));
 }
 
-/* PORCENTAJE DE CARGA Y LÍNEA INDICADORA HUD */
 .hud-percentage-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
 }
 
 .splash-pct-num {
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--neon-mint);
-  letter-spacing: 1.5px;
-  text-shadow: 0 0 12px rgba(0, 255, 204, 0.9);
+  text-shadow: 0 0 10px var(--neon-mint);
 }
 
 .hud-pointer-line {
   width: 2px;
-  height: 16px;
+  height: 14px;
   background: var(--neon-mint);
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* HARDWARE CPU BASE CON COBERTURA LIQUID GLASS */
-.cpu-hardware-base {
+/* HARDWARE CPU REAL CON SOCKET Y PINES */
+.cpu-hardware-socket {
   width: 100%;
-  position: relative;
-  background: rgba(15, 5, 30, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: rgba(12, 4, 25, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.4); /* BORDE BLANCO GLASS */
+  border-top: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 16px;
-  padding: 10px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  padding: 12px 8px;
+  backdrop-filter: blur(16px);
   box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.5),
-    0 10px 30px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(180, 100, 255, 0.15);
+    inset 0 0 20px rgba(0, 0, 0, 0.9),
+    0 10px 25px rgba(0, 0, 0, 0.8),
+    0 0 15px rgba(255, 255, 255, 0.15);
+  position: relative;
 }
 
-.cpu-glass-cover {
-  width: 100%;
+.cpu-inner-circuit {
+  background: radial-gradient(circle, rgba(40, 10, 60, 0.6) 0%, rgba(5, 1, 10, 0.9) 100%);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 8px;
 }
 
-/* GRID DE 14 PILAS / CÁPSULAS HORIZONTALES */
 .capsules-track {
   display: grid;
   grid-template-columns: repeat(14, 1fr);
@@ -154,414 +128,189 @@ body {
 .capsule {
   height: 64px;
   border-radius: 4px;
-  background: rgba(10, 4, 20, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
 }
 
-/* Brillo superior en las pilas */
-.capsule::after {
-  content: '';
+.cap-glint {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 45%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.02) 100%);
-  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-.capsule.cap-mint.active {
-  background: linear-gradient(180deg, #62fce0 0%, #00bf8f 55%, #004d3a 100%);
+.capsule.cap-mint {
+  background: linear-gradient(180deg, #62fce0 0%, #00bf8f 60%, #004d3a 100%);
   border: 1px solid #a8ffee;
-  box-shadow: 0 0 12px rgba(0, 255, 204, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.8);
 }
 
-.capsule.cap-fuchsia.active {
-  background: linear-gradient(180deg, #ff7bc3 0%, #e60073 55%, #59002c 100%);
+.capsule.cap-fuchsia {
+  background: linear-gradient(180deg, #ff7bc3 0%, #e60073 60%, #59002c 100%);
   border: 1px solid #ffc2e0;
-  box-shadow: 0 0 12px rgba(255, 0, 122, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(255, 0, 122, 0.8);
 }
 
-.capsule.cap-off {
-  background: rgba(18, 8, 32, 0.6);
-  opacity: 0.4;
+/* CARGA NEGRA/OSCURA PARA LAS PILAS APAGADAS */
+.capsule.cap-dark {
+  background: linear-gradient(180deg, #120a1c 0%, #05010a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0.9;
 }
 
-/* CÍRCULOS DE BORDES DELGADOS Y ORBE CENTRAL */
+/* GAUGES */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   max-width: 320px;
-  position: relative;
 }
 
 .hud-center-node {
-  width: 16px;
-  height: 16px;
+  width: 14px; height: 14px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ff99dd 0%, #ff007a 60%, #300018 100%);
-  box-shadow: 0 0 14px var(--neon-fuchsia), inset 0 0 4px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: var(--neon-fuchsia);
+  box-shadow: 0 0 12px var(--neon-fuchsia);
 }
 
 .gauge-card {
   position: relative;
-  width: 90px;
-  height: 90px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  border: none !important;
+  width: 90px; height: 90px;
+  display: flex; align-items: center; justify-content: center;
 }
 
-.gauge-ring {
-  width: 90px !important;
-  height: 90px !important;
-  transform: rotate(-90deg);
-}
+.gauge-ring { width: 90px; height: 90px; transform: rotate(-90deg); }
+.ring-thin-bg { fill: none; stroke: rgba(255, 255, 255, 0.1); stroke-width: 2; }
+.ring-thin-fill { fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-.ring-thin-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 2.5;
-}
-
-.ring-thin-fill {
-  fill: none;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-
-.mint-stroke { stroke: var(--neon-mint); filter: drop-shadow(0 0 5px var(--neon-mint)); }
-.fuchsia-stroke { stroke: var(--neon-fuchsia); filter: drop-shadow(0 0 5px var(--neon-fuchsia)); }
+.mint-stroke { stroke: var(--neon-mint); filter: drop-shadow(0 0 4px var(--neon-mint)); }
+.fuchsia-stroke { stroke: var(--neon-fuchsia); filter: drop-shadow(0 0 4px var(--neon-fuchsia)); }
 
 .gauge-content {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
 }
 
-.gauge-label {
-  font-size: 0.45rem;
-  color: var(--text-sub);
-  letter-spacing: 0.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
+.gauge-label { font-size: 0.42rem; color: var(--text-sub); text-transform: uppercase; }
+.gauge-val { font-size: 0.9rem; font-weight: 800; margin-top: 2px; }
 
-.gauge-val {
-  font-size: 0.95rem;
-  font-weight: 800;
-  margin-top: 2px;
-}
-
-/* CARTEL BIENVENIDOS (TRANSPARENTE LIQUID GLASS) */
-.banner-glass-welcome {
+/* BOTON BIENVENIDO VIDRIO BLANCO */
+.btn-glass-white {
   width: 100%;
   padding: 14px 0;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 6px;
+  font-size: 1.3rem; font-weight: 700; letter-spacing: 6px;
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-top: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 14px;
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    inset 0 1px 3px rgba(255, 255, 255, 0.7),
-    0 10px 28px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(0, 255, 204, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.8), 0 10px 25px rgba(0, 0, 0, 0.8);
 }
 
 /* ========================================== */
-/* 2. DASHBOARD MAIN (VERDE MENTA LIQUID GLASS)*/
+/* 2. DASHBOARD MAIN (BORDE VERDE MENTA)     */
 /* ========================================== */
 
 .dashboard-container {
-  width: 100%;
-  max-width: 412px;
+  width: 100%; max-width: 412px;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 0 auto;
-  box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 16px;
 }
 
 .dash-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
+  display: flex; justify-content: space-between; align-items: center;
 }
 
-.dash-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
+.dash-menu-icon { font-size: 1.3rem; }
 
-.lion-avatar-frame {
-  font-size: 1.3rem;
-  filter: drop-shadow(0 0 6px var(--neon-mint));
-}
-
-.brand-text {
-  font-family: 'Cinzel', serif;
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.dash-menu-icon {
-  font-size: 1.3rem;
-  color: #fff;
-  cursor: pointer;
-}
-
-/* TARJETA BASE VERDE MENTA LIQUID GLASS (CENTRO TRANSPARENTE PÚRPURA) */
-.glass-card-mint {
-  background: radial-gradient(circle at center, rgba(0, 255, 204, 0.03) 0%, rgba(12, 3, 26, 0.75) 100%) !important;
-  border: 1px solid rgba(0, 255, 204, 0.35) !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+/* TARJETAS CON BORDE VERDE MENTA EN DASHBOARD */
+.glass-card-dash {
+  background: radial-gradient(circle at center, rgba(0, 255, 204, 0.02) 0%, rgba(12, 3, 26, 0.85) 100%);
+  border: 1px solid rgba(0, 255, 204, 0.4); /* BORDE VERDE MENTA */
   border-radius: 18px;
   padding: 16px;
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 
-    inset 0 0 15px rgba(0, 255, 204, 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.6) !important;
-  width: 100%;
-  box-sizing: border-box;
+  box-shadow: inset 0 0 12px rgba(0, 255, 204, 0.08), 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 8px;
-}
+.section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 
-/* SLIDER DE MÉTRICAS HORIZONTALES */
-.metrics-section {
-  width: 100%;
-}
+/* SLIDER METRICAS */
+.metrics-slider { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
+.metrics-slider::-webkit-scrollbar { display: none; }
+.metrics-slider .glass-card-dash { flex: 0 0 82%; }
 
-.metrics-slider {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  padding-bottom: 4px;
-}
+.card-head { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-sub); }
+.card-value { font-size: 1.6rem; font-weight: 800; margin: 2px 0; }
+.card-chart { width: 100%; height: 45px; }
+.card-chart svg { width: 100%; height: 100%; filter: drop-shadow(0 0 6px var(--neon-mint)); }
+.card-foot { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-sub); }
 
-.metrics-slider::-webkit-scrollbar {
-  display: none;
-}
+/* CHAT SIN HORA NI FOTO */
+.chat-body { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
 
-.metrics-slider .glass-card-mint {
-  flex: 0 0 82%; /* Muestra tarjeta principal y asoma la siguiente */
-  scroll-snap-align: start;
-}
-
-.card-head {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--text-sub);
-}
-
-.card-value {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 2px 0;
-}
-
-.card-chart {
-  width: 100%;
-  height: 45px;
-  margin: 4px 0;
-}
-
-.card-chart svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 6px var(--neon-mint));
-}
-
-.card-foot {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--text-sub);
-}
-
-/* CHAT WEB (VERDE MENTA & PÚRPURA) */
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chat-body {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 12px 0;
-}
-
-.chat-bubble {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  max-width: 85%;
-}
-
-.chat-bubble.incoming {
-  align-self: flex-start;
-}
-
-.chat-bubble.outgoing {
-  align-self: flex-end;
-}
-
-.chat-avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--neon-mint);
-  flex-shrink: 0;
-}
-
-.chat-avatar.user {
-  background: var(--neon-fuchsia);
-}
-
-.bubble-content {
+.incoming-simple p {
   background: rgba(0, 255, 204, 0.12);
   border: 1px solid rgba(0, 255, 204, 0.3);
   border-radius: 12px 12px 12px 2px;
-  padding: 8px 12px;
-  font-size: 0.82rem;
-  color: #fff;
-  position: relative;
+  padding: 10px 14px; font-size: 0.85rem; color: #fff;
+  max-width: 85%;
 }
 
-.chat-bubble.outgoing .bubble-content {
+.outgoing-simple p {
   background: rgba(255, 0, 122, 0.15);
-  border-color: rgba(255, 0, 122, 0.35);
+  border: 1px solid rgba(255, 0, 122, 0.35);
   border-radius: 12px 12px 2px 12px;
+  padding: 10px 14px; font-size: 0.85rem; color: #fff;
+  max-width: 85%; margin-left: auto;
 }
 
-.chat-time {
-  display: block;
-  font-size: 0.6rem;
-  color: var(--text-sub);
-  margin-top: 4px;
-  text-align: right;
+/* Carrusel de 4 opciones abajo */
+.chat-quick-options {
+  display: flex; gap: 8px; overflow-x: auto;
+  margin-bottom: 12px; scrollbar-width: none;
+}
+.chat-quick-options::-webkit-scrollbar { display: none; }
+
+.opt-btn {
+  flex: 0 0 auto;
+  background: rgba(0, 255, 204, 0.08);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  border-radius: 20px;
+  padding: 6px 12px; color: var(--neon-mint);
+  font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  white-space: nowrap;
 }
 
-.chat-input-bar {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
+.chat-input-bar { display: flex; gap: 8px; }
 .chat-input-bar input {
-  flex: 1;
-  background: rgba(10, 4, 20, 0.6);
-  border: 1px solid rgba(0, 255, 204, 0.3);
-  border-radius: 10px;
-  padding: 8px 12px;
-  color: #fff;
-  font-size: 0.8rem;
-  outline: none;
+  flex: 1; background: rgba(10, 4, 20, 0.6);
+  border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 10px;
+  padding: 8px 12px; color: #fff; font-size: 0.8rem; outline: none;
 }
-
 .chat-send-btn {
-  background: var(--neon-mint);
-  border: none;
-  border-radius: 10px;
-  width: 36px;
-  color: #05010a;
-  font-weight: 800;
-  cursor: pointer;
+  background: var(--neon-mint); border: none; border-radius: 10px;
+  width: 36px; color: #05010a; font-weight: 800; cursor: pointer;
 }
 
-/* PAGO FINAL (P.F) */
-.pf-summary-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 12px 0;
-  font-size: 0.9rem;
-}
-
-.pf-row {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-sub);
-}
-
-.pf-row.pf-total {
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding-top: 8px;
-  font-size: 1.1rem;
-  color: #fff;
-}
+/* PAGO FINAL */
+.pf-summary-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.9rem; }
+.pf-row { display: flex; justify-content: space-between; color: var(--text-sub); }
+.pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; }
 
 .btn-pf-action {
-  width: 100%;
-  padding: 12px 0;
-  background: linear-gradient(180deg, rgba(0, 255, 204, 0.25) 0%, rgba(0, 180, 140, 0.1) 100%);
-  border: 1.5px solid var(--neon-mint);
-  border-radius: 12px;
-  color: var(--neon-mint);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 1px;
-  cursor: pointer;
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+  width: 100%; padding: 12px 0;
+  background: linear-gradient(180deg, rgba(0, 255, 204, 0.2) 0%, rgba(0, 180, 140, 0.05) 100%);
+  border: 1.5px solid var(--neon-mint); border-radius: 12px;
+  color: var(--neon-mint); font-weight: 700; font-size: 0.95rem; cursor: pointer;
 }
 
-/* TIMER DE CUENTA REGRESIVA */
-.timer-section {
-  text-align: center;
-}
-
-.timer-label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text-sub);
-  letter-spacing: 1px;
-}
-
-.timer-digits {
-  font-size: 3rem;
-  font-weight: 800;
-  color: var(--neon-mint);
-  text-shadow: 0 0 16px rgba(0, 255, 204, 0.85);
-  line-height: 1.1;
-  margin: 4px 0;
-}
-
-.timer-sub {
-  font-size: 0.65rem;
-  color: var(--text-sub);
-  letter-spacing: 1px;
-}
+/* TIMER */
+.timer-section { text-align: center; }
+.timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
+.timer-digits { font-size: 3rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; }
+.timer-sub { font-size: 0.65rem; color: var(--text-sub); letter-spacing: 1px; }
