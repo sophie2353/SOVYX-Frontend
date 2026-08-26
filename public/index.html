@@ -9,143 +9,214 @@
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (HUD OVERLAY)             -->
+  <!-- 1. SPLASH SCREEN (LIQUID GLASS TRANSPARENTE) -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO GIGANTE CON S MAGENTA -->
-      <h1 class="logo-title">
-        SOVY<span class="serif-s">X</span>
-      </h1>
+      <!-- TITULO CENTRADO CON S SERIFADA FUCSIA -->
+      <div class="logo-wrapper">
+        <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
+      </div>
 
-      <!-- CHIP / CPU CONTAINER (BARRAS DE CRISTAL) -->
-      <div class="processor-core-frame">
-        <div class="capsules-track">
-          <div class="capsule cap-green active">
-            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
-          </div>
-          <div class="capsule cap-green active">
-            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
-          </div>
-          <div class="capsule cap-magenta active">
-            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
-          </div>
-          <div class="capsule cap-magenta">
-            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+      <!-- PORCENTAJE DE CARGA UNIDO A LÍNEA HUD -->
+      <div class="hud-percentage-wrapper">
+        <span id="splash-pct" class="splash-pct-num">0%</span>
+        <div class="hud-pointer-line"></div>
+      </div>
+
+      <!-- HARDWARE CPU BASE CON 14 PILAS/CÁPSULAS LIQUID GLASS -->
+      <div class="cpu-hardware-base">
+        <div class="cpu-glass-cover">
+          <div class="capsules-track">
+            <!-- 14 Pilas (Clases dinámicas para app.js) -->
+            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
+            <div class="capsule cap-mint active"><div class="cap-core"></div></div>
+            <div class="capsule cap-fuchsia active"><div class="cap-core"></div></div>
+            <div class="capsule cap-fuchsia active"><div class="cap-core"></div></div>
+            <div class="capsule cap-fuchsia active"><div class="cap-core"></div></div>
+            <div class="capsule cap-off"><div class="cap-core"></div></div>
+            <div class="capsule cap-off"><div class="cap-core"></div></div>
+            <div class="capsule cap-off"><div class="cap-core"></div></div>
+            <div class="capsule cap-off"><div class="cap-core"></div></div>
+            <div class="capsule cap-off"><div class="cap-core"></div></div>
           </div>
         </div>
       </div>
 
-      <!-- CÍRCULOS DE MÉTRICAS Y ORBE CENTRAL -->
+      <!-- CÍRCULOS DE BORDES DELGADOS CONECTADOS -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
-            <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            <path class="ring-fill green-fill" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
+            <circle class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="82, 100" />
           </svg>
           <div class="gauge-content">
-            <span class="gauge-label">CPU CORE</span>
-            <span class="gauge-val green-txt">85%</span>
+            <span class="gauge-label">DATOS PROCESADOS</span>
+            <span class="gauge-val mint-txt">82%</span>
           </div>
         </div>
 
-        <div class="gauge-card gauge-magenta">
+        <!-- ORBE CENTRAL CONECTOR -->
+        <div class="hud-center-node"></div>
+
+        <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
-            <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            <path class="ring-fill magenta-fill" stroke-dasharray="62, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
+            <circle class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="90, 100" />
           </svg>
           <div class="gauge-content">
-            <span class="gauge-label">MEMORY</span>
-            <span class="gauge-val magenta-txt">62%</span>
+            <span class="gauge-label">ANÁLISIS MERCADO</span>
+            <span class="gauge-val fuchsia-txt">90%</span>
           </div>
         </div>
       </div>
 
-      <!-- INDICADOR Y PORCENTAJE DEL 100% -->
-      <div class="hud-percentage-wrapper">
-        <div class="hud-pointer-line"></div>
-        <span id="splash-pct" class="splash-pct-num">100%</span>
-      </div>
-
-      <!-- ANUNCIO LIQUID GLASS "BIENVENIDO" -->
-      <div class="btn-glass-welcome">BIENVENIDO</div>
+      <!-- CARTEL BIENVENIDOS LIQUID GLASS TRANSPARENTE -->
+      <div class="banner-glass-welcome">BIENVENIDO</div>
     </div>
   </div>
 
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN                          -->
+  <!-- 2. DASHBOARD PRINCIPAL (VERDE MENTA GLASS) -->
   <!-- ========================================== -->
   <main class="dashboard-container">
-    
-    <!-- HEADER DEL DASHBOARD -->
+
+    <!-- BARRA SUPERIOR CON AVATAR LEÓN -->
     <header class="dash-header">
-      <button class="dash-menu-btn">
-        <span>☰</span> MENU
-      </button>
-      <h2 class="logo-title" style="font-size: 1.8rem !important;">
-        SOVY<span class="serif-s" style="font-size: 2.2rem !important;">X</span>
-      </h2>
+      <div class="dash-header-left">
+        <div class="lion-avatar-frame">🦁</div>
+        <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
+      </div>
+      <div class="dash-header-right">
+        <span class="dash-menu-icon">☰</span>
+      </div>
     </header>
 
-    <!-- SLIDER / CARRUSEL DE MÉTRICAS -->
+    <!-- MÉTRICAS: TARJETAS DESLIZABLES VERDE MENTA LIQUID GLASS -->
     <section class="metrics-section">
-      <h3 class="metrics-title">Rendimiento Sistema</h3>
+      <h3 class="section-title">Metrics</h3>
       
       <div class="metrics-slider">
         
-        <!-- Tarjeta 1 del Carrusel -->
-        <article class="metric-card">
-          <span class="metric-card-title">Tasa de Conversión</span>
-          <span class="metric-card-val green-txt">4.8%</span>
-          <div class="metric-wave-container">
-            <svg viewBox="0 0 300 65" preserveAspectRatio="none">
-              <path d="M0,45 Q75,10 150,40 T300,15" fill="none" stroke="#00ffcc" stroke-width="3" filter="drop-shadow(0 0 6px #00ffcc)"/>
+        <!-- Slide 1 -->
+        <article class="glass-card-mint">
+          <div class="card-head">
+            <span>Alcance</span>
+            <span class="dots">•••</span>
+          </div>
+          <div class="card-value">15.000</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 50" preserveAspectRatio="none">
+              <path d="M0,35 Q50,5 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="2.5" />
             </svg>
           </div>
-          <div class="metric-card-footer">
-            <span>OBJETIVO: 5.0%</span>
-            <span class="green-txt">+12% ESTE MES</span>
+          <div class="card-foot">
+            <span>Incremento</span>
+            <span class="mint-txt">+12.5%</span>
           </div>
         </article>
 
-        <!-- Tarjeta 2 del Carrusel -->
-        <article class="metric-card">
-          <span class="metric-card-title">CTR Meta Ads</span>
-          <span class="metric-card-val magenta-txt">3.2%</span>
-          <div class="metric-wave-container">
-            <svg viewBox="0 0 300 65" preserveAspectRatio="none">
-              <path d="M0,20 Q75,55 150,25 T300,50" fill="none" stroke="#ff007a" stroke-width="3" filter="drop-shadow(0 0 6px #ff007a)"/>
+        <!-- Slide 2 -->
+        <article class="glass-card-mint">
+          <div class="card-head">
+            <span>Inversión</span>
+            <span class="dots">•••</span>
+          </div>
+          <div class="card-value">15$</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 50" preserveAspectRatio="none">
+              <path d="M0,15 Q50,45 100,20 T200,35" fill="none" stroke="#00ffcc" stroke-width="2.5" />
             </svg>
           </div>
-          <div class="metric-card-footer">
-            <span>ALCANCE: 15,000</span>
-            <span class="magenta-txt">-1.30%</span>
+          <div class="card-foot">
+            <span>Variación</span>
+            <span class="fuchsia-txt">-1.50%</span>
+          </div>
+        </article>
+
+        <!-- Slide 3 -->
+        <article class="glass-card-mint">
+          <div class="card-head">
+            <span>C.O</span>
+            <span class="dots">•••</span>
+          </div>
+          <div class="card-value">3.3%</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 50" preserveAspectRatio="none">
+              <path d="M0,40 Q50,20 100,35 T200,5" fill="none" stroke="#00ffcc" stroke-width="2.5" />
+            </svg>
+          </div>
+          <div class="card-foot">
+            <span>Rendimiento</span>
+            <span class="mint-txt">Estable</span>
           </div>
         </article>
 
       </div>
     </section>
 
-    <!-- TARJETA DE RESUMEN -->
-    <section class="dashboard-card">
-      <h3 class="metrics-title" style="margin-bottom: 12px;">Estado del Servidor</h3>
-      <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
-        <span style="color: var(--text-sub);">Usuarios Activos:</span>
-        <strong style="color: #fff;">21 personas</strong>
+    <!-- CHAT WEB: VERDE MENTA & PÚRPURA LIQUID GLASS -->
+    <section class="glass-card-mint chat-section">
+      <div class="chat-header">
+        <h3 class="section-title">Chat Web</h3>
+        <span class="dots">•••</span>
       </div>
-      <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
-        <span style="color: var(--text-sub);">Slots Disponibles:</span>
-        <strong class="magenta-txt">2 Cupos</strong>
+
+      <div id="chat-messages" class="chat-body">
+        <div class="chat-bubble incoming">
+          <div class="chat-avatar"></div>
+          <div class="bubble-content">
+            Hola, ¿los costos incluyen la calibración de la IA?
+            <span class="chat-time">19:00 AM</span>
+          </div>
+        </div>
+
+        <div class="chat-bubble outgoing">
+          <div class="bubble-content">
+            ¡Sí! Incluye calibración espejo y ciclo 48H.
+            <span class="chat-time">6:00 PM</span>
+          </div>
+          <div class="chat-avatar user"></div>
+        </div>
+      </div>
+
+      <div class="chat-input-bar">
+        <input type="text" placeholder="Escribe un mensaje..." />
+        <button class="chat-send-btn">➤</button>
       </div>
     </section>
 
-    <!-- TARJETA TEMPORIZADOR -->
-    <section class="dashboard-card timer-card">
-      <span class="timer-title">TIEMPO RESTANTE DE SESIÓN</span>
-      <div id="timer-display" class="timer-digital">48:00:00</div>
-      <span class="timer-sub-text">ESTADO DE RESERVA: ACTIVO</span>
+    <!-- PAGO FINAL (P.F) DESGLOSADO -->
+    <section class="glass-card-mint pf-section">
+      <h3 class="section-title">P.F (Pago Final)</h3>
+      <div class="pf-summary-list">
+        <div class="pf-row">
+          <span>Pago inicial</span>
+          <strong>1.000$</strong>
+        </div>
+        <div class="pf-row">
+          <span>Pago después de resultados</span>
+          <strong>9.000$</strong>
+        </div>
+        <div class="pf-row pf-total">
+          <span>Total</span>
+          <strong class="mint-txt">10.000$</strong>
+        </div>
+      </div>
+      <button class="btn-pf-action">PAGAR</button>
+    </section>
+
+    <!-- TIMER DE CUENTA REGRESIVA -->
+    <section class="glass-card-mint timer-section">
+      <span class="timer-label">TIEMPO RESTANTE</span>
+      <div id="timer-display" class="timer-digits">48:00:00</div>
+      <span class="timer-sub">TIEMPO CON SOFTWARE ACTIVO</span>
     </section>
 
   </main>
