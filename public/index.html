@@ -9,37 +9,36 @@
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (BORDE CRISTAL BLANCO)   -->
+  <!-- 1. SPLASH SCREEN (AUTOCARGA AL 100%)       -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO CON S SERIFADA -->
+      <!-- LOGO MÁS GRANDE Y CENTRADO -->
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
       </div>
 
-      <!-- PORCENTAJE DE CARGA -->
+      <!-- PORCENTAJE DINÁMICO HUD -->
       <div class="hud-percentage-wrapper">
-        <span id="splash-pct" class="splash-pct-num">65%</span>
+        <span id="splash-pct" class="splash-pct-num">0%</span>
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- CPU HARDWARE CONTAINER (SOCKET CON PINES Y CIRCUITO) -->
+      <!-- SOCKET HARDWARE CPU -->
       <div class="cpu-hardware-socket">
-        <div class="cpu-pins-top"></div>
         <div class="cpu-inner-circuit">
-          <div class="capsules-track">
-            <!-- 14 Pilas (6 Verde Menta, 3 Fucsia, 5 Negras/Apagadas) -->
-            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-mint active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-fuchsia active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-fuchsia active"><div class="cap-glint"></div></div>
-            <div class="capsule cap-fuchsia active"><div class="cap-glint"></div></div>
+          <div id="capsules-track" class="capsules-track">
+            <!-- 14 Pilas vacías al inicio -->
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
@@ -47,10 +46,9 @@
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
           </div>
         </div>
-        <div class="cpu-pins-bottom"></div>
       </div>
 
-      <!-- GAUGES DE BORDES DELGADOS -->
+      <!-- GAUGES HUD DE BORDES GLOW -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -77,20 +75,20 @@
         </div>
       </div>
 
-      <!-- BOTON BIENVENIDO VIDRIO BLANCO -->
-      <button class="btn-glass-white">BIENVENIDO</button>
+      <!-- CARTEL / BANNER BIENVENIDO (SIN BOTÓN, CENTRADO Y GRANDE) -->
+      <div class="welcome-sign-glass">BIENVENIDO</div>
+
     </div>
   </div>
 
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN (BORDE VERDE MENTA)     -->
+  <!-- 2. DASHBOARD MAIN (BORDES VERDE MENTA)     -->
   <!-- ========================================== -->
   <main class="dashboard-container">
 
     <header class="dash-header">
       <div class="dash-header-left">
-        <div class="lion-avatar-frame"></div>
         <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
       </div>
       <div class="dash-header-right">
@@ -98,9 +96,9 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS -->
+    <!-- MÉTRICAS SLIDER -->
     <section class="metrics-section">
-      <h3 class="section-title">Metrics</h3>
+      <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider">
         <article class="glass-card-dash">
           <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
@@ -126,34 +124,31 @@
       </div>
     </section>
 
-    <!-- CHAT WEB SIMPLIFICADO CON 4 OPCIONES ABAJO -->
+    <!-- CHAT WEB -->
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
-        <span class="dots">•••</span>
       </div>
 
-      <div class="chat-body">
+      <div id="chat-body" class="chat-body">
         <div class="chat-bubble incoming-simple">
           <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
         </div>
-
         <div class="chat-bubble outgoing-simple">
           <p>¡Sí! Incluye calibración espejo y ciclo 48H.</p>
         </div>
       </div>
 
-      <!-- 4 OPCIONES DESLIZABLES DEBAJO DEL MENSAJE -->
       <div class="chat-quick-options">
-        <button class="opt-btn">1. Ver Planes</button>
-        <button class="opt-btn">2. Calibración IA</button>
-        <button class="opt-btn">3. Soporte 24/7</button>
-        <button class="opt-btn">4. Métodos de Pago</button>
+        <button class="opt-btn" onclick="sendQuickMsg('Ver Planes')">1. Ver Planes</button>
+        <button class="opt-btn" onclick="sendQuickMsg('Calibración IA')">2. Calibración IA</button>
+        <button class="opt-btn" onclick="sendQuickMsg('Soporte 24/7')">3. Soporte 24/7</button>
+        <button class="opt-btn" onclick="sendQuickMsg('Métodos de Pago')">4. Métodos de Pago</button>
       </div>
 
       <div class="chat-input-bar">
-        <input type="text" placeholder="Escribe un mensaje..." />
-        <button class="chat-send-btn">➤</button>
+        <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
+        <button id="chat-send" class="chat-send-btn">➤</button>
       </div>
     </section>
 
@@ -168,7 +163,7 @@
       <button class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- TIMER -->
+    <!-- TIMER 48H -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO RESTANTE</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
@@ -176,6 +171,70 @@
     </section>
 
   </main>
+
+  <!-- ========================================== -->
+  <!-- 3. SCRIPT DE AUTOCARGA A 100% Y TRANSICIÓN -->
+  <!-- ========================================== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const splash = document.getElementById('view-splash');
+      const pctText = document.getElementById('splash-pct');
+      const capsules = document.querySelectorAll('#capsules-track .capsule');
+
+      let currentPct = 0;
+      const targetPct = 100; // Carga completa automatizada al 100%
+
+      const loadInterval = setInterval(() => {
+        if (currentPct < targetPct) {
+          currentPct++;
+          pctText.textContent = `${currentPct}%`;
+
+          // Llenado dinámico de las 14 pilas (8 Menta, 6 Fucsia)
+          const activeCapsulesCount = Math.floor((currentPct / 100) * capsules.length);
+          capsules.forEach((cap, index) => {
+            if (index < activeCapsulesCount) {
+              if (index < 8) {
+                cap.className = 'capsule cap-mint';
+              } else {
+                cap.className = 'capsule cap-fuchsia';
+              }
+            }
+          });
+        } else {
+          clearInterval(loadInterval);
+          pctText.textContent = '100%';
+          
+          // Al llegar a 100%, espera 400ms y abre la web automáticamente
+          setTimeout(() => {
+            splash.classList.add('hidden');
+          }, 400);
+        }
+      }, 30); // Velocidad fluida de carga
+
+      // Temporizador regresivo 48 horas
+      let totalSeconds = 48 * 3600;
+      const timerDisplay = document.getElementById('timer-display');
+
+      setInterval(() => {
+        if (totalSeconds > 0) {
+          totalSeconds--;
+          const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+          const secs = String(totalSeconds % 60).padStart(2, '0');
+          timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
+        }
+      }, 1000);
+    });
+
+    function sendQuickMsg(text) {
+      const chatBody = document.getElementById('chat-body');
+      const msgBubble = document.createElement('div');
+      msgBubble.className = 'chat-bubble outgoing-simple';
+      msgBubble.innerHTML = `<p>${text}</p>`;
+      chatBody.appendChild(msgBubble);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+  </script>
 
 </body>
 </html>
