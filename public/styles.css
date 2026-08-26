@@ -20,7 +20,7 @@ body {
   background: var(--bg-dark);
   background-image: radial-gradient(circle at 50% 30%, #320754 0%, #110228 60%, #040008 100%);
   color: var(--text-main);
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,13 +32,14 @@ body {
 .mint-txt { color: var(--neon-mint); }
 
 /* ========================================================= */
-/* 1. SPLASH SCREEN (EFFECTOS SCI-FI + CPU HUD MEJORADOS)   */
+/* 1. SPLASH SCREEN (ESTRUCTURA Y CAPA CPU)                 */
 /* ========================================================= */
 
 .full-screen {
   position: fixed;
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  width: 100vw; 
+  height: 100dvh; /* Dynamic Viewport Height para móviles */
   z-index: 9999;
   background: radial-gradient(circle at 50% 35%, #38075c 0%, #0f0221 65%, #030007 100%);
   display: flex;
@@ -56,27 +57,27 @@ body {
 .splash-content {
   width: 100%;
   max-width: 380px;
-  height: 100vh;
-  padding: 16px 16px 28px 16px;
+  height: 100dvh;
+  padding: 20px 16px 24px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; /* Mantiene distancias parejas verticalmente */
   text-align: center;
 }
 
-/* LOGO MÁS ABAJO Y MÁS GRANDE CON EFECTO GLOW SCI-FI */
+/* LOGO SODIE CENTRADO */
 .logo-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 45px;
+  margin-top: 20px;
 }
 
 .logo-title {
   font-family: 'Cinzel', serif !important;
-  font-size: 5.8rem !important;
+  font-size: 5.2rem !important;
   font-weight: 800;
   background: linear-gradient(180deg, #FFFFFF 30%, #D8DFEE 100%);
   -webkit-background-clip: text;
@@ -85,18 +86,19 @@ body {
   align-items: center; 
   justify-content: center;
   filter: drop-shadow(0 4px 22px rgba(255, 255, 255, 0.45));
-  letter-spacing: -1px;
+  letter-spacing: 2px;
   animation: logoGlow 4s infinite alternate ease-in-out;
 }
 
 .logo-title .serif-s {
-  font-size: 7.2rem !important;
+  font-size: 6.5rem !important;
   color: var(--neon-fuchsia) !important;
   -webkit-text-fill-color: var(--neon-fuchsia) !important;
   filter: drop-shadow(0 0 25px rgba(255, 0, 122, 0.95)) drop-shadow(0 0 45px rgba(255, 0, 122, 0.6));
   animation: sPulse 2.5s infinite alternate ease-in-out;
 }
 
+/* INDICADOR DE PORCENTAJE HUD */
 .hud-percentage-wrapper {
   display: flex;
   flex-direction: column;
@@ -119,16 +121,16 @@ body {
   box-shadow: 0 0 8px var(--neon-mint), 0 0 16px var(--neon-mint);
 }
 
-/* HARDWARE CPU SOCKET CON CIRCUITO SVG Y LÁSER DE ESCANEO */
+/* HARDWARE CPU SOCKET CON CAPA DE PROCESADOR */
 .cpu-hardware-socket {
   width: 100%;
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.12) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.08) 100%);
   border: 1.8px solid rgba(255, 255, 255, 0.65);
   border-top: 2.5px solid rgba(255, 255, 255, 0.95);
   border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
-  padding: 14px 10px;
+  padding: 16px 12px;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   box-shadow: 
@@ -138,9 +140,33 @@ body {
     0 0 30px rgba(255, 0, 122, 0.25),
     0 0 40px rgba(0, 255, 204, 0.15);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Efecto de Escaneo Láser Vertical Sci-Fi */
+/* CAPA VECTORIAL DEL CHIP PROCESADOR (FONDO) */
+.cpu-chip-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cpu-chip-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  opacity: 0.95;
+}
+
+/* LÁSER DE ESCANEO SCI-FI SOBRE EL CPU */
 .cpu-hardware-socket::after {
   content: '';
   position: absolute;
@@ -148,29 +174,22 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 204, 0.2) 80%, rgba(0, 255, 204, 0.8) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 204, 0.15) 80%, rgba(0, 255, 204, 0.7) 100%);
   pointer-events: none;
   z-index: 3;
   animation: cpuScanLine 3.5s infinite linear;
 }
 
-.cpu-bg-circuit {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.85;
-}
-
+/* CAPA INTERNA DE BATERÍAS/CÁPSULAS (FRENTE) */
 .cpu-inner-circuit {
   position: relative;
-  z-index: 2;
-  background: rgba(15, 3, 30, 0.45);
+  z-index: 2; /* Sobrepone el track al procesador */
+  width: 100%;
+  background: rgba(10, 2, 22, 0.65);
   border: 1px dashed rgba(255, 255, 255, 0.35);
   border-radius: 12px;
   padding: 8px;
-  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
 }
 
 .capsules-track {
@@ -181,7 +200,7 @@ body {
 }
 
 .capsule {
-  height: 60px;
+  height: 58px;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -215,7 +234,7 @@ body {
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-/* GAUGES HUD */
+/* GAUGES HUD CIRCULARES */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -253,19 +272,19 @@ body {
 .gauge-label { font-size: 0.42rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
 .gauge-val { font-size: 0.9rem; font-weight: 800; margin-top: 2px; }
 
-/* BANNER BIENVENIDO (SUBIDO Y ESTILIZADO CON EFFECTO ULTRA-GLASS) */
+/* CARTEL BIENVENIDO (AJUSTADO PARA NO CORTARSE EN PANTALLA) */
 .welcome-sign-glass {
   width: 100%;
-  padding: 16px 0;
+  padding: 14px 0;
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.8rem; 
+  font-size: 1.6rem; 
   font-weight: 800; 
-  letter-spacing: 8px;
+  letter-spacing: 6px;
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
   border: 1.8px solid rgba(255, 255, 255, 0.65);
   border-top: 2.5px solid rgba(255, 255, 255, 0.95);
   border-radius: 16px;
@@ -277,7 +296,7 @@ body {
     0 0 25px rgba(255, 255, 255, 0.25);
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 255, 255, 0.5);
   user-select: none;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -290,7 +309,7 @@ body {
 }
 
 /* ========================================================= */
-/* ANIMACIONES SCI-FI HUD DE ALTA DEFINICIÓN                 */
+/* ANIMACIONES                                               */
 /* ========================================================= */
 
 @keyframes logoGlow {
@@ -324,7 +343,7 @@ body {
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN (MÉTRICAS CUADRADAS - INTACTO)          */
+/* 2. DASHBOARD MAIN                                         */
 /* ========================================================= */
 
 .dashboard-container {
@@ -363,7 +382,7 @@ body {
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 
-/* MÉTRICAS CUADRADAS CON BORDES REDONDEADOS */
+/* MÉTRICAS CUADRADAS */
 .metrics-slider { 
   display: flex; 
   gap: 14px; 
@@ -407,7 +426,6 @@ body {
   max-width: 85%; margin-left: auto;
 }
 
-/* OPCIONES DESLIZABLES */
 .chat-quick-options {
   display: flex; gap: 8px; overflow-x: auto;
   margin-bottom: 12px; scrollbar-width: none;
