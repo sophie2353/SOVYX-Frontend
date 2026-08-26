@@ -60,12 +60,13 @@ body {
   width: 100%;
   max-width: 380px;
   height: 100%;
-  max-height: 680px;
-  padding: 16px 20px;
+  max-height: 580px; /* Reducido para agrupar mejor los elementos */
+  padding: 12px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center; /* Alineación compacta al centro */
+  gap: 16px; /* Distancia constante y compacta como en el diseño original */
   text-align: center;
   box-sizing: border-box;
 }
@@ -73,8 +74,8 @@ body {
 /* LOGO SOVYX */
 .logo-title {
   font-family: 'Cinzel', serif;
-  font-size: 2.8rem;
-  letter-spacing: 3px;
+  font-size: 3.2rem;
+  letter-spacing: 2px;
   font-weight: 700;
   background: linear-gradient(180deg, #FFFFFF 15%, #D0D5E0 65%, #8A92A3 100%);
   -webkit-background-clip: text;
@@ -83,12 +84,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
+  margin: 0 0 4px 0;
 }
 
 .logo-title .serif-s {
   font-family: 'Cinzel', serif;
-  font-size: 3.6rem;
+  font-size: 4rem;
   color: var(--neon-magenta);
   -webkit-text-fill-color: var(--neon-magenta);
   font-weight: 800;
@@ -106,7 +107,7 @@ body {
 
 .hud-pointer-line {
   width: 1.5px;
-  height: 8px;
+  height: 12px;
   background: linear-gradient(180deg, transparent, var(--neon-green));
   box-shadow: 0 0 6px var(--neon-green);
 }
@@ -119,73 +120,83 @@ body {
   text-shadow: 0 0 10px rgba(0, 255, 204, 0.9);
 }
 
-/* NÚCLEO DE CÁPSULAS */
+/* NÚCLEO DE CÁPSULAS - EFECTO CRISTAL Y BARRAS MÁS LARGAS */
 .processor-core-frame {
   width: 100%;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(13, 5, 26, 0.88);
-  border: 1.5px solid rgba(224, 17, 95, 0.45);
-  border-radius: 14px;
-  padding: 5px;
+  background: rgba(13, 5, 26, 0.65);
+  border: 1px solid rgba(180, 100, 255, 0.35);
+  border-radius: 12px;
+  padding: 6px;
   box-shadow: 
-    inset 0 0 18px rgba(0, 0, 0, 0.9),
-    0 0 20px rgba(224, 17, 95, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+    inset 0 0 20px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(180, 100, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .capsules-track {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 3px;
+  gap: 4px;
   width: 100%;
 }
 
 .capsule {
   flex: 1;
-  height: 42px;
-  border-radius: 5px;
-  background: rgba(22, 10, 36, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  height: 58px; /* Más largas verticalmente */
+  border-radius: 6px;
+  background: rgba(22, 10, 36, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(8px);
 }
 
+/* Reflejo de cristal superior (Glint) */
 .capsule::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 42%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 4px 4px 0 0;
+  height: 48%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 5px 5px 0 0;
   pointer-events: none;
 }
 
 .capsule .cap-icon {
-  width: 10px !important;
-  height: 10px !important;
+  width: 12px !important;
+  height: 12px !important;
   z-index: 3;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95));
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95));
 }
 
+/* Cápsula Verde Cristalina */
 .capsule.cap-green.active {
-  background: linear-gradient(180deg, #50f2c3 0%, #009975 60%, #004d3b 100%);
-  border: 1px solid #73ffd6;
-  box-shadow: 0 0 10px rgba(0, 255, 204, 0.7), inset 0 2px 3px rgba(255, 255, 255, 0.85);
+  background: linear-gradient(180deg, #60fbd0 0%, #00b386 50%, #005944 100%);
+  border: 1px solid #a3ffe5;
+  box-shadow: 
+    0 0 12px rgba(0, 255, 204, 0.8),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.4);
 }
 
+/* Cápsula Magenta Cristalina */
 .capsule.cap-magenta.active {
-  background: linear-gradient(180deg, #ff66b2 0%, #cc0066 60%, #59002c 100%);
-  border: 1px solid #ff99cc;
-  box-shadow: 0 0 10px rgba(255, 0, 122, 0.75), inset 0 2px 3px rgba(255, 255, 255, 0.85);
+  background: linear-gradient(180deg, #ff77be 0%, #e60073 50%, #660033 100%);
+  border: 1px solid #ffb3d9;
+  box-shadow: 
+    0 0 12px rgba(255, 0, 122, 0.85),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /* GAUGES Y ORBE CENTRAL */
@@ -194,9 +205,9 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 320px;
+  max-width: 310px;
   position: relative;
-  margin: 0;
+  margin: 4px 0;
 }
 
 .splash-gauges::after {
@@ -205,17 +216,17 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--neon-magenta);
-  box-shadow: 0 0 10px var(--neon-magenta), 0 0 20px var(--neon-magenta);
+  box-shadow: 0 0 12px var(--neon-magenta), 0 0 24px var(--neon-magenta);
 }
 
 .gauge-card {
   position: relative;
-  width: 86px;
-  height: 86px;
+  width: 84px;
+  height: 84px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,7 +236,7 @@ body {
 .gauge-card::before {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   border: 1px dashed rgba(0, 255, 204, 0.35);
   border-radius: 50%;
 }
@@ -235,8 +246,8 @@ body {
 }
 
 .gauge-ring {
-  width: 86px !important;
-  height: 86px !important;
+  width: 84px !important;
+  height: 84px !important;
   transform: rotate(-90deg);
 }
 
@@ -285,35 +296,35 @@ body {
   margin-top: 2px;
 }
 
-/* BOTÓN BIENVENIDO */
+/* BOTÓN BIENVENIDO - GLASSMORPHISM PULIDO */
 .btn-glass-welcome {
   pointer-events: auto;
   cursor: pointer;
   width: 100% !important;
-  padding: 11px 0 !important;
+  padding: 13px 0 !important;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.15rem !important;
+  font-size: 1.25rem !important;
   font-weight: 700 !important;
-  letter-spacing: 5px !important;
+  letter-spacing: 6px !important;
   color: #ffffff !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.75) !important;
-  border-radius: 14px !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.8),
-    0 8px 24px rgba(0, 0, 0, 0.75),
-    0 0 18px rgba(0, 255, 204, 0.12) !important;
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    0 10px 28px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 255, 204, 0.15) !important;
   transition: all 0.2s ease;
-  margin: 0;
+  margin-top: 6px;
 }
 
 .btn-glass-welcome:active {
   transform: scale(0.98);
   border-color: var(--neon-green) !important;
-  box-shadow: 0 0 20px rgba(0, 255, 204, 0.5) !important;
+  box-shadow: 0 0 22px rgba(0, 255, 204, 0.6) !important;
 }
 
 /* ========================================== */
