@@ -30,13 +30,21 @@ body {
   align-items: center;
   overflow-x: hidden;
   width: 100%;
+  position: relative;
 }
 
 .magenta-txt { color: var(--neon-magenta); }
 .green-txt { color: var(--neon-green); }
 
+/* FIX CRÍTICO: CLASE PARA OCULTAR PANTALLAS Y DESBLOQUEAR EL DASHBOARD */
+.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* ========================================== */
-/* 1. SPLASH SCREEN (100% IDENTICO A LA REF)  */
+/* 1. SPLASH SCREEN                           */
 /* ========================================== */
 
 .full-screen {
@@ -55,26 +63,27 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow-y: auto;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 .splash-content {
   width: 100%;
   max-width: 380px;
-  height: 100vh;
-  padding: 20px 16px;
+  min-height: 100vh;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around; /* Distribución vertical uniforme centrado */
+  justify-content: space-between;
   text-align: center;
   box-sizing: border-box;
 }
 
-/* LOGO GIGANTE IDENTICO A LA REFERENCIA */
+/* LOGO GIGANTE SOVYX */
 .logo-title {
   font-family: 'Cinzel', serif !important;
-  font-size: 4.5rem !important;
+  font-size: 4.2rem !important;
   letter-spacing: 2px;
   font-weight: 800;
   background: linear-gradient(180deg, #FFFFFF 20%, #D0D5E0 65%, #8A92A3 100%);
@@ -85,11 +94,12 @@ body {
   align-items: center;
   justify-content: center;
   line-height: 1;
+  margin-top: 10px;
 }
 
 .logo-title .serif-s {
   font-family: 'Cinzel', serif !important;
-  font-size: 5.8rem !important;
+  font-size: 5.5rem !important;
   color: var(--neon-magenta) !important;
   -webkit-text-fill-color: var(--neon-magenta) !important;
   font-weight: 800;
@@ -97,47 +107,57 @@ body {
   margin-right: -2px;
 }
 
-/* INDICADOR Y BRACKETS DEL 65% */
+/* INDICADOR SUPERIOR CON LÍNEAS GUÍA (HUD) */
 .hud-percentage-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-bottom: -6px;
+  margin-bottom: -4px;
 }
 
 .hud-pointer-line {
   width: 2px;
-  height: 12px;
+  height: 14px;
   background: var(--neon-green);
   box-shadow: 0 0 8px var(--neon-green);
 }
 
 .splash-pct-num {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--neon-green);
   letter-spacing: 1.5px;
   text-shadow: 0 0 12px rgba(0, 255, 204, 0.9);
 }
 
-/* CHIP / CPU CONTAINER CON CIRCUITO TRASERO */
+/* CHIP / MARCO DEL PROCESADOR CON CIRCUITO DETRÁS */
 .processor-core-frame {
   width: 100%;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(15, 5, 30, 0.85);
-  border: 1.5px solid rgba(180, 100, 255, 0.35);
+  background: rgba(15, 5, 30, 0.88);
+  border: 1.5px solid rgba(180, 100, 255, 0.4);
   border-radius: 16px;
   padding: 10px 8px;
   box-shadow: 
     inset 0 0 25px rgba(0, 0, 0, 0.95),
-    0 0 30px rgba(180, 100, 255, 0.15),
+    0 0 30px rgba(180, 100, 255, 0.18),
     0 0 2px rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+/* Pines de circuito rodeando el chip */
+.processor-core-frame::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1px dashed rgba(180, 100, 255, 0.25);
+  border-radius: 20px;
+  pointer-events: none;
 }
 
 .capsules-track {
@@ -148,50 +168,74 @@ body {
   width: 100%;
 }
 
+/* CÁPSULAS CON CORTE GEOMÉTRICO 3D (FACETADO TIPO GEMA) */
 .capsule {
   flex: 1;
-  height: 68px; /* Barras alargadas tipo cristal */
-  border-radius: 6px;
-  background: rgba(12, 4, 22, 0.7);
+  height: 68px;
+  border-radius: 5px;
+  background: rgba(10, 3, 20, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Glass Glint Glossy Reflect */
+/* Bisel central vertical para efecto cristalino 3D */
+.capsule::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 100%);
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Reflejo superior brillante */
 .capsule::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 48%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 5px 5px 0 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-radius: 4px 4px 0 0;
   pointer-events: none;
+  z-index: 3;
 }
 
 .capsule .cap-icon {
   width: 12px !important;
   height: 12px !important;
-  z-index: 3;
+  z-index: 4;
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95));
 }
 
+/* Cápsulas Verdes */
 .capsule.cap-green.active {
-  background: linear-gradient(180deg, #62fce0 0%, #00bf8f 55%, #005943 100%);
-  border: 1px solid #a8ffee;
-  box-shadow: 0 0 16px rgba(0, 255, 204, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, #74ffe4 0%, #00d9a3 40%, #007054 85%, #003628 100%);
+  border: 1px solid #b3fff2;
+  box-shadow: 
+    0 0 14px rgba(0, 255, 204, 0.8),
+    inset 0 2px 5px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.7);
 }
 
+/* Cápsulas Magenta */
 .capsule.cap-magenta.active {
-  background: linear-gradient(180deg, #ff7bc3 0%, #e60073 55%, #660033 100%);
+  background: linear-gradient(180deg, #ff94ce 0%, #e60073 40%, #850043 85%, #400020 100%);
   border: 1px solid #ffc2e0;
-  box-shadow: 0 0 16px rgba(255, 0, 122, 0.9), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 0 14px rgba(255, 0, 122, 0.85),
+    inset 0 2px 5px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.7);
 }
 
-/* CIRCULOS Y PLANETOIDE CENTRAL */
+/* CÍRCULOS Y PLANETOIDE CENTRAL CON ANILLOS */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -199,9 +243,10 @@ body {
   width: 100%;
   max-width: 320px;
   position: relative;
+  margin: 10px 0;
 }
 
-/* Orbe 3D Central */
+/* Orbe 3D Central con Anillo Orbital */
 .splash-gauges::after {
   content: '';
   position: absolute;
@@ -211,15 +256,19 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ff99dd 0%, #ff007a 50%, #300018 100%);
-  box-shadow: 0 0 16px var(--neon-magenta), inset 0 0 5px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: radial-gradient(circle at 35% 35%, #ff99dd 0%, #ff007a 55%, #300018 100%);
+  box-shadow: 
+    0 0 18px var(--neon-magenta),
+    0 0 4px #ffffff,
+    inset 0 0 6px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  z-index: 5;
 }
 
 .gauge-card {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 92px;
+  height: 92px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,8 +288,8 @@ body {
 }
 
 .gauge-ring {
-  width: 90px !important;
-  height: 90px !important;
+  width: 92px !important;
+  height: 92px !important;
   transform: rotate(-90deg);
 }
 
@@ -282,7 +331,7 @@ body {
   margin-top: 2px;
 }
 
-/* BOTON GLASS BIENVENIDO */
+/* BOTÓN GLASS BIENVENIDO */
 .btn-glass-welcome {
   pointer-events: auto;
   cursor: pointer;
@@ -303,6 +352,7 @@ body {
     inset 0 1px 2px rgba(255, 255, 255, 0.9),
     0 10px 28px rgba(0, 0, 0, 0.8),
     0 0 20px rgba(0, 255, 204, 0.15) !important;
+  margin-bottom: 10px;
 }
 
 .btn-glass-welcome:active {
@@ -312,7 +362,7 @@ body {
 }
 
 /* ========================================== */
-/* 2. DASHBOARD MAIN & CAROUSEL LAYOUT FIX    */
+/* 2. DASHBOARD MAIN & LAYOUT FIX             */
 /* ========================================== */
 
 .dashboard-container {
@@ -324,6 +374,8 @@ body {
   gap: 16px;
   margin: 0 auto;
   box-sizing: border-box;
+  z-index: 10;
+  position: relative;
 }
 
 .dash-header {
@@ -346,7 +398,6 @@ body {
   font-weight: 600;
 }
 
-/* FIX CRÍTICO DEL OVERFLOW DE LAS GRAFICAS EN DASHBOARD */
 .metrics-section {
   width: 100%;
   overflow: hidden;
@@ -375,7 +426,7 @@ body {
 }
 
 .metric-card {
-  flex: 0 0 100%; /* Garantiza una sola tarjeta contenida a la vez */
+  flex: 0 0 100%;
   max-width: 100%;
   box-sizing: border-box;
   scroll-snap-align: start;
@@ -403,7 +454,6 @@ body {
   margin: 4px 0;
 }
 
-/* FIX SVG DEFORMADO */
 .metric-wave-container {
   width: 100%;
   height: 65px;
