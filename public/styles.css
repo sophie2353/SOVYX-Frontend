@@ -44,6 +44,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+/* CLASE CLAVE PARA OCULTAR EL SPLASH Y MOSTRAR EL DASHBOARD */
+.full-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .splash-content {
@@ -99,7 +107,7 @@ body {
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* HARDWARE CPU REAL - VIDRIO BLANCO PREDOMINANTE (MENOS TRANSPARENTE) */
+/* HARDWARE CPU REAL - VIDRIO BLANCO PREDOMINANTE */
 .cpu-hardware-socket {
   width: 100%;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(200, 210, 230, 0.12) 50%, rgba(255, 255, 255, 0.18) 100%);
@@ -225,26 +233,36 @@ body {
     0 0 15px rgba(255, 255, 255, 0.2);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-glass-white:active {
+  transform: scale(0.98);
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN (BORDES MENTA & SLIDER/CHAT)            */
+/* 2. DASHBOARD MAIN (BORDES MENTA VERDE REAL)               */
 /* ========================================================= */
 
 .dashboard-container {
-  width: 100%; max-width: 412px;
+  width: 100%; 
+  max-width: 412px;
   padding: 16px;
-  display: flex; flex-direction: column; gap: 16px;
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px;
 }
 
 .dash-header {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
 }
 
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
 .dash-menu-icon { font-size: 1.3rem; }
 
-/* CONTENEDORES CON BORDE MENTA EN DASHBOARD */
+/* TODAS LAS TARJETAS CON BORDE VERDE MENTA GLOW */
 .glass-card-dash {
   background: radial-gradient(circle at center, rgba(0, 255, 204, 0.03) 0%, rgba(12, 3, 26, 0.88) 100%);
   border: 1.2px solid rgba(0, 255, 204, 0.45);
