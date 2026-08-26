@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&display=swap');
 
 :root {
   --bg-dark: #05010a;
@@ -32,7 +33,7 @@ body {
 .mint-txt { color: var(--neon-mint); }
 
 /* ========================================================= */
-/* 1. SPLASH SCREEN (COMPACTO, CENTRADO Y LIQUID GLASS)     */
+/* 1. SPLASH SCREEN (HUD LÍQUIDO FUTURISTA)                  */
 /* ========================================================= */
 
 .full-screen {
@@ -44,7 +45,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
 .full-screen.hidden {
@@ -63,11 +64,11 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 20px;
   text-align: center;
 }
 
-/* LOGO SODIE / SOVYX CON TIPOGRAFÍA CINZEL (IMAGEN 1) */
+/* LOGO SODIE (ORBITRON) */
 .logo-wrapper {
   width: 100%;
   display: flex;
@@ -77,25 +78,25 @@ body {
 }
 
 .logo-title {
-  font-family: 'Cinzel', serif !important;
-  font-size: 4.6rem !important;
-  font-weight: 800;
-  background: linear-gradient(180deg, #FFFFFF 30%, #D8DFEE 100%);
+  font-family: 'Orbitron', sans-serif !important;
+  font-size: 3.8rem !important;
+  font-weight: 900;
+  background: linear-gradient(180deg, #FFFFFF 20%, #A5B8EC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: flex; 
   align-items: center; 
   justify-content: center;
   filter: drop-shadow(0 4px 25px rgba(255, 255, 255, 0.4));
-  letter-spacing: 2px;
+  letter-spacing: 4px;
 }
 
 .logo-title .serif-s {
-  font-family: 'Cinzel', serif !important;
-  font-size: 6.0rem !important;
+  font-family: 'Orbitron', sans-serif !important;
+  font-size: 4.5rem !important;
   color: var(--neon-fuchsia) !important;
   -webkit-text-fill-color: var(--neon-fuchsia) !important;
-  filter: drop-shadow(0 0 26px rgba(255, 0, 122, 1));
+  filter: drop-shadow(0 0 30px rgba(255, 0, 122, 1));
   margin-right: 2px;
 }
 
@@ -106,80 +107,73 @@ body {
 }
 
 .splash-pct-num {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: var(--neon-mint);
   text-shadow: 0 0 14px var(--neon-mint);
+  font-family: 'Orbitron', sans-serif;
 }
 
 .hud-pointer-line {
   width: 2px;
-  height: 10px;
+  height: 12px;
   background: var(--neon-mint);
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* BARRA DE PROGRESO FLUIDA (SIN MARCO DE CPU) */
-.cpu-liquid-box,
-.bar-glass-container {
+/* BARRA DE CÁPSULAS GRUESA */
+.cpu-liquid-box {
   width: 100%;
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border: 1.8px solid rgba(255, 255, 255, 0.65);
-  border-top: 2.5px solid rgba(255, 255, 255, 0.95);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.4);
-  border-radius: 18px;
-  padding: 6px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 0.7),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.4),
-    0 10px 28px rgba(0, 0, 0, 0.75),
-    0 0 20px rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-top: 2.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 2px 5px rgba(255,255,255,0.2);
 }
 
 .capsules-track {
   display: grid;
   grid-template-columns: repeat(14, 1fr);
-  gap: 3px;
+  gap: 4px;
   width: 100%;
 }
 
 .capsule {
-  height: 48px; /* Altura media perfecta */
-  border-radius: 5px;
+  height: 60px;
+  border-radius: 6px;
   position: relative;
   overflow: hidden;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .cap-glint {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 45%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
   pointer-events: none;
 }
 
 .capsule.cap-mint {
   background: linear-gradient(180deg, #62fce0 0%, #00bf8f 60%, #004d3a 100%);
   border: 1px solid #a8ffee;
-  box-shadow: 0 0 10px rgba(0, 255, 204, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.9);
 }
 
 .capsule.cap-fuchsia {
   background: linear-gradient(180deg, #ff7bc3 0%, #e60073 60%, #59002c 100%);
   border: 1px solid #ffc2e0;
-  box-shadow: 0 0 10px rgba(255, 0, 122, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 12px rgba(255, 0, 122, 0.9);
 }
 
 .capsule.cap-dark {
-  background: linear-gradient(180deg, rgba(55, 18, 80, 0.6) 0%, rgba(25, 6, 38, 0.75) 100%);
-  border: 1px solid rgba(180, 120, 230, 0.3);
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* GAUGES CÍRCULOS EN LIQUID GLASS BLANCO REAL */
+/* GAUGES HUD (CÍRCULOS PERFECTOS) */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -193,79 +187,82 @@ body {
   border-radius: 50%;
   background: var(--neon-fuchsia);
   box-shadow: 0 0 16px var(--neon-fuchsia), 0 0 6px #fff;
+  animation: pulse-node 1.5s infinite alternate;
+}
+
+@keyframes pulse-node {
+  0% { transform: scale(1); box-shadow: 0 0 16px var(--neon-fuchsia); }
+  100% { transform: scale(1.3); box-shadow: 0 0 25px var(--neon-fuchsia), 0 0 10px #fff; }
 }
 
 .gauge-card {
   position: relative;
-  width: 88px; height: 88px;
+  width: 90px; height: 90px;
   display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 30% 30%, #2b1a3d 0%, #0a0412 80%);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border: 1.8px solid rgba(255, 255, 255, 0.65);
-  border-top: 2.5px solid rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    inset 0 2px 5px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.4),
-    0 10px 22px rgba(0, 0, 0, 0.65),
-    0 0 15px rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 8px 16px rgba(0, 0, 0, 0.6);
 }
 
-.gauge-ring { width: 88px; height: 88px; transform: rotate(-90deg); }
-.ring-thin-bg { fill: none; stroke: rgba(255, 255, 255, 0.15); stroke-width: 2.5; }
-.ring-thin-fill { fill: none; stroke-width: 3; stroke-linecap: round; }
+.gauge-ring { width: 90px; height: 90px; transform: rotate(-90deg); position: absolute; }
+.ring-thin-bg { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 2.5; }
+.ring-thin-fill { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dasharray 0.05s linear; }
 
 .mint-stroke { stroke: var(--neon-mint); filter: drop-shadow(0 0 6px var(--neon-mint)); }
 .fuchsia-stroke { stroke: var(--neon-fuchsia); filter: drop-shadow(0 0 6px var(--neon-fuchsia)); }
 
 .gauge-content {
-  position: absolute;
+  position: relative;
+  z-index: 2;
   display: flex; flex-direction: column; align-items: center;
-  text-align: center;
 }
 
-.gauge-label { 
-  font-size: 0.4rem; 
-  color: var(--text-sub); 
-  text-transform: uppercase; 
-  letter-spacing: 0.5px; 
-  max-width: 55px;
-  line-height: 1;
-}
+.gauge-label { font-size: 0.38rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+.gauge-val { font-size: 0.85rem; font-weight: 800; margin-top: 1px; font-family: 'Orbitron', sans-serif; }
 
-.gauge-val { font-size: 0.88rem; font-weight: 800; margin-top: 2px; }
-
-/* CARTEL BIENVENIDO (GIGANTE + CINZEL + LIQUID GLASS BLANCO) */
+/* CARTEL BIENVENIDO (ANIMANTE DE ABAJO HACIA ARRIBA) */
 .welcome-sign-glass {
+  position: relative;
   width: 100%;
-  padding: 22px 0;
+  padding: 18px 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Cinzel', serif !important;
-  font-size: 2.3rem !important; 
-  font-weight: 800; 
-  letter-spacing: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Relleno líquido animado */
+.welcome-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(0deg, rgba(255, 0, 122, 0.4) 0%, rgba(0, 255, 204, 0.5) 100%);
+  border-top: 2.5px solid var(--neon-mint);
+  box-shadow: 0 -2px 12px var(--neon-mint);
+  transition: height 0.05s linear;
+  z-index: 1;
+}
+
+.welcome-text {
+  position: relative;
+  z-index: 2;
+  font-family: 'Orbitron', sans-serif !important;
+  font-size: 1.7rem; 
+  font-weight: 900; 
+  letter-spacing: 8px;
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.12) 100%);
-  border: 2px solid rgba(255, 255, 255, 0.75);
-  border-top: 3px solid rgba(255, 255, 255, 1);
-  border-radius: 18px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  box-shadow: 
-    inset 0 2px 5px rgba(255, 255, 255, 0.95),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.4),
-    0 12px 32px rgba(0, 0, 0, 0.85),
-    0 0 22px rgba(255, 255, 255, 0.3);
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.9);
-  cursor: pointer;
-  user-select: none;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 12px rgba(255, 255, 255, 0.6);
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN                                         */
+/* 2. DASHBOARD MAIN (INTACTO)                               */
 /* ========================================================= */
 
 .dashboard-container {
