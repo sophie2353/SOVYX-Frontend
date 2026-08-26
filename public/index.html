@@ -9,12 +9,12 @@
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (AUTOCARGA AL 100%)       -->
+  <!-- 1. SPLASH SCREEN (HUD SCI-FI LIQUID GLASS) -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO MARCA -->
+      <!-- LOGO SODIE MÁS ABAJO CERCANO AL PORCENTAJE -->
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
       </div>
@@ -25,53 +25,11 @@
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- HARDWARE CPU SOCKET CON CAPA DE PROCESADOR Y CIRCUITO -->
-      <div class="cpu-hardware-socket">
-        
-        <!-- CAPA CPU / CHIP PROCESADOR VECTORIAL -->
-        <div class="cpu-chip-layer">
-          <svg class="cpu-chip-svg" viewBox="0 0 360 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <!-- Gradiente Metálico del Socket -->
-              <linearGradient id="cpu-body-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1c1136" />
-                <stop offset="50%" stop-color="#0a0518" />
-                <stop offset="100%" stop-color="#210a38" />
-              </linearGradient>
-
-              <!-- Patrón de Pistas de Silicio -->
-              <pattern id="silicon-grid" width="16" height="16" patternUnits="userSpaceOnUse">
-                <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(0, 255, 204, 0.12)" stroke-width="0.8"/>
-                <circle cx="8" cy="8" r="0.8" fill="rgba(255, 0, 127, 0.25)" />
-              </pattern>
-            </defs>
-
-            <!-- Bisel Externo del Socket CPU -->
-            <rect x="4" y="4" width="352" height="172" rx="16" fill="url(#cpu-body-grad)" stroke="#00ffcc" stroke-width="1.5" stroke-opacity="0.5" />
-            <rect x="12" y="12" width="336" height="156" rx="12" fill="#080313" stroke="#ff007f" stroke-width="1" stroke-opacity="0.4" />
-            
-            <!-- Muescas de Alineación de Hardware (Esquinas) -->
-            <path d="M 18 4 L 4 18 M 342 4 L 356 18 M 18 176 L 4 162 M 342 176 L 356 162" stroke="#ff007f" stroke-width="2" />
-
-            <!-- Grilla Interna de Silicio -->
-            <rect x="18" y="18" width="324" height="144" rx="8" fill="url(#silicon-grid)" />
-
-            <!-- Pines de Conexión Dorados/Neón Top & Bottom -->
-            <g stroke="rgba(0, 255, 204, 0.6)" stroke-width="1.5">
-              <path d="M 30 0 L 30 12 M 60 0 L 60 12 M 90 0 L 90 12 M 120 0 L 120 12 M 150 0 L 150 12 M 180 0 L 180 12 M 210 0 L 210 12 M 240 0 L 240 12 M 270 0 L 270 12 M 300 0 L 300 12 M 330 0 L 330 12" />
-              <path d="M 30 168 L 30 180 M 60 168 L 60 180 M 90 168 L 90 180 M 120 168 L 120 180 M 150 168 L 150 180 M 180 168 L 180 180 M 210 168 L 210 180 M 240 168 L 240 180 M 270 168 L 270 180 M 300 168 L 300 180 M 330 168 L 330 180" />
-            </g>
-
-            <!-- Marcas de Calibración Láser -->
-            <circle cx="32" cy="32" r="3" fill="none" stroke="#00ffcc" stroke-width="1" />
-            <circle cx="328" cy="32" r="3" fill="none" stroke="#ff007f" stroke-width="1" />
-            <path d="M 170 25 L 190 25 M 180 20 L 180 30" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1" />
-          </svg>
-        </div>
-
-        <!-- TRACK DE CÁPSULAS SOBREPUESTO -->
+      <!-- CPU LIQUID GLASS CONTENEDOR PRINCIPAL -->
+      <div class="cpu-liquid-chip">
         <div class="cpu-inner-circuit">
           <div id="capsules-track" class="capsules-track">
+            <!-- 14 Pilas vacías -->
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
@@ -90,7 +48,7 @@
         </div>
       </div>
 
-      <!-- GAUGES HUD DE BORDES GLOW -->
+      <!-- GAUGES HUD DE BORDES GLOW (PEGADOS ABAJO DEL CPU) -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -117,7 +75,7 @@
         </div>
       </div>
 
-      <!-- CARTEL BIENVENIDO -->
+      <!-- BOTÓN BIENVENIDO LIQUID GLASS (AJUSTADO EN POSICIÓN) -->
       <div class="welcome-sign-glass">BIENVENIDO</div>
 
     </div>
