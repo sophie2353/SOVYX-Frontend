@@ -18,7 +18,7 @@
 
 body {
   background: var(--bg-dark);
-  background-image: radial-gradient(circle at 50% 30%, #2b0648 0%, #100323 60%, #040008 100%);
+  background-image: radial-gradient(circle at 50% 30%, #320754 0%, #110228 60%, #040008 100%);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -32,7 +32,7 @@ body {
 .mint-txt { color: var(--neon-mint); }
 
 /* ========================================================= */
-/* 1. SPLASH SCREEN / INTRO (LIQUID GLASS VIDRIO BLANCO REAL) */
+/* 1. SPLASH SCREEN / INTRO (LIQUID GLASS CRISTAL REAL)      */
 /* ========================================================= */
 
 .full-screen {
@@ -40,7 +40,7 @@ body {
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   z-index: 9999;
-  background: radial-gradient(circle at 50% 35%, #2a0445 0%, #0d021c 65%, #030007 100%);
+  background: radial-gradient(circle at 50% 35%, #38075c 0%, #0f0221 65%, #030007 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -65,7 +65,7 @@ body {
   text-align: center;
 }
 
-/* LOGO MÁS GRANDE Y CENTRADO */
+/* LOGO */
 .logo-wrapper {
   width: 100%;
   display: flex;
@@ -114,31 +114,30 @@ body {
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* HARDWARE CPU SOCKET (VIDRIO BLANCO REAL) */
+/* HARDWARE CPU SOCKET */
 .cpu-hardware-socket {
   width: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(220, 230, 255, 0.12) 50%, rgba(255, 255, 255, 0.22) 100%);
-  border: 1.8px solid rgba(255, 255, 255, 0.75);
-  border-top: 2.5px solid rgba(255, 255, 255, 0.98);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.45);
-  border-radius: 18px;
-  padding: 12px 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.15) 100%);
+  border: 1.8px solid rgba(255, 255, 255, 0.65);
+  border-top: 2.5px solid rgba(255, 255, 255, 0.95);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 12px 10px;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   box-shadow: 
-    inset 0 2px 6px rgba(255, 255, 255, 0.7),
-    inset 0 -2px 10px rgba(0, 0, 0, 0.4),
+    inset 0 2px 5px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.5),
     0 12px 32px rgba(0, 0, 0, 0.8),
-    0 0 24px rgba(255, 255, 255, 0.25);
+    0 0 25px rgba(255, 255, 255, 0.15);
   position: relative;
 }
 
 .cpu-inner-circuit {
-  background: radial-gradient(circle, rgba(35, 12, 55, 0.75) 0%, rgba(15, 4, 25, 0.85) 100%);
+  background: rgba(15, 3, 30, 0.4);
   border: 1px dashed rgba(255, 255, 255, 0.35);
   border-radius: 12px;
   padding: 8px;
-  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.6);
 }
 
 .capsules-track {
@@ -175,11 +174,11 @@ body {
   box-shadow: 0 0 10px rgba(255, 0, 122, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
-/* PILAS VACÍAS: CRISTAL MORADO TRASLÚCIDO (SIN FONDOS NEGROS) */
+/* PILAS VACÍAS: 100% TRANSPARENTES SIN MARCOS NEGROS */
 .capsule.cap-dark {
-  background: linear-gradient(180deg, rgba(55, 18, 80, 0.6) 0%, rgba(25, 6, 38, 0.75) 100%);
-  border: 1px solid rgba(180, 120, 230, 0.3);
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* GAUGES HUD EN INTRO */
@@ -219,7 +218,7 @@ body {
 .gauge-label { font-size: 0.42rem; color: var(--text-sub); text-transform: uppercase; }
 .gauge-val { font-size: 0.9rem; font-weight: 800; margin-top: 2px; }
 
-/* CARTEL BIENVENIDO (VIDRIO BLANCO REAL ESTÁTICO) */
+/* CARTEL BIENVENIDO GLASS */
 .welcome-sign-glass {
   width: 100%;
   padding: 18px 0;
@@ -232,15 +231,14 @@ body {
   font-weight: 800; 
   letter-spacing: 8px;
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.1) 100%);
-  border: 1.8px solid rgba(255, 255, 255, 0.7);
-  border-top: 2.5px solid rgba(255, 255, 255, 0.98);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border: 1.8px solid rgba(255, 255, 255, 0.65);
+  border-top: 2.5px solid rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   box-shadow: 
     inset 0 1px 3px rgba(255, 255, 255, 0.9),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.3),
     0 10px 25px rgba(0, 0, 0, 0.8),
     0 0 15px rgba(255, 255, 255, 0.2);
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
@@ -248,7 +246,7 @@ body {
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN (TRANSPARENTE + BORDES VERDE MENTA)     */
+/* 2. DASHBOARD MAIN (LIQUID GLASS REAL - MENTA Y TRANSPARENTE) */
 /* ========================================================= */
 
 .dashboard-container {
@@ -269,18 +267,21 @@ body {
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
 .dash-menu-icon { font-size: 1.3rem; }
 
-/* TARJETAS DEL DASHBOARD: TOTALMENTE TRANSPARENTES CON BORDE VERDE MENTA GLOW */
+/* TARJETAS CON LIQUID GLASS MENTA Y EFECTO CRISTAL PROFUNDO */
 .glass-card-dash {
-  background: rgba(10, 3, 22, 0.35);
-  border: 1.5px solid rgba(0, 255, 204, 0.55);
-  border-radius: 18px;
-  padding: 16px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.07) 0%, rgba(10, 3, 22, 0.45) 100%);
+  border: 1.5px solid rgba(0, 255, 204, 0.45);
+  border-top: 2px solid rgba(0, 255, 204, 0.85);
+  border-bottom: 1.5px solid rgba(0, 255, 204, 0.25);
+  border-radius: 20px;
+  padding: 18px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: 
-    inset 0 0 15px rgba(0, 255, 204, 0.08), 
-    0 8px 24px rgba(0, 0, 0, 0.6),
-    0 0 12px rgba(0, 255, 204, 0.15);
+    inset 0 1px 2px rgba(0, 255, 204, 0.5),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.5),
+    0 10px 28px rgba(0, 0, 0, 0.7),
+    0 0 15px rgba(0, 255, 204, 0.12);
 }
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
@@ -315,7 +316,7 @@ body {
   max-width: 85%; margin-left: auto;
 }
 
-/* 4 OPCIONES DESLIZABLES */
+/* OPCIONES DESLIZABLES */
 .chat-quick-options {
   display: flex; gap: 8px; overflow-x: auto;
   margin-bottom: 12px; scrollbar-width: none;
