@@ -45,7 +45,7 @@
         </div>
       </div>
 
-      <!-- GAUGES HUD Y NODO CENTRAL (ANIMADOS A SINCRO COMPLETA) -->
+      <!-- GAUGES HUD Y NODO CENTRAL -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -100,7 +100,7 @@
       <div class="metrics-slider">
         <!-- 1. Clientes Activos -->
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Activos</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
           <div class="card-value">100</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -136,7 +136,7 @@
 
         <!-- 4. Clientes Actuales -->
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Actuales</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Actuales</span><span class="dots">•••</span></div>
           <div class="card-value">3.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -243,7 +243,6 @@
             }
           });
 
-          // Carga progresiva al 100% de los arcos
           if (gaugeVal1) gaugeVal1.textContent = `${currentPct}%`;
           if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${currentPct}, 100`);
 
@@ -265,6 +264,30 @@
         }
       }, 30);
 
+      // --- SINCRONIZACIÓN DEL CARRUSEL CON LOS PUNTOS INDICADORES ---
+      const cards = document.querySelectorAll('.metrics-slider .metric-square');
+      const dots = document.querySelectorAll('.slider-dots-indicator .dot');
+
+      const observerOptions = {
+        root: document.querySelector('.metrics-slider'),
+        threshold: 0.6
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const index = Array.from(cards).indexOf(entry.target);
+            dots.forEach(dot => dot.classList.remove('active'));
+            if (dots[index]) {
+              dots[index].classList.add('active');
+            }
+          }
+        });
+      }, observerOptions);
+
+      cards.forEach(card => observer.observe(card));
+
+      // --- TIMER ---
       let totalSeconds = 48 * 3600;
       const timerDisplay = document.getElementById('timer-display');
       setInterval(() => {
