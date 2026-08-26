@@ -9,59 +9,43 @@
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (HUD SCI-FI COMPLETO)     -->
+  <!-- 1. SPLASH SCREEN (HUD LÍQUIDO FUTURISTA)   -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO SOVYX -->
+      <!-- LOGO SODIE -->
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
       </div>
 
-      <!-- PORCENTAJE HUD CON LÍNEA CONECTADA AL CPU -->
+      <!-- PORCENTAJE HUD -->
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- BLOQUE CENTRAL: SOCKET CPU SCI-FI + BARRA DE CÁPSULAS -->
-        <!-- SVG TÉCNICO DE FONDO (CIRCUITOS, PINS Y LÍNEAS) -->
-        <svg class="cpu-tech-bg" viewBox="0 0 340 180" preserveAspectRatio="none">
-          <!-- Marco exterior del chip -->
-          <rect x="25" y="15" width="290" height="150" rx="14" fill="rgba(15, 3, 30, 0.65)" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.5" stroke-dasharray="5,3" />
-          <rect x="35" y="25" width="270" height="130" rx="10" fill="none" stroke="rgba(0, 255, 204, 0.25)" stroke-width="1" />
-          
-          <!-- Pines superiores e inferiores del procesador -->
-          <path d="M 60 15 L 60 25 M 90 15 L 90 25 M 120 15 L 120 25 M 150 15 L 150 25 M 180 15 L 180 25 M 210 15 L 210 25 M 240 15 L 240 25 M 270 15 L 270 25" stroke="rgba(255,255,255,0.6)" stroke-width="2" />
-          <path d="M 60 155 L 60 165 M 90 155 L 90 165 M 120 155 L 120 165 M 150 155 L 150 165 M 180 155 L 180 165 M 210 155 L 210 165 M 240 155 L 240 165 M 270 155 L 270 165" stroke="rgba(255,255,255,0.6)" stroke-width="2" />
-          
-          <!-- Líneas conectoras hacia los círculos inferiores -->
-          <path d="M 170 145 L 120 175 M 170 145 L 220 175" fill="none" stroke="rgba(255, 0, 122, 0.7)" stroke-width="1.5" />
-        </svg>
-
-        <!-- BARRA LIQUID GLASS Y CÁPSULAS SUPERPUESTAS -->
-        <div class="cpu-liquid-box">
-          <div id="capsules-track" class="capsules-track">
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-            <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          </div>
+      <!-- BARRA DE CÁPSULAS FLUIDAS (LIQUID GLASS) -->
+      <div class="cpu-liquid-box">
+        <div id="capsules-track" class="capsules-track">
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
         </div>
       </div>
 
-      <!-- GAUGES HUD INFERIORES CON NODO CENTRAL -->
+      <!-- GAUGES HUD CON EFECTO LIQUID GLASS Y NODO CENTRAL -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -69,7 +53,7 @@
             <circle class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="82, 100" />
           </svg>
           <div class="gauge-content">
-            <span class="gauge-label">DATOS PROCESADOS:</span>
+            <span class="gauge-label">DATOS PROCESADOS</span>
             <span class="gauge-val mint-txt">82%</span>
           </div>
         </div>
@@ -82,20 +66,20 @@
             <circle class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="90, 100" />
           </svg>
           <div class="gauge-content">
-            <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
+            <span class="gauge-label">ANÁLISIS MERCADO</span>
             <span class="gauge-val fuchsia-txt">90%</span>
           </div>
         </div>
       </div>
 
-      <!-- CARTEL BIENVENIDO -->
+      <!-- CARTEL BIENVENIDO AMPLIADO -->
       <div class="welcome-sign-glass">BIENVENIDO</div>
 
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN                          -->
+  <!-- 2. DASHBOARD MAIN (TOP & INTACTO)          -->
   <!-- ========================================== -->
   <main class="dashboard-container">
     <header class="dash-header">
