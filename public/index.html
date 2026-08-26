@@ -45,7 +45,7 @@
         </div>
       </div>
 
-      <!-- GAUGES HUD Y NODO CENTRAL (ANIMADOS DESDE 0%) -->
+      <!-- GAUGES HUD Y NODO CENTRAL (ANIMADOS A SINCRO COMPLETA) -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -72,7 +72,7 @@
         </div>
       </div>
 
-      <!-- CARTEL BIENVENIDO CON CARGA DE ABAJO HACIA ARRIBA -->
+      <!-- CARTEL BIENVENIDO -->
       <div class="welcome-sign-glass">
         <div id="welcome-fill" class="welcome-fill"></div>
         <span class="welcome-text">BIENVENIDO</span>
@@ -82,7 +82,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN (TOP & INTACTO)          -->
+  <!-- 2. DASHBOARD MAIN                          -->
   <!-- ========================================== -->
   <main class="dashboard-container">
     <header class="dash-header">
@@ -94,9 +94,23 @@
       </div>
     </header>
 
+    <!-- SECCIÓN MÉTRICAS COMPLETA -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas de Rendimiento</h3>
+      <h3 class="section-title">Métricas</h3>
       <div class="metrics-slider">
+        <!-- 1. Clientes Activos -->
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Clientes Activos</span><span class="dots">•••</span></div>
+          <div class="card-value">100</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Estado</span><span class="mint-txt">Óptimo</span></div>
+        </article>
+
+        <!-- 2. Alcance -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
           <div class="card-value">15.000</div>
@@ -108,9 +122,10 @@
           <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
         </article>
 
+        <!-- 3. Inversión -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
-          <div class="card-value">15$</div>
+          <div class="card-value">40$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -118,11 +133,51 @@
           </div>
           <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
         </article>
+
+        <!-- 4. Clientes Actuales -->
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Clientes Actuales</span><span class="dots">•••</span></div>
+          <div class="card-value">3.000</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,40 Q50,20 100,10 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Retención</span><span class="mint-txt">98%</span></div>
+        </article>
+
+        <!-- 5. Clientes Objetivo -->
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Clientes Objetivo</span><span class="dots">•••</span></div>
+          <div class="card-value">2</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Meta</span><span class="fuchsia-txt">Pendiente</span></div>
+        </article>
+      </div>
+
+      <!-- PUNTOS INDICADORES DE CARRUSEL -->
+      <div class="slider-dots-indicator">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
       </div>
     </section>
 
+    <!-- SECCIÓN CHAT WEB CON INDICADOR DE CUPOS -->
     <section class="glass-card-dash chat-section">
-      <div class="chat-header"><h3 class="section-title">Chat Web</h3></div>
+      <div class="chat-header">
+        <h3 class="section-title">Chat Web</h3>
+        <div class="cupos-badge">
+          <span class="purple-neon-dot"></span>
+          <span class="cupos-text">solo 2 cupos</span>
+        </div>
+      </div>
       <div id="chat-body" class="chat-body">
         <div class="chat-bubble incoming-simple">
           <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
@@ -172,16 +227,13 @@
       let currentPct = 0;
       const targetPct = 100;
 
-      // Intervalo de Carga Sincronizada
       const loadInterval = setInterval(() => {
         if (currentPct < targetPct) {
           currentPct++;
           pctText.textContent = `${currentPct}%`;
 
-          // 1. Relleno del cartel BIENVENIDO de abajo hacia arriba
           if (welcomeFill) welcomeFill.style.height = `${currentPct}%`;
 
-          // 2. Encendido progresivo de cápsulas (8 menta, 6 fucsia)
           const activeCount = Math.floor((currentPct / 100) * capsules.length);
           capsules.forEach((cap, index) => {
             if (index < activeCount) {
@@ -191,29 +243,28 @@
             }
           });
 
-          // 3. Carga en tiempo real de los círculos (0% a su meta)
-          const g1Current = Math.floor((currentPct / 100) * 82);
-          const g2Current = Math.floor((currentPct / 100) * 90);
+          // Carga progresiva al 100% de los arcos
+          if (gaugeVal1) gaugeVal1.textContent = `${currentPct}%`;
+          if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${currentPct}, 100`);
 
-          if (gaugeVal1) gaugeVal1.textContent = `${g1Current}%`;
-          if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${g1Current}, 100`);
-
-          if (gaugeVal2) gaugeVal2.textContent = `${g2Current}%`;
-          if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', `${g2Current}, 100`);
+          if (gaugeVal2) gaugeVal2.textContent = `${currentPct}%`;
+          if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', `${currentPct}, 100`);
 
         } else {
           clearInterval(loadInterval);
           pctText.textContent = '100%';
           if (welcomeFill) welcomeFill.style.height = '100%';
+          if (gaugeVal1) gaugeVal1.textContent = '100%';
+          if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', '100, 100');
+          if (gaugeVal2) gaugeVal2.textContent = '100%';
+          if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', '100, 100');
 
-          // Desaparición fluida al terminar
           setTimeout(() => { 
             splash.classList.add('hidden'); 
           }, 500);
         }
       }, 30);
 
-      // Timer del Dashboard
       let totalSeconds = 48 * 3600;
       const timerDisplay = document.getElementById('timer-display');
       setInterval(() => {
