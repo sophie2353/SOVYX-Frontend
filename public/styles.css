@@ -20,7 +20,7 @@ body {
   background: var(--bg-dark);
   background-image: radial-gradient(circle at 50% 30%, #320754 0%, #110228 60%, #040008 100%);
   color: var(--text-main);
-  min-height: 100dvh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,14 +32,13 @@ body {
 .mint-txt { color: var(--neon-mint); }
 
 /* ========================================================= */
-/* 1. SPLASH SCREEN (ESTRUCTURA Y CAPA CPU)                 */
+/* 1. SPLASH SCREEN (ESTILOS Y DISTRIBUCIÓN REVISADA)        */
 /* ========================================================= */
 
 .full-screen {
   position: fixed;
   top: 0; left: 0;
-  width: 100vw; 
-  height: 100dvh; /* Dynamic Viewport Height para móviles */
+  width: 100vw; height: 100vh;
   z-index: 9999;
   background: radial-gradient(circle at 50% 35%, #38075c 0%, #0f0221 65%, #030007 100%);
   display: flex;
@@ -57,27 +56,28 @@ body {
 .splash-content {
   width: 100%;
   max-width: 380px;
-  height: 100dvh;
-  padding: 20px 16px 24px 16px;
+  height: 100vh;
+  padding: 20px 16px 35px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between; /* Mantiene distancias parejas verticalmente */
+  justify-content: space-between;
   text-align: center;
 }
 
-/* LOGO SODIE CENTRADO */
+/* LOGO SODIE BAJADO Y CERCANO AL % */
 .logo-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 55px;
+  margin-bottom: -15px;
 }
 
 .logo-title {
   font-family: 'Cinzel', serif !important;
-  font-size: 5.2rem !important;
+  font-size: 5.6rem !important;
   font-weight: 800;
   background: linear-gradient(180deg, #FFFFFF 30%, #D8DFEE 100%);
   -webkit-background-clip: text;
@@ -86,108 +86,60 @@ body {
   align-items: center; 
   justify-content: center;
   filter: drop-shadow(0 4px 22px rgba(255, 255, 255, 0.45));
-  letter-spacing: 2px;
-  animation: logoGlow 4s infinite alternate ease-in-out;
+  letter-spacing: -1px;
 }
 
 .logo-title .serif-s {
-  font-size: 6.5rem !important;
+  font-size: 6.8rem !important;
   color: var(--neon-fuchsia) !important;
   -webkit-text-fill-color: var(--neon-fuchsia) !important;
-  filter: drop-shadow(0 0 25px rgba(255, 0, 122, 0.95)) drop-shadow(0 0 45px rgba(255, 0, 122, 0.6));
-  animation: sPulse 2.5s infinite alternate ease-in-out;
+  filter: drop-shadow(0 0 25px rgba(255, 0, 122, 0.95));
 }
 
-/* INDICADOR DE PORCENTAJE HUD */
 .hud-percentage-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: -10px;
+  margin-bottom: -10px;
 }
 
 .splash-pct-num {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: var(--neon-mint);
-  text-shadow: 0 0 12px var(--neon-mint), 0 0 24px rgba(0, 255, 204, 0.6);
-  letter-spacing: 1px;
+  text-shadow: 0 0 12px var(--neon-mint);
 }
 
 .hud-pointer-line {
   width: 2px;
-  height: 12px;
+  height: 14px;
   background: var(--neon-mint);
-  box-shadow: 0 0 8px var(--neon-mint), 0 0 16px var(--neon-mint);
+  box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* HARDWARE CPU SOCKET CON CAPA DE PROCESADOR */
-.cpu-hardware-socket {
+/* ESTRUCTURA CPU LIQUID GLASS CONTENEDORA */
+.cpu-liquid-chip {
   width: 100%;
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.08) 100%);
-  border: 1.8px solid rgba(255, 255, 255, 0.65);
-  border-top: 2.5px solid rgba(255, 255, 255, 0.95);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  padding: 16px 12px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.18) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-top: 3px solid rgba(255, 255, 255, 0.95);
+  border-bottom: 1.8px solid rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  padding: 12px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   box-shadow: 
-    inset 0 2px 5px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.5),
-    0 12px 32px rgba(0, 0, 0, 0.8),
-    0 0 30px rgba(255, 0, 122, 0.25),
-    0 0 40px rgba(0, 255, 204, 0.15);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    inset 0 2px 6px rgba(255, 255, 255, 0.9),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.6),
+    0 15px 35px rgba(0, 0, 0, 0.85),
+    0 0 25px rgba(255, 255, 255, 0.2);
 }
 
-/* CAPA VECTORIAL DEL CHIP PROCESADOR (FONDO) */
-.cpu-chip-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cpu-chip-svg {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-  opacity: 0.95;
-}
-
-/* LÁSER DE ESCANEO SCI-FI SOBRE EL CPU */
-.cpu-hardware-socket::after {
-  content: '';
-  position: absolute;
-  top: -100%;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 204, 0.15) 80%, rgba(0, 255, 204, 0.7) 100%);
-  pointer-events: none;
-  z-index: 3;
-  animation: cpuScanLine 3.5s infinite linear;
-}
-
-/* CAPA INTERNA DE BATERÍAS/CÁPSULAS (FRENTE) */
 .cpu-inner-circuit {
-  position: relative;
-  z-index: 2; /* Sobrepone el track al procesador */
-  width: 100%;
-  background: rgba(10, 2, 22, 0.65);
-  border: 1px dashed rgba(255, 255, 255, 0.35);
-  border-radius: 12px;
+  background: rgba(12, 3, 25, 0.65);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
   padding: 8px;
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
 }
@@ -195,13 +147,13 @@ body {
 .capsules-track {
   display: grid;
   grid-template-columns: repeat(14, 1fr);
-  gap: 3px;
+  gap: 4px;
   width: 100%;
 }
 
 .capsule {
-  height: 58px;
-  border-radius: 4px;
+  height: 65px;
+  border-radius: 5px;
   position: relative;
   overflow: hidden;
 }
@@ -218,14 +170,12 @@ body {
   background: linear-gradient(180deg, #62fce0 0%, #00bf8f 60%, #004d3a 100%);
   border: 1px solid #a8ffee;
   box-shadow: 0 0 10px rgba(0, 255, 204, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  animation: capsuleGlowMint 2s infinite alternate ease-in-out;
 }
 
 .capsule.cap-fuchsia {
   background: linear-gradient(180deg, #ff7bc3 0%, #e60073 60%, #59002c 100%);
   border: 1px solid #ffc2e0;
   box-shadow: 0 0 10px rgba(255, 0, 122, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  animation: capsuleGlowFuchsia 2s infinite alternate ease-in-out;
 }
 
 .capsule.cap-dark {
@@ -234,57 +184,57 @@ body {
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-/* GAUGES HUD CIRCULARES */
+/* GAUGES HUD CONECTADOS CON EL CPU */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 320px;
+  max-width: 310px;
+  margin-top: -5px;
 }
 
 .hud-center-node {
   width: 14px; height: 14px;
   border-radius: 50%;
   background: var(--neon-fuchsia);
-  box-shadow: 0 0 14px var(--neon-fuchsia), 0 0 28px var(--neon-fuchsia);
-  animation: nodePulse 1.8s infinite alternate ease-in-out;
+  box-shadow: 0 0 14px var(--neon-fuchsia);
 }
 
 .gauge-card {
   position: relative;
-  width: 90px; height: 90px;
+  width: 86px; height: 86px;
   display: flex; align-items: center; justify-content: center;
 }
 
-.gauge-ring { width: 90px; height: 90px; transform: rotate(-90deg); }
+.gauge-ring { width: 86px; height: 86px; transform: rotate(-90deg); }
 .ring-thin-bg { fill: none; stroke: rgba(255, 255, 255, 0.15); stroke-width: 2; }
 .ring-thin-fill { fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-.mint-stroke { stroke: var(--neon-mint); filter: drop-shadow(0 0 6px var(--neon-mint)); }
-.fuchsia-stroke { stroke: var(--neon-fuchsia); filter: drop-shadow(0 0 6px var(--neon-fuchsia)); }
+.mint-stroke { stroke: var(--neon-mint); filter: drop-shadow(0 0 4px var(--neon-mint)); }
+.fuchsia-stroke { stroke: var(--neon-fuchsia); filter: drop-shadow(0 0 4px var(--neon-fuchsia)); }
 
 .gauge-content {
   position: absolute;
   display: flex; flex-direction: column; align-items: center;
 }
 
-.gauge-label { font-size: 0.42rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-.gauge-val { font-size: 0.9rem; font-weight: 800; margin-top: 2px; }
+.gauge-label { font-size: 0.4rem; color: var(--text-sub); text-transform: uppercase; }
+.gauge-val { font-size: 0.88rem; font-weight: 800; margin-top: 2px; }
 
-/* CARTEL BIENVENIDO (AJUSTADO PARA NO CORTARSE EN PANTALLA) */
+/* CARTEL BIENVENIDO GLASS CON MARGEN DE ESPACIO INFERIOR */
 .welcome-sign-glass {
   width: 100%;
-  padding: 14px 0;
+  padding: 16px 0;
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.6rem; 
+  font-size: 1.8rem; 
   font-weight: 800; 
-  letter-spacing: 6px;
+  letter-spacing: 8px;
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 100%);
   border: 1.8px solid rgba(255, 255, 255, 0.65);
   border-top: 2.5px solid rgba(255, 255, 255, 0.95);
   border-radius: 16px;
@@ -293,57 +243,14 @@ body {
   box-shadow: 
     inset 0 1px 3px rgba(255, 255, 255, 0.9),
     0 10px 25px rgba(0, 0, 0, 0.8),
-    0 0 25px rgba(255, 255, 255, 0.25);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 255, 255, 0.5);
+    0 0 15px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
   user-select: none;
-  margin-bottom: 8px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.welcome-sign-glass:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    inset 0 1px 4px rgba(255, 255, 255, 1),
-    0 12px 30px rgba(0, 0, 0, 0.9),
-    0 0 35px rgba(255, 255, 255, 0.4);
+  margin-top: 10px;
 }
 
 /* ========================================================= */
-/* ANIMACIONES                                               */
-/* ========================================================= */
-
-@keyframes logoGlow {
-  0% { filter: drop-shadow(0 4px 18px rgba(255, 255, 255, 0.25)); }
-  100% { filter: drop-shadow(0 4px 28px rgba(255, 255, 255, 0.55)); }
-}
-
-@keyframes sPulse {
-  0% { filter: drop-shadow(0 0 15px rgba(255, 0, 122, 0.7)); }
-  100% { filter: drop-shadow(0 0 32px rgba(255, 0, 122, 1)); }
-}
-
-@keyframes cpuScanLine {
-  0% { top: -100%; }
-  100% { top: 100%; }
-}
-
-@keyframes capsuleGlowMint {
-  0% { box-shadow: 0 0 6px rgba(0, 255, 204, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8); }
-  100% { box-shadow: 0 0 14px rgba(0, 255, 204, 1), inset 0 1px 4px rgba(255, 255, 255, 1); }
-}
-
-@keyframes capsuleGlowFuchsia {
-  0% { box-shadow: 0 0 6px rgba(255, 0, 122, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8); }
-  100% { box-shadow: 0 0 14px rgba(255, 0, 122, 1), inset 0 1px 4px rgba(255, 255, 255, 1); }
-}
-
-@keyframes nodePulse {
-  0% { transform: scale(0.9); box-shadow: 0 0 8px var(--neon-fuchsia); }
-  100% { transform: scale(1.15); box-shadow: 0 0 20px var(--neon-fuchsia), 0 0 30px var(--neon-fuchsia); }
-}
-
-/* ========================================================= */
-/* 2. DASHBOARD MAIN                                         */
+/* 2. DASHBOARD MAIN (PERMANECE INTACTO)                      */
 /* ========================================================= */
 
 .dashboard-container {
@@ -382,7 +289,6 @@ body {
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 
-/* MÉTRICAS CUADRADAS */
 .metrics-slider { 
   display: flex; 
   gap: 14px; 
@@ -407,7 +313,6 @@ body {
 .card-chart svg { width: 100%; height: 100%; filter: drop-shadow(0 0 6px var(--neon-mint)); }
 .card-foot { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-sub); }
 
-/* CHAT WEB */
 .chat-body { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
 
 .incoming-simple p {
@@ -453,7 +358,6 @@ body {
   width: 36px; color: #05010a; font-weight: 800; cursor: pointer;
 }
 
-/* PAGO FINAL */
 .pf-summary-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.9rem; }
 .pf-row { display: flex; justify-content: space-between; color: var(--text-sub); }
 .pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; }
@@ -466,7 +370,6 @@ body {
   box-shadow: 0 0 12px rgba(0, 255, 204, 0.2);
 }
 
-/* TIMER */
 .timer-section { text-align: center; }
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
 .timer-digits { font-size: 3rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; }
