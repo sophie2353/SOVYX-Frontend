@@ -14,7 +14,7 @@
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO MÁS GRANDE Y CENTRADO -->
+      <!-- LOGO MÁS ABAJO Y MÁS GRANDE -->
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
       </div>
@@ -25,11 +25,20 @@
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- SOCKET HARDWARE CPU (CRISTAL TRANSPARENTE REAL) -->
+      <!-- HARDWARE CPU SOCKET CON SVG CIRCUITO -->
       <div class="cpu-hardware-socket">
+        <!-- SVG ILUSTRACIÓN CIRCUITO CPU DE FONDO -->
+        <svg class="cpu-bg-circuit" viewBox="0 0 340 120" preserveAspectRatio="none">
+          <rect x="2" y="2" width="336" height="116" rx="16" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1.5" stroke-dasharray="6,4" />
+          <rect x="12" y="12" width="316" height="96" rx="12" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+          <!-- Pines de hardware -->
+          <path d="M 30 2 L 30 12 M 60 2 L 60 12 M 90 2 L 90 12 M 120 2 L 120 12 M 150 2 L 150 12 M 180 2 L 180 12 M 210 2 L 210 12 M 240 2 L 240 12 M 270 2 L 270 12 M 300 2 L 300 12" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
+          <path d="M 30 108 L 30 118 M 60 108 L 60 118 M 90 108 L 90 118 M 120 108 L 120 118 M 150 108 L 150 118 M 180 108 L 180 118 M 210 108 L 210 118 M 240 108 L 240 118 M 270 108 L 270 118 M 300 108 L 300 118" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
+        </svg>
+
         <div class="cpu-inner-circuit">
           <div id="capsules-track" class="capsules-track">
-            <!-- 14 Pilas vacías al inicio -->
+            <!-- 14 Pilas vacías -->
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
             <div class="capsule cap-dark"><div class="cap-glint"></div></div>
@@ -75,15 +84,14 @@
         </div>
       </div>
 
-      <!-- CARTEL / BANNER BIENVENIDO GLASS -->
+      <!-- CARTEL BIENVENIDO (MÁS ARRIBA) -->
       <div class="welcome-sign-glass">BIENVENIDO</div>
 
     </div>
   </div>
 
-
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN (LIQUID GLASS MENTA)     -->
+  <!-- 2. DASHBOARD MAIN                          -->
   <!-- ========================================== -->
   <main class="dashboard-container">
 
@@ -96,27 +104,27 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS SLIDER -->
+    <!-- MÉTRICAS SLIDER CUADRADAS -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider">
-        <article class="glass-card-dash">
+        <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
           <div class="card-value">15.000</div>
           <div class="card-chart">
-            <svg viewBox="0 0 200 50" preserveAspectRatio="none">
-              <path d="M0,35 Q50,5 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="2.5" />
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
           <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
         </article>
 
-        <article class="glass-card-dash">
+        <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
           <div class="card-value">15$</div>
           <div class="card-chart">
-            <svg viewBox="0 0 200 50" preserveAspectRatio="none">
-              <path d="M0,15 Q50,45 100,20 T200,35" fill="none" stroke="#00ffcc" stroke-width="2.5" />
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
           <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
@@ -172,9 +180,6 @@
 
   </main>
 
-  <!-- ========================================== -->
-  <!-- 3. SCRIPT DE AUTOCARGA Y LÓGICA DE CHAT    -->
-  <!-- ========================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const splash = document.getElementById('view-splash');
@@ -189,7 +194,6 @@
           currentPct++;
           pctText.textContent = `${currentPct}%`;
 
-          // Llenado dinámico preservando el reflejo glint (8 Menta, 6 Fucsia)
           const activeCapsulesCount = Math.floor((currentPct / 100) * capsules.length);
           capsules.forEach((cap, index) => {
             if (index < activeCapsulesCount) {
@@ -209,7 +213,6 @@
         }
       }, 30);
 
-      // Temporizador 48 horas
       let totalSeconds = 48 * 3600;
       const timerDisplay = document.getElementById('timer-display');
 
@@ -223,7 +226,6 @@
         }
       }, 1000);
 
-      // Listener para tecla Enter en el chat
       document.getElementById('chat-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendInputMsg();
       });
@@ -238,9 +240,7 @@
       chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    function sendQuickMsg(text) {
-      appendMessage(text);
-    }
+    function sendQuickMsg(text) { appendMessage(text); }
 
     function sendInputMsg() {
       const input = document.getElementById('chat-input');
