@@ -25,7 +25,7 @@
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- SOCKET HARDWARE CPU -->
+      <!-- SOCKET HARDWARE CPU (CRISTAL TRANSPARENTE REAL) -->
       <div class="cpu-hardware-socket">
         <div class="cpu-inner-circuit">
           <div id="capsules-track" class="capsules-track">
@@ -75,7 +75,7 @@
         </div>
       </div>
 
-      <!-- CARTEL / BANNER BIENVENIDO (SIN BOTÓN, CENTRADO Y GRANDE) -->
+      <!-- CARTEL / BANNER BIENVENIDO GLASS -->
       <div class="welcome-sign-glass">BIENVENIDO</div>
 
     </div>
@@ -83,7 +83,7 @@
 
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN (BORDES VERDE MENTA)     -->
+  <!-- 2. DASHBOARD MAIN (LIQUID GLASS MENTA)     -->
   <!-- ========================================== -->
   <main class="dashboard-container">
 
@@ -148,7 +148,7 @@
 
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
-        <button id="chat-send" class="chat-send-btn">➤</button>
+        <button id="chat-send" class="chat-send-btn" onclick="sendInputMsg()">➤</button>
       </div>
     </section>
 
@@ -173,7 +173,7 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- 3. SCRIPT DE AUTOCARGA A 100% Y TRANSICIÓN -->
+  <!-- 3. SCRIPT DE AUTOCARGA Y LÓGICA DE CHAT    -->
   <!-- ========================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -182,36 +182,34 @@
       const capsules = document.querySelectorAll('#capsules-track .capsule');
 
       let currentPct = 0;
-      const targetPct = 100; // Carga completa automatizada al 100%
+      const targetPct = 100;
 
       const loadInterval = setInterval(() => {
         if (currentPct < targetPct) {
           currentPct++;
           pctText.textContent = `${currentPct}%`;
 
-          // Llenado dinámico de las 14 pilas (8 Menta, 6 Fucsia)
+          // Llenado dinámico preservando el reflejo glint (8 Menta, 6 Fucsia)
           const activeCapsulesCount = Math.floor((currentPct / 100) * capsules.length);
           capsules.forEach((cap, index) => {
             if (index < activeCapsulesCount) {
-              if (index < 8) {
-                cap.className = 'capsule cap-mint';
-              } else {
-                cap.className = 'capsule cap-fuchsia';
-              }
+              const colorClass = index < 8 ? 'cap-mint' : 'cap-fuchsia';
+              cap.className = `capsule ${colorClass}`;
+            } else {
+              cap.className = 'capsule cap-dark';
             }
           });
         } else {
           clearInterval(loadInterval);
           pctText.textContent = '100%';
           
-          // Al llegar a 100%, espera 400ms y abre la web automáticamente
           setTimeout(() => {
             splash.classList.add('hidden');
           }, 400);
         }
-      }, 30); // Velocidad fluida de carga
+      }, 30);
 
-      // Temporizador regresivo 48 horas
+      // Temporizador 48 horas
       let totalSeconds = 48 * 3600;
       const timerDisplay = document.getElementById('timer-display');
 
@@ -224,15 +222,33 @@
           timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
         }
       }, 1000);
+
+      // Listener para tecla Enter en el chat
+      document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendInputMsg();
+      });
     });
 
-    function sendQuickMsg(text) {
+    function appendMessage(text) {
       const chatBody = document.getElementById('chat-body');
       const msgBubble = document.createElement('div');
       msgBubble.className = 'chat-bubble outgoing-simple';
       msgBubble.innerHTML = `<p>${text}</p>`;
       chatBody.appendChild(msgBubble);
       chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendQuickMsg(text) {
+      appendMessage(text);
+    }
+
+    function sendInputMsg() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (text) {
+        appendMessage(text);
+        input.value = '';
+      }
     }
   </script>
 
