@@ -1,5 +1,5 @@
 /* ========================================== */
-/* SOVYX Core OS - Master Stylesheet (styles.css) */
+/* SOVYX Core OS - Fix Dashboard & Splash     */
 /* ========================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&display=swap');
@@ -25,494 +25,178 @@ body {
   background-image: radial-gradient(circle at 50% 30%, #2b0648 0%, #100323 60%, #040008 100%);
   color: var(--text-main);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100vw;
   overflow-x: hidden;
-  width: 100%;
-  position: relative;
 }
 
-.magenta-txt { color: var(--neon-magenta); }
-.green-txt { color: var(--neon-green); }
-
-/* FIX CRÍTICO: CLASE PARA OCULTAR PANTALLAS Y DESBLOQUEAR EL DASHBOARD */
 .hidden {
   display: none !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
 /* ========================================== */
-/* 1. SPLASH SCREEN                           */
+/* 1. FIX SPLASH SCREEN & CÁPSULAS DELGADAS   */
 /* ========================================== */
 
 .full-screen {
   position: fixed;
-  top: 0; 
-  left: 0;
-  width: 100vw; 
-  height: 100vh;
+  inset: 0;
   z-index: 9999;
   background: #06010e;
-  background-image: 
-    radial-gradient(circle at 50% 35%, #340954 0%, #0e021e 65%, #030007 100%),
-    linear-gradient(rgba(0, 255, 204, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
-  background-size: 100% 100%, 24px 24px, 24px 24px;
+  background-image: radial-gradient(circle at 50% 35%, #340954 0%, #0e021e 65%, #030007 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-y: auto;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 .splash-content {
   width: 100%;
-  max-width: 380px;
-  min-height: 100vh;
-  padding: 24px 16px;
+  max-width: 360px;
+  height: 100vh;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  box-sizing: border-box;
+  justify-content: space-evenly;
 }
 
-/* LOGO GIGANTE SOVYX */
 .logo-title {
   font-family: 'Cinzel', serif !important;
-  font-size: 4.2rem !important;
-  letter-spacing: 2px;
+  font-size: 3.8rem !important;
   font-weight: 800;
   background: linear-gradient(180deg, #FFFFFF 20%, #D0D5E0 65%, #8A92A3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.95));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  margin-top: 10px;
 }
 
 .logo-title .serif-s {
   font-family: 'Cinzel', serif !important;
-  font-size: 5.5rem !important;
+  font-size: 5rem !important;
   color: var(--neon-magenta) !important;
   -webkit-text-fill-color: var(--neon-magenta) !important;
-  font-weight: 800;
-  filter: drop-shadow(0 0 22px rgba(255, 0, 122, 0.95));
-  margin-right: -2px;
 }
 
-/* INDICADOR SUPERIOR CON LÍNEAS GUÍA (HUD) */
-.hud-percentage-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  margin-bottom: -4px;
-}
-
-.hud-pointer-line {
-  width: 2px;
-  height: 14px;
-  background: var(--neon-green);
-  box-shadow: 0 0 8px var(--neon-green);
-}
-
-.splash-pct-num {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--neon-green);
-  letter-spacing: 1.5px;
-  text-shadow: 0 0 12px rgba(0, 255, 204, 0.9);
-}
-
-/* CHIP / MARCO DEL PROCESADOR CON CIRCUITO DETRÁS */
+/* CHIP Y CÁPSULAS FINAS */
 .processor-core-frame {
   width: 100%;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(15, 5, 30, 0.88);
-  border: 1.5px solid rgba(180, 100, 255, 0.4);
-  border-radius: 16px;
-  padding: 10px 8px;
-  box-shadow: 
-    inset 0 0 25px rgba(0, 0, 0, 0.95),
-    0 0 30px rgba(180, 100, 255, 0.18),
-    0 0 2px rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-/* Pines de circuito rodeando el chip */
-.processor-core-frame::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border: 1px dashed rgba(180, 100, 255, 0.25);
-  border-radius: 20px;
-  pointer-events: none;
+  background: rgba(12, 4, 24, 0.9);
+  border: 1.5px solid rgba(180, 100, 255, 0.35);
+  border-radius: 12px;
+  padding: 8px 10px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 25px rgba(180, 100, 255, 0.15);
 }
 
 .capsules-track {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 3px;
+  justify-content: center;
+  gap: 5px; /* Separación real entre cápsulas */
   width: 100%;
 }
 
-/* CÁPSULAS CON CORTE GEOMÉTRICO 3D (FACETADO TIPO GEMA) */
 .capsule {
   flex: 1;
-  height: 68px;
-  border-radius: 5px;
-  background: rgba(10, 3, 20, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  max-width: 18px; /* Mantiene el grosor delgado original */
+  height: 52px;
+  border-radius: 4px;
+  background: rgba(18, 6, 32, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Bisel central vertical para efecto cristalino 3D */
-.capsule::before {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 1px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 100%);
-  transform: translateX(-50%);
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* Reflejo superior brillante */
-.capsule::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 4px 4px 0 0;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.capsule .cap-icon {
-  width: 12px !important;
-  height: 12px !important;
-  z-index: 4;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95));
-}
-
-/* Cápsulas Verdes */
 .capsule.cap-green.active {
-  background: linear-gradient(180deg, #74ffe4 0%, #00d9a3 40%, #007054 85%, #003628 100%);
-  border: 1px solid #b3fff2;
-  box-shadow: 
-    0 0 14px rgba(0, 255, 204, 0.8),
-    inset 0 2px 5px rgba(255, 255, 255, 0.95),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(180deg, #62fce0 0%, #00bf8f 55%, #005943 100%);
+  border-color: #a8ffee;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
 }
 
-/* Cápsulas Magenta */
 .capsule.cap-magenta.active {
-  background: linear-gradient(180deg, #ff94ce 0%, #e60073 40%, #850043 85%, #400020 100%);
-  border: 1px solid #ffc2e0;
-  box-shadow: 
-    0 0 14px rgba(255, 0, 122, 0.85),
-    inset 0 2px 5px rgba(255, 255, 255, 0.95),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(180deg, #ff7bc3 0%, #e60073 55%, #660033 100%);
+  border-color: #ffc2e0;
+  box-shadow: 0 0 10px rgba(255, 0, 122, 0.6);
 }
 
-/* CÍRCULOS Y PLANETOIDE CENTRAL CON ANILLOS */
+/* CIRCULOS Y BOTÓN */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 320px;
-  position: relative;
-  margin: 10px 0;
-}
-
-/* Orbe 3D Central con Anillo Orbital */
-.splash-gauges::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ff99dd 0%, #ff007a 55%, #300018 100%);
-  box-shadow: 
-    0 0 18px var(--neon-magenta),
-    0 0 4px #ffffff,
-    inset 0 0 6px rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  z-index: 5;
+  max-width: 300px;
 }
 
 .gauge-card {
+  width: 85px;
+  height: 85px;
   position: relative;
-  width: 92px;
-  height: 92px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
 }
 
-.gauge-card::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border: 1px dashed rgba(0, 255, 204, 0.35);
-  border-radius: 50%;
-}
-
-.gauge-card.gauge-magenta::before {
-  border-color: rgba(255, 0, 122, 0.45);
-}
-
-.gauge-ring {
-  width: 92px !important;
-  height: 92px !important;
-  transform: rotate(-90deg);
-}
-
-.ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 6;
-}
-
-.ring-fill {
-  fill: none;
-  stroke-width: 6;
-  stroke-linecap: round;
-}
-
-.green-fill { stroke: var(--neon-green); filter: drop-shadow(0 0 6px var(--neon-green)); }
-.magenta-fill { stroke: var(--neon-magenta); filter: drop-shadow(0 0 6px var(--neon-magenta)); }
-
-.gauge-content {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.gauge-label {
-  font-size: 0.48rem;
-  color: var(--text-sub);
-  letter-spacing: 0.5px;
-  font-weight: 700;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.gauge-val {
-  font-size: 1rem;
-  font-weight: 800;
-  margin-top: 2px;
-}
-
-/* BOTÓN GLASS BIENVENIDO */
 .btn-glass-welcome {
-  pointer-events: auto;
-  cursor: pointer;
-  width: 100% !important;
-  padding: 14px 0 !important;
+  width: 100%;
+  padding: 14px 0;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.3rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 6px !important;
-  color: #ffffff !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.85) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.9),
-    0 10px 28px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(0, 255, 204, 0.15) !important;
-  margin-bottom: 10px;
-}
-
-.btn-glass-welcome:active {
-  transform: scale(0.98);
-  border-color: var(--neon-green) !important;
-  box-shadow: 0 0 22px rgba(0, 255, 204, 0.6) !important;
+  font-size: 1.2rem;
+  letter-spacing: 5px;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
 }
 
 /* ========================================== */
-/* 2. DASHBOARD MAIN & LAYOUT FIX             */
+/* 2. FIX CRÍTICO DASHBOARD (SVG ONDAS)       */
 /* ========================================== */
 
 .dashboard-container {
   width: 100%;
-  max-width: 410px;
+  max-width: 400px;
+  margin: 0 auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  z-index: 10;
-  position: relative;
-}
-
-.dash-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-  width: 100%;
-}
-
-.dash-menu-btn {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.metrics-section {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.metrics-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 8px;
-}
-
-.metrics-slider {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  padding: 4px 2px;
-  width: 100%;
-}
-
-.metrics-slider::-webkit-scrollbar {
-  display: none;
 }
 
 .metric-card {
-  flex: 0 0 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  scroll-snap-align: start;
+  width: 100%;
   background: rgba(18, 8, 30, 0.85);
-  border: 1px solid rgba(0, 255, 204, 0.35);
+  border: 1px solid rgba(0, 255, 204, 0.3);
   border-radius: 14px;
   padding: 14px;
-  box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 6px 16px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
-.metric-card-title {
-  font-size: 0.85rem;
-  color: var(--text-sub);
-  font-weight: 600;
-}
-
-.metric-card-val {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 4px 0;
-}
-
+/* CONTENEDOR RÍGIDO PARA EL SVG (EVITA LA EXPLOSIÓN VERTICAL) */
 .metric-wave-container {
   width: 100%;
-  height: 65px;
+  height: 60px !important;
+  max-height: 60px !important;
   overflow: hidden;
   position: relative;
-  margin: 6px 0;
+  margin: 8px 0;
 }
 
 .metric-wave-container svg {
   width: 100% !important;
-  height: 100% !important;
+  height: 60px !important;
+  max-height: 60px !important;
   display: block;
+  object-fit: fill;
 }
 
-.metric-card-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.7rem;
+.metric-card-title {
+  font-size: 0.9rem;
   color: var(--text-sub);
 }
 
-.dashboard-card {
-  background: rgba(18, 8, 30, 0.85);
-  border: 1px solid rgba(180, 100, 255, 0.3);
-  border-radius: 16px;
-  padding: 14px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.timer-card {
-  border: 1.5px solid var(--neon-green);
-  box-shadow: 0 0 18px rgba(0, 255, 204, 0.25), inset 0 0 12px rgba(0, 255, 204, 0.08);
-  text-align: center;
-  padding: 14px;
-}
-
-.timer-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.timer-digital {
-  font-size: 3.2rem;
+.metric-card-val {
+  font-size: 1.4rem;
   font-weight: 800;
-  color: var(--neon-green);
-  text-shadow: 0 0 15px rgba(0, 255, 204, 0.85);
-  letter-spacing: 2px;
-  line-height: 1.1;
-  margin: 4px 0;
-}
-
-.timer-sub-text {
-  font-size: 0.68rem;
-  letter-spacing: 1.2px;
-  color: var(--text-sub);
-  font-weight: 700;
-  text-transform: uppercase;
+  color: #ffffff;
 }
