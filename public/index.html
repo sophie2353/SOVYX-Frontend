@@ -2,292 +2,153 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SOVYX</title>
-
-  <!-- Fuentes Futuristas / Elegantes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- SPLASH SCREEN OVERLAY (HUD SCI-FI)         -->
+  <!-- 1. SPLASH SCREEN (HUD OVERLAY)             -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
-    <div class="splash-cyber-bg"></div>
     <div class="splash-content">
       
-      <!-- Logo Serif Sovyx -->
-      <h1 class="logo-title"><span class="serif-s">S</span>OVYX</h1>
-      
-      <!-- Indicador Porcentaje superior con líneas HUD -->
+      <!-- LOGO GIGANTE CON S MAGENTA -->
+      <h1 class="logo-title">
+        SOVY<span class="serif-s">X</span>
+      </h1>
+
+      <!-- CHIP / CPU CONTAINER (BARRAS DE CRISTAL) -->
+      <div class="processor-core-frame">
+        <div class="capsules-track">
+          <div class="capsule cap-green active">
+            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+          </div>
+          <div class="capsule cap-green active">
+            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+          </div>
+          <div class="capsule cap-magenta active">
+            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+          </div>
+          <div class="capsule cap-magenta">
+            <svg class="cap-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- CÍRCULOS DE MÉTRICAS Y ORBE CENTRAL -->
+      <div class="splash-gauges">
+        <div class="gauge-card">
+          <svg class="gauge-ring" viewBox="0 0 36 36">
+            <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="ring-fill green-fill" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          </svg>
+          <div class="gauge-content">
+            <span class="gauge-label">CPU CORE</span>
+            <span class="gauge-val green-txt">85%</span>
+          </div>
+        </div>
+
+        <div class="gauge-card gauge-magenta">
+          <svg class="gauge-ring" viewBox="0 0 36 36">
+            <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="ring-fill magenta-fill" stroke-dasharray="62, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          </svg>
+          <div class="gauge-content">
+            <span class="gauge-label">MEMORY</span>
+            <span class="gauge-val magenta-txt">62%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INDICADOR Y PORCENTAJE DEL 100% -->
       <div class="hud-percentage-wrapper">
-        <span class="hud-pointer-line"></span>
-        <span id="splash-percentage-text" class="splash-pct-num">65%</span>
+        <div class="hud-pointer-line"></div>
+        <span id="splash-pct" class="splash-pct-num">100%</span>
       </div>
 
-      <!-- CONTENEDOR DE 14 CÁPSULAS -->
-<div class="processor-core-frame">
-  <div class="capsules-track">
-    <!-- 8 Cápsulas Verdes Activas -->
-    <div class="capsule cap-green active">
-      <svg class="cap-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-    </div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-    <div class="capsule cap-green active"></div>
-
-    <!-- 6 Cápsulas Magenta Activas -->
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active">
-      <svg class="cap-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>
-    </div>
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active"></div>
-    <div class="capsule cap-magenta active"></div>
-  </div>
-</div>
-
-<!-- CÍRCULOS DE MÉTRICAS (MÁS SEPARADOS) -->
-<div class="splash-gauges">
-  <div class="gauge-card gauge-green">
-    <svg class="gauge-ring" viewBox="0 0 100 100">
-      <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-      <circle class="ring-fill green-fill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="47"></circle>
-    </svg>
-    <div class="gauge-content">
-      <span class="gauge-label">DATOS PROCESADOS:</span>
-      <span class="gauge-val green-txt">82%</span>
+      <!-- ANUNCIO LIQUID GLASS "BIENVENIDO" -->
+      <div class="btn-glass-welcome">BIENVENIDO</div>
     </div>
   </div>
 
-  <div class="gauge-card gauge-magenta">
-    <svg class="gauge-ring" viewBox="0 0 100 100">
-      <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-      <circle class="ring-fill magenta-fill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="26"></circle>
-    </svg>
-    <div class="gauge-content">
-      <span class="gauge-label">ANÁLISIS DE MERCADO:</span>
-      <span class="gauge-val magenta-txt">90%</span>
-    </div>
-  </div>
-</div>
-
-      <!-- ANUNCIO / BANNER LIQUID GLASS (NO BOTÓN) -->
-<div class="banner-glass-welcome">BIENVENIDO</div>
 
   <!-- ========================================== -->
-  <!-- TOP BAR / HEADER NAVEGACIÓN                -->
+  <!-- 2. DASHBOARD MAIN                          -->
   <!-- ========================================== -->
-  <header class="top-bar">
-    <div class="logo" id="brand-logo">
-      <div class="lion-avatar-badge">🦁</div>
-      <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
-    </div>
-    <div class="top-bar-right">
-      <button class="top-icon-btn" aria-label="Buscar"></button>
-      <button class="top-icon-btn badge-rel" aria-label="Notificaciones">
-        <span class="icon-dot"></span>
+  <main class="dashboard-container">
+    
+    <!-- HEADER DEL DASHBOARD -->
+    <header class="dash-header">
+      <button class="dash-menu-btn">
+        <span>☰</span> MENU
       </button>
+      <h2 class="logo-title" style="font-size: 1.8rem !important;">
+        SOVY<span class="serif-s" style="font-size: 2.2rem !important;">X</span>
+      </h2>
+    </header>
+
+    <!-- SLIDER / CARRUSEL DE MÉTRICAS -->
+    <section class="metrics-section">
+      <h3 class="metrics-title">Rendimiento Sistema</h3>
       
-      <!-- BOTÓN ADMIN (AL HACER CLIC PIDE CONTRASEÑA) -->
-      <div class="user-avatar" id="btn-admin-access" title="Acceso Admin">
-        <span>US</span>
-      </div>
-      
-      <button id="btn-menu" class="hamburger-btn" aria-label="Menú">☰</button>
-    </div>
-  </header>
-
-  <!-- ========================================== -->
-  <!-- DASHBOARD PRINCIPAL DEL CLIENTE            -->
-  <!-- ========================================== -->
-  <main id="app-container">
-
-    <!-- Card 1: Métricas Actuales -->
-    <section class="card neon-card">
-      <div class="live-side-badge">• live view...</div>
-      <h2 class="card-title">Métricas Actuales</h2>
-      
-      <div class="metrics-grid">
-        <!-- Metric Item: Visitantes -->
-        <div class="metric-item">
-          <span class="metric-label">Visitantes:</span>
-          <span class="value"><strong id="metric-visitors">1,504</strong> <small class="green">(+3.5%)</small></span>
-          <div class="sparkline-box">
-            <svg viewBox="0 0 120 40" class="spark-svg">
-              <defs>
-                <linearGradient id="grad-green" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#00ffcc" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,32 Q25,10 50,22 T100,8 L120,5 L120,40 L0,40 Z" fill="url(#grad-green)"/>
-              <path d="M0,32 Q25,10 50,22 T100,8 L120,5" fill="none" stroke="#00ffcc" stroke-width="2.5"/>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Metric Item: Nuevos Leads -->
-        <div class="metric-item">
-          <span class="metric-label">Nuevos Leads:</span>
-          <span class="value"><strong id="metric-leads">75</strong> <small class="green">(+1.2%)</small></span>
-          <div class="sparkline-box">
-            <svg viewBox="0 0 120 40" class="spark-svg">
-              <defs>
-                <linearGradient id="grad-magenta" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#e0115f" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#e0115f" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,35 Q30,12 60,25 T120,8 L120,40 L0,40 Z" fill="url(#grad-magenta)"/>
-              <path d="M0,35 Q30,12 60,25 T120,8" fill="none" stroke="#e0115f" stroke-width="2.5"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tasa de Conversión -->
-      <div class="metric-item single-full">
-        <span class="metric-label">Tasa de Conversión:</span>
-        <span class="value-highlight">4.8%</span>
-        <div class="equalizer-bar-chart">
-          <div class="eq-bar" style="height: 30%;"></div>
-          <div class="eq-bar" style="height: 45%;"></div>
-          <div class="eq-bar" style="height: 38%;"></div>
-          <div class="eq-bar" style="height: 75%;"></div>
-          <div class="eq-bar" style="height: 55%;"></div>
-          <div class="eq-bar highlight-magenta" style="height: 90%;"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Card 2: Métricas Objetivo (Deslizables) -->
-    <section class="card neon-card">
-      <h2 class="card-title">Métricas Objetivo</h2>
-      <div class="carousel-metrics">
+      <div class="metrics-slider">
         
-        <div class="metric-card-sub">
-          <span class="metric-label">Clientes Obtenidos</span>
-          <span class="value-large">Goal: 100</span>
-          <span class="green">Incremento: +12%</span>
-          <div class="mini-spark">
-            <svg viewBox="0 0 100 25">
-              <path d="M0,20 Q25,5 50,15 T100,2" fill="none" stroke="#00ffcc" stroke-width="2"/>
+        <!-- Tarjeta 1 del Carrusel -->
+        <article class="metric-card">
+          <span class="metric-card-title">Tasa de Conversión</span>
+          <span class="metric-card-val green-txt">4.8%</span>
+          <div class="metric-wave-container">
+            <svg viewBox="0 0 300 65" preserveAspectRatio="none">
+              <path d="M0,45 Q75,10 150,40 T300,15" fill="none" stroke="#00ffcc" stroke-width="3" filter="drop-shadow(0 0 6px #00ffcc)"/>
             </svg>
           </div>
-        </div>
+          <div class="metric-card-footer">
+            <span>OBJETIVO: 5.0%</span>
+            <span class="green-txt">+12% ESTE MES</span>
+          </div>
+        </article>
 
-        <div class="metric-card-sub">
-          <span class="metric-label">Alcance</span>
-          <span class="value-large">15,000</span>
-          <span class="red">-1.30%</span>
-          <div class="mini-spark">
-            <svg viewBox="0 0 100 25">
-              <path d="M0,8 Q25,22 50,10 T100,18" fill="none" stroke="#e0115f" stroke-width="2"/>
+        <!-- Tarjeta 2 del Carrusel -->
+        <article class="metric-card">
+          <span class="metric-card-title">CTR Meta Ads</span>
+          <span class="metric-card-val magenta-txt">3.2%</span>
+          <div class="metric-wave-container">
+            <svg viewBox="0 0 300 65" preserveAspectRatio="none">
+              <path d="M0,20 Q75,55 150,25 T300,50" fill="none" stroke="#ff007a" stroke-width="3" filter="drop-shadow(0 0 6px #ff007a)"/>
             </svg>
           </div>
-        </div>
-
-        <div class="metric-card-sub">
-          <span class="metric-label">Inversión</span>
-          <span class="value-large">$15</span>
-          <span class="green">Optimizado</span>
-          <div class="mini-spark">
-            <svg viewBox="0 0 100 25">
-              <path d="M0,18 Q30,5 60,15 T100,8" fill="none" stroke="#00ffcc" stroke-width="2"/>
-            </svg>
+          <div class="metric-card-footer">
+            <span>ALCANCE: 15,000</span>
+            <span class="magenta-txt">-1.30%</span>
           </div>
-        </div>
+        </article>
 
       </div>
     </section>
 
-    <!-- Card 3: Chat Web -->
-    <section class="card neon-card">
-      <div class="live-status-bar">
-        <span class="live-dot"></span>
-        <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
+    <!-- TARJETA DE RESUMEN -->
+    <section class="dashboard-card">
+      <h3 class="metrics-title" style="margin-bottom: 12px;">Estado del Servidor</h3>
+      <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+        <span style="color: var(--text-sub);">Usuarios Activos:</span>
+        <strong style="color: #fff;">21 personas</strong>
       </div>
-
-      <div class="card-header-row">
-        <h2 class="card-title">Chat Web (Cierre SOVYX)</h2>
-        <span class="dots-menu">&#8478;</span>
-      </div>
-
-      <div class="chat-messages" id="chat-box">
-        <div class="msg incoming">
-          ¡Hola! 👋 Soy la IA de SOVYX. Quedan 2 cupos de cómputo en el servidor esta semana. ¿Tienes preguntas sobre la calibración espejo o el ciclo de 48H antes de reservar?
-        </div>
-      </div>
-
-      <div class="chat-questions-carousel">
-        <button class="question-chip">¿Cómo funciona el ciclo de 48H?</button>
-        <button class="question-chip">¿Por qué solo hay 2 slots libres?</button>
-      </div>
-
-      <div class="chat-input-row">
-        <input type="text" placeholder="Pregunta lo que quieras antes de reservar...">
-        <button class="btn-icon">➤</button>
+      <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+        <span style="color: var(--text-sub);">Slots Disponibles:</span>
+        <strong class="magenta-txt">2 Cupos</strong>
       </div>
     </section>
 
-    <!-- Card 4: Pago Final -->
-    <section class="card neon-card">
-      <h2 class="card-title">P.F (Pago Final)</h2>
-      <div class="pf-details">
-        <div class="pf-client">Rusmario</div>
-        <div class="pf-row">
-          <span>Reserva Inicial</span>
-          <strong>$ 1.000,00</strong>
-        </div>
-        <div class="pf-row">
-          <span>Tras Resultados</span>
-          <strong>$ 9.000,00</strong>
-        </div>
-        <div class="pf-row total-row">
-          <span>Total Proyecto</span>
-          <strong class="green-txt">$ 10.000,00</strong>
-        </div>
-      </div>
-
-      <!-- Botón simplificado a "Pagar" -->
-      <button class="btn-primary-action" id="btn-pagar">Pagar</button>
-    </section>
-
-    <!-- Card 5: Temporizador -->
-    <section class="card timer-card">
-      <span class="timer-title">47:59:59 (Tiempo Restante)</span>
-      <div class="timer-display" id="timer-count">47:59:59</div>
-      <span class="timer-status">TIEMPO CON SOFTWARE ACTIVO</span>
+    <!-- TARJETA TEMPORIZADOR -->
+    <section class="dashboard-card timer-card">
+      <span class="timer-title">TIEMPO RESTANTE DE SESIÓN</span>
+      <div id="timer-display" class="timer-digital">48:00:00</div>
+      <span class="timer-sub-text">ESTADO DE RESERVA: ACTIVO</span>
     </section>
 
   </main>
-
-  <!-- ========================================== -->
-  <!-- MODAL AUTENTICACIÓN ADMIN                  -->
-  <!-- ========================================== -->
-  <div id="admin-modal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <h3 class="card-title" style="color: var(--neon-green);">Acceso Admin</h3>
-      <p style="font-size: 0.85rem; color: var(--text-sub);">Ingresa la contraseña para continuar:</p>
-      <input type="password" id="admin-pass-input" class="admin-input" placeholder="••••••••">
-      <p id="admin-error-msg" style="color: var(--neon-magenta); font-size: 0.78rem; display: none;">Contraseña incorrecta</p>
-      <div class="modal-actions">
-        <button id="btn-admin-cancel" class="btn-modal-cancel">Cancelar</button>
-        <button id="btn-admin-confirm" class="btn-modal-confirm">Ingresar</button>
-      </div>
-    </div>
-  </div>
 
   <script src="app.js"></script>
 </body>
