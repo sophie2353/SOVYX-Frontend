@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SODIE</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
 </head>
 <body>
 
@@ -15,7 +14,7 @@
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       
-      <!-- LOGO -->
+      <!-- LOGO SODIE -->
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
       </div>
@@ -46,16 +45,16 @@
         </div>
       </div>
 
-      <!-- GAUGES HUD CON EFECTO LIQUID GLASS Y NODO CENTRAL -->
+      <!-- GAUGES HUD Y NODO CENTRAL (ANIMADOS DESDE 0%) -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
             <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
-            <circle class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="82, 100" />
+            <circle id="gauge-circle-1" class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="0, 100" />
           </svg>
           <div class="gauge-content">
             <span class="gauge-label">DATOS PROCESADOS</span>
-            <span class="gauge-val mint-txt">82%</span>
+            <span id="gauge-val-1" class="gauge-val mint-txt">0%</span>
           </div>
         </div>
 
@@ -64,17 +63,20 @@
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
             <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
-            <circle class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="90, 100" />
+            <circle id="gauge-circle-2" class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="0, 100" />
           </svg>
           <div class="gauge-content">
             <span class="gauge-label">ANÁLISIS MERCADO</span>
-            <span class="gauge-val fuchsia-txt">90%</span>
+            <span id="gauge-val-2" class="gauge-val fuchsia-txt">0%</span>
           </div>
         </div>
       </div>
 
-      <!-- CARTEL BIENVENIDO AMPLIADO -->
-      <div id="btn-welcome" class="welcome-sign-glass">BIENVENIDO</div>
+      <!-- CARTEL BIENVENIDO CON CARGA DE ABAJO HACIA ARRIBA -->
+      <div class="welcome-sign-glass">
+        <div id="welcome-fill" class="welcome-fill"></div>
+        <span class="welcome-text">BIENVENIDO</span>
+      </div>
 
     </div>
   </div>
@@ -85,7 +87,7 @@
   <main class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
-        <span class="brand-text"><span class="serif-s">S</span>OVYX</span>
+        <span class="brand-text"><span class="serif-s">S</span>ODIE</span>
       </div>
       <div class="dash-header-right">
         <span class="dash-menu-icon">☰</span>
@@ -155,5 +157,94 @@
     </section>
   </main>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const splash = document.getElementById('view-splash');
+      const pctText = document.getElementById('splash-pct');
+      const capsules = document.querySelectorAll('#capsules-track .capsule');
+      const welcomeFill = document.getElementById('welcome-fill');
+
+      const gaugeVal1 = document.getElementById('gauge-val-1');
+      const gaugeCircle1 = document.getElementById('gauge-circle-1');
+      const gaugeVal2 = document.getElementById('gauge-val-2');
+      const gaugeCircle2 = document.getElementById('gauge-circle-2');
+
+      let currentPct = 0;
+      const targetPct = 100;
+
+      // Intervalo de Carga Sincronizada
+      const loadInterval = setInterval(() => {
+        if (currentPct < targetPct) {
+          currentPct++;
+          pctText.textContent = `${currentPct}%`;
+
+          // 1. Relleno del cartel BIENVENIDO de abajo hacia arriba
+          if (welcomeFill) welcomeFill.style.height = `${currentPct}%`;
+
+          // 2. Encendido progresivo de cápsulas (8 menta, 6 fucsia)
+          const activeCount = Math.floor((currentPct / 100) * capsules.length);
+          capsules.forEach((cap, index) => {
+            if (index < activeCount) {
+              cap.className = index < 8 ? 'capsule cap-mint' : 'capsule cap-fuchsia';
+            } else {
+              cap.className = 'capsule cap-dark';
+            }
+          });
+
+          // 3. Carga en tiempo real de los círculos (0% a su meta)
+          const g1Current = Math.floor((currentPct / 100) * 82);
+          const g2Current = Math.floor((currentPct / 100) * 90);
+
+          if (gaugeVal1) gaugeVal1.textContent = `${g1Current}%`;
+          if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${g1Current}, 100`);
+
+          if (gaugeVal2) gaugeVal2.textContent = `${g2Current}%`;
+          if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', `${g2Current}, 100`);
+
+        } else {
+          clearInterval(loadInterval);
+          pctText.textContent = '100%';
+          if (welcomeFill) welcomeFill.style.height = '100%';
+
+          // Desaparición fluida al terminar
+          setTimeout(() => { 
+            splash.classList.add('hidden'); 
+          }, 500);
+        }
+      }, 30);
+
+      // Timer del Dashboard
+      let totalSeconds = 48 * 3600;
+      const timerDisplay = document.getElementById('timer-display');
+      setInterval(() => {
+        if (totalSeconds > 0) {
+          totalSeconds--;
+          const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+          const secs = String(totalSeconds % 60).padStart(2, '0');
+          timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
+        }
+      }, 1000);
+
+      document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendInputMsg();
+      });
+    });
+
+    function appendMessage(text) {
+      const chatBody = document.getElementById('chat-body');
+      const msgBubble = document.createElement('div');
+      msgBubble.className = 'chat-bubble outgoing-simple';
+      msgBubble.innerHTML = `<p>${text}</p>`;
+      chatBody.appendChild(msgBubble);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    function sendQuickMsg(text) { appendMessage(text); }
+    function sendInputMsg() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (text) { appendMessage(text); input.value = ''; }
+    }
+  </script>
 </body>
 </html>
