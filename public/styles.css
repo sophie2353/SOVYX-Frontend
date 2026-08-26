@@ -32,7 +32,7 @@ body {
 .mint-txt { color: var(--neon-mint); }
 
 /* ========================================================= */
-/* 1. SPLASH SCREEN / INTRO (LIQUID GLASS CRISTAL REAL)      */
+/* 1. SPLASH SCREEN (REORGANIZACIÓN VERTICAL)                */
 /* ========================================================= */
 
 .full-screen {
@@ -57,26 +57,26 @@ body {
   width: 100%;
   max-width: 380px;
   height: 100vh;
-  padding: 20px 16px;
+  padding: 16px 16px 28px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   text-align: center;
 }
 
-/* LOGO */
+/* LOGO MÁS ABAJO Y MÁS GRANDE */
 .logo-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 45px;
 }
 
 .logo-title {
   font-family: 'Cinzel', serif !important;
-  font-size: 4.8rem !important;
+  font-size: 5.8rem !important;
   font-weight: 800;
   background: linear-gradient(180deg, #FFFFFF 30%, #D8DFEE 100%);
   -webkit-background-clip: text;
@@ -84,24 +84,26 @@ body {
   display: flex; 
   align-items: center; 
   justify-content: center;
-  filter: drop-shadow(0 4px 18px rgba(255, 255, 255, 0.3));
+  filter: drop-shadow(0 4px 22px rgba(255, 255, 255, 0.35));
+  letter-spacing: -1px;
 }
 
 .logo-title .serif-s {
-  font-size: 6.2rem !important;
+  font-size: 7.2rem !important;
   color: var(--neon-fuchsia) !important;
   -webkit-text-fill-color: var(--neon-fuchsia) !important;
-  filter: drop-shadow(0 0 22px rgba(255, 0, 122, 0.95));
+  filter: drop-shadow(0 0 25px rgba(255, 0, 122, 0.95));
 }
 
 .hud-percentage-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: -10px;
 }
 
 .splash-pct-num {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--neon-mint);
   text-shadow: 0 0 12px var(--neon-mint);
@@ -109,20 +111,21 @@ body {
 
 .hud-pointer-line {
   width: 2px;
-  height: 14px;
+  height: 12px;
   background: var(--neon-mint);
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* HARDWARE CPU SOCKET */
+/* HARDWARE CPU SOCKET CON CIRCUITO SVG */
 .cpu-hardware-socket {
   width: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.15) 100%);
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.12) 100%);
   border: 1.8px solid rgba(255, 255, 255, 0.65);
   border-top: 2.5px solid rgba(255, 255, 255, 0.95);
   border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
-  padding: 12px 10px;
+  padding: 14px 10px;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   box-shadow: 
@@ -130,11 +133,21 @@ body {
     inset 0 -2px 8px rgba(0, 0, 0, 0.5),
     0 12px 32px rgba(0, 0, 0, 0.8),
     0 0 25px rgba(255, 255, 255, 0.15);
-  position: relative;
+  overflow: hidden;
+}
+
+.cpu-bg-circuit {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .cpu-inner-circuit {
-  background: rgba(15, 3, 30, 0.4);
+  position: relative;
+  z-index: 2;
+  background: rgba(15, 3, 30, 0.45);
   border: 1px dashed rgba(255, 255, 255, 0.35);
   border-radius: 12px;
   padding: 8px;
@@ -148,7 +161,7 @@ body {
 }
 
 .capsule {
-  height: 64px;
+  height: 60px;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -174,14 +187,13 @@ body {
   box-shadow: 0 0 10px rgba(255, 0, 122, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
-/* PILAS VACÍAS: 100% TRANSPARENTES SIN MARCOS NEGROS */
 .capsule.cap-dark {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-/* GAUGES HUD EN INTRO */
+/* GAUGES HUD */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -218,16 +230,15 @@ body {
 .gauge-label { font-size: 0.42rem; color: var(--text-sub); text-transform: uppercase; }
 .gauge-val { font-size: 0.9rem; font-weight: 800; margin-top: 2px; }
 
-/* CARTEL BIENVENIDO GLASS */
+/* BANNER BIENVENIDO (SUBIDO Y ESTILIZADO) */
 .welcome-sign-glass {
   width: 100%;
-  padding: 18px 0;
-  margin-top: 10px;
+  padding: 16px 0;
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.7rem; 
+  font-size: 1.8rem; 
   font-weight: 800; 
   letter-spacing: 8px;
   color: #ffffff;
@@ -243,10 +254,11 @@ body {
     0 0 15px rgba(255, 255, 255, 0.2);
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
   user-select: none;
+  margin-bottom: 10px;
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN (LIQUID GLASS REAL - MENTA Y TRANSPARENTE) */
+/* 2. DASHBOARD MAIN (MÉTRICAS CUADRADAS)                   */
 /* ========================================================= */
 
 .dashboard-container {
@@ -267,7 +279,6 @@ body {
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
 .dash-menu-icon { font-size: 1.3rem; }
 
-/* TARJETAS CON LIQUID GLASS MENTA Y EFECTO CRISTAL PROFUNDO */
 .glass-card-dash {
   background: linear-gradient(135deg, rgba(0, 255, 204, 0.07) 0%, rgba(10, 3, 22, 0.45) 100%);
   border: 1.5px solid rgba(0, 255, 204, 0.45);
@@ -286,16 +297,30 @@ body {
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 
-/* MÉTRICAS SLIDER */
-.metrics-slider { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
+/* MÉTRICAS CUADRADAS CON BORDES REDONDEADOS */
+.metrics-slider { 
+  display: flex; 
+  gap: 14px; 
+  overflow-x: auto; 
+  scrollbar-width: none; 
+}
 .metrics-slider::-webkit-scrollbar { display: none; }
-.metrics-slider .glass-card-dash { flex: 0 0 82%; }
 
-.card-head { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-sub); }
-.card-value { font-size: 1.6rem; font-weight: 800; margin: 2px 0; }
-.card-chart { width: 100%; height: 45px; }
+.metrics-slider .metric-square { 
+  flex: 0 0 148px; 
+  height: 158px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 18px;
+}
+
+.card-head { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); }
+.card-value { font-size: 1.45rem; font-weight: 800; margin: 0; }
+.card-chart { width: 100%; height: 42px; }
 .card-chart svg { width: 100%; height: 100%; filter: drop-shadow(0 0 6px var(--neon-mint)); }
-.card-foot { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-sub); }
+.card-foot { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-sub); }
 
 /* CHAT WEB */
 .chat-body { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
