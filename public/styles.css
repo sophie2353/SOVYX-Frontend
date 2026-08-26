@@ -293,10 +293,27 @@ body {
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 
-/* MÉTRICAS & CARRUSEL */
-.metrics-slider { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+/* MÉTRICAS & CARRUSEL (CON SNAP SCROLL) */
+.metrics-slider { 
+  display: flex; 
+  gap: 14px; 
+  overflow-x: auto; 
+  scrollbar-width: none; 
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
 .metrics-slider::-webkit-scrollbar { display: none; }
-.metrics-slider .metric-square { flex: 0 0 148px; height: 158px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 18px; }
+
+.metrics-slider .metric-square { 
+  flex: 0 0 148px; 
+  height: 158px; 
+  padding: 12px; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between; 
+  border-radius: 18px; 
+  scroll-snap-align: center;
+}
 
 .card-head { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); }
 .card-value { font-size: 1.45rem; font-weight: 800; margin: 0; }
