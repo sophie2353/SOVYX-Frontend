@@ -1,21 +1,22 @@
 /* ========================================== */
-/* SOVYX ULTRA-PREMIUM NEON GLASS SYSTEM      */
+/* SOVYX LIQUID GLASS & NEON SYSTEM           */
 /* ========================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap');
 
 :root {
   --bg-dark: #070112;
-  --card-glass: rgba(22, 10, 40, 0.65);
+  --card-glass: rgba(22, 10, 42, 0.65);
+  --card-border: rgba(0, 255, 204, 0.25);
   --neon-cyan: #00ffcc;
   --neon-magenta: #ff007a;
   --cyan-glow: 0 0 20px rgba(0, 255, 204, 0.35);
   --magenta-glow: 0 0 25px rgba(255, 0, 122, 0.7);
-  --border-glass: 1px solid rgba(0, 255, 204, 0.3);
   --text-white: #ffffff;
+  --text-muted: #9c8eb9;
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -25,119 +26,197 @@
 body {
   background: var(--bg-dark);
   background-image: 
-    radial-gradient(circle at 50% 15%, #3d0866 0%, #120326 50%, #05000c 90%);
+    radial-gradient(circle at 50% 15%, #3a085c 0%, #100221 60%, #05000a 100%);
   color: var(--text-white);
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  padding: 12px 8px;
 }
 
-.mobile-frame {
+/* CONTENEDOR PRINCIPAL: CONTROL ESTRICTO DE ANCHO */
+.app-viewport {
   width: 100%;
-  max-width: 400px;
-  padding: 16px;
-  display: flex;
+  max-width: 412px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* AISLAMIENTO DE PANTALLAS (EVITA COLISIÓN Y DESBORDE) */
+.screen {
+  display: none !important;
+  width: 100%;
   flex-direction: column;
   gap: 16px;
 }
 
-/* ------------------------------------------ */
-/* 1. SPLASH SCREEN (Referencia 43859_8)     */
-/* ------------------------------------------ */
+.screen.active {
+  display: flex !important;
+}
 
-.splash-screen {
+/* ========================================== */
+/* 1. SPLASH SCREEN (Boceto Liquid Glass)     */
+/* ========================================== */
+
+.splash-content {
+  min-height: 94vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-height: 90vh;
-  padding: 20px 0;
+  padding: 20px 10px;
 }
 
-/* Logo "S" Magenta con resplandor intenso */
 .logo-sovyx {
   font-family: 'Cinzel', serif;
   font-size: 4.2rem;
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 2px;
+  text-align: center;
+  margin-top: 10px;
 }
 
 .logo-sovyx .s-pink {
   font-family: 'Cinzel', serif;
   color: var(--neon-magenta);
-  text-shadow: 0 0 20px rgba(255, 0, 122, 0.9), 0 0 40px rgba(255, 0, 122, 0.6);
+  text-shadow: 0 0 20px var(--neon-magenta), 0 0 40px var(--neon-magenta);
 }
 
-/* Indicadores de Círculo Neón SVG */
-.circles-container {
+.progress-percent {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+/* MARCO CÁPSULAS LIQUID GLASS */
+.capsules-glass-frame {
+  width: 100%;
+  background: rgba(12, 4, 28, 0.7);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  border-radius: 18px;
+  padding: 12px 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--cyan-glow), inset 0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+.capsules-grid {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.capsule-item {
+  flex: 1;
+  height: 56px;
+  border-radius: 8px;
+  border: 1px solid var(--neon-cyan);
+  background: rgba(0, 255, 204, 0.12);
+  box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capsule-item.pink {
+  border-color: var(--neon-magenta);
+  background: rgba(255, 0, 122, 0.3);
+  box-shadow: 0 0 12px rgba(255, 0, 122, 0.8);
+}
+
+.capsule-item.dark {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(10, 5, 20, 0.6);
+  box-shadow: none;
+}
+
+/* MEDIDORES CIRCULARES CON GLOW */
+.meters-row {
   display: flex;
   justify-content: space-around;
   width: 100%;
-  margin: 15px 0;
+  margin: 10px 0;
 }
 
-.circle-meter {
-  width: 110px;
-  height: 110px;
-  position: relative;
+.circle-meter-box {
+  width: 115px;
+  height: 115px;
+  border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
   text-align: center;
+  padding: 8px;
+  backdrop-filter: blur(10px);
 }
 
-.circle-meter.cyan {
+.circle-meter-box.cyan {
   border: 2px solid var(--neon-cyan);
+  background: rgba(0, 255, 204, 0.05);
   box-shadow: var(--cyan-glow), inset 0 0 15px rgba(0, 255, 204, 0.2);
 }
 
-.circle-meter.magenta {
+.circle-meter-box.magenta {
   border: 2px solid var(--neon-magenta);
+  background: rgba(255, 0, 122, 0.05);
   box-shadow: var(--magenta-glow), inset 0 0 15px rgba(255, 0, 122, 0.2);
 }
 
-.meter-title {
-  font-size: 0.65rem;
+.meter-label {
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  line-height: 1.1;
+  color: #ffffff;
 }
 
-.meter-value {
-  font-size: 1.4rem;
+.meter-val {
+  font-size: 1.5rem;
   font-weight: 800;
+  margin-top: 2px;
 }
 
-/* Botón Biselado Bisel Cristal "BIENVENIDO" */
-.btn-bienvenido-glass {
+/* BOTÓN LIQUID GLASS "BIENVENIDO" */
+.btn-bienvenido-liquid {
   width: 100%;
-  padding: 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(20,8,38,0.8) 100%);
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(20,8,38,0.85) 100%);
   border: 1.5px solid rgba(255, 255, 255, 0.4);
-  border-radius: 14px;
+  border-top: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
   color: #ffffff;
   font-family: 'Cinzel', serif;
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: 5px;
   text-align: center;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.15);
   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* ------------------------------------------ */
-/* 2. DASHBOARD (Referencia 43366_4)         */
-/* ------------------------------------------ */
+.btn-bienvenido-liquid:active {
+  transform: scale(0.98);
+}
 
-/* Header con León Verde y Menú */
+/* ========================================== */
+/* 2. DASHBOARD (Glassmorphism Completo)      */
+/* ========================================== */
+
 .dash-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  padding: 4px 0;
 }
 
 .brand-lion {
@@ -145,119 +224,194 @@ body {
   align-items: center;
   gap: 8px;
   font-family: 'Cinzel', serif;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #ffffff;
 }
 
-.lion-icon {
-  width: 32px;
-  height: 32px;
-  filter: drop-shadow(0 0 8px rgba(0,255,204,0.6));
-}
-
-.topbar-icons {
+.topbar-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.sub-header-title {
-  font-size: 0.95rem;
-  color: #bfa1e6;
-  margin-top: -4px;
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+  background: rgba(0, 255, 204, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--neon-cyan);
 }
 
-/* Tarjetas Transparentes Neón (Glassmorphism) */
+.dash-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: -6px;
+  margin-bottom: 4px;
+}
+
+/* TARJETAS GLASS */
 .glass-card {
   background: var(--card-glass);
-  border: var(--border-glass);
+  border: var(--card-border);
   border-radius: 18px;
   padding: 16px;
   backdrop-filter: blur(16px);
-  box-shadow: var(--cyan-glow);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 255, 204, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.card-title-dash {
-  font-size: 1.15rem;
+.card-heading {
+  font-size: 1.2rem;
   font-weight: 700;
   color: #ffffff;
 }
 
-/* Carousel / Métricas Horizontales */
-.metrics-scroll-row {
+/* CARRUSEL DE MÉTRICAS */
+.metrics-carousel {
   display: flex;
   gap: 10px;
   overflow-x: auto;
+  padding-bottom: 4px;
 }
 
-.metric-mini-card {
-  flex: 0 0 110px;
+.metric-mini-tile {
+  flex: 0 0 115px;
   background: rgba(10, 4, 22, 0.6);
   border: 1px solid rgba(0, 255, 204, 0.3);
   border-radius: 12px;
   padding: 10px;
 }
 
-/* Chat Web con Contenedor Blanco Interno */
-.chat-white-box {
+.metric-tile-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.metric-tile-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+/* CHAT WEB */
+.chat-inner-white {
   background: #ffffff;
   border-radius: 12px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: #000;
+  color: #000000;
 }
 
-.chat-bubble-incoming {
-  background: #98f5d5;
-  color: #0a3d2e;
+.chat-bubble-in {
+  background: #a3f7dd;
+  color: #083b2d;
   padding: 8px 12px;
   border-radius: 12px;
   border-bottom-left-radius: 2px;
   font-size: 0.8rem;
   max-width: 85%;
+  align-self: flex-start;
+  font-weight: 600;
 }
 
-.chat-bubble-outgoing {
-  background: #4a2d6e;
+.chat-bubble-out {
+  background: #47266b;
   color: #ffffff;
   padding: 8px 12px;
   border-radius: 12px;
   border-bottom-right-radius: 2px;
   font-size: 0.8rem;
-  align-self: flex-end;
   max-width: 85%;
-}
-
-/* Pago Final (P.F) */
-.pf-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-}
-
-.btn-glass-pay {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(0, 255, 204, 0.4);
-  color: #ffffff;
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
+  align-self: flex-end;
   font-weight: 600;
+}
+
+.chat-input-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chat-input-bar input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.chat-input-bar button {
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #000;
+  font-weight: bold;
   cursor: pointer;
 }
 
-/* Timer gigante neón */
-.timer-cyan-giant {
+/* SECCIÓN PAGO FINAL */
+.pf-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.btn-pay-action {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--cyan-glow);
+}
+
+/* TIMER GIGANTE */
+.timer-val-giant {
   font-size: 2.8rem;
   font-weight: 800;
   color: var(--neon-cyan);
   text-shadow: var(--cyan-glow);
   text-align: center;
-  margin: 4px 0;
+  margin: 2px 0;
+}
+
+/* BOTÓN DE CAMBIO DE PANTALLA EN PRUEBAS */
+.demo-toggle-btn {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: var(--neon-magenta);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: 0 0 12px rgba(255, 0, 122, 0.8);
+  cursor: pointer;
+  z-index: 10000;
 }
