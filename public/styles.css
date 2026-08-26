@@ -2,9 +2,10 @@
 /* SOVYX Core OS - Master Stylesheet (styles.css) */
 /* ========================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Rajdhani:wght@500;600;700&display=swap');
+
 :root {
   --bg-dark: #05010a;
-  --bg-galaxy: radial-gradient(circle at 50% 30%, #2b0648 0%, #100323 60%, #040008 100%);
   --neon-green: #00ffcc;
   --neon-magenta: #ff007a;
   --text-main: #ffffff;
@@ -15,13 +16,13 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-family: 'Rajdhani', sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--bg-dark);
-  background-image: var(--bg-galaxy);
+  background-image: radial-gradient(circle at 50% 30%, #2b0648 0%, #100323 60%, #040008 100%);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -35,7 +36,7 @@ body {
 .green-txt { color: var(--neon-green); }
 
 /* ========================================== */
-/* 1. SPLASH SCREEN HUD 100% HI-FI OVERLAY    */
+/* 1. SPLASH SCREEN (100% IDENTICO A LA REF)  */
 /* ========================================== */
 
 .full-screen {
@@ -45,16 +46,12 @@ body {
   width: 100vw; 
   height: 100vh;
   z-index: 9999;
-  background: var(--bg-dark);
-  /* Fondo Galáctico + Trama Grid HUD + Trama Constelaciones */
+  background: #06010e;
   background-image: 
-    radial-gradient(circle at 50% 35%, #2e084d 0%, #0d021c 65%, #030007 100%),
-    linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px),
-    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.6), transparent),
-    radial-gradient(1.5px 1.5px at 80px 120px, rgba(0, 255, 204, 0.8), transparent),
-    radial-gradient(1px 1px at 240px 70px, rgba(255, 0, 122, 0.8), transparent);
-  background-size: 100% 100%, 25px 25px, 25px 25px, 300px 300px, 200px 200px, 250px 250px;
+    radial-gradient(circle at 50% 35%, #340954 0%, #0e021e 65%, #030007 100%),
+    linear-gradient(rgba(0, 255, 204, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px, 24px 24px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -63,94 +60,84 @@ body {
 
 .splash-content {
   width: 100%;
-  max-width: 390px;
+  max-width: 380px;
   height: 100vh;
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
+  justify-content: space-around; /* Distribución vertical uniforme centrado */
   text-align: center;
   box-sizing: border-box;
 }
 
-/* LOGO PROPORCIÓN 100% EXACTA */
+/* LOGO GIGANTE IDENTICO A LA REFERENCIA */
 .logo-title {
-  font-family: 'Cinzel', serif;
-  font-size: 4.2rem;
-  letter-spacing: 3px;
-  font-weight: 700;
-  background: linear-gradient(180deg, #FFFFFF 15%, #D0D5E0 65%, #8A92A3 100%);
+  font-family: 'Cinzel', serif !important;
+  font-size: 4.5rem !important;
+  letter-spacing: 2px;
+  font-weight: 800;
+  background: linear-gradient(180deg, #FFFFFF 20%, #D0D5E0 65%, #8A92A3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.95));
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.95));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2px;
+  line-height: 1;
 }
 
 .logo-title .serif-s {
-  font-family: 'Cinzel', serif;
-  font-size: 5.2rem;
-  color: var(--neon-magenta);
-  -webkit-text-fill-color: var(--neon-magenta);
+  font-family: 'Cinzel', serif !important;
+  font-size: 5.8rem !important;
+  color: var(--neon-magenta) !important;
+  -webkit-text-fill-color: var(--neon-magenta) !important;
   font-weight: 800;
-  filter: drop-shadow(0 0 18px rgba(255, 0, 122, 0.9));
-  margin-right: 2px;
+  filter: drop-shadow(0 0 22px rgba(255, 0, 122, 0.95));
+  margin-right: -2px;
 }
 
-/* PORCENTAJE SUPERIOR HUD */
+/* INDICADOR Y BRACKETS DEL 65% */
 .hud-percentage-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+  margin-bottom: -6px;
 }
 
 .hud-pointer-line {
-  width: 1.5px;
+  width: 2px;
   height: 12px;
-  background: linear-gradient(180deg, transparent, var(--neon-green));
-  box-shadow: 0 0 6px var(--neon-green);
+  background: var(--neon-green);
+  box-shadow: 0 0 8px var(--neon-green);
 }
 
 .splash-pct-num {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--neon-green);
   letter-spacing: 1.5px;
-  text-shadow: 0 0 10px rgba(0, 255, 204, 0.9);
+  text-shadow: 0 0 12px rgba(0, 255, 204, 0.9);
 }
 
-/* PLACA DE PROCESADOR CPU CON PINES Y CIRCUITO */
+/* CHIP / CPU CONTAINER CON CIRCUITO TRASERO */
 .processor-core-frame {
   width: 100%;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(13, 5, 26, 0.85);
-  border: 1px solid rgba(180, 100, 255, 0.4);
-  border-radius: 14px;
-  padding: 8px;
+  background: rgba(15, 5, 30, 0.85);
+  border: 1.5px solid rgba(180, 100, 255, 0.35);
+  border-radius: 16px;
+  padding: 10px 8px;
   box-shadow: 
-    inset 0 0 20px rgba(0, 0, 0, 0.95),
-    0 0 30px rgba(180, 100, 255, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    inset 0 0 25px rgba(0, 0, 0, 0.95),
+    0 0 30px rgba(180, 100, 255, 0.15),
+    0 0 2px rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-}
-
-/* Trama de líneas de circuito en la placa */
-.processor-core-frame::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border: 1px dashed rgba(0, 255, 204, 0.25);
-  border-radius: 18px;
-  pointer-events: none;
 }
 
 .capsules-track {
@@ -163,54 +150,48 @@ body {
 
 .capsule {
   flex: 1;
-  height: 64px;
+  height: 68px; /* Barras alargadas tipo cristal */
   border-radius: 6px;
-  background: rgba(15, 6, 28, 0.7);
+  background: rgba(12, 4, 22, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Glass Glint Glossy Reflect */
 .capsule::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 48%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.02) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.02) 100%);
   border-radius: 5px 5px 0 0;
   pointer-events: none;
 }
 
 .capsule .cap-icon {
-  width: 11px !important;
-  height: 11px !important;
+  width: 12px !important;
+  height: 12px !important;
   z-index: 3;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.95));
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95));
 }
 
 .capsule.cap-green.active {
   background: linear-gradient(180deg, #62fce0 0%, #00bf8f 55%, #005943 100%);
   border: 1px solid #a8ffee;
-  box-shadow: 
-    0 0 14px rgba(0, 255, 204, 0.85),
-    inset 0 2px 4px rgba(255, 255, 255, 0.95),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 16px rgba(0, 255, 204, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.95);
 }
 
 .capsule.cap-magenta.active {
   background: linear-gradient(180deg, #ff7bc3 0%, #e60073 55%, #660033 100%);
   border: 1px solid #ffc2e0;
-  box-shadow: 
-    0 0 14px rgba(255, 0, 122, 0.9),
-    inset 0 2px 4px rgba(255, 255, 255, 0.95),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 16px rgba(255, 0, 122, 0.9), inset 0 2px 4px rgba(255, 255, 255, 0.95);
 }
 
-/* ORBE HOLOGRÁFICO CENTRAL & GAUGES */
+/* CIRCULOS Y PLANETOIDE CENTRAL */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -218,31 +199,27 @@ body {
   width: 100%;
   max-width: 320px;
   position: relative;
-  margin: 4px 0;
 }
 
-/* Orbe planetario central holográfico */
+/* Orbe 3D Central */
 .splash-gauges::after {
   content: '';
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ff99dd 0%, #ff007a 50%, #4a0024 100%);
-  box-shadow: 
-    0 0 12px var(--neon-magenta),
-    0 0 24px rgba(255, 0, 122, 0.6),
-    inset 0 0 4px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: radial-gradient(circle at 35% 35%, #ff99dd 0%, #ff007a 50%, #300018 100%);
+  box-shadow: 0 0 16px var(--neon-magenta), inset 0 0 5px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 .gauge-card {
   position: relative;
-  width: 88px;
-  height: 88px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,14 +239,14 @@ body {
 }
 
 .gauge-ring {
-  width: 88px !important;
-  height: 88px !important;
+  width: 90px !important;
+  height: 90px !important;
   transform: rotate(-90deg);
 }
 
 .ring-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: rgba(255, 255, 255, 0.08);
   stroke-width: 6;
 }
 
@@ -279,15 +256,8 @@ body {
   stroke-linecap: round;
 }
 
-.green-fill {
-  stroke: var(--neon-green);
-  filter: drop-shadow(0 0 6px var(--neon-green));
-}
-
-.magenta-fill {
-  stroke: var(--neon-magenta);
-  filter: drop-shadow(0 0 6px var(--neon-magenta));
-}
+.green-fill { stroke: var(--neon-green); filter: drop-shadow(0 0 6px var(--neon-green)); }
+.magenta-fill { stroke: var(--neon-magenta); filter: drop-shadow(0 0 6px var(--neon-magenta)); }
 
 .gauge-content {
   position: absolute;
@@ -298,7 +268,7 @@ body {
 }
 
 .gauge-label {
-  font-size: 0.46rem;
+  font-size: 0.48rem;
   color: var(--text-sub);
   letter-spacing: 0.5px;
   font-weight: 700;
@@ -307,19 +277,19 @@ body {
 }
 
 .gauge-val {
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 800;
   margin-top: 2px;
 }
 
-/* BOTÓN BIENVENIDO GLASS */
+/* BOTON GLASS BIENVENIDO */
 .btn-glass-welcome {
   pointer-events: auto;
   cursor: pointer;
   width: 100% !important;
-  padding: 13px 0 !important;
+  padding: 14px 0 !important;
   font-family: 'Cinzel', serif !important;
-  font-size: 1.25rem !important;
+  font-size: 1.3rem !important;
   font-weight: 700 !important;
   letter-spacing: 6px !important;
   color: #ffffff !important;
@@ -333,7 +303,6 @@ body {
     inset 0 1px 2px rgba(255, 255, 255, 0.9),
     0 10px 28px rgba(0, 0, 0, 0.8),
     0 0 20px rgba(0, 255, 204, 0.15) !important;
-  transition: all 0.2s ease;
 }
 
 .btn-glass-welcome:active {
@@ -343,7 +312,7 @@ body {
 }
 
 /* ========================================== */
-/* 2. DASHBOARD MAIN & CAROUSEL               */
+/* 2. DASHBOARD MAIN & CAROUSEL LAYOUT FIX    */
 /* ========================================== */
 
 .dashboard-container {
@@ -377,9 +346,11 @@ body {
   font-weight: 600;
 }
 
+/* FIX CRÍTICO DEL OVERFLOW DE LAS GRAFICAS EN DASHBOARD */
 .metrics-section {
   width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .metrics-title {
@@ -387,13 +358,6 @@ body {
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 8px;
-}
-
-.metrics-slider-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
 }
 
 .metrics-slider {
@@ -411,75 +375,54 @@ body {
 }
 
 .metric-card {
-  flex: 0 0 85%;
-  max-width: 320px;
+  flex: 0 0 100%; /* Garantiza una sola tarjeta contenida a la vez */
+  max-width: 100%;
+  box-sizing: border-box;
   scroll-snap-align: start;
   background: rgba(18, 8, 30, 0.85);
   border: 1px solid rgba(0, 255, 204, 0.35);
   border-radius: 14px;
-  padding: 12px;
+  padding: 14px;
   box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 6px 16px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-sizing: border-box;
 }
 
 .metric-card-title {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-sub);
   font-weight: 600;
 }
 
 .metric-card-val {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #ffffff;
   margin: 4px 0;
 }
 
+/* FIX SVG DEFORMADO */
 .metric-wave-container {
   width: 100%;
-  height: 60px;
+  height: 65px;
   overflow: hidden;
   position: relative;
   margin: 6px 0;
 }
 
-.metric-wave-svg {
-  width: 100%;
-  height: 100%;
-  stroke: var(--neon-green);
-  fill: none;
-  stroke-width: 2.5;
-  filter: drop-shadow(0 0 6px var(--neon-green));
+.metric-wave-container svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 
 .metric-card-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--text-sub);
-}
-
-.metrics-pagination-dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.metrics-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.metrics-dot.active {
-  background: var(--neon-green);
-  box-shadow: 0 0 6px var(--neon-green);
 }
 
 .dashboard-card {
@@ -514,7 +457,6 @@ body {
   letter-spacing: 2px;
   line-height: 1.1;
   margin: 4px 0;
-  font-family: 'Rajdhani', sans-serif;
 }
 
 .timer-sub-text {
