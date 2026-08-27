@@ -30,8 +30,11 @@ body {
   width: 100%;
 }
 
+/* CLASES DE UTILIDAD */
 .fuchsia-txt { color: var(--neon-fuchsia); }
 .mint-txt { color: var(--neon-mint); }
+.hidden { display: none !important; }
+.text-center { text-align: center; }
 
 /* ========================================================= */
 /* 1. SPLASH SCREEN (HUD LÍQUIDO FUTURISTA)                  */
@@ -222,7 +225,7 @@ body {
 .gauge-label { font-size: 0.38rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
 .gauge-val { font-size: 0.85rem; font-weight: 800; margin-top: 1px; font-family: 'Orbitron', sans-serif; }
 
-/* CARTEL BIENVENIDO (ANIMANTE DE ABAJO HACIA ARRIBA) */
+/* CARTEL BIENVENIDO */
 .welcome-sign-glass {
   position: relative;
   width: 100%;
@@ -272,8 +275,10 @@ body {
 }
 
 .dash-header { display: flex; justify-content: space-between; align-items: center; }
+.dash-header-right { display: flex; align-items: center; gap: 8px; }
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
-.dash-menu-icon { font-size: 1.3rem; }
+.badge-client { font-size: 0.75rem; background: rgba(0, 255, 204, 0.15); border: 1px solid var(--neon-mint); padding: 2px 8px; border-radius: 10px; color: var(--neon-mint); }
+.btn-icon { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; }
 
 .glass-card-dash {
   background: linear-gradient(135deg, rgba(0, 255, 204, 0.07) 0%, rgba(10, 3, 22, 0.45) 100%);
@@ -292,6 +297,12 @@ body {
 }
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+
+/* PANEL ADMIN */
+.admin-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.admin-group label { font-size: 0.8rem; color: var(--text-sub); display: block; margin-bottom: 4px; }
+.admin-btns { display: flex; gap: 6px; }
+.admin-btns button { flex: 1; padding: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: #fff; cursor: pointer; }
 
 /* MÉTRICAS & CARRUSEL (CON SNAP SCROLL) */
 .metrics-slider { 
@@ -345,6 +356,15 @@ body {
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
+/* PASOS Y FLUJOS DE ENTRADA */
+.step-desc { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px; }
+.input-group-flow { display: flex; flex-direction: column; gap: 8px; }
+.input-group-flow input { background: rgba(10, 4, 20, 0.6); border: 1px solid var(--neon-mint); border-radius: 10px; padding: 10px; color: #fff; outline: none; }
+.file-input-custom { margin-bottom: 12px; color: var(--text-sub); width: 100%; }
+.style-wait-msg { font-size: 0.85rem; margin-top: 8px; text-align: center; }
+.btn-fb { background: linear-gradient(180deg, rgba(255, 0, 122, 0.3) 0%, rgba(180, 0, 90, 0.1) 100%); border-color: var(--neon-fuchsia); color: #fff; }
+.row-btns-renew { display: flex; gap: 10px; margin-top: 10px; }
+
 /* CHAT WEB HEADER & CUPOS BADGE */
 .chat-header {
   display: flex;
@@ -389,11 +409,13 @@ body {
 .chat-input-bar input { flex: 1; background: rgba(10, 4, 20, 0.5); border: 1px solid rgba(0, 255, 204, 0.35); border-radius: 10px; padding: 8px 12px; color: #fff; font-size: 0.8rem; outline: none; }
 .chat-send-btn { background: var(--neon-mint); border: none; border-radius: 10px; width: 36px; color: #05010a; font-weight: 800; cursor: pointer; }
 
+/* ACCIONES DE PAGO Y BOTONES */
 .pf-summary-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.9rem; }
 .pf-row { display: flex; justify-content: space-between; color: var(--text-sub); }
 .pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; }
 
 .btn-pf-action { width: 100%; padding: 12px 0; background: linear-gradient(180deg, rgba(0, 255, 204, 0.25) 0%, rgba(0, 180, 140, 0.08) 100%); border: 1.5px solid var(--neon-mint); border-radius: 12px; color: var(--neon-mint); font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 0 12px rgba(0, 255, 204, 0.2); }
+.btn-danger { border-color: var(--neon-fuchsia); color: var(--neon-fuchsia); background: rgba(255, 0, 122, 0.1); }
 
 .timer-section { text-align: center; }
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
