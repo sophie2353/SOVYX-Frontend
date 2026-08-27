@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE</title>
+  <title>SOVYX / SODIE</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN                           -->
+  <!-- 1. SPLASH SCREEN (CARGA EN PORCENTAJES)   -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       <div class="logo-wrapper">
         <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
       </div>
+      
+      <!-- Porcentaje principal de carga -->
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
         <div class="hud-pointer-line"></div>
       </div>
+
+      <!-- Barra de cápsulas progresivas -->
       <div class="cpu-liquid-box">
         <div id="capsules-track" class="capsules-track">
           <div class="capsule cap-dark"><div class="cap-glint"></div></div>
@@ -38,6 +42,8 @@
           <div class="capsule cap-dark"><div class="cap-glint"></div></div>
         </div>
       </div>
+
+      <!-- Indicadores circulares con porcentajes dinámicos -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -49,7 +55,9 @@
             <span id="gauge-val-1" class="gauge-val mint-txt">0%</span>
           </div>
         </div>
+
         <div class="hud-center-node"></div>
+
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
             <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
@@ -61,6 +69,7 @@
           </div>
         </div>
       </div>
+
       <div class="welcome-sign-glass">
         <div id="welcome-fill" class="welcome-fill"></div>
         <span class="welcome-text">BIENVENIDO</span>
@@ -77,7 +86,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN                          -->
+  <!-- 2. DASHBOARD PRINCIPAL                     -->
   <!-- ========================================== -->
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
@@ -86,21 +95,21 @@
       </div>
       <div class="dash-header-right">
         <span id="client-id-badge" class="badge-client">Cliente: #1</span>
-        <button id="btn-admin-toggle" class="btn-icon">⚙️</button>
+        <!-- Botón de acceso directo al Panel Admin -->
+        <button id="btn-admin-toggle" class="btn-icon" title="Acceso Admin">⚙️</button>
       </div>
     </header>
 
-    <!-- PANEL ADMIN MÓDULO (Protegido por Clave y Zona Única de Pagos de Prueba) -->
+    <!-- MODAL / PANEL ADMIN (Única zona donde existen las acciones de Pago) -->
     <section id="admin-panel" class="glass-card-dash hidden">
       <h3 class="section-title fuchsia-txt">Dashboard Mio (Admin) 👺</h3>
       <div class="admin-grid">
         <div class="admin-group">
-          <label>Módulo 3: Generar Link / Ejecutar Pago de Prueba</label>
+          <label>Generar Link / Ejecutar Pago de Prueba</label>
           <div class="admin-btns">
-            <!-- El pago de prueba vive exclusivamente en esta sección -->
             <button id="btn-admin-link-1k" class="btn-pf-action">$1.000 / $1 (Prueba)</button>
-            <button id="btn-admin-link-9k">$9.000</button>
-            <button id="btn-admin-link-5k">$5.000</button>
+            <button id="btn-admin-link-9k" class="btn-pf-action">$9.000</button>
+            <button id="btn-admin-link-5k" class="btn-pf-action">$5.000</button>
           </div>
         </div>
         <div class="admin-group">
@@ -114,10 +123,10 @@
       </div>
     </section>
 
-    <!-- MÉTRICAS & CARRUSEL -->
+    <!-- MÉTRICAS & CARRUSEL (PUNTOS SINCRONIZADOS AL SLIDE) -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas</h3>
-      <div class="metrics-slider">
+      <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Clientes Activos</span><span class="dots">•••</span></div>
           <div class="card-value">100</div>
@@ -174,7 +183,8 @@
         </article>
       </div>
 
-      <div class="slider-dots-indicator">
+      <!-- Indicadores de punto sincronizados -->
+      <div class="slider-dots-indicator" id="slider-dots">
         <span class="dot active"></span>
         <span class="dot"></span>
         <span class="dot"></span>
@@ -186,11 +196,10 @@
     <!-- SECUENCIA DE PASOS DE CONFIGURACIÓN -->
     <section class="glass-card-dash flow-container">
       
-      <!-- Paso 1: Estado de Activación Inicial (Pago gestionado desde Admin) -->
+      <!-- Paso 1: Configuración Limpia (Sin tarjetas de pago estorbando) -->
       <div id="step-1" class="step-card">
-        <h3 class="section-title">Paso Requerido</h3>
-        <p class="step-desc">Pago inicial de activación ($1.000 / $1 Prueba)</p>
-        <p class="mint-txt" style="font-size: 0.85rem; margin-top: 8px;">Esperando verificación de transacción desde el panel de control...</p>
+        <h3 class="section-title">Paso 1: Configuración Inicial</h3>
+        <p class="step-desc">Inicializando parámetros del sistema y sincronizando credenciales...</p>
       </div>
 
       <!-- Paso 2: Evaluador en Meta -->
@@ -247,7 +256,7 @@
       </div>
     </section>
 
-    <!-- CHAT WEB -->
+    <!-- CHAT WEB CON OPCIONES SELECCIONABLES Y ENVIABLES -->
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -261,19 +270,22 @@
           <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
         </div>
       </div>
+
+      <!-- Opciones Rápidas Seleccionables -->
       <div class="chat-quick-options">
-        <button class="opt-btn" id="opt-btn-1">1. Ver Planes</button>
-        <button class="opt-btn" id="opt-btn-2">2. Calibración IA</button>
-        <button class="opt-btn" id="opt-btn-3">3. Soporte 24/7</button>
-        <button class="opt-btn" id="opt-btn-4">4. Métodos de Pago</button>
+        <button type="button" class="opt-btn" id="opt-btn-1">1. Ver Planes</button>
+        <button type="button" class="opt-btn" id="opt-btn-2">2. Calibración IA</button>
+        <button type="button" class="opt-btn" id="opt-btn-3">3. Soporte 24/7</button>
+        <button type="button" class="opt-btn" id="opt-btn-4">4. Métodos de Pago</button>
       </div>
+
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
-        <button id="chat-send" class="chat-send-btn">➤</button>
+        <button id="chat-send" class="chat-send-btn" type="button">➤</button>
       </div>
     </section>
 
-    <!-- PAGO FINAL -->
+    <!-- PAGO FINAL (BOTÓN DE ACCIÓN CLEAR) -->
     <section id="pf-card" class="glass-card-dash pf-section">
       <h3 class="section-title">P.F (Pago Final)</h3>
       <div class="pf-summary-list">
@@ -281,7 +293,7 @@
         <div class="pf-row"><span>Pago después de resultados</span><strong id="price-post">$9.000</strong></div>
         <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">$10.000</strong></div>
       </div>
-      <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
+      <button id="btn-pay-main" class="btn-pf-action" type="button">PAGAR</button>
     </section>
 
     <!-- TIMER 48H -->
