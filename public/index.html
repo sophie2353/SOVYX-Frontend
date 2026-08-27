@@ -115,7 +115,7 @@
         <!-- Inversión -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
-          <div class="card-value">15$</div>
+          <div class="card-value">40$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -175,6 +175,10 @@
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
+        <div class="cupos-badge">
+          <span class="purple-neon-dot"></span>
+          <span id="cupos-count-badge" class="cupos-text">solo 2 clientes disponibles</span>
+        </div>
       </div>
       <div id="chat-body" class="chat-body">
         <div class="incoming-simple">
@@ -206,7 +210,7 @@
     <!-- TEMPORIZADOR 48H -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO RESTANTE</span>
-      <div id="timer-display" class="timer-digits">47:59:59</div>
+      <div id="timer-display" class="timer-digits">47:59:44</div>
       <span class="timer-sub">TIEMPO CON SOFTWARE ACTIVO</span>
     </section>
   </main>
@@ -225,16 +229,26 @@
     </header>
 
     <section class="glass-card-dash">
-      <h3 class="section-title fuchsia-txt">Móduos de Configuración y Pagos Requeridos</h3>
+      <h3 class="section-title fuchsia-txt">Módulos de Configuración y Pagos Requeridos</h3>
       <div class="admin-grid">
         
-        <!-- Paso Requerido -->
+        <!-- Selección de Pago Requerido y Generación de Link -->
         <div class="admin-group">
-          <label>Generar Link de Pago Requerido ($1.000 / $1)</label>
+          <label>Seleccionar Pago Requerido</label>
           <div class="admin-btns">
-            <button id="btn-admin-link-1k">$1.000 / $1</button>
-            <button id="btn-admin-link-9k">$9.000</button>
-            <button id="btn-admin-link-5k">$5.000</button>
+            <button class="btn-select-amount" data-amount="1">1$</button>
+            <button class="btn-select-amount" data-amount="1000">1.000$</button>
+            <button class="btn-select-amount" data-amount="9000">9.000$</button>
+            <button class="btn-select-amount" data-amount="5000">5.000$</button>
+          </div>
+          
+          <!-- Contenedor dinámico de asignación de link -->
+          <div id="link-input-container" class="link-input-wrapper hidden" style="margin-top: 10px;">
+            <label id="selected-amount-label">Ingresar link para el pago:</label>
+            <div class="input-group-flow">
+              <input type="url" id="payment-link-input" placeholder="https://link.depago.com/..." />
+              <button id="btn-send-payment-link" class="btn-pf-action">Enviar</button>
+            </div>
           </div>
         </div>
 
