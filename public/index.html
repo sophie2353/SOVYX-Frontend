@@ -4,172 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SODIE</title>
-  <style>
-    /* ========================================== */
-    /* ESTILOS GLOBALES Y PALETA NEÓN/GLASS       */
-    /* ========================================== */
-    :root {
-      --bg-dark: #08090d;
-      --card-bg: rgba(18, 22, 34, 0.75);
-      --card-border: rgba(0, 255, 204, 0.2);
-      --mint: #00ffcc;
-      --mint-glow: rgba(0, 255, 204, 0.4);
-      --fuchsia: #ff007f;
-      --fuchsia-glow: rgba(255, 0, 127, 0.4);
-      --text-main: #f0f4f8;
-      --text-muted: #8a99ad;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
-
-    .hidden { display: none !important; }
-    .text-center { text-align: center; }
-    .mint-txt { color: var(--mint); text-shadow: 0 0 8px var(--mint-glow); }
-    .fuchsia-txt { color: var(--fuchsia); text-shadow: 0 0 8px var(--fuchsia-glow); }
-
-    /* ========================================== */
-    /* 1. SPLASH SCREEN (INTRO) FIXES DE COLOR    */
-    /* ========================================== */
-    .full-screen {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: radial-gradient(circle at center, #111525 0%, #050609 100%);
-      display: flex; justify-content: center; align-items: center; z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-
-    .splash-content {
-      width: 90%; max-width: 450px; display: flex; flex-direction: column; align-items: center; gap: 20px;
-    }
-
-    .logo-wrapper { cursor: pointer; user-select: none; }
-    .logo-title { font-size: 3rem; font-weight: 900; letter-spacing: 4px; color: #fff; }
-    .serif-s { font-family: Georgia, serif; color: var(--fuchsia); font-style: italic; }
-
-    .hud-percentage-wrapper { position: relative; text-align: center; }
-    .splash-pct-num { font-size: 2.5rem; font-weight: 800; color: var(--mint); text-shadow: 0 0 12px var(--mint-glow); }
-
-    /* CAPSULAS / BARRA CPU */
-    .cpu-liquid-box {
-      width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--card-border);
-      padding: 8px; border-radius: 12px; backdrop-filter: blur(10px);
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    .capsules-track { display: flex; gap: 4px; width: 100%; height: 24px; }
-    .capsule {
-      flex: 1; background: rgba(255,255,255,0.08); border-radius: 4px; transition: all 0.2s ease;
-      position: relative; overflow: hidden;
-    }
-    .capsule.cap-active {
-      background: linear-gradient(180deg, var(--mint) 0%, #009977 100%);
-      box-shadow: 0 0 10px var(--mint-glow);
-    }
-
-    /* GAUGES Y ANILLOS SVG */
-    .splash-gauges { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .gauge-card { display: flex; align-items: center; gap: 10px; background: var(--card-bg); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--card-border); }
-    .gauge-ring { width: 42px; height: 42px; transform: rotate(-90deg); }
-    .ring-thin-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 3; }
-    .ring-thin-fill { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dasharray 0.1s linear; }
-    .mint-stroke { stroke: var(--mint); }
-    .fuchsia-stroke { stroke: var(--fuchsia); }
-    .gauge-content { display: flex; flex-direction: column; }
-    .gauge-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
-    .gauge-val { font-size: 0.9rem; font-weight: 800; }
-
-    /* CARTEL DE BIENVENIDO FIX DE COLORES */
-    .welcome-sign-glass {
-      width: 100%; height: 45px; position: relative; border-radius: 8px; overflow: hidden;
-      background: rgba(255,255,255,0.05); border: 1px solid var(--fuchsia-glow);
-      display: flex; align-items: center; justify-content: center; margin-top: 10px;
-    }
-    .welcome-fill {
-      position: absolute; left: 0; top: 0; height: 100%; width: 0%;
-      background: linear-gradient(90deg, var(--mint) 0%, var(--fuchsia) 100%);
-      opacity: 0.35; transition: width 0.1s linear;
-    }
-    .welcome-text {
-      position: relative; z-index: 2; font-weight: 900; letter-spacing: 3px; font-size: 0.95rem;
-      color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.8);
-    }
-
-    /* ========================================== */
-    /* 2. DASHBOARD MAIN                          */
-    /* ========================================== */
-    .dashboard-container { max-width: 500px; margin: 0 auto; padding: 20px 15px 80px 15px; display: flex; flex-direction: column; gap: 18px; }
-    .dash-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .brand-text { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; cursor: pointer; user-select: none; }
-    .badge-client { background: rgba(0, 255, 204, 0.15); color: var(--mint); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--mint-glow); }
-    .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 4px; }
-
-    .glass-card-dash {
-      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
-      padding: 16px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-    .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; color: #fff; letter-spacing: 0.5px; }
-
-    /* ADMIN PANEL */
-    #admin-panel { border-color: var(--fuchsia); background: rgba(30, 10, 25, 0.85); }
-    .admin-grid { display: flex; flex-direction: column; gap: 12px; }
-    .admin-group { display: flex; flex-direction: column; gap: 6px; }
-    .admin-group label { font-size: 0.75rem; color: var(--text-muted); }
-    .admin-btns { display: flex; gap: 8px; }
-    .admin-btns button { flex: 1; padding: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; cursor: pointer; }
-    .admin-btns button:hover { background: var(--fuchsia); }
-
-    /* CARRUSEL METRICAS */
-    .metrics-slider { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
-    .metrics-slider::-webkit-scrollbar { height: 4px; }
-    .metrics-slider::-webkit-scrollbar-thumb { background: var(--mint); border-radius: 4px; }
-    .metric-square { min-width: 140px; flex: 0 0 140px; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; height: 130px; padding: 12px; }
-    .card-head { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); }
-    .card-value { font-size: 1.4rem; font-weight: 800; color: #fff; }
-    .card-chart svg { width: 100%; height: 30px; }
-    .card-foot { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; }
-
-    /* BOTONES ACCION Y FORMULARIOS */
-    .btn-pf-action {
-      width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer;
-      background: linear-gradient(90deg, var(--mint) 0%, #00b386 100%); color: #000;
-      box-shadow: 0 0 15px var(--mint-glow); transition: transform 0.1s; margin-top: 8px;
-    }
-    .btn-pf-action:active { transform: scale(0.98); }
-    .btn-fb { background: linear-gradient(90deg, #1877f2 0%, #0d52ab 100%); color: #fff; box-shadow: 0 0 15px rgba(24,119,242,0.4); }
-    .btn-danger { background: linear-gradient(90deg, var(--fuchsia) 0%, #a00050 100%); color: #fff; box-shadow: 0 0 15px var(--fuchsia-glow); }
-
-    .step-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
-    .input-group-flow { display: flex; gap: 8px; }
-    .input-group-flow input, .file-input-custom {
-      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.3); color: #fff; font-size: 0.85rem;
-    }
-
-    /* CHAT WEB */
-    .chat-section { display: flex; flex-direction: column; gap: 10px; }
-    .chat-header { display: flex; justify-content: space-between; align-items: center; }
-    .cupos-badge { display: flex; align-items: center; gap: 6px; background: rgba(255,0,127,0.15); border: 1px solid var(--fuchsia-glow); padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; color: var(--fuchsia); }
-    .purple-neon-dot { width: 6px; height: 6px; background: var(--fuchsia); border-radius: 50%; box-shadow: 0 0 6px var(--fuchsia); }
-    .chat-body { height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
-    .chat-bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.8rem; line-height: 1.3; }
-    .incoming-simple { background: rgba(255,255,255,0.08); align-self: flex-start; border-bottom-left-radius: 2px; }
-    .outgoing-simple { background: var(--mint); color: #000; font-weight: 600; align-self: flex-end; border-bottom-right-radius: 2px; }
-    .chat-quick-options { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
-    .opt-btn { font-size: 0.65rem; white-space: nowrap; padding: 6px 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: #fff; border-radius: 12px; cursor: pointer; }
-    .chat-input-bar { display: flex; gap: 6px; }
-    .chat-input-bar input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 8px; color: #fff; font-size: 0.8rem; }
-    .chat-send-btn { background: var(--mint); border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-weight: bold; }
-
-    /* PAGO FINAL Y TIMERS */
-    .pf-summary-list { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; margin-bottom: 10px; }
-    .pf-row { display: flex; justify-content: space-between; color: var(--text-muted); }
-    .pf-total { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; font-size: 1rem; font-weight: 800; color: #fff; }
-    .timer-section { text-align: center; }
-    .timer-digits { font-size: 2.2rem; font-weight: 900; letter-spacing: 2px; color: var(--mint); text-shadow: 0 0 10px var(--mint-glow); font-family: monospace; }
-    .timer-label { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 1px; }
-    .timer-sub { font-size: 0.75rem; color: var(--fuchsia); }
-  </style>
+  <!-- Vínculo al archivo de estilos CSS separado -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+  <!-- ========================================== -->
+  <!-- MODAL DE ACCESO / CONTRASEÑA DASHBOARD     -->
+  <!-- ========================================== -->
+  <div id="view-login-modal" class="full-screen hidden">
+    <div class="glass-card-dash login-card text-center">
+      <h2 class="brand-text margin-b"><span class="serif-s">S</span>ODIE</h2>
+      <p class="step-desc">Ingresa la clave de acceso para entrar al Dashboard:</p>
+      <div class="input-group-vertical">
+        <input type="password" id="dashboard-pass-input" placeholder="Contraseña de cliente..." />
+        <button id="btn-login-submit" class="btn-pf-action">Entrar al Dashboard</button>
+      </div>
+      <p id="login-error-msg" class="fuchsia-txt hidden margin-t">Contraseña incorrecta. Inténtalo de nuevo.</p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. SPLASH SCREEN (INTRO)                   -->
+  <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       <div class="logo-wrapper" id="splash-logo">
@@ -216,14 +73,18 @@
     </div>
   </div>
 
+  <!-- VISTA CUPOS AGOTADOS -->
   <div id="view-sold-out" class="full-screen hidden">
     <div class="glass-card-dash text-center">
       <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
-      <p class="step-desc" style="margin-top: 10px;">El acceso al software se encuentra cerrado actualmente.</p>
+      <p class="step-desc margin-t">El acceso al software se encuentra cerrado actualmente.</p>
     </div>
   </div>
 
-  <main id="app-dashboard" class="dashboard-container">
+  <!-- ========================================== -->
+  <!-- 2. DASHBOARD MAIN (MI DASHBOARD)           -->
+  <!-- ========================================== -->
+  <main id="app-dashboard" class="dashboard-container hidden">
     <header class="dash-header">
       <div class="dash-header-left">
         <span class="brand-text" id="dash-brand-name"><span class="serif-s">S</span>ODIE</span>
@@ -234,6 +95,7 @@
       </div>
     </header>
 
+    <!-- PANEL ADMIN MÓDULO (Protegido por Clave / 5 Clics) -->
     <section id="admin-panel" class="glass-card-dash hidden">
       <h3 class="section-title fuchsia-txt">Dashboard Mio (Admin) 👺</h3>
       <div class="admin-grid">
@@ -255,8 +117,9 @@
       </div>
     </section>
 
+    <!-- MÉTRICAS & CARRUSEL -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas</h3>
+      <h3 class="section-title">Métricas de Campaña</h3>
       <div class="metrics-slider">
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Clientes Activos</span><span>•••</span></div>
@@ -301,38 +164,31 @@
           </div>
           <div class="card-foot"><span>Retención</span><span class="mint-txt">98%</span></div>
         </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Objetivo</span><span>•••</span></div>
-          <div class="card-value">2</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Meta</span><span class="fuchsia-txt">Pendiente</span></div>
-        </article>
       </div>
     </section>
 
+    <!-- PAGO REQUERIDO Y PASOS DENTRO DEL DASHBOARD -->
     <section class="glass-card-dash flow-container">
       
+      <!-- Paso 1: Pago Requerido -->
       <div id="step-1" class="step-card">
         <h3 class="section-title">Paso Requerido</h3>
         <p class="step-desc" id="step-1-desc">Pago inicial de activación ($1.000 USD)</p>
-        <button id="btn-pay-step1" class="btn-pf-action">Pagar Ahora</button>
+        <button id="btn-pay-step1" class="btn-pf-action">PAGAR AHORA</button>
       </div>
 
+      <!-- Paso 2: Evaluador en Meta -->
       <div id="step-2" class="step-card hidden">
         <h3 class="section-title">Paso 2: Evaluador en Meta</h3>
         <p class="step-desc">Ingresa tu email / usuario de Meta Ads:</p>
         <div class="input-group-flow">
           <input type="text" id="meta-user-input" placeholder="email / usuario" />
-          <button id="btn-submit-evaluator" class="btn-pf-action" style="width: 120px; margin-top:0;">Enviar</button>
+          <button id="btn-submit-evaluator" class="btn-pf-action btn-fit">Enviar</button>
         </div>
-        <p id="evaluator-status-msg" class="mint-txt hidden" style="margin-top: 10px; font-size: 0.8rem;">Esperando aprobación de acceso...</p>
+        <p id="evaluator-status-msg" class="mint-txt hidden margin-t text-sm">Esperando aprobación de acceso backend...</p>
       </div>
 
+      <!-- Paso 3: Subir Hoja de Cálculo -->
       <div id="step-3" class="step-card hidden">
         <h3 class="section-title">Paso 3: Hoja de Cálculo</h3>
         <p class="step-desc">Sube tu base de compradores (300 - 1,500 clientes en CSV/Excel)</p>
@@ -340,12 +196,14 @@
         <button id="btn-upload-spreadsheet" class="btn-pf-action">Procesar Audiencia</button>
       </div>
 
+      <!-- Paso 4: Conectar con Facebook Oficial -->
       <div id="step-4" class="step-card hidden">
         <h3 class="section-title">Paso 4: Integración Oficial</h3>
         <p class="step-desc">Acepta todos los permisos para vincular la campaña.</p>
         <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Conectar con facebook oficialmente aceptando todo 🗿</button>
       </div>
 
+      <!-- Paso 5: Borrador Final -->
       <div id="step-5" class="step-card hidden">
         <h3 class="section-title">Paso 5: Borrador Final</h3>
         <p class="step-desc">Agregar Borrador de Anuncio "Prueba Hora 24"</p>
@@ -355,25 +213,28 @@
 
     </section>
 
+    <!-- TARJETA NOTIFICACIÓN 24H -->
     <section id="card-notification-24h" class="glass-card-dash hidden text-center">
       <h3 class="section-title mint-txt">Notificación Activa (24H)</h3>
       <p class="step-desc">Envía archivo actual de data para recalibrar borrador "Hora 48".</p>
       <button id="btn-activate-24h-notification" class="btn-pf-action">Activar Ciclo 24H</button>
-      <div id="timer-24h-display" class="timer-digits hidden" style="font-size: 1.8rem; margin-top: 10px;">24:00:00</div>
+      <div id="timer-24h-display" class="timer-digits hidden margin-t text-lg">24:00:00</div>
     </section>
 
+    <!-- TARJETA RENOVAR 30 DÍAS -->
     <section id="card-renew-30days" class="glass-card-dash hidden text-center">
       <h3 class="section-title fuchsia-txt">Tiempo agotado.</h3>
       <p class="step-desc">¿Deseas renovar el servicio por 30 días adicionales?</p>
-      <div style="display:flex; gap:10px; margin-top:10px;">
+      <div class="row-flex margin-t">
         <button id="btn-renew-yes" class="btn-pf-action">Sí (Renovar)</button>
         <button id="btn-renew-no" class="btn-pf-action btn-danger">No</button>
       </div>
     </section>
 
+    <!-- CHAT WEB INTERACTIVO -->
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
-        <h3 class="section-title">Chat Web Directo</h3>
+        <h3 class="section-title">Chat Web</h3>
         <div class="cupos-badge">
           <span class="purple-neon-dot"></span>
           <span id="cupos-count-badge" class="cupos-text">solo 2 cupos</span>
@@ -385,10 +246,10 @@
         </div>
       </div>
       <div class="chat-quick-options">
-        <button class="opt-btn" onclick="sendQuickMsg('1. Ver Planes')">1. Ver Planes</button>
-        <button class="opt-btn" onclick="sendQuickMsg('2. Calibración IA')">2. Calibración IA</button>
-        <button class="opt-btn" onclick="sendQuickMsg('3. Soporte 24/7')">3. Soporte 24/7</button>
-        <button class="opt-btn" onclick="sendQuickMsg('4. Métodos de Pago')">4. Métodos de Pago</button>
+        <button class="opt-btn" data-msg="1. Ver Planes">1. Ver Planes</button>
+        <button class="opt-btn" data-msg="2. Calibración IA">2. Calibración IA</button>
+        <button class="opt-btn" data-msg="3. Soporte 24/7">3. Soporte 24/7</button>
+        <button class="opt-btn" data-msg="4. Métodos de Pago">4. Métodos de Pago</button>
       </div>
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
@@ -396,6 +257,7 @@
       </div>
     </section>
 
+    <!-- MÓDULO PAGO FINAL -->
     <section id="pf-card" class="glass-card-dash pf-section">
       <h3 class="section-title">P.F (Pago Final)</h3>
       <div class="pf-summary-list">
@@ -406,6 +268,7 @@
       <button id="btn-pay-main" class="btn-pf-action">PAGAR AHORA</button>
     </section>
 
+    <!-- TIMER 48H -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO RESTANTE DE OPTIMIZACIÓN</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
@@ -413,221 +276,7 @@
     </section>
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-
-      // 1. ANIMACIÓN DE LA INTRO (SPLASH) Y SINCRONIZACIÓN DE PORCENTAJES
-      let progress = 0;
-      const splashPct = document.getElementById('splash-pct');
-      const gaugeVal1 = document.getElementById('gauge-val-1');
-      const gaugeVal2 = document.getElementById('gauge-val-2');
-      const gaugeCircle1 = document.getElementById('gauge-circle-1');
-      const gaugeCircle2 = document.getElementById('gauge-circle-2');
-      const welcomeFill = document.getElementById('welcome-fill');
-      const capsules = document.querySelectorAll('.capsule');
-      const splashView = document.getElementById('view-splash');
-
-      const introInterval = setInterval(() => {
-        progress += 2;
-        if (progress > 100) progress = 100;
-
-        // Actualizar textos
-        splashPct.textContent = `${progress}%`;
-        gaugeVal1.textContent = `${progress}%`;
-        gaugeVal2.textContent = `${Math.min(100, Math.floor(progress * 1.1))}%`;
-
-        // Actualizar Anillos SVG
-        gaugeCircle1.setAttribute('stroke-dasharray', `${progress}, 100`);
-        gaugeCircle2.setAttribute('stroke-dasharray', `${Math.min(100, Math.floor(progress * 1.1))}, 100`);
-
-        // Actualizar Cartel
-        welcomeFill.style.width = `${progress}%`;
-
-        // Encender Cápsulas según avance
-        const activeCapsulesCount = Math.floor((progress / 100) * capsules.length);
-        capsules.forEach((cap, idx) => {
-          if (idx < activeCapsulesCount) {
-            cap.classList.add('cap-active');
-          }
-        });
-
-        if (progress >= 100) {
-          clearInterval(introInterval);
-          setTimeout(() => {
-            splashView.style.opacity = '0';
-            setTimeout(() => splashView.classList.add('hidden'), 500);
-          }, 400);
-        }
-      }, 35);
-
-      // 2. ACTIVAR TRUCO DE 5 CLICS PARA MODO ADMIN
-      let adminClicks = 0;
-      let clickTimer;
-      const brandLogo = document.getElementById('dash-brand-name');
-      const splashLogo = document.getElementById('splash-logo');
-      const adminPanel = document.getElementById('admin-panel');
-      const btnAdminToggle = document.getElementById('btn-admin-toggle');
-
-      function triggerAdminClick() {
-        adminClicks++;
-        clearTimeout(clickTimer);
-        if (adminClicks >= 5) {
-          adminPanel.classList.toggle('hidden');
-          alert('👺 Modo Admin Activado');
-          adminClicks = 0;
-        } else {
-          clickTimer = setTimeout(() => { adminClicks = 0; }, 2000);
-        }
-      }
-
-      if (brandLogo) brandLogo.addEventListener('click', triggerAdminClick);
-      if (splashLogo) splashLogo.addEventListener('click', triggerAdminClick);
-      if (btnAdminToggle) btnAdminToggle.addEventListener('click', () => adminPanel.classList.toggle('hidden'));
-
-      // 3. PAGO DE PRUEBA EN ADMIN ($1 vs $1.000)
-      let isTestPrice = false;
-      const btnAdmin1k = document.getElementById('btn-admin-link-1k');
-      const btnAdminReset = document.getElementById('btn-admin-link-9k');
-      const priceInitial = document.getElementById('price-initial');
-      const priceTotal = document.getElementById('price-total');
-      const step1Desc = document.getElementById('step-1-desc');
-
-      btnAdmin1k.addEventListener('click', () => {
-        isTestPrice = true;
-        priceInitial.textContent = '$1 USD (Prueba)';
-        priceTotal.textContent = '$9.001 USD';
-        step1Desc.textContent = 'Pago inicial de activación ($1 USD - Modo Prueba Admin)';
-        alert('Modo de pago de prueba $1 activado.');
-      });
-
-      btnAdminReset.addEventListener('click', () => {
-        isTestPrice = false;
-        priceInitial.textContent = '$1.000';
-        priceTotal.textContent = '$10.000';
-        step1Desc.textContent = 'Pago inicial de activación ($1.000 USD)';
-        alert('Precios reestablecidos a $1.000 USD.');
-      });
-
-      // 4. FLUJO DE PASOS (1 AL 5)
-      const btnPayStep1 = document.getElementById('btn-pay-step1');
-      const step1 = document.getElementById('step-1');
-      const step2 = document.getElementById('step-2');
-      const step3 = document.getElementById('step-3');
-      const step4 = document.getElementById('step-4');
-      const step5 = document.getElementById('step-5');
-
-      btnPayStep1.addEventListener('click', () => {
-        alert(isTestPrice ? 'Procesando pago de prueba de $1 USD...' : 'Procesando pago inicial de $1.000 USD...');
-        step1.classList.add('hidden');
-        step2.classList.remove('hidden');
-      });
-
-      // Paso 2: Evaluador
-      const btnSubmitEvaluator = document.getElementById('btn-submit-evaluator');
-      const evaluatorStatusMsg = document.getElementById('evaluator-status-msg');
-      const btnAdminApprove = document.getElementById('btn-admin-approve-evaluator');
-
-      btnSubmitEvaluator.addEventListener('click', () => {
-        const val = document.getElementById('meta-user-input').value;
-        if (!val) return alert('Ingresa tu usuario o correo.');
-        evaluatorStatusMsg.classList.remove('hidden');
-      });
-
-      btnAdminApprove.addEventListener('click', () => {
-        alert('Evaluador Aprobado por el Admin.');
-        step2.classList.add('hidden');
-        step3.classList.remove('hidden');
-      });
-
-      // Paso 3: Hoja de cálculo
-      document.getElementById('btn-upload-spreadsheet').addEventListener('click', () => {
-        const file = document.getElementById('spreadsheet-file-input').files[0];
-        if (!file) return alert('Por favor selecciona un archivo CSV/Excel de compradores.');
-        alert('Data de compradores procesada con éxito por SODIE IA.');
-        step3.classList.add('hidden');
-        step4.classList.remove('hidden');
-      });
-
-      // Paso 4: Facebook
-      document.getElementById('btn-connect-facebook').addEventListener('click', () => {
-        alert('Conectado oficialmente con Meta API 🗿');
-        step4.classList.add('hidden');
-        step5.classList.remove('hidden');
-      });
-
-      // Paso 5: Borrador Final
-      document.getElementById('btn-upload-draft').addEventListener('click', () => {
-        alert('¡Campaña SODIE Lanzada! Entrando en ciclo de actualización de 24H.');
-        step5.classList.add('hidden');
-        document.getElementById('card-notification-24h').classList.remove('hidden');
-      });
-
-      // 24H & RENOVAR
-      document.getElementById('btn-activate-24h-notification').addEventListener('click', () => {
-        document.getElementById('timer-24h-display').classList.remove('hidden');
-        alert('Ciclo de 24 horas activado. Actualizando pauta diariamente.');
-        setTimeout(() => {
-          document.getElementById('card-notification-24h').classList.add('hidden');
-          document.getElementById('card-renew-30days').classList.remove('hidden');
-        }, 3000);
-      });
-
-      document.getElementById('btn-renew-yes').addEventListener('click', () => alert('Renovación completada.'));
-      document.getElementById('btn-renew-no').addEventListener('click', () => alert('Servicio finalizado.'));
-
-      // CIERRE DSIBOARD (ADMIN)
-      document.getElementById('btn-admin-close-dashboard').addEventListener('click', () => {
-        document.getElementById('view-sold-out').classList.remove('hidden');
-      });
-
-      // 5. CHAT WEB INTERACTIVO
-      const chatInput = document.getElementById('chat-input');
-      const chatSend = document.getElementById('chat-send');
-      const chatBody = document.getElementById('chat-body');
-
-      function appendMessage(text, isOutgoing) {
-        const msg = document.createElement('div');
-        msg.className = `chat-bubble ${isOutgoing ? 'outgoing-simple' : 'incoming-simple'}`;
-        msg.textContent = text;
-        chatBody.appendChild(msg);
-        chatBody.scrollTop = chatBody.scrollHeight;
-      }
-
-      function handleChatSend() {
-        const text = chatInput.value.trim();
-        if (!text) return;
-        appendMessage(text, true);
-        chatInput.value = '';
-
-        setTimeout(() => {
-          appendMessage('Perfecto. Un asesor de SODIE se conectará o puedes completar los pasos arriba.', false);
-        }, 1000);
-      }
-
-      chatSend.addEventListener('click', handleChatSend);
-      chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleChatSend(); });
-
-      window.sendQuickMsg = function(msgText) {
-        appendMessage(msgText, true);
-        setTimeout(() => {
-          if (msgText.includes('Planes')) appendMessage('Los planes son $1.000 iniciales + $9.000 contra resultados comprobados.', false);
-          else if (msgText.includes('Calibración')) appendMessage('La IA recalibra la audiencia de compradores cada 24 horas automáticamente.', false);
-          else appendMessage('Información registrada. Completa el Paso 1 para asegurar tu cupo.', false);
-        }, 800);
-      };
-
-      // 6. TIMER DE 48 HORAS
-      let totalSeconds = 48 * 3600;
-      const timerDisplay = document.getElementById('timer-display');
-      setInterval(() => {
-        if (totalSeconds > 0) totalSeconds--;
-        const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-        const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-        const s = String(totalSeconds % 60).padStart(2, '0');
-        timerDisplay.textContent = `${h}:${m}:${s}`;
-      }, 1000);
-
-    });
-  </script>
+  <!-- Vínculo al script JS separado -->
+  <script src="app.js"></script>
 </body>
 </html>
