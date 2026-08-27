@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- Meta Pixel Code (Opcional) -->
+  <title>SODIE Core OS - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
   <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)n.fbq=n;n.push(async;n.loaded=!0;n.version='2.0';
+    if(!f._fbq)n.fbq=n;n.push(this);n.loaded=!0;n.version='2.0';
     n.queue=[];t=b.createElement(e);t.async=!0;
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
@@ -32,9 +31,7 @@
       <div id="splash-percentage-text" class="splash-percentage">0%</div>
 
       <!-- Barra de cápsulas progresivas -->
-      <div id="capsules-track" class="capsules-track">
-        <!-- Generado dinámicamente por app.js -->
-      </div>
+      <div id="capsules-track" class="capsules-track"></div>
 
       <!-- Métricas circulares secundarias -->
       <div class="splash-metrics-row">
@@ -45,7 +42,7 @@
         <div class="center-indicator-dot"></div>
         <div class="circle-metric">
           <span class="circle-title">ANÁLISIS MERCADO</span>
-          <span class="circle-value">0%</span>
+          <span id="market-pct" class="circle-value">0%</span>
         </div>
       </div>
 
@@ -107,7 +104,7 @@
       </div>
     </section>
 
-    <!-- Sección de Carga de Archivos (Hojas de cálculo / Lista de 100) -->
+    <!-- Sección de Carga de Archivos -->
     <section id="upload-section" class="upload-box-container">
       <h3>Cargar Base de Datos / Lista de Prospectos</h3>
       <input type="file" id="file-upload-input" accept=".csv, .xlsx, .xls">
@@ -143,7 +140,6 @@
         <span id="admin-error-msg" class="error-text" style="display:none;">Clave incorrecta.</span>
       </div>
 
-      <!-- El pago de prueba vive EXCLUSIVAMENTE aquí dentro del admin -->
       <div class="admin-actions-box">
         <h3>Zona de Pruebas de Pago</h3>
         <button id="btn-pagar" class="btn-neon-magenta">Ejecutar Pago de Prueba ($1,000)</button>
@@ -163,7 +159,6 @@
     <button id="btn-accept-cookies" class="btn-small">Aceptar</button>
   </div>
 
-  <!-- Script principal actualizado -->
   <script src="app.js"></script>
 </body>
 </html>
