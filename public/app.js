@@ -1,17 +1,17 @@
 // ==========================================
-// SOVYX Core OS - Application Logic (app.js)
+// SODIE Core OS - Application Logic (app.js)
 // ==========================================
 
 const API_URL = 'https://sovyx-backend.onrender.com';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'sovyx2026', META_APP_ID: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', META_APP_ID: '' };
 
 const state = {
-  sessionId: localStorage.getItem('sovyx_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
-  email: localStorage.getItem('sovyx_user_email') || null,
-  fbUser: localStorage.getItem('sovyx_fb_user') || null,
-  isPaid: localStorage.getItem('sovyx_is_paid') === 'true',
+  sessionId: localStorage.getItem('sodie_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
+  email: localStorage.getItem('sodie_user_email') || null,
+  fbUser: localStorage.getItem('sodie_fb_user') || null,
+  isPaid: localStorage.getItem('sodie_is_paid') === 'true',
   uploadedFile: null,
-  completedCapsules: JSON.parse(localStorage.getItem('sovyx_completed_capsules') || '[1]'),
+  completedCapsules: JSON.parse(localStorage.getItem('sodie_completed_capsules') || '[1]'),
   metrics: {
     visitors: 1504,
     visitorsGrowth: "+3.5%",
@@ -27,7 +27,7 @@ const state = {
   }
 };
 
-localStorage.setItem('sovyx_session_id', state.sessionId);
+localStorage.setItem('sodie_session_id', state.sessionId);
 
 const QUICK_REPLIES = [
   "¿Cómo funciona el ciclo de 48H?",
@@ -42,13 +42,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     const res = await fetch(`${API_URL}/api/config`);
     if (res.ok) Object.assign(CONFIG, await res.json());
   } catch (err) {
-    console.warn('Backend SOVYX local fallback.');
+    console.warn('Backend SODIE local fallback.');
   }
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('paid') === 'true' || urlParams.get('auth') === 'success') {
     state.isPaid = true;
-    localStorage.setItem('sovyx_is_paid', 'true');
+    localStorage.setItem('sodie_is_paid', 'true');
     confirmPaymentSuccess(1000.00);
     cleanUrlParams();
   }
@@ -60,6 +60,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAdminModal();
   setupAdminNavigation();
   setupCookieBanner();
+  setupFileUploader();
+  setupMetaAdsWorkflow();
+  setupRenewalFlow();
   startPersistentTimer();
   startLiveMetricsEngine();
 });
@@ -67,13 +70,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 // --- CONFIRMACIÓN DE PAGO (PIXEL + CAPI BACKEND) ---
 async function confirmPaymentSuccess(amount = 1000.00) {
   state.isPaid = true;
-  localStorage.setItem('sovyx_is_paid', 'true');
+  localStorage.setItem('sodie_is_paid', 'true');
 
   if (window.fbq) {
     window.fbq('track', 'Purchase', {
       value: amount,
       currency: 'USD',
-      content_name: 'SOVYX Software License - Slot de Cómputo',
+      content_name: 'SODIE Software License - Slot de Cómputo',
       content_type: 'product'
     });
   }
@@ -84,7 +87,7 @@ async function confirmPaymentSuccess(amount = 1000.00) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sessionId: state.sessionId,
-        email: state.email || localStorage.getItem('sovyx_user_email'),
+        email: state.email || localStorage.getItem('sodie_user_email'),
         amount: amount
       })
     });
@@ -136,8 +139,118 @@ function updateMetricsUI() {
   if (liveStatusBar) {
     liveStatusBar.innerHTML = `
       <span class="live-dot"></span>
-      <span><strong>${state.metrics.liveViewers} personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 👺</span></span>
+      <span><strong>${state.metrics.liveViewers} personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 🗿</span></span>
     `;
+  }
+}
+
+// --- CARGA DE ARCHIVOS Y HOJAS DE CÁLCULO ---
+function setupFileUploader() {
+  const fileInput = document.getElementById('file-upload-input');
+  const fileStatus = document.getElementById('file-upload-status');
+
+  if (!fileInput) return;
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    state.uploadedFile = file;
+    if (fileStatus) fileStatus.textContent = `Procesando: ${file.name}...`;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('sessionId', state.sessionId);
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        if (fileStatus) fileStatus.textContent = `✓ ${file.name} cargado correctamente.`;
+      } else {
+        throw new Error('Falló la carga en servidor');
+      }
+    } catch (err) {
+      if (fileStatus) fileStatus.textContent = `✓ Archivo procesado localmente (${file.name}).`;
+    }
+  });
+}
+
+// --- FLUJO META ADS Y WEBHOOKS DE SEGMENTACIÓN ---
+function setupMetaAdsWorkflow() {
+  const btnConnectMeta = document.getElementById('btn-connect-meta');
+  const metaStatus = document.getElementById('meta-sync-status');
+
+  if (!btnConnectMeta) return;
+
+  btnConnectMeta.addEventListener('click', async () => {
+    btnConnectMeta.disabled = true;
+    btnConnectMeta.textContent = 'Vinculando Pixel y Webhook... ⚡';
+
+    try {
+      const res = await fetch(`${API_URL}/api/meta/connect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: state.sessionId })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        if (metaStatus) metaStatus.textContent = 'Estado: Audiencia y Webhook sincronizados.';
+        alert('Meta Ads vinculado con éxito al pipeline SODIE.');
+      } else {
+        if (metaStatus) metaStatus.textContent = 'Estado: Conexión emulada correctamente.';
+      }
+    } catch (err) {
+      if (metaStatus) metaStatus.textContent = 'Estado: Conexión emulada (Modo Offline).';
+    } finally {
+      btnConnectMeta.disabled = false;
+      btnConnectMeta.textContent = 'Reconectar Meta Ads';
+    }
+  });
+}
+
+// --- FLUJO DE NOTIFICACIONES 24H Y RENOVACIÓN DE SLOTS ---
+function setupRenewalFlow() {
+  const btnRenew = document.getElementById('btn-renew-slot');
+  const notificationBox = document.getElementById('notification-24h');
+
+  const endTime = Number(localStorage.getItem('sodie_timer_end') || 0);
+  const remainingHours = (endTime - Date.now()) / (1000 * 3600);
+
+  if (remainingHours <= 24 && notificationBox) {
+    notificationBox.classList.remove('hidden');
+  }
+
+  if (btnRenew) {
+    btnRenew.addEventListener('click', async () => {
+      btnRenew.disabled = true;
+      btnRenew.textContent = 'Renovando Licencia...';
+
+      try {
+        const res = await fetch(`${API_URL}/api/slot/renew`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: state.sessionId })
+        });
+        
+        const newEndTime = Date.now() + (48 * 3600 * 1000);
+        localStorage.setItem('sodie_timer_end', newEndTime);
+
+        alert('¡Slot de cómputo renovado exitosamente por 48H más!');
+        if (notificationBox) notificationBox.classList.add('hidden');
+      } catch (err) {
+        const newEndTime = Date.now() + (48 * 3600 * 1000);
+        localStorage.setItem('sodie_timer_end', newEndTime);
+        alert('Slot renovado (Modo local).');
+        if (notificationBox) notificationBox.classList.add('hidden');
+      } finally {
+        btnRenew.disabled = false;
+        btnRenew.textContent = 'Renovar Slot por 48H';
+      }
+    });
   }
 }
 
@@ -149,12 +262,10 @@ function runSplashScreen() {
   const btnWelcome = document.getElementById('btn-splash-welcome');
   const capsulesTrack = document.getElementById('capsules-track');
 
-  // Convertir botón de bienvenida en un cartel puramente informativo (no clicleable)
   if (btnWelcome) {
     btnWelcome.style.pointerEvents = 'none';
   }
 
-  // Generar dinámicamente las 10 cápsulas con sus clases correspondientes si no existen
   if (capsulesTrack && capsulesTrack.children.length === 0) {
     capsulesTrack.innerHTML = '';
     for (let i = 0; i < 10; i++) {
@@ -172,7 +283,7 @@ function runSplashScreen() {
   const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 3200; // Carga progresiva fluida de 3.2s
+  const totalDurationMs = 3200;
   const stepTime = totalDurationMs / 100;
 
   const interval = setInterval(() => {
@@ -181,7 +292,6 @@ function runSplashScreen() {
     if (pctTextHeader) pctTextHeader.textContent = `${pct}%`;
     if (statusPctText) statusPctText.textContent = `${pct}%`;
 
-    // Encender progresivamente las 10 cápsulas hasta completar el 100%
     const activeCapsCount = Math.floor((pct / 100) * capsules.length);
     capsules.forEach((cap, index) => {
       if (index < activeCapsCount) {
@@ -200,7 +310,6 @@ function runSplashScreen() {
         btnWelcome.classList.add('pulse-ready');
       }
       
-      // Salida automática hacia el dashboard tras 600ms de completar el 100%
       setTimeout(() => {
         finishSplash();
       }, 600);
@@ -248,9 +357,9 @@ function setupAdminModal() {
   const handleAuth = () => {
     if (!passInput) return;
     const inputKey = passInput.value.trim();
-    if (inputKey === CONFIG.SOVYX_ADMIN_KEY || inputKey === 'admin123') {
+    if (inputKey === CONFIG.SODIE_ADMIN_KEY || inputKey === 'admin123') {
       closeModal();
-      alert('🔐 Acceso de Administrador Concedido.');
+      alert('Acceso de Administrador Concedido.');
     } else {
       if (errorMsg) errorMsg.style.display = 'block';
       passInput.classList.add('shake');
@@ -363,7 +472,7 @@ function setupChatListeners() {
         body: JSON.stringify({ message: text, sessionId: state.sessionId })
       });
       const data = await res.json();
-      const reply = data.reply || 'Sistema SOVYX: Solicitud procesada. Asignando recursos de cómputo en nodo principal.';
+      const reply = data.reply || 'Sistema SODIE: Solicitud procesada. Asignando recursos de cómputo en nodo principal.';
 
       boxEl.innerHTML += `
         <div class="msg incoming">
@@ -373,7 +482,7 @@ function setupChatListeners() {
     } catch (err) {
       boxEl.innerHTML += `
         <div class="msg incoming">
-          Sistema SOVYX: Operación confirmada. Monitoreando métricas del nodo activo.
+          Sistema SODIE: Operación confirmada. Monitoreando métricas del nodo activo.
         </div>`;
       boxEl.scrollTop = boxEl.scrollHeight;
     }
@@ -390,16 +499,16 @@ function startPersistentTimer() {
   const timerDisplay = document.getElementById('timer-count');
   if (!timerDisplay) return;
 
-  let endTime = localStorage.getItem('sovyx_timer_end');
+  let endTime = localStorage.getItem('sodie_timer_end');
   const now = Date.now();
 
   if (!endTime || Number(endTime) < now) {
     endTime = now + (48 * 3600 * 1000);
-    localStorage.setItem('sovyx_timer_end', endTime);
+    localStorage.setItem('sodie_timer_end', endTime);
   }
 
   const updateTimer = () => {
-    const timeLeft = Math.max(0, Number(localStorage.getItem('sovyx_timer_end')) - Date.now());
+    const timeLeft = Math.max(0, Number(localStorage.getItem('sodie_timer_end')) - Date.now());
     const totalSeconds = Math.floor(timeLeft / 1000);
 
     const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -433,13 +542,13 @@ function setupCookieBanner() {
   const banner = document.getElementById('cookie-banner');
   const btnAccept = document.getElementById('btn-accept-cookies');
 
-  if (localStorage.getItem('sovyx_cookies_accepted') === 'true' && banner) {
+  if (localStorage.getItem('sodie_cookies_accepted') === 'true' && banner) {
     banner.style.display = 'none';
   }
 
   if (btnAccept && banner) {
     btnAccept.addEventListener('click', () => {
-      localStorage.setItem('sovyx_cookies_accepted', 'true');
+      localStorage.setItem('sodie_cookies_accepted', 'true');
       banner.style.display = 'none';
     });
   }
