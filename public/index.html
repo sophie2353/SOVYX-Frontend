@@ -4,293 +4,166 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SODIE</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- Meta Pixel Code (Opcional) -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)n.fbq=n;n.push(async;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_PIXEL_ID');
+    fbq('track', 'PageView');
+  </script>
 </head>
-<body>
+<body class="sodie-theme">
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN                           -->
+  <!-- 1. VISTA SPLASH & CARGA PROGRESIVA         -->
   <!-- ========================================== -->
-  <div id="view-splash" class="full-screen">
+  <div id="view-splash" class="full-screen splash-screen">
     <div class="splash-content">
-      <div class="logo-wrapper">
-        <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
-      </div>
-      <div class="hud-percentage-wrapper">
-        <span id="splash-pct" class="splash-pct-num">0%</span>
-        <div class="hud-pointer-line"></div>
-      </div>
-      <div class="cpu-liquid-box">
-        <div id="capsules-track" class="capsules-track">
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
-        </div>
-      </div>
-      <div class="splash-gauges">
-        <div class="gauge-card">
-          <svg class="gauge-ring" viewBox="0 0 36 36">
-            <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
-            <circle id="gauge-circle-1" class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="0, 100" />
-          </svg>
-          <div class="gauge-content">
-            <span class="gauge-label">DATOS PROCESADOS</span>
-            <span id="gauge-val-1" class="gauge-val mint-txt">0%</span>
-          </div>
-        </div>
-        <div class="hud-center-node"></div>
-        <div class="gauge-card">
-          <svg class="gauge-ring" viewBox="0 0 36 36">
-            <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
-            <circle id="gauge-circle-2" class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="0, 100" />
-          </svg>
-          <div class="gauge-content">
-            <span class="gauge-label">ANÁLISIS MERCADO</span>
-            <span id="gauge-val-2" class="gauge-val fuchsia-txt">0%</span>
-          </div>
-        </div>
-      </div>
-      <div class="welcome-sign-glass">
-        <div id="welcome-fill" class="welcome-fill"></div>
-        <span class="welcome-text">BIENVENIDO</span>
-      </div>
-    </div>
-  </div>
+      <div class="sodie-logo-title">S<span class="highlight-magenta">O</span>DIE</div>
+      
+      <!-- Porcentaje principal sincronizado -->
+      <div id="splash-percentage-text" class="splash-percentage">0%</div>
 
-  <!-- VISTA CUPOS AGOTADOS -->
-  <div id="view-sold-out" class="full-screen hidden">
-    <div class="glass-card-dash text-center">
-      <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
-      <p class="step-desc" style="margin-top: 10px;">El acceso al software se encuentra cerrado actualmente.</p>
+      <!-- Barra de cápsulas progresivas -->
+      <div id="capsules-track" class="capsules-track">
+        <!-- Generado dinámicamente por app.js -->
+      </div>
+
+      <!-- Métricas circulares secundarias -->
+      <div class="splash-metrics-row">
+        <div class="circle-metric">
+          <span class="circle-title">DATOS PROCESADOS</span>
+          <span id="status-pct" class="circle-value">0%</span>
+        </div>
+        <div class="center-indicator-dot"></div>
+        <div class="circle-metric">
+          <span class="circle-title">ANÁLISIS MERCADO</span>
+          <span class="circle-value">0%</span>
+        </div>
+      </div>
+
+      <!-- Cartel de bienvenida informativo -->
+      <button id="btn-splash-welcome" class="btn-neon-block">BIENVENIDO</button>
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN                          -->
+  <!-- 2. DASHBOARD PRINCIPAL                     -->
   <!-- ========================================== -->
-  <main id="app-dashboard" class="dashboard-container">
-    <header class="dash-header">
-      <div class="dash-header-left">
-        <span class="brand-text"><span class="serif-s">S</span>ODIE</span>
+  <div class="dashboard-container">
+    
+    <!-- Barra Superior de Estado (Live) -->
+    <header class="top-bar">
+      <div class="live-status-bar">
+        <span class="live-dot"></span>
+        <span><strong>21 personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 🗿</span></span>
       </div>
-      <div class="dash-header-right">
-        <span id="client-id-badge" class="badge-client">Cliente: #1</span>
-        <button id="btn-admin-toggle" class="btn-icon">⚙️</button>
+      <div class="top-actions">
+        <button id="btn-menu" class="btn-icon-top">☰</button>
+        <button id="btn-admin-access" class="btn-icon-top">🛡️</button>
       </div>
     </header>
 
-    <!-- PANEL ADMIN MÓDULO (Protegido por Clave) -->
-    <section id="admin-panel" class="glass-card-dash hidden">
-      <h3 class="section-title fuchsia-txt">Dashboard Mio (Admin) 👺</h3>
-      <div class="admin-grid">
-        <div class="admin-group">
-          <label>Módulo 3: Generar Link de Pago</label>
-          <div class="admin-btns">
-            <button id="btn-admin-link-1k">$1.000 / $1</button>
-            <button id="btn-admin-link-9k">$9.000</button>
-            <button id="btn-admin-link-5k">$5.000</button>
-          </div>
-        </div>
-        <div class="admin-group">
-          <label>Módulo 4: Evaluador Meta</label>
-          <button id="btn-admin-approve-evaluator" class="btn-pf-action">Listo (Aprobar Cliente)</button>
-        </div>
-        <div class="admin-group">
-          <label>Cierre General</label>
-          <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
-        </div>
+    <!-- Menú Lateral / Sidebar -->
+    <nav id="sidebar-menu" class="sidebar hidden">
+      <div class="sidebar-header">
+        <h3>Menú SODIE</h3>
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="#metrics">Métricas en Vivo</a></li>
+        <li><a href="#upload-section">Cargar Archivo / Lista</a></li>
+        <li><a href="#chat-section">Asistente IA2</a></li>
+      </ul>
+    </nav>
+
+    <!-- Notificación de 48H / Temporizador -->
+    <section class="timer-section">
+      <div class="timer-box">
+        <span>Ciclo de Cómputo Activo:</span>
+        <strong id="timer-count">48:00:00</strong>
+      </div>
+      <div id="notification-24h" class="notification-banner hidden">
+        <p>⚠️ Tu slot expira pronto.</p>
+        <button id="btn-renew-slot" class="btn-small">Renovar Slot por 48H</button>
       </div>
     </section>
 
-    <!-- MÉTRICAS & CARRUSEL -->
-    <section class="metrics-section">
-      <h3 class="section-title">Métricas</h3>
-      <div class="metrics-slider">
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
-          <div class="card-value">100</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Estado</span><span class="mint-txt">Óptimo</span></div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
-          <div class="card-value">15.000</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
-          <div class="card-value">40$</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Actuales</span><span class="dots">•••</span></div>
-          <div class="card-value">3.000</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,40 Q50,20 100,10 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Retención</span><span class="mint-txt">98%</span></div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Objetivo</span><span class="dots">•••</span></div>
-          <div class="card-value">2</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Meta</span><span class="fuchsia-txt">Pendiente</span></div>
-        </article>
+    <!-- Bloque Principal de Métricas -->
+    <section id="metrics" class="metrics-grid">
+      <div class="card-metric">
+        <span>Visitantes Totales</span>
+        <h2 id="metric-visitors">1,504</h2>
       </div>
-
-      <div class="slider-dots-indicator">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+      <div class="card-metric">
+        <span>Leads Capturados</span>
+        <h2 id="metric-leads">75</h2>
       </div>
     </section>
 
-    <!-- SECUENCIA DE PASOS DE CONFIGURACIÓN -->
-    <section class="glass-card-dash flow-container">
+    <!-- Sección de Carga de Archivos (Hojas de cálculo / Lista de 100) -->
+    <section id="upload-section" class="upload-box-container">
+      <h3>Cargar Base de Datos / Lista de Prospectos</h3>
+      <input type="file" id="file-upload-input" accept=".csv, .xlsx, .xls">
+      <p id="file-upload-status" class="status-text">Ningún archivo seleccionado.</p>
+    </section>
+
+    <!-- Sección de Chat / IA2 -->
+    <section id="chat-section" class="chat-container">
+      <div class="chat-questions-carousel">
+        <!-- Quick replies inyectados por JS -->
+      </div>
+      <div id="chat-box" class="chat-messages-box">
+        <div class="msg incoming">Sistema SODIE: Nodo de IA2 activo. ¿Cómo procedemos hoy?</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" placeholder="Escribe tu comando o consulta...">
+        <button class="btn-icon">➤</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. MODAL DE ADMINISTRACIÓN (PAGO DE PRUEBA)-->
+  <!-- ========================================== -->
+  <div id="admin-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2>Panel de Administración SODIE</h2>
+      <p>Introduce la clave maestra para acceder a las opciones de control y pagos de prueba.</p>
       
-      <!-- Paso 1: Generación de Link de Pago -->
-      <div id="step-1" class="step-card">
-        <h3 class="section-title">Paso Requerido</h3>
-        <p class="step-desc">Pago inicial de activación ($1.000 / $1 Prueba)</p>
-        <button id="btn-pay-step1" class="btn-pf-action">Pagar</button>
+      <div class="admin-input-group">
+        <input type="password" id="admin-pass-input" placeholder="Clave admin (ej: sodie2026)">
+        <span id="admin-error-msg" class="error-text" style="display:none;">Clave incorrecta.</span>
       </div>
 
-      <!-- Paso 2: Evaluador en Meta -->
-      <div id="step-2" class="step-card hidden">
-        <h3 class="section-title">Paso 2: Evaluador en Meta</h3>
-        <p class="step-desc">Ingresa tu email / usuario para darte acceso:</p>
-        <div class="input-group-flow">
-          <input type="text" id="meta-user-input" placeholder="email / usuario" />
-          <button id="btn-submit-evaluator" class="btn-pf-action">Enviar</button>
-        </div>
-        <p id="evaluator-status-msg" class="mint-txt hidden style-wait-msg">esperando respuesta. Espera unos minutos.</p>
+      <!-- El pago de prueba vive EXCLUSIVAMENTE aquí dentro del admin -->
+      <div class="admin-actions-box">
+        <h3>Zona de Pruebas de Pago</h3>
+        <button id="btn-pagar" class="btn-neon-magenta">Ejecutar Pago de Prueba ($1,000)</button>
+        <button id="btn-connect-meta" class="btn-secondary">Sincronizar Meta Ads & Webhook</button>
       </div>
 
-      <!-- Paso 3: Subir Hoja de Cálculo -->
-      <div id="step-3" class="step-card hidden">
-        <h3 class="section-title">Paso 3: Hoja de Cálculo</h3>
-        <p class="step-desc">Sube tu archivo de datos (Excel / CSV)</p>
-        <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-        <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Archivo</button>
+      <div class="modal-buttons">
+        <button id="btn-admin-confirm" class="btn-primary">Acceder</button>
+        <button id="btn-admin-cancel" class="btn-secondary">Cerrar</button>
       </div>
+    </div>
+  </div>
 
-      <!-- Paso 4: Conectar con Facebook Oficial -->
-      <div id="step-4" class="step-card hidden">
-        <h3 class="section-title">Paso 4: Integración Oficial</h3>
-        <p class="step-desc">Acepta todos los permisos para vincular la campaña.</p>
-        <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Conectar con Facebook</button>
-      </div>
+  <!-- Banner de Cookies -->
+  <div id="cookie-banner" class="cookie-banner">
+    <p>Utilizamos almacenamiento local y cookies técnicas para optimizar tu nodo de cómputo en SODIE.</p>
+    <button id="btn-accept-cookies" class="btn-small">Aceptar</button>
+  </div>
 
-      <!-- Paso 5: Ir al Dashboard / Subir Borrador -->
-      <div id="step-5" class="step-card hidden">
-        <h3 class="section-title">Paso 5: Borrador Final</h3>
-        <p class="step-desc">Agregar Borrador con "Prueba Hora 24"</p>
-        <input type="file" id="draft-file-input" class="file-input-custom" />
-        <button id="btn-upload-draft" class="btn-pf-action">Listo</button>
-      </div>
-
-    </section>
-
-    <!-- TARJETA NOTIFICACIÓN 24H -->
-    <section id="card-notification-24h" class="glass-card-dash hidden text-center">
-      <h3 class="section-title mint-txt">Notificación Activa (24H)</h3>
-      <p class="step-desc">Envía archivo actual de data y crea el borrador "Hora 48".</p>
-      <button id="btn-activate-24h-notification" class="btn-pf-action">Activar</button>
-      <div id="timer-24h-display" class="timer-digits hidden" style="font-size: 2rem;">24:00:00</div>
-    </section>
-
-    <!-- TARJETA RENOVAR 30 DÍAS -->
-    <section id="card-renew-30days" class="glass-card-dash hidden text-center">
-      <h3 class="section-title fuchsia-txt">Tiempo agotado.</h3>
-      <p class="step-desc">¿Renovar 30 Días?</p>
-      <div class="row-btns-renew">
-        <button id="btn-renew-yes" class="btn-pf-action">Sí</button>
-        <button id="btn-renew-no" class="btn-pf-action btn-danger">No</button>
-      </div>
-    </section>
-
-    <!-- CHAT WEB -->
-    <section class="glass-card-dash chat-section">
-      <div class="chat-header">
-        <h3 class="section-title">Chat Web</h3>
-        <div class="cupos-badge">
-          <span class="purple-neon-dot"></span>
-          <span id="cupos-count-badge" class="cupos-text">solo 2 cupos</span>
-        </div>
-      </div>
-      <div id="chat-body" class="chat-body">
-        <div class="chat-bubble incoming-simple">
-          <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
-        </div>
-      </div>
-      <div class="chat-quick-options">
-        <button class="opt-btn" id="opt-btn-1">1. Ver Planes</button>
-        <button class="opt-btn" id="opt-btn-2">2. Calibración IA</button>
-        <button class="opt-btn" id="opt-btn-3">3. Soporte 24/7</button>
-        <button class="opt-btn" id="opt-btn-4">4. Métodos de Pago</button>
-      </div>
-      <div class="chat-input-bar">
-        <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
-        <button id="chat-send" class="chat-send-btn">➤</button>
-      </div>
-    </section>
-
-    <!-- PAGO FINAL -->
-    <section id="pf-card" class="glass-card-dash pf-section">
-      <h3 class="section-title">P.F (Pago Final)</h3>
-      <div class="pf-summary-list">
-        <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">$1.000</strong></div>
-        <div class="pf-row"><span>Pago después de resultados</span><strong id="price-post">$9.000</strong></div>
-        <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">$10.000</strong></div>
-      </div>
-      <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
-    </section>
-
-    <!-- TIMER 48H -->
-    <section class="glass-card-dash timer-section">
-      <span class="timer-label">TIEMPO RESTANTE</span>
-      <div id="timer-display" class="timer-digits">48:00:00</div>
-      <span class="timer-sub">Métricas Objetivo en 48H</span>
-    </section>
-  </main>
-
+  <!-- Script principal actualizado -->
   <script src="app.js"></script>
 </body>
 </html>
