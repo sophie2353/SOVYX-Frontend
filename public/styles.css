@@ -304,7 +304,7 @@ body {
 .admin-btns { display: flex; gap: 6px; }
 .admin-btns button { flex: 1; padding: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: #fff; cursor: pointer; }
 
-/* MÉTRICAS & CARRUSEL (CON SNAP SCROLL) */
+/* MÉTRICAS & CARRUSEL (CON SNAP SCROLL CORREGIDO) */
 .metrics-slider { 
   display: flex; 
   gap: 14px; 
@@ -312,6 +312,8 @@ body {
   scrollbar-width: none; 
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
+  /* Añadido para cálculo preciso del padding al deslizar */
+  scroll-padding-inline: 0px; 
 }
 .metrics-slider::-webkit-scrollbar { display: none; }
 
@@ -323,14 +325,8 @@ body {
   flex-direction: column; 
   justify-content: space-between; 
   border-radius: 18px; 
-  scroll-snap-align: center;
+  scroll-snap-align: start; /* Cambiado a start para alineación exacta con el índice */
 }
-
-.card-head { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); }
-.card-value { font-size: 1.45rem; font-weight: 800; margin: 0; }
-.card-chart { width: 100%; height: 42px; }
-.card-chart svg { width: 100%; height: 100%; filter: drop-shadow(0 0 6px var(--neon-mint)); }
-.card-foot { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-sub); }
 
 /* PUNTOS INDICADORES DEL CARRUSEL */
 .slider-dots-indicator {
@@ -347,6 +343,7 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.25);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .slider-dots-indicator .dot.active {
