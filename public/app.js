@@ -11,30 +11,17 @@ const state = {
   fbUser: localStorage.getItem('sodie_fb_user') || null,
   isPaid: localStorage.getItem('sodie_is_paid') === 'true',
   uploadedFile: null,
-  completedCapsules: JSON.parse(localStorage.getItem('sodie_completed_capsules') || '[1]'),
   metrics: {
     visitors: 1504,
-    visitorsGrowth: "+3.5%",
     leads: 75,
-    leadsGrowth: "+1.2%",
     conversionRate: "4.8%",
     reach: 15000,
-    reachDelta: "-1.30%",
     spend: "$15",
-    targetClients: 100,
-    clientGrowth: "+12%",
     liveViewers: 21
   }
 };
 
 localStorage.setItem('sodie_session_id', state.sessionId);
-
-const QUICK_REPLIES = [
-  "¿Cómo funciona el ciclo de 48H?",
-  "¿Por qué solo hay 2 slots libres?",
-  "¿Qué es la calibración espejo?",
-  "¿Cuándo se paga la liquidación final?"
-];
 
 // --- INICIALIZACIÓN PRINCIPAL ---
 window.addEventListener('DOMContentLoaded', async () => {
@@ -53,13 +40,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     cleanUrlParams();
   }
 
+  // Módulos del sistema
   runSplashScreen();
+  setupChatSystem();
+  setupAdminFiveClicks();
+  setupCarouselDots();
   setupPaymentFlow();
-  setupQuickReplies();
-  setupChatListeners();
-  setupAdminModal();
-  setupAdminNavigation();
-  setupCookieBanner();
   setupFileUploader();
   setupMetaAdsWorkflow();
   setupRenewalFlow();
@@ -67,215 +53,27 @@ window.addEventListener('DOMContentLoaded', async () => {
   startLiveMetricsEngine();
 });
 
-// --- CONFIRMACIÓN DE PAGO (PIXEL + CAPI BACKEND) ---
-async function confirmPaymentSuccess(amount = 1000.00) {
-  state.isPaid = true;
-  localStorage.setItem('sodie_is_paid', 'true');
-
-  if (window.fbq) {
-    window.fbq('track', 'Purchase', {
-      value: amount,
-      currency: 'USD',
-      content_name: 'SODIE Software License - Slot de Cómputo',
-      content_type: 'product'
-    });
-  }
-
-  try {
-    await fetch(`${API_URL}/api/pago/confirmar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionId: state.sessionId,
-        email: state.email || localStorage.getItem('sodie_user_email'),
-        amount: amount
-      })
-    });
-  } catch (err) {
-    console.warn('Backend CAPI offline, evento procesado en local.');
-  }
-}
-
-// --- MOTOR DE MÉTRICAS EN TIEMPO REAL ---
-function startLiveMetricsEngine() {
-  updateMetricsUI();
-
-  setInterval(async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/metrics`);
-      if (res.ok) {
-        const data = await res.json();
-        state.metrics.visitors = data.visitors || state.metrics.visitors;
-        state.metrics.leads = data.leads || state.metrics.leads;
-        state.metrics.conversionRate = data.conversionRate || state.metrics.conversionRate;
-        state.metrics.reach = data.reach || state.metrics.reach;
-        state.metrics.spend = data.spend || state.metrics.spend;
-        state.metrics.liveViewers = data.liveViewers || state.metrics.liveViewers;
-      } else {
-        simulateLiveFluctuations();
-      }
-    } catch (err) {
-      simulateLiveFluctuations();
-    }
-
-    updateMetricsUI();
-  }, 4000);
-}
-
-function simulateLiveFluctuations() {
-  const deltaViewers = Math.floor(Math.random() * 3) - 1;
-  state.metrics.liveViewers = Math.max(18, Math.min(26, state.metrics.liveViewers + deltaViewers));
-  state.metrics.visitors += Math.floor(Math.random() * 3);
-}
-
-function updateMetricsUI() {
-  const elVisitors = document.getElementById('metric-visitors');
-  const elLeads = document.getElementById('metric-leads');
-  
-  if (elVisitors) elVisitors.textContent = state.metrics.visitors.toLocaleString();
-  if (elLeads) elLeads.textContent = state.metrics.leads.toLocaleString();
-
-  const liveStatusBar = document.querySelector('.live-status-bar');
-  if (liveStatusBar) {
-    liveStatusBar.innerHTML = `
-      <span class="live-dot"></span>
-      <span><strong>${state.metrics.liveViewers} personas</strong> viendo la web | <span class="highlight-slots">2 Slots disponibles 🗿</span></span>
-    `;
-  }
-}
-
-// --- CARGA DE ARCHIVOS Y HOJAS DE CÁLCULO ---
-function setupFileUploader() {
-  const fileInput = document.getElementById('file-upload-input');
-  const fileStatus = document.getElementById('file-upload-status');
-
-  if (!fileInput) return;
-
-  fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    state.uploadedFile = file;
-    if (fileStatus) fileStatus.textContent = `Procesando: ${file.name}...`;
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('sessionId', state.sessionId);
-
-    try {
-      const res = await fetch(`${API_URL}/api/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      if (res.ok) {
-        if (fileStatus) fileStatus.textContent = `✓ ${file.name} cargado correctamente.`;
-      } else {
-        throw new Error('Falló la carga en servidor');
-      }
-    } catch (err) {
-      if (fileStatus) fileStatus.textContent = `✓ Archivo procesado localmente (${file.name}).`;
-    }
-  });
-}
-
-// --- FLUJO META ADS Y WEBHOOKS DE SEGMENTACIÓN ---
-function setupMetaAdsWorkflow() {
-  const btnConnectMeta = document.getElementById('btn-connect-meta');
-  const metaStatus = document.getElementById('meta-sync-status');
-
-  if (!btnConnectMeta) return;
-
-  btnConnectMeta.addEventListener('click', async () => {
-    btnConnectMeta.disabled = true;
-    btnConnectMeta.textContent = 'Vinculando Pixel y Webhook... ⚡';
-
-    try {
-      const res = await fetch(`${API_URL}/api/meta/connect`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: state.sessionId })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        if (metaStatus) metaStatus.textContent = 'Estado: Audiencia y Webhook sincronizados.';
-        alert('Meta Ads vinculado con éxito al pipeline SODIE.');
-      } else {
-        if (metaStatus) metaStatus.textContent = 'Estado: Conexión emulada correctamente.';
-      }
-    } catch (err) {
-      if (metaStatus) metaStatus.textContent = 'Estado: Conexión emulada (Modo Offline).';
-    } finally {
-      btnConnectMeta.disabled = false;
-      btnConnectMeta.textContent = 'Reconectar Meta Ads';
-    }
-  });
-}
-
-// --- FLUJO DE NOTIFICACIONES 24H Y RENOVACIÓN DE SLOTS ---
-function setupRenewalFlow() {
-  const btnRenew = document.getElementById('btn-renew-slot');
-  const notificationBox = document.getElementById('notification-24h');
-
-  const endTime = Number(localStorage.getItem('sodie_timer_end') || 0);
-  const remainingHours = (endTime - Date.now()) / (1000 * 3600);
-
-  if (remainingHours <= 24 && notificationBox) {
-    notificationBox.classList.remove('hidden');
-  }
-
-  if (btnRenew) {
-    btnRenew.addEventListener('click', async () => {
-      btnRenew.disabled = true;
-      btnRenew.textContent = 'Renovando Licencia...';
-
-      try {
-        const res = await fetch(`${API_URL}/api/slot/renew`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: state.sessionId })
-        });
-        
-        const newEndTime = Date.now() + (48 * 3600 * 1000);
-        localStorage.setItem('sodie_timer_end', newEndTime);
-
-        alert('¡Slot de cómputo renovado exitosamente por 48H más!');
-        if (notificationBox) notificationBox.classList.add('hidden');
-      } catch (err) {
-        const newEndTime = Date.now() + (48 * 3600 * 1000);
-        localStorage.setItem('sodie_timer_end', newEndTime);
-        alert('Slot renovado (Modo local).');
-        if (notificationBox) notificationBox.classList.add('hidden');
-      } finally {
-        btnRenew.disabled = false;
-        btnRenew.textContent = 'Renovar Slot por 48H';
-      }
-    });
-  }
-}
-
-// --- VISTA SPLASH (AUTOCARGA AL 100% Y TRANSICIÓN DIRECTA) ---
+// ==========================================
+// 1. SPLASH SCREEN (CARGA 100% & COLORES)
+// ==========================================
 function runSplashScreen() {
-  const splash = document.getElementById('view-splash');
-  const pctTextHeader = document.getElementById('splash-percentage-text');
-  const statusPctText = document.getElementById('status-pct');
-  const btnWelcome = document.getElementById('btn-splash-welcome');
+  const splashPct = document.getElementById('splash-pct');
+  const statusPct = document.getElementById('status-pct');
+  const gaugeVal1 = document.getElementById('gauge-val-1');
+  const gaugeVal2 = document.getElementById('gauge-val-2');
+  
+  const gaugeCircle1 = document.getElementById('gauge-circle-1');
+  const gaugeCircle2 = document.getElementById('gauge-circle-2');
+  const welcomeFill = document.getElementById('welcome-fill');
   const capsulesTrack = document.getElementById('capsules-track');
 
-  if (btnWelcome) {
-    btnWelcome.style.pointerEvents = 'none';
-  }
-
+  // Rellenar cápsulas si están vacías
   if (capsulesTrack && capsulesTrack.children.length === 0) {
     capsulesTrack.innerHTML = '';
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 14; i++) {
       const cap = document.createElement('div');
-      cap.className = 'capsule cap-off';
-      if (i === 0) {
-        cap.innerHTML = `<svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-5.45 9-12V5l-9-4z"/></svg>`;
-      } else if (i === 4) {
-        cap.innerHTML = `<svg class="cap-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7.44-7.93H7v-2h-1.44C6 6.05 9.05 3 13 2.56V4h-2v1.44c-3.95.49-7 3.85-7.44 7.93H5v2h1.44z"/></svg>`;
-      }
+      cap.className = 'capsule cap-dark';
+      cap.innerHTML = `<div class="cap-glint"></div>`;
       capsulesTrack.appendChild(cap);
     }
   }
@@ -283,107 +81,216 @@ function runSplashScreen() {
   const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 3200;
+  const totalDurationMs = 2800; // 2.8 segundos de intro
   const stepTime = totalDurationMs / 100;
 
   const interval = setInterval(() => {
     pct += 1;
 
-    if (pctTextHeader) pctTextHeader.textContent = `${pct}%`;
-    if (statusPctText) statusPctText.textContent = `${pct}%`;
+    // Actualizar números
+    if (splashPct) splashPct.textContent = `${pct}%`;
+    if (statusPct) statusPct.textContent = `${pct}%`;
+    if (gaugeVal1) gaugeVal1.textContent = `${pct}%`;
+    if (gaugeVal2) gaugeVal2.textContent = `${pct}%`;
 
-    const activeCapsCount = Math.floor((pct / 100) * capsules.length);
-    capsules.forEach((cap, index) => {
-      if (index < activeCapsCount) {
-        if (index >= 4 && index <= 5) {
-          cap.className = 'capsule cap-magenta active';
+    // SVG Gauges
+    if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${pct}, 100`);
+    if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', `${pct}, 100`);
+
+    // Llenado de agua en el cartel BIENVENIDO
+    if (welcomeFill) welcomeFill.style.height = `${pct}%`;
+
+    // Encender cápsulas en verde/menta y fucsia
+    if (capsules.length > 0) {
+      const activeCount = Math.floor((pct / 100) * capsules.length);
+      capsules.forEach((cap, index) => {
+        if (index < activeCount) {
+          if (index >= 6 && index <= 8) {
+            cap.className = 'capsule cap-fuchsia';
+          } else {
+            cap.className = 'capsule cap-mint';
+          }
         } else {
-          cap.className = 'capsule cap-green active';
+          cap.className = 'capsule cap-dark';
         }
-      }
-    });
+      });
+    }
 
+    // Finalizar en 100%
     if (pct >= 100) {
       clearInterval(interval);
-      if (btnWelcome) {
-        btnWelcome.style.boxShadow = "0 0 25px var(--neon-green)";
-        btnWelcome.classList.add('pulse-ready');
-      }
-      
       setTimeout(() => {
         finishSplash();
-      }, 600);
+      }, 400);
     }
   }, stepTime);
 }
 
 function finishSplash() {
-  const splash = document.getElementById('view-splash');
+  const splash = document.getElementById('view-splash') || document.querySelector('.full-screen');
   if (splash) {
-    splash.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    splash.style.transition = 'opacity 0.6s ease, visibility 0.6s ease';
     splash.style.opacity = '0';
-    splash.style.transform = 'scale(1.04)';
+    splash.style.visibility = 'hidden';
     setTimeout(() => {
-      splash.style.display = 'none';
-    }, 800);
-  } else {
-    const fallbackSplash = document.querySelector('.full-screen');
-    if (fallbackSplash) fallbackSplash.style.display = 'none';
+      splash.classList.add('hidden');
+    }, 600);
   }
 }
 
-// --- MODAL Y AUTENTICACIÓN ADMIN ---
-function setupAdminModal() {
-  const btnAdmin = document.getElementById('btn-admin-access');
-  const modal = document.getElementById('admin-modal');
-  const passInput = document.getElementById('admin-pass-input');
-  const btnConfirm = document.getElementById('btn-admin-confirm');
-  const btnCancel = document.getElementById('btn-admin-cancel');
-  const errorMsg = document.getElementById('admin-error-msg');
+// ==========================================
+// 2. CHAT WEB INTERACTIVO & BOTONES
+// ==========================================
+function setupChatSystem() {
+  const inputEl = document.querySelector('.chat-input-bar input');
+  const btnSend = document.querySelector('.chat-send-btn');
+  const chatBody = document.getElementById('chat-body') || document.querySelector('.chat-body');
+  const quickOpts = document.querySelectorAll('.chat-quick-options .opt-btn');
 
-  if (!btnAdmin || !modal) return;
+  if (!btnSend || !inputEl || !chatBody) return;
 
-  btnAdmin.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-    if (passInput) {
-      passInput.value = '';
-      passInput.focus();
+  const appendMsg = (text, isOutgoing) => {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = isOutgoing ? 'outgoing-simple' : 'incoming-simple';
+    msgDiv.innerHTML = `<p>${escapeHTML(text)}</p>`;
+    chatBody.appendChild(msgDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  };
+
+  const sendMsg = async (customText = null, customReply = null) => {
+    const text = customText || inputEl.value.trim();
+    if (!text) return;
+
+    appendMsg(text, true);
+    if (!customText) inputEl.value = '';
+
+    if (customReply) {
+      setTimeout(() => appendMsg(customReply, false), 400);
+      return;
     }
-    if (errorMsg) errorMsg.style.display = 'none';
-  });
 
-  const closeModal = () => modal.classList.add('hidden');
-
-  const handleAuth = () => {
-    if (!passInput) return;
-    const inputKey = passInput.value.trim();
-    if (inputKey === CONFIG.SODIE_ADMIN_KEY || inputKey === 'admin123') {
-      closeModal();
-      alert('Acceso de Administrador Concedido.');
-    } else {
-      if (errorMsg) errorMsg.style.display = 'block';
-      passInput.classList.add('shake');
-      setTimeout(() => passInput.classList.remove('shake'), 500);
+    try {
+      const res = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, sessionId: state.sessionId })
+      });
+      const data = await res.json();
+      appendMsg(data.reply || 'Sistema SODIE: Solicitud recibida. Calibrando parámetros.', false);
+    } catch (err) {
+      setTimeout(() => {
+        appendMsg('Sistema SODIE: Mensaje procesado. Monitoreando métricas.', false);
+      }, 500);
     }
   };
 
-  if (btnConfirm) btnConfirm.addEventListener('click', handleAuth);
-  if (btnCancel) btnCancel.addEventListener('click', closeModal);
-  if (passInput) {
-    passInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleAuth();
-    });
-  }
+  btnSend.addEventListener('click', () => sendMsg());
+  inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMsg();
+  });
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+  // Conectar botones rápidos
+  quickOpts.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const userText = btn.textContent.trim();
+      const botReply = btn.getAttribute('data-reply') || "Procesando tu consulta...";
+      sendMsg(userText, botReply);
+    });
   });
 }
 
-// --- FLUJO DE PAGO Y BOTÓN DE ACCIÓN ---
-function setupPaymentFlow() {
-  const btnPagar = document.getElementById('btn-pagar');
+// ==========================================
+// 3. ACCESO ADMIN CON 5 CLICS EN LOGO
+// ==========================================
+function setupAdminFiveClicks() {
+  let logoClicks = 0;
+  let clickTimer;
 
+  const logoTriggers = document.querySelectorAll('.logo-wrapper, .brand-text');
+  const appDashboard = document.getElementById('app-dashboard');
+  const adminDashboard = document.getElementById('admin-dashboard');
+  const btnExitAdmin = document.getElementById('btn-exit-admin');
+
+  logoTriggers.forEach(logo => {
+    logo.addEventListener('click', () => {
+      logoClicks++;
+      clearTimeout(clickTimer);
+
+      if (logoClicks >= 5) {
+        logoClicks = 0;
+        if (appDashboard && adminDashboard) {
+          appDashboard.classList.add('hidden');
+          adminDashboard.classList.remove('hidden');
+          alert('👺 Acceso Concedido: Dashboard Admin SODIE');
+        }
+      } else {
+        clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
+      }
+    });
+  });
+
+  if (btnExitAdmin) {
+    btnExitAdmin.addEventListener('click', () => {
+      if (appDashboard && adminDashboard) {
+        adminDashboard.classList.add('hidden');
+        appDashboard.classList.remove('hidden');
+      }
+    });
+  }
+}
+
+// ==========================================
+// 4. SINCRONÍA DE CARRUSEL CON INDICADORES
+// ==========================================
+function setupCarouselDots() {
+  const slider = document.querySelector('.metrics-slider');
+  const dots = document.querySelectorAll('.slider-dots-indicator .dot');
+  const cards = document.querySelectorAll('.metrics-slider .metric-square');
+
+  if (!slider || dots.length === 0 || cards.length === 0) return;
+
+  slider.addEventListener('scroll', () => {
+    const scrollPos = slider.scrollLeft;
+    const cardWidth = cards[0].offsetWidth + 14; 
+    const activeIdx = Math.round(scrollPos / cardWidth);
+
+    dots.forEach((dot, idx) => {
+      if (idx === activeIdx) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+  });
+
+  dots.forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      const cardWidth = cards[0].offsetWidth + 14;
+      slider.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
+    });
+  });
+}
+
+// ==========================================
+// 5. MOTOR DE MÉTRICAS Y FLUJOS SECUNDARIOS
+// ==========================================
+function startLiveMetricsEngine() {
+  setInterval(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/metrics`);
+      if (res.ok) {
+        const data = await res.json();
+        state.metrics.visitors = data.visitors || state.metrics.visitors;
+        state.metrics.leads = data.leads || state.metrics.leads;
+      }
+    } catch (err) {
+      state.metrics.visitors += Math.floor(Math.random() * 2);
+    }
+  }, 4000);
+}
+
+function setupPaymentFlow() {
+  const btnPagar = document.getElementById('btn-pay-main') || document.getElementById('btn-pagar');
   if (btnPagar) {
     btnPagar.addEventListener('click', async () => {
       btnPagar.disabled = true;
@@ -400,158 +307,72 @@ function setupPaymentFlow() {
         if (data.ok && data.url) {
           window.location.href = data.url;
         } else {
-          await confirmPaymentSuccess(1000.00);
-          alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
-          btnPagar.disabled = false;
-          btnPagar.textContent = 'Pagar';
+          confirmPaymentSuccess(1000.00);
+          alert('¡Slot de cómputo reservado con éxito! 🚀');
         }
       } catch (err) {
-        await confirmPaymentSuccess(1000.00);
-        alert('¡Transacción completada! Slot de cómputo reservado con éxito 🚀');
+        confirmPaymentSuccess(1000.00);
+        alert('¡Transacción completada localmente! 🚀');
+      } finally {
         btnPagar.disabled = false;
-        btnPagar.textContent = 'Pagar';
+        btnPagar.textContent = 'PAGAR AHORA';
       }
     });
   }
 }
 
-// --- QUICK REPLIES & CHIPS ---
-function setupQuickReplies() {
-  const container = document.querySelector('.chat-questions-carousel');
-  if (!container) return;
-
-  const attachChipEvent = (chipBtn) => {
-    chipBtn.addEventListener('click', () => {
-      const input = document.querySelector('.chat-input-row input');
-      const btnSend = document.querySelector('.chat-input-row .btn-icon');
-      if (input && btnSend) {
-        input.value = chipBtn.textContent.trim();
-        btnSend.click();
-      }
+async function confirmPaymentSuccess(amount = 1000.00) {
+  state.isPaid = true;
+  localStorage.setItem('sodie_is_paid', 'true');
+  try {
+    await fetch(`${API_URL}/api/pago/confirmar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: state.sessionId, amount: amount })
     });
-  };
+  } catch (err) {}
+}
 
-  const existingChips = container.querySelectorAll('.question-chip');
-  if (existingChips.length > 0) {
-    existingChips.forEach(attachChipEvent);
-  } else {
-    container.innerHTML = '';
-    QUICK_REPLIES.forEach(text => {
-      const chip = document.createElement('button');
-      chip.className = 'question-chip';
-      chip.textContent = text;
-      attachChipEvent(chip);
-      container.appendChild(chip);
+function setupFileUploader() {
+  const fileInput = document.getElementById('spreadsheet-file-input') || document.getElementById('file-upload-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) state.uploadedFile = e.target.files[0];
     });
   }
 }
 
-// --- CHAT WEB ---
-function setupChatListeners() {
-  const inputEl = document.querySelector('.chat-input-row input');
-  const btnSend = document.querySelector('.chat-input-row .btn-icon');
-  const boxEl = document.getElementById('chat-box');
-
-  if (!btnSend || !inputEl || !boxEl) return;
-
-  const sendMsg = async () => {
-    const text = inputEl.value.trim();
-    if (!text) return;
-
-    boxEl.innerHTML += `
-      <div class="msg outgoing">
-        ${escapeHTML(text)}
-      </div>`;
-    inputEl.value = '';
-    boxEl.scrollTop = boxEl.scrollHeight;
-
-    try {
-      const res = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, sessionId: state.sessionId })
-      });
-      const data = await res.json();
-      const reply = data.reply || 'Sistema SODIE: Solicitud procesada. Asignando recursos de cómputo en nodo principal.';
-
-      boxEl.innerHTML += `
-        <div class="msg incoming">
-          ${escapeHTML(reply)}
-        </div>`;
-      boxEl.scrollTop = boxEl.scrollHeight;
-    } catch (err) {
-      boxEl.innerHTML += `
-        <div class="msg incoming">
-          Sistema SODIE: Operación confirmada. Monitoreando métricas del nodo activo.
-        </div>`;
-      boxEl.scrollTop = boxEl.scrollHeight;
-    }
-  };
-
-  btnSend.addEventListener('click', sendMsg);
-  inputEl.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMsg();
-  });
+function setupMetaAdsWorkflow() {
+  const btnSubmitEval = document.getElementById('btn-submit-evaluator');
+  if (btnSubmitEval) {
+    btnSubmitEval.addEventListener('click', () => {
+      const msg = document.getElementById('evaluator-status-msg');
+      if (msg) msg.classList.remove('hidden');
+    });
+  }
 }
 
-// --- TEMPORIZADOR PERSISTENTE (48 HORAS) ---
+function setupRenewalFlow() {
+  const btnRenew = document.getElementById('btn-renew-yes');
+  if (btnRenew) {
+    btnRenew.addEventListener('click', () => {
+      alert('¡Slot renovado exitosamente por 30 días!');
+    });
+  }
+}
+
 function startPersistentTimer() {
-  const timerDisplay = document.getElementById('timer-count');
+  const timerDisplay = document.getElementById('timer-display');
   if (!timerDisplay) return;
 
-  let endTime = localStorage.getItem('sodie_timer_end');
-  const now = Date.now();
-
-  if (!endTime || Number(endTime) < now) {
-    endTime = now + (48 * 3600 * 1000);
-    localStorage.setItem('sodie_timer_end', endTime);
-  }
-
-  const updateTimer = () => {
-    const timeLeft = Math.max(0, Number(localStorage.getItem('sodie_timer_end')) - Date.now());
-    const totalSeconds = Math.floor(timeLeft / 1000);
-
-    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const secs = String(totalSeconds % 60).padStart(2, '0');
-
-    timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
-
-    if (totalSeconds <= 0) {
-      timerDisplay.textContent = "00:00:00";
-    }
-  };
-
-  updateTimer();
-  setInterval(updateTimer, 1000);
-}
-
-// --- NAVEGACIÓN MENÚ LATERAL ---
-function setupAdminNavigation() {
-  const btnMenu = document.getElementById('btn-menu');
-  const sidebar = document.getElementById('sidebar-menu');
-
-  if (btnMenu && sidebar) {
-    btnMenu.addEventListener('click', () => {
-      sidebar.classList.toggle('hidden');
-    });
-  }
-}
-
-function setupCookieBanner() {
-  const banner = document.getElementById('cookie-banner');
-  const btnAccept = document.getElementById('btn-accept-cookies');
-
-  if (localStorage.getItem('sodie_cookies_accepted') === 'true' && banner) {
-    banner.style.display = 'none';
-  }
-
-  if (btnAccept && banner) {
-    btnAccept.addEventListener('click', () => {
-      localStorage.setItem('sodie_cookies_accepted', 'true');
-      banner.style.display = 'none';
-    });
-  }
+  let totalSecs = 48 * 3600;
+  setInterval(() => {
+    if (totalSecs > 0) totalSecs--;
+    const h = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
+    const m = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
+    const s = String(totalSecs % 60).padStart(2, '0');
+    timerDisplay.textContent = `${h}:${m}:${s}`;
+  }, 1000);
 }
 
 function cleanUrlParams() {
