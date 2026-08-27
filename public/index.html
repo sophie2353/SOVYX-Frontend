@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOVYX / SODIE</title>
+  <title>SODIE</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (CARGA EN PORCENTAJES)   -->
+  <!-- 1. SPLASH SCREEN (Carga en Porcentajes)    -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
@@ -17,15 +17,15 @@
         <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
       </div>
       
-      <!-- Porcentaje principal de carga -->
+      <!-- Indicador Porcentual Central -->
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
         <div class="hud-pointer-line"></div>
       </div>
 
-      <!-- Barra de cápsulas progresivas -->
+      <!-- Track de Cápsulas Progresivas -->
       <div class="cpu-liquid-box">
-        <div id="capsules-track" class="capsules-track">
+        <div id="capsules-track" class="capsules-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
           <div class="capsule cap-dark"><div class="cap-glint"></div></div>
           <div class="capsule cap-dark"><div class="cap-glint"></div></div>
           <div class="capsule cap-dark"><div class="cap-glint"></div></div>
@@ -43,7 +43,7 @@
         </div>
       </div>
 
-      <!-- Indicadores circulares con porcentajes dinámicos -->
+      <!-- Indicadores Circulares Secundarios (% en tiempo real) -->
       <div class="splash-gauges">
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
@@ -86,7 +86,22 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD PRINCIPAL                     -->
+  <!-- 2. MODAL DE AUTENTICACIÓN ADMIN            -->
+  <!-- ========================================== -->
+  <div id="modal-admin-auth" class="modal-overlay hidden">
+    <div class="glass-card-dash modal-auth-box">
+      <h3 class="section-title fuchsia-txt">Acceso Restringido 🛡️</h3>
+      <p class="step-desc">Introduce la clave de administrador para acceder a la gestión de pagos y control:</p>
+      <div class="input-group-flow" style="margin-top: 15px;">
+        <input type="password" id="admin-auth-key" placeholder="Clave Maestra" />
+        <button id="btn-submit-admin-auth" class="btn-pf-action">Entrar</button>
+      </div>
+      <button id="btn-close-admin-auth" class="btn-pf-action btn-danger" style="margin-top: 10px; width: 100%;">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. DASHBOARD MAIN                          -->
   <!-- ========================================== -->
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
@@ -95,18 +110,19 @@
       </div>
       <div class="dash-header-right">
         <span id="client-id-badge" class="badge-client">Cliente: #1</span>
-        <!-- Botón de acceso directo al Panel Admin -->
-        <button id="btn-admin-toggle" class="btn-icon" title="Acceso Admin">⚙️</button>
+        <!-- Botón de Acceso Admin -->
+        <button id="btn-admin-toggle" class="btn-icon" title="Modo Admin">⚙️</button>
       </div>
     </header>
 
-    <!-- MODAL / PANEL ADMIN (Única zona donde existen las acciones de Pago) -->
+    <!-- PANEL ADMIN MÓDULO (Protegido - Única Zona de Pagos de Prueba) -->
     <section id="admin-panel" class="glass-card-dash hidden">
-      <h3 class="section-title fuchsia-txt">Dashboard Mio (Admin) 👺</h3>
+      <h3 class="section-title fuchsia-txt">Dashboard Mío (Admin) 👺</h3>
       <div class="admin-grid">
         <div class="admin-group">
-          <label>Generar Link / Ejecutar Pago de Prueba</label>
+          <label>Módulo 3: Generar Link de Pago & Checkout</label>
           <div class="admin-btns">
+            <!-- Botón directo de ejecución de Pago de Prueba -->
             <button id="btn-admin-link-1k" class="btn-pf-action">$1.000 / $1 (Prueba)</button>
             <button id="btn-admin-link-9k" class="btn-pf-action">$9.000</button>
             <button id="btn-admin-link-5k" class="btn-pf-action">$5.000</button>
@@ -123,11 +139,11 @@
       </div>
     </section>
 
-    <!-- MÉTRICAS & CARRUSEL (PUNTOS SINCRONIZADOS AL SLIDE) -->
+    <!-- MÉTRICAS & CARRUSEL (Puntos Sincronizados) -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas</h3>
-      <div class="metrics-slider" id="metrics-slider">
-        <article class="glass-card-dash metric-square">
+      <div id="metrics-slider" class="metrics-slider">
+        <article class="glass-card-dash metric-square" data-index="0">
           <div class="card-head"><span>Clientes Activos</span><span class="dots">•••</span></div>
           <div class="card-value">100</div>
           <div class="card-chart">
@@ -138,7 +154,7 @@
           <div class="card-foot"><span>Estado</span><span class="mint-txt">Óptimo</span></div>
         </article>
 
-        <article class="glass-card-dash metric-square">
+        <article class="glass-card-dash metric-square" data-index="1">
           <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
           <div class="card-value">15.000</div>
           <div class="card-chart">
@@ -149,7 +165,7 @@
           <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
         </article>
 
-        <article class="glass-card-dash metric-square">
+        <article class="glass-card-dash metric-square" data-index="2">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
           <div class="card-value">40$</div>
           <div class="card-chart">
@@ -160,7 +176,7 @@
           <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
         </article>
 
-        <article class="glass-card-dash metric-square">
+        <article class="glass-card-dash metric-square" data-index="3">
           <div class="card-head"><span>Clientes Actuales</span><span class="dots">•••</span></div>
           <div class="card-value">3.000</div>
           <div class="card-chart">
@@ -171,7 +187,7 @@
           <div class="card-foot"><span>Retención</span><span class="mint-txt">98%</span></div>
         </article>
 
-        <article class="glass-card-dash metric-square">
+        <article class="glass-card-dash metric-square" data-index="4">
           <div class="card-head"><span>Clientes Objetivo</span><span class="dots">•••</span></div>
           <div class="card-value">2</div>
           <div class="card-chart">
@@ -183,28 +199,22 @@
         </article>
       </div>
 
-      <!-- Indicadores de punto sincronizados -->
-      <div class="slider-dots-indicator" id="slider-dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+      <!-- Puntos de Indicación Sincronizados -->
+      <div id="slider-dots" class="slider-dots-indicator">
+        <span class="dot active" data-target="0"></span>
+        <span class="dot" data-target="1"></span>
+        <span class="dot" data-target="2"></span>
+        <span class="dot" data-target="3"></span>
+        <span class="dot" data-target="4"></span>
       </div>
     </section>
 
-    <!-- SECUENCIA DE PASOS DE CONFIGURACIÓN -->
+    <!-- SECUENCIA DE PASOS DE CONFIGURACIÓN (Sin tarjetas de pago públicas) -->
     <section class="glass-card-dash flow-container">
       
-      <!-- Paso 1: Configuración Limpia (Sin tarjetas de pago estorbando) -->
-      <div id="step-1" class="step-card">
-        <h3 class="section-title">Paso 1: Configuración Inicial</h3>
-        <p class="step-desc">Inicializando parámetros del sistema y sincronizando credenciales...</p>
-      </div>
-
       <!-- Paso 2: Evaluador en Meta -->
-      <div id="step-2" class="step-card hidden">
-        <h3 class="section-title">Paso 2: Evaluador en Meta</h3>
+      <div id="step-2" class="step-card">
+        <h3 class="section-title">Paso 1: Evaluador en Meta</h3>
         <p class="step-desc">Ingresa tu email / usuario para darte acceso:</p>
         <div class="input-group-flow">
           <input type="text" id="meta-user-input" placeholder="email / usuario" />
@@ -215,7 +225,7 @@
 
       <!-- Paso 3: Subir Hoja de Cálculo -->
       <div id="step-3" class="step-card hidden">
-        <h3 class="section-title">Paso 3: Hoja de Cálculo</h3>
+        <h3 class="section-title">Paso 2: Hoja de Cálculo</h3>
         <p class="step-desc">Sube tu archivo de datos (Excel / CSV)</p>
         <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
         <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Archivo</button>
@@ -223,14 +233,14 @@
 
       <!-- Paso 4: Conectar con Facebook Oficial -->
       <div id="step-4" class="step-card hidden">
-        <h3 class="section-title">Paso 4: Integración Oficial</h3>
+        <h3 class="section-title">Paso 3: Integración Oficial</h3>
         <p class="step-desc">Acepta todos los permisos para vincular la campaña.</p>
         <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Conectar con facebook oficialmente aceptando todo 🗿</button>
       </div>
 
       <!-- Paso 5: Ir al Dashboard / Subir Borrador -->
       <div id="step-5" class="step-card hidden">
-        <h3 class="section-title">Paso 5: Borrador Final</h3>
+        <h3 class="section-title">Paso 4: Borrador Final</h3>
         <p class="step-desc">Agregar Borrador con "Prueba Hora 24"</p>
         <input type="file" id="draft-file-input" class="file-input-custom" />
         <button id="btn-upload-draft" class="btn-pf-action">Listo</button>
@@ -256,7 +266,7 @@
       </div>
     </section>
 
-    <!-- CHAT WEB CON OPCIONES SELECCIONABLES Y ENVIABLES -->
+    <!-- CHAT WEB (Opciones Botón Autodisparables) -->
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -265,35 +275,25 @@
           <span id="cupos-count-badge" class="cupos-text">solo 2 cupos</span>
         </div>
       </div>
+
       <div id="chat-body" class="chat-body">
         <div class="chat-bubble incoming-simple">
           <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
         </div>
       </div>
 
-      <!-- Opciones Rápidas Seleccionables -->
+      <!-- Opciones de Botón para Selección y Envío Inmediato -->
       <div class="chat-quick-options">
-        <button type="button" class="opt-btn" id="opt-btn-1">1. Ver Planes</button>
-        <button type="button" class="opt-btn" id="opt-btn-2">2. Calibración IA</button>
-        <button type="button" class="opt-btn" id="opt-btn-3">3. Soporte 24/7</button>
-        <button type="button" class="opt-btn" id="opt-btn-4">4. Métodos de Pago</button>
+        <button type="button" class="opt-btn" id="opt-btn-1" data-value="Ver Planes">1. Ver Planes</button>
+        <button type="button" class="opt-btn" id="opt-btn-2" data-value="Calibración IA">2. Calibración IA</button>
+        <button type="button" class="opt-btn" id="opt-btn-3" data-value="Soporte 24/7">3. Soporte 24/7</button>
+        <button type="button" class="opt-btn" id="opt-btn-4" data-value="Métodos de Pago">4. Métodos de Pago</button>
       </div>
 
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
         <button id="chat-send" class="chat-send-btn" type="button">➤</button>
       </div>
-    </section>
-
-    <!-- PAGO FINAL (BOTÓN DE ACCIÓN CLEAR) -->
-    <section id="pf-card" class="glass-card-dash pf-section">
-      <h3 class="section-title">P.F (Pago Final)</h3>
-      <div class="pf-summary-list">
-        <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">$1.000</strong></div>
-        <div class="pf-row"><span>Pago después de resultados</span><strong id="price-post">$9.000</strong></div>
-        <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">$10.000</strong></div>
-      </div>
-      <button id="btn-pay-main" class="btn-pf-action" type="button">PAGAR</button>
     </section>
 
     <!-- TIMER 48H -->
@@ -304,6 +304,7 @@
     </section>
   </main>
 
+  <!-- Script Principal -->
   <script src="app.js"></script>
 </body>
 </html>
