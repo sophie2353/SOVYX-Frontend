@@ -90,14 +90,15 @@
       </div>
     </header>
 
-    <!-- PANEL ADMIN MÓDULO (Protegido por Clave) -->
+    <!-- PANEL ADMIN MÓDULO (Protegido por Clave y Zona Única de Pagos de Prueba) -->
     <section id="admin-panel" class="glass-card-dash hidden">
       <h3 class="section-title fuchsia-txt">Dashboard Mio (Admin) 👺</h3>
       <div class="admin-grid">
         <div class="admin-group">
-          <label>Módulo 3: Generar Link de Pago</label>
+          <label>Módulo 3: Generar Link / Ejecutar Pago de Prueba</label>
           <div class="admin-btns">
-            <button id="btn-admin-link-1k">$1.000 / $1</button>
+            <!-- El pago de prueba vive exclusivamente en esta sección -->
+            <button id="btn-admin-link-1k" class="btn-pf-action">$1.000 / $1 (Prueba)</button>
             <button id="btn-admin-link-9k">$9.000</button>
             <button id="btn-admin-link-5k">$5.000</button>
           </div>
@@ -185,11 +186,11 @@
     <!-- SECUENCIA DE PASOS DE CONFIGURACIÓN -->
     <section class="glass-card-dash flow-container">
       
-      <!-- Paso 1: Generación de Link de Pago -->
+      <!-- Paso 1: Estado de Activación Inicial (Pago gestionado desde Admin) -->
       <div id="step-1" class="step-card">
         <h3 class="section-title">Paso Requerido</h3>
         <p class="step-desc">Pago inicial de activación ($1.000 / $1 Prueba)</p>
-        <button id="btn-pay-step1" class="btn-pf-action">Pagar</button>
+        <p class="mint-txt" style="font-size: 0.85rem; margin-top: 8px;">Esperando verificación de transacción desde el panel de control...</p>
       </div>
 
       <!-- Paso 2: Evaluador en Meta -->
