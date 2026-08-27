@@ -3,45 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE</title>
-  <!-- Vínculo al archivo de estilos CSS separado -->
+  <title>SOVYX / SODIE</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- ========================================== -->
-  <!-- MODAL DE ACCESO / CONTRASEÑA DASHBOARD     -->
-  <!-- ========================================== -->
-  <div id="view-login-modal" class="full-screen hidden">
-    <div class="glass-card-dash login-card text-center">
-      <h2 class="brand-text margin-b"><span class="serif-s">S</span>ODIE</h2>
-      <p class="step-desc">Ingresa la clave de acceso para entrar al Dashboard:</p>
-      <div class="input-group-vertical">
-        <input type="password" id="dashboard-pass-input" placeholder="Contraseña de cliente..." />
-        <button id="btn-login-submit" class="btn-pf-action">Entrar al Dashboard</button>
-      </div>
-      <p id="login-error-msg" class="fuchsia-txt hidden margin-t">Contraseña incorrecta. Inténtalo de nuevo.</p>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- 1. SPLASH SCREEN (INTRO)                   -->
-  <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
-      <div class="logo-wrapper" id="splash-logo">
-        <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
+      <div class="logo-wrapper">
+        <h1 class="logo-title" id="splash-logo"><span class="serif-s">S</span>ODIE</h1>
       </div>
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
+        <div class="hud-pointer-line"></div>
       </div>
       <div class="cpu-liquid-box">
         <div id="capsules-track" class="capsules-track">
-          <div class="capsule"></div><div class="capsule"></div><div class="capsule"></div>
-          <div class="capsule"></div><div class="capsule"></div><div class="capsule"></div>
-          <div class="capsule"></div><div class="capsule"></div><div class="capsule"></div>
-          <div class="capsule"></div><div class="capsule"></div><div class="capsule"></div>
-          <div class="capsule"></div><div class="capsule"></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
         </div>
       </div>
       <div class="splash-gauges">
@@ -55,6 +46,7 @@
             <span id="gauge-val-1" class="gauge-val mint-txt">0%</span>
           </div>
         </div>
+        <div class="hud-center-node"></div>
         <div class="gauge-card">
           <svg class="gauge-ring" viewBox="0 0 36 36">
             <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
@@ -73,56 +65,52 @@
     </div>
   </div>
 
-  <!-- VISTA CUPOS AGOTADOS -->
   <div id="view-sold-out" class="full-screen hidden">
     <div class="glass-card-dash text-center">
       <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
-      <p class="step-desc margin-t">El acceso al software se encuentra cerrado actualmente.</p>
+      <p class="step-desc" style="margin-top: 10px;">El acceso al software se encuentra cerrado actualmente.</p>
+      <button id="btn-reopen-app" class="btn-pf-action style-btn-reopen">Reactivar Acceso</button>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN (MI DASHBOARD)           -->
-  <!-- ========================================== -->
   <main id="app-dashboard" class="dashboard-container hidden">
     <header class="dash-header">
       <div class="dash-header-left">
-        <span class="brand-text" id="dash-brand-name"><span class="serif-s">S</span>ODIE</span>
+        <span id="brand-logo-trigger" class="brand-text" title="5 clics para modo Admin"><span class="serif-s">S</span>OVYX</span>
       </div>
       <div class="dash-header-right">
         <span id="client-id-badge" class="badge-client">Cliente: #1</span>
-        <button id="btn-admin-toggle" class="btn-icon">⚙️</button>
+        <button id="btn-admin-toggle" class="btn-icon" title="Modo Admin">⚙️</button>
       </div>
     </header>
 
-    <!-- PANEL ADMIN MÓDULO (Protegido por Clave / 5 Clics) -->
     <section id="admin-panel" class="glass-card-dash hidden">
-      <h3 class="section-title fuchsia-txt">Dashboard Mio (Admin) 👺</h3>
+      <h3 class="section-title fuchsia-txt">Dashboard Mío (Admin) 👺</h3>
       <div class="admin-grid">
         <div class="admin-group">
-          <label>Módulo 3: Modo de Pago de Prueba ($1 vs $1.000)</label>
+          <label>Módulo 3: Generar Link de Pago</label>
           <div class="admin-btns">
-            <button id="btn-admin-link-1k">Activar Prueba ($1)</button>
-            <button id="btn-admin-link-9k">Reset $1.000</button>
+            <button id="btn-admin-link-1k">$1.000 / $1 (Prueba)</button>
+            <button id="btn-admin-link-9k">$9.000</button>
+            <button id="btn-admin-link-5k">$5.000</button>
           </div>
         </div>
         <div class="admin-group">
           <label>Módulo 4: Evaluador Meta</label>
-          <button id="btn-admin-approve-evaluator" class="btn-pf-action">Aprobar Evaluador</button>
+          <button id="btn-admin-approve-evaluator" class="btn-pf-action">Listo (Aprobar Cliente)</button>
         </div>
         <div class="admin-group">
           <label>Cierre General</label>
-          <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Cupos (Modo Sold Out)</button>
+          <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
         </div>
       </div>
     </section>
 
-    <!-- MÉTRICAS & CARRUSEL -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas de Campaña</h3>
+      <h3 class="section-title">Métricas</h3>
       <div class="metrics-slider">
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Activos</span><span>•••</span></div>
+          <div class="card-head"><span>Clientes Activos</span><span class="dots">•••</span></div>
           <div class="card-value">100</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -133,7 +121,7 @@
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Alcance</span><span>•••</span></div>
+          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
           <div class="card-value">15.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -144,7 +132,7 @@
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Inversión</span><span>•••</span></div>
+          <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
           <div class="card-value">40$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -155,7 +143,7 @@
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Actuales</span><span>•••</span></div>
+          <div class="card-head"><span>Clientes Actuales</span><span class="dots">•••</span></div>
           <div class="card-value">3.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -164,74 +152,84 @@
           </div>
           <div class="card-foot"><span>Retención</span><span class="mint-txt">98%</span></div>
         </article>
+
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Clientes Objetivo</span><span class="dots">•••</span></div>
+          <div class="card-value">2</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Meta</span><span class="fuchsia-txt">Pendiente</span></div>
+        </article>
+      </div>
+
+      <div class="slider-dots-indicator">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
       </div>
     </section>
 
-    <!-- PAGO REQUERIDO Y PASOS DENTRO DEL DASHBOARD -->
     <section class="glass-card-dash flow-container">
       
-      <!-- Paso 1: Pago Requerido -->
       <div id="step-1" class="step-card">
         <h3 class="section-title">Paso Requerido</h3>
-        <p class="step-desc" id="step-1-desc">Pago inicial de activación ($1.000 USD)</p>
-        <button id="btn-pay-step1" class="btn-pf-action">PAGAR AHORA</button>
+        <p class="step-desc" id="step1-desc">Pago inicial de activación ($1.000 / $1 Prueba)</p>
+        <button id="btn-pay-step1" class="btn-pf-action">Pagar</button>
       </div>
 
-      <!-- Paso 2: Evaluador en Meta -->
       <div id="step-2" class="step-card hidden">
         <h3 class="section-title">Paso 2: Evaluador en Meta</h3>
-        <p class="step-desc">Ingresa tu email / usuario de Meta Ads:</p>
+        <p class="step-desc">Ingresa tu email / usuario para darte acceso:</p>
         <div class="input-group-flow">
           <input type="text" id="meta-user-input" placeholder="email / usuario" />
-          <button id="btn-submit-evaluator" class="btn-pf-action btn-fit">Enviar</button>
+          <button id="btn-submit-evaluator" class="btn-pf-action">Enviar</button>
         </div>
-        <p id="evaluator-status-msg" class="mint-txt hidden margin-t text-sm">Esperando aprobación de acceso backend...</p>
+        <p id="evaluator-status-msg" class="mint-txt hidden style-wait-msg">esperando respuesta. Espera unos minutos.</p>
       </div>
 
-      <!-- Paso 3: Subir Hoja de Cálculo -->
       <div id="step-3" class="step-card hidden">
         <h3 class="section-title">Paso 3: Hoja de Cálculo</h3>
-        <p class="step-desc">Sube tu base de compradores (300 - 1,500 clientes en CSV/Excel)</p>
+        <p class="step-desc">Sube tu archivo de datos (Excel / CSV)</p>
         <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-        <button id="btn-upload-spreadsheet" class="btn-pf-action">Procesar Audiencia</button>
+        <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Archivo</button>
       </div>
 
-      <!-- Paso 4: Conectar con Facebook Oficial -->
       <div id="step-4" class="step-card hidden">
         <h3 class="section-title">Paso 4: Integración Oficial</h3>
         <p class="step-desc">Acepta todos los permisos para vincular la campaña.</p>
         <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Conectar con facebook oficialmente aceptando todo 🗿</button>
       </div>
 
-      <!-- Paso 5: Borrador Final -->
       <div id="step-5" class="step-card hidden">
         <h3 class="section-title">Paso 5: Borrador Final</h3>
-        <p class="step-desc">Agregar Borrador de Anuncio "Prueba Hora 24"</p>
+        <p class="step-desc">Agregar Borrador con "Prueba Hora 24"</p>
         <input type="file" id="draft-file-input" class="file-input-custom" />
-        <button id="btn-upload-draft" class="btn-pf-action">Lanzar Campaña Con SODIE</button>
+        <button id="btn-upload-draft" class="btn-pf-action">Listo</button>
       </div>
 
     </section>
 
-    <!-- TARJETA NOTIFICACIÓN 24H -->
     <section id="card-notification-24h" class="glass-card-dash hidden text-center">
       <h3 class="section-title mint-txt">Notificación Activa (24H)</h3>
-      <p class="step-desc">Envía archivo actual de data para recalibrar borrador "Hora 48".</p>
-      <button id="btn-activate-24h-notification" class="btn-pf-action">Activar Ciclo 24H</button>
-      <div id="timer-24h-display" class="timer-digits hidden margin-t text-lg">24:00:00</div>
+      <p class="step-desc">Envía archivo actual de data y crea el borrador "Hora 48".</p>
+      <button id="btn-activate-24h-notification" class="btn-pf-action">Activar</button>
+      <div id="timer-24h-display" class="timer-digits hidden" style="font-size: 2rem; margin-top: 10px;">24:00:00</div>
     </section>
 
-    <!-- TARJETA RENOVAR 30 DÍAS -->
     <section id="card-renew-30days" class="glass-card-dash hidden text-center">
       <h3 class="section-title fuchsia-txt">Tiempo agotado.</h3>
-      <p class="step-desc">¿Deseas renovar el servicio por 30 días adicionales?</p>
-      <div class="row-flex margin-t">
-        <button id="btn-renew-yes" class="btn-pf-action">Sí (Renovar)</button>
+      <p class="step-desc">¿renovar 30 días?</p>
+      <div class="row-btns-renew">
+        <button id="btn-renew-yes" class="btn-pf-action">Sí</button>
         <button id="btn-renew-no" class="btn-pf-action btn-danger">No</button>
       </div>
     </section>
 
-    <!-- CHAT WEB INTERACTIVO -->
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -242,14 +240,14 @@
       </div>
       <div id="chat-body" class="chat-body">
         <div class="chat-bubble incoming-simple">
-          Hola, ¿los costos incluyen la calibración de la IA y clonación de audiencias?
+          <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
         </div>
       </div>
       <div class="chat-quick-options">
-        <button class="opt-btn" data-msg="1. Ver Planes">1. Ver Planes</button>
-        <button class="opt-btn" data-msg="2. Calibración IA">2. Calibración IA</button>
-        <button class="opt-btn" data-msg="3. Soporte 24/7">3. Soporte 24/7</button>
-        <button class="opt-btn" data-msg="4. Métodos de Pago">4. Métodos de Pago</button>
+        <button class="opt-btn" id="opt-btn-1">1. Ver Planes</button>
+        <button class="opt-btn" id="opt-btn-2">2. Calibración IA</button>
+        <button class="opt-btn" id="opt-btn-3">3. Soporte 24/7</button>
+        <button class="opt-btn" id="opt-btn-4">4. Métodos de Pago</button>
       </div>
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
@@ -257,7 +255,6 @@
       </div>
     </section>
 
-    <!-- MÓDULO PAGO FINAL -->
     <section id="pf-card" class="glass-card-dash pf-section">
       <h3 class="section-title">P.F (Pago Final)</h3>
       <div class="pf-summary-list">
@@ -265,18 +262,16 @@
         <div class="pf-row"><span>Pago después de resultados</span><strong id="price-post">$9.000</strong></div>
         <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">$10.000</strong></div>
       </div>
-      <button id="btn-pay-main" class="btn-pf-action">PAGAR AHORA</button>
+      <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- TIMER 48H -->
     <section class="glass-card-dash timer-section">
-      <span class="timer-label">TIEMPO RESTANTE DE OPTIMIZACIÓN</span>
+      <span class="timer-label">TIEMPO RESTANTE</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
-      <span class="timer-sub">Métricas Objetivo Escaladas en 48H</span>
+      <span class="timer-sub">Métricas Objetivo en 48H</span>
     </section>
   </main>
 
-  <!-- Vínculo al script JS separado -->
   <script src="app.js"></script>
 </body>
 </html>
