@@ -764,13 +764,19 @@ function setupPostPayStepFlow() {
           }
           updateMetricsUI(state.metrics);
 
-          // 1. Mostrar las tarjetas de métricas post-lanzamiento Meta
+          // 1. Ocultar métricas estáticas iniciales para reemplazo total
+          const originalMetricsSection = document.querySelector('.metrics-section');
+          if (originalMetricsSection) {
+            originalMetricsSection.classList.add('hidden');
+          }
+
+          // 2. Mostrar las tarjetas de métricas post-lanzamiento Meta
           const liveMetricsContainer = document.getElementById('meta-live-metrics-container');
           if (liveMetricsContainer) {
             liveMetricsContainer.classList.remove('hidden');
           }
 
-          // 2. Reemplazar/ocultar la tarjeta del borrador y mostrar el temporizador del siguiente ciclo
+          // 3. Reemplazar/ocultar la tarjeta del borrador y mostrar el temporizador del siguiente ciclo
           const cardDraftSection = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
           if (cardDraftSection) {
             cardDraftSection.classList.add('hidden');
@@ -793,7 +799,7 @@ function setupPostPayStepFlow() {
         alert('Error conectando con el motor IA1 para confirmar el borrador.');
       } finally {
         btnConfirmDraft.disabled = false;
-        btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR';
+        btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR 🚀';
       }
     });
   }
