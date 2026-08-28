@@ -338,6 +338,40 @@ body {
   transform: translateY(-1px);
 }
 
+/* BOTÓN DE ACCESO BIOMÉTRICO (ADMIN) */
+.btn-admin-biometric {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 255, 204, 0.08);
+  border: 1.5px solid var(--neon-mint);
+  border-radius: 12px;
+  color: var(--neon-mint);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.2);
+  transition: all 0.25s ease;
+  margin-top: 8px;
+}
+
+.btn-admin-biometric:hover {
+  background: var(--neon-mint);
+  color: var(--bg-dark);
+  box-shadow: 0 0 20px var(--neon-mint);
+  transform: translateY(-1px);
+}
+
+.btn-admin-biometric svg, 
+.btn-admin-biometric .bio-icon-placeholder {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
 .link-input-wrapper {
   animation: fadeInDown 0.3s ease;
 }
@@ -387,6 +421,22 @@ body {
   justify-content: space-between; 
   border-radius: 18px; 
   scroll-snap-align: start;
+}
+
+/* TARJETAS DE MÉTRICAS PARA CLIENTES */
+.metrics-slider .metric-square.client-metric-card {
+  background: linear-gradient(135deg, rgba(210, 48, 255, 0.06) 0%, rgba(10, 3, 22, 0.6) 100%);
+  border: 1.5px solid rgba(210, 48, 255, 0.35);
+  border-top: 2px solid rgba(210, 48, 255, 0.7);
+  box-shadow: 
+    inset 0 1px 2px rgba(210, 48, 255, 0.3),
+    0 8px 22px rgba(0, 0, 0, 0.6);
+}
+
+.client-metric-card .gauge-val,
+.client-metric-card .metric-number {
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
 }
 
 /* PUNTOS INDICADORES DEL CARRUSEL */
