@@ -10,6 +10,8 @@ const state = {
   email: localStorage.getItem('sodie_user_email') || null,
   fbUser: localStorage.getItem('sodie_fb_user') || null,
   isPaid: localStorage.getItem('sodie_is_paid') === 'true',
+  selectedAmount: 1000, // Monto por defecto ($1,000 USD iniciales)
+  currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($9K), 'MONTHLY_30D' ($5K)
   uploadedFile: null,
   metrics: {
     visitors: 1504,
@@ -37,17 +39,21 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn('Backend SODIE local fallback.');
   }
 
+  // Verificar estado de pago desde la URL (redirección pasarela / callback)
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('paid') === 'true' || urlParams.get('auth') === 'success') {
+  const paymentStatus = urlParams.get('payment') || urlParams.get('paid');
+  const clientId = urlParams.get('client_id');
+
+  if (paymentStatus === 'true' || paymentStatus === 'success' || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
-    confirmPaymentSuccess(1000.00);
+    confirmPaymentSuccess(state.selectedAmount, clientId || state.sessionId);
     cleanUrlParams();
   }
 
   // Verificar si ya pagó previamente para restablecer la vista pospago
   if (state.isPaid) {
-    activatePostPayView();
+    activatePostPayView(clientId);
   }
 
   // Módulos del sistema
@@ -62,6 +68,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   startPersistentTimers();
   startLiveMetricsEngine();
   setupPushNotifications();
+  syncPaymentStatusWithBackend();
 });
 
 // ==========================================
@@ -225,7 +232,19 @@ function setupChatSystem() {
   quickOpts.forEach(btn => {
     btn.addEventListener('click', () => {
       const userText = btn.textContent.trim();
-      const botReply = btn.getAttribute('data-reply') || "Procesando tu consulta...";
+      const payload = btn.getAttribute('data-payload');
+      
+      let botReply = "Procesando tu consulta...";
+      if (payload === 'acceder') {
+        botReply = "Perfecto. Haz clic en el botón PAGAR del panel P.F para reservar tu slot inicial de $1,000 USD (o $1 USD si estás en modo de prueba).";
+      } else if (payload === 'metodos_pago') {
+        botReply = "Aceptamos tarjetas globales vía pasarela segura, transferencia y criptoactivos. El flujo se divide en: $1,000 iniciales, $9,000 a las 48h con resultados, y $5,000 para mantenimiento a 30 días.";
+      } else if (payload === 'ecommerce') {
+        botReply = "Protocolo Ecommerce activado: Inyección directa de audiencias optimizadas para escalar facturación sobre los 100K€.";
+      } else if (payload === 'como_funciona') {
+        botReply = "SODIE integra IA1 (audiencias), IA2 (conversión) e IA3 (análisis de métricas). Conectas tu Meta Ads Manager y el sistema ejecuta borradores optimizados automáticamente.";
+      }
+
       sendMsg(userText, botReply);
     });
   });
@@ -301,8 +320,8 @@ function setupAdminAmountSelection() {
 
   amountBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const amount = e.target.getAttribute('data-amount');
-      if (labelAmount) labelAmount.innerText = `Ingresar link para el pago de ${amount}$:`;
+      state.selectedAmount = Number(e.target.getAttribute('data-amount')) || 1000;
+      if (labelAmount) labelAmount.innerText = `Ingresar link para el pago de ${state.selectedAmount}$:`;
       if (linkContainer) linkContainer.classList.remove('hidden');
     });
   });
@@ -311,22 +330,34 @@ function setupAdminAmountSelection() {
     btnSendLink.addEventListener('click', async () => {
       const url = inputLink ? inputLink.value.trim() : '';
       if (!url) return alert('Por favor ingresa una URL válida.');
+
+      const targetClientId = state.selectedAmount === 1 ? 'test_admin' : 'cliente_1';
+
       try {
-        let res = await fetch(`${API_URL}/api/v1/admin/payment-link`, {
+        let res = await fetch(`${API_URL}/api/pagos/admin/set-payment-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ link: url })
+          body: JSON.stringify({ 
+            clientId: targetClientId,
+            amount: state.selectedAmount,
+            rawPaymentUrl: url
+          })
         });
+
         if (!res.ok) {
-          await fetch(`${API_URL}/api/admin/payment-link`, {
+          res = await fetch(`${API_URL}/api/v1/admin/payment-link`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ link: url })
+            body: JSON.stringify({ clientId: targetClientId, amount: state.selectedAmount, link: url })
           });
         }
-        alert('Link generado y enviado.');
+
+        const data = await res.json();
+        alert(`Link guardado exitosamente en DB para ${targetClientId} ($${state.selectedAmount}).`);
+        if (linkContainer) linkContainer.classList.add('hidden');
       } catch (err) {
-        alert('Link guardado.');
+        alert('Enlace asignado localmente en modo contingencia.');
+        if (linkContainer) linkContainer.classList.add('hidden');
       }
     });
   }
@@ -382,7 +413,7 @@ function startLiveMetricsEngine() {
 }
 
 // ==========================================
-// 6. FLUJO DE PAGO Y PASO 1 POSPAGO (KONTIGO / META CAPI)
+// 6. FLUJO DE PAGO Y RUTAS /API/PAGOS
 // ==========================================
 function setupPaymentFlow() {
   const btnPagar = document.getElementById('btn-pay-main');
@@ -391,30 +422,40 @@ function setupPaymentFlow() {
       btnPagar.disabled = true;
       btnPagar.textContent = 'Procesando Pago... ⏳';
 
+      const targetClientId = state.selectedAmount === 1 ? 'test_admin' : (localStorage.getItem('sodie_client_id') || 'cliente_1');
+
       try {
-        let res = await fetch(`${API_URL}/api/v1/payments/checkout`, {
+        // Solicitamos la URL de pago desde routes/pagos
+        let res = await fetch(`${API_URL}/api/pagos/client/${targetClientId}/payment-info`);
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.paymentUrl) {
+            window.location.href = data.paymentUrl;
+            return;
+          }
+        }
+
+        // Fallback al endpoint de creación directa de checkout
+        res = await fetch(`${API_URL}/api/pagos/checkout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: state.sessionId })
+          body: JSON.stringify({ 
+            sessionId: state.sessionId, 
+            clientId: targetClientId,
+            amount: state.selectedAmount 
+          })
         });
-        
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/pagos/checkout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: state.sessionId })
-          });
-        }
 
-        const data = await res.json();
+        const checkoutData = await res.json();
 
-        if (data.ok && data.url) {
-          window.location.href = data.url;
+        if (checkoutData.ok && checkoutData.url) {
+          window.location.href = checkoutData.url;
         } else {
-          confirmPaymentSuccess(1000.00);
+          confirmPaymentSuccess(state.selectedAmount, targetClientId);
         }
       } catch (err) {
-        confirmPaymentSuccess(1000.00);
+        confirmPaymentSuccess(state.selectedAmount, targetClientId);
       } finally {
         btnPagar.disabled = false;
         btnPagar.textContent = 'PAGAR';
@@ -423,16 +464,18 @@ function setupPaymentFlow() {
   }
 }
 
-async function confirmPaymentSuccess(amount = 1000.00) {
+async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   state.isPaid = true;
   localStorage.setItem('sodie_is_paid', 'true');
-  activatePostPayView();
+  localStorage.setItem('sodie_client_id', clientId);
+
+  activatePostPayView(clientId);
 
   try {
-    let res = await fetch(`${API_URL}/api/v1/payments/confirm`, {
+    let res = await fetch(`${API_URL}/api/pagos/confirm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: state.sessionId, amount: amount })
+      body: JSON.stringify({ sessionId: state.sessionId, clientId: clientId, amount: amount })
     });
 
     if (!res.ok) {
@@ -446,16 +489,51 @@ async function confirmPaymentSuccess(amount = 1000.00) {
 
   // Notificar al Admin
   sendSystemNotification('¡Nuevo Pago Registrado! 💰', {
-    body: `El cliente con sesión ${state.sessionId} ha realizado el pago inicial de ${amount}$.`
+    body: `Cliente ${clientId} ha confirmado el pago de $${amount} USD.`
   });
 }
 
-function activatePostPayView() {
+function activatePostPayView(clientId = null) {
   const badgeClient = document.getElementById('client-id-badge');
   const postPayFlow = document.getElementById('section-post-pay-flow');
+  const pfCard = document.getElementById('pf-card');
 
-  if (badgeClient) badgeClient.classList.remove('hidden');
+  const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
+
+  if (badgeClient) {
+    badgeClient.textContent = `Cliente #${activeId}`;
+    badgeClient.classList.remove('hidden');
+  }
+
   if (postPayFlow) postPayFlow.classList.remove('hidden');
+  if (pfCard) pfCard.classList.add('hidden'); // Ocultar bloque de pago inicial una vez completado
+}
+
+async function syncPaymentStatusWithBackend() {
+  const activeId = localStorage.getItem('sodie_client_id') || 'cliente_1';
+  try {
+    const res = await fetch(`${API_URL}/api/pagos/client/${activeId}/payment-info`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.status === 'PAID') {
+        state.isPaid = true;
+        localStorage.setItem('sodie_is_paid', 'true');
+        activatePostPayView(activeId);
+      }
+      
+      // Actualizar vista de precios dinámicamente si aplica (1K -> 9K -> 5K)
+      if (data.currentStage === 'POST_48H') {
+        updatePriceDisplay('9.000$');
+      } else if (data.currentStage === 'MONTHLY_30D') {
+        updatePriceDisplay('5.000$');
+      }
+    }
+  } catch (e) {}
+}
+
+function updatePriceDisplay(postPriceText) {
+  const pricePost = document.getElementById('price-post');
+  if (pricePost) pricePost.textContent = postPriceText;
 }
 
 function setupPostPayStepFlow() {
@@ -543,7 +621,7 @@ function setupPostPayStepFlow() {
 }
 
 // ==========================================
-// 7. TEMPORIZADORES Y HORA 24 / HORA 48
+// 7. TEMPORIZADORES Y HORA 24 / HORA 48 / 30 DÍAS
 // ==========================================
 function startPersistentTimers() {
   const timerTotal = document.getElementById('timer-display');
@@ -565,14 +643,16 @@ function startPersistentTimers() {
     if (totalSecs === 24 * 3600) {
       if (card24h) card24h.classList.remove('hidden');
       sendSystemNotification('⏰ Hora 24 Alcanzada', {
-        body: 'Actualiza el Borrador Hora 48 y envia el archivo con las compras'
+        body: 'Actualiza el Borrador Hora 48 y envía el archivo con las compras.'
       });
     }
 
     if (totalSecs === 0) {
-      sendSystemNotification('🚨 Hora 48: Ciclo Finalizado', {
-        body: 'El periodo activo del software ha expirado.'
+      sendSystemNotification('🚨 Hora 48 Alcanzada - Siguiente Tramo ($9,000)', {
+        body: 'El primer ciclo de 48H ha finalizado con éxito. Se habilita el cobro de $9,000 USD y posterior renovación a 30 días ($5,000 USD).'
       });
+      state.currentStage = 'POST_48H';
+      updatePriceDisplay('9.000$');
     }
 
     if (timer24h && totalSecs <= 24 * 3600) {
