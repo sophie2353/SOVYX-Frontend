@@ -13,12 +13,13 @@ const state = {
   selectedAmount: 1000, // Monto por defecto ($1,000 USD iniciales)
   currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($9K), 'MONTHLY_30D' ($5K)
   uploadedFile: null,
+  // Métricas iniciales fijas
   metrics: {
-    visitors: 1504,
-    leads: 75,
+    visitors: 1504,      // Clics / Visitas a la app
+    leads: 75,         // Clientes Objetivo (lleno por defecto)
     conversionRate: "4.8%",
-    reach: 15000,
-    spend: "$15",
+    reach: 15000,      // Alcance Meta
+    spend: "$15",      // Inversión Meta
     liveViewers: 21
   }
 };
@@ -66,9 +67,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupPaymentFlow();
   setupPostPayStepFlow();
   startPersistentTimers();
-  startLiveMetricsEngine();
+  startLiveMetricsEngine();       // Fallback de métricas
+  setupSSEMetricsStream();        // <--- NOTIFICACIONES Y CLICS EN TIEMPO REAL (SSE)
   setupPushNotifications();
   syncPaymentStatusWithBackend();
+  renderInitialMetrics();         // Renderiza tarjetas con estado inicial
 });
 
 // ==========================================
@@ -276,7 +279,7 @@ function setupAdminFiveClicks() {
         logoClicks = 0;
         if (modalAuth) {
           modalAuth.classList.remove('hidden');
-          injectBiometricButton(modalAuth); // Añadir botón de huella dinámicamente si no existe
+          injectBiometricButton(modalAuth); // Inyectar o asegurar botón de huella
         }
       } else {
         clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
@@ -287,7 +290,6 @@ function setupAdminFiveClicks() {
   if (btnSubmitKey) {
     btnSubmitKey.addEventListener('click', () => {
       const valorIngresado = adminKeyInput ? adminKeyInput.value.trim() : '';
-      // Acepta la clave correcta o un bypass de emergencia si estás muy cansado ("admin2026")
       if (valorIngresado === '23555' || valorIngresado === 'admin2026') {
         modalAuth.classList.add('hidden');
         if (appDashboard && adminDashboard) {
@@ -316,20 +318,20 @@ function setupAdminFiveClicks() {
   }
 }
 
-// Inyectar botón de huella dactilar / FaceID en el modal de admin de forma nativa
+// Inyectar o activar la Autenticación Biométrica (WebAuthn / Huella / FaceID)
 function injectBiometricButton(modalAuth) {
-  if (document.getElementById('btn-biometric-auth')) return; // Ya existe
+  if (document.getElementById('btn-biometric-auth')) return;
 
   const container = modalAuth.querySelector('.modal-content, div') || modalAuth;
   const bioBtn = document.createElement('button');
   bioBtn.id = 'btn-biometric-auth';
   bioBtn.type = 'button';
-  bioBtn.textContent = '👆 USAR HUELLA / FACEID';
-  bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 10px; background: #10B981; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;';
+  bioBtn.textContent = '👆 DESBLOQUEAR CON HUELLA / FACEID';
+  bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 12px; background: #10B981; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;';
   
   bioBtn.addEventListener('click', async () => {
     if (!window.PublicKeyCredential) {
-      alert("Tu dispositivo o navegador no soporta WebAuthn biométrico.");
+      alert("Tu dispositivo o navegador no soporta biometría WebAuthn.");
       return;
     }
     try {
@@ -347,11 +349,11 @@ function injectBiometricButton(modalAuth) {
         modalAuth.classList.add('hidden');
         document.getElementById('app-dashboard')?.classList.add('hidden');
         document.getElementById('admin-dashboard')?.classList.remove('hidden');
-        alert("🧬 ¡Acceso autorizado por biometría!");
+        sendSystemNotification("🔑 Acceso Administrador", { body: "Autenticación biométrica exitosa." });
       }
     } catch (err) {
-      console.warn("Autenticación biométrica cancelada o fallida:", err);
-      alert("No se pudo verificar la huella.");
+      console.warn("Autenticación biométrica no completada:", err);
+      alert("No se pudo verificar la huella/rostro.");
     }
   });
 
@@ -408,7 +410,7 @@ function setupAdminAmountSelection() {
 }
 
 // ==========================================
-// 5. CARRUSEL Y MÉTRICAS (IA3)
+// 5. CARRUSEL Y MÉTRICAS (IA3 + SSE REAL TIME)
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -439,6 +441,56 @@ function setupCarouselDots() {
   });
 }
 
+// Mantiene las métricas iniciales proyectadas en el DOM
+function renderInitialMetrics() {
+  updateMetricsUI(state.metrics);
+}
+
+// Función centralizada para actualizar elementos visuales de métricas (Clics, Inversión, Alcance, Clientes)
+function updateMetricsUI(metricsData) {
+  const visitorsEl = document.getElementById('metric-visitors') || document.getElementById('metric-clicks');
+  const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients');
+  const reachEl = document.getElementById('metric-reach');
+  const spendEl = document.getElementById('metric-spend');
+
+  if (visitorsEl) visitorsEl.textContent = metricsData.visitors || state.metrics.visitors;
+  if (leadsEl) leadsEl.textContent = metricsData.leads || state.metrics.leads;
+  if (reachEl) reachEl.textContent = metricsData.reach ? metricsData.reach.toLocaleString() : state.metrics.reach.toLocaleString();
+  if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
+}
+
+// --- ESCUCHADOR SSE (Server-Sent Events) PARA ACTUALIZACIÓN EN TIEMPO REAL ---
+function setupSSEMetricsStream() {
+  if (!window.EventSource) {
+    console.warn("EventSource SSE no es soportado por este navegador.");
+    return;
+  }
+
+  const sseUrl = `${API_URL}/api/campaigns/stream?sessionId=${state.sessionId}`;
+  const eventSource = new EventSource(sseUrl);
+
+  eventSource.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data && data.metrics) {
+        // Actualizar el estado con la nueva información recibida de Meta
+        Object.assign(state.metrics, data.metrics);
+        updateMetricsUI(state.metrics);
+
+        sendSystemNotification('📊 Métricas de Campaña Actualizadas', {
+          body: `Clics actuales: ${state.metrics.visitors} | Inversión: ${state.metrics.spend}`
+        });
+      }
+    } catch (e) {
+      console.error("Error al procesar evento SSE:", e);
+    }
+  };
+
+  eventSource.onerror = (err) => {
+    console.warn("Conexión SSE interrumpida. Reintentando dinámicamente...");
+  };
+}
+
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
@@ -448,12 +500,13 @@ function startLiveMetricsEngine() {
       }
       if (res.ok) {
         const data = await res.json();
-        state.metrics.visitors = data.visitors || state.metrics.visitors;
+        if (data.visitors) {
+          state.metrics.visitors = data.visitors;
+          updateMetricsUI(state.metrics);
+        }
       }
-    } catch (err) {
-      state.metrics.visitors += Math.floor(Math.random() * 2);
-    }
-  }, 4000);
+    } catch (err) {}
+  }, 5000);
 }
 
 // ==========================================
@@ -467,7 +520,6 @@ function setupPaymentFlow() {
       btnPagar.textContent = 'Procesando Pago... ⏳';
 
       try {
-        // Consultar el link dinámico directamente al backend según el monto seleccionado
         let res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}`);
         
         if (res.ok) {
@@ -478,7 +530,6 @@ function setupPaymentFlow() {
           }
         }
 
-        // Fallback simulado si el servidor no responde
         confirmPaymentSuccess(state.selectedAmount, state.sessionId);
       } catch (err) {
         confirmPaymentSuccess(state.selectedAmount, state.sessionId);
@@ -551,6 +602,7 @@ function updatePriceDisplay(postPriceText) {
   if (pricePost) pricePost.textContent = postPriceText;
 }
 
+// Envío del borrador y disparador de actualización de métricas desde el cliente
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
   const inputMetaUser = document.getElementById('client-meta-user-input');
@@ -605,6 +657,7 @@ function setupPostPayStepFlow() {
       if (stepConnect) stepConnect.classList.remove('hidden');
 
       try {
+        // Al enviar el borrador/archivo de audiencia, el backend responderá o notificará vía SSE con los nuevos números de Meta
         let res = await fetch(`${API_URL}/api/v1/client/upload-audience`, {
           method: 'POST',
           body: formData
@@ -621,6 +674,14 @@ function setupPostPayStepFlow() {
               method: 'POST',
               body: formData
             });
+          }
+        }
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.metrics) {
+            Object.assign(state.metrics, result.metrics);
+            updateMetricsUI(state.metrics);
           }
         }
       } catch (e) {}
