@@ -112,7 +112,7 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS DE RENDIMIENTO -->
+    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas</h3>
       <div class="metrics-slider" id="metrics-slider">
@@ -120,7 +120,7 @@
         <!-- Alcance -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-alcance-val">15.000</div>
+          <div class="card-value" id="metric-reach">15.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -132,7 +132,7 @@
         <!-- Inversión -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-inversion-val">40$</div>
+          <div class="card-value" id="metric-spend">40$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -144,7 +144,7 @@
         <!-- Visitas (Vistas) -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-vistas-val">1.504</div>
+          <div class="card-value" id="metric-visitors">1.504</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -156,7 +156,7 @@
         <!-- Clientes Objetivo -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Clientes</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-objetivo-val">2</div>
+          <div class="card-value" id="metric-leads">2</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -172,6 +172,29 @@
         <span class="dot"></span>
         <span class="dot"></span>
         <span class="dot"></span>
+      </div>
+    </section>
+
+    <!-- TARJETAS DE MÉTRICAS META EN VIVO (DESPLEGADAS TRAS CONFIRMAR BORRADOR) -->
+    <section id="meta-live-metrics-container" class="glass-card-dash hidden" style="margin-bottom: 20px;">
+      <h3 class="section-title mint-txt">📊 Métricas Meta Ads en Tiempo Real</h3>
+      <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+        <div class="metric-live-box glass-card-dash text-center">
+          <span class="gauge-label">Alcance Meta</span>
+          <div id="live-metric-reach" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">15,420</div>
+        </div>
+        <div class="metric-live-box glass-card-dash text-center">
+          <span class="gauge-label">Visitas</span>
+          <div id="live-metric-visitors" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">1,504</div>
+        </div>
+        <div class="metric-live-box glass-card-dash text-center">
+          <span class="gauge-label">Clientes / Leads</span>
+          <div id="live-metric-leads" class="timer-digits fuchsia-txt" style="font-size: 1.6rem; margin-top: 5px;">75</div>
+        </div>
+        <div class="metric-live-box glass-card-dash text-center">
+          <span class="gauge-label">Conversión</span>
+          <div id="live-metric-conversion" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">4.8%</div>
+        </div>
       </div>
     </section>
 
@@ -245,9 +268,15 @@
       </div>
 
       <!-- Subpaso 3: Conectar Permisos Oficiales Facebook -->
-      <div id="step-connect-meta" class="step-card hidden">
+      <div id="step-connect-meta" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>1.3. Conexión de API:</strong> Otorga los permisos oficiales para iniciar el borrador:</p>
         <button id="btn-connect-facebook-client" class="btn-pf-action btn-fb" style="margin-top: 8px; width: 100%;">Vincular Facebook Oficial 🗿</button>
+      </div>
+
+      <!-- Subpaso 4: Confirmar y Activar Borrador en Meta Ads -->
+      <div id="card-draft-section" class="step-card hidden">
+        <p class="step-desc"><strong>1.4. Inyección Final:</strong> Activa el borrador generado por IA1 directamente en Meta Ads Manager:</p>
+        <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 8px; width: 100%; background: #10B981;">CONFIRMAR Y ACTIVAR BORRADOR 🚀</button>
       </div>
     </section>
 
