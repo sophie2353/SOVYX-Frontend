@@ -3,7 +3,7 @@
 // ==========================================
 
 const API_URL = 'https://sovyx-backend.onrender.com';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', META_APP_ID: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', META_APP_ID: '', VAPID_PUBLIC_KEY: '' };
 
 const state = {
   sessionId: localStorage.getItem('sodie_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
@@ -26,7 +26,7 @@ localStorage.setItem('sodie_session_id', state.sessionId);
 // --- INICIALIZACIÓN PRINCIPAL ---
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch(`${API_URL}/api/config`);
+    const res = await fetch(`${API_URL}/api/v1/config`);
     if (res.ok) Object.assign(CONFIG, await res.json());
   } catch (err) {
     console.warn('Backend SODIE local fallback.');
@@ -40,21 +40,46 @@ window.addEventListener('DOMContentLoaded', async () => {
     cleanUrlParams();
   }
 
+  // Verificar si ya pagó previamente para restablecer la vista pospago
+  if (state.isPaid) {
+    activatePostPayView();
+  }
+
   // Módulos del sistema
   runSplashScreen();
+  setupCookieBanner();
   setupChatSystem();
   setupAdminFiveClicks();
+  setupAdminAmountSelection();
   setupCarouselDots();
   setupPaymentFlow();
-  setupFileUploader();
-  setupMetaAdsWorkflow();
-  setupRenewalFlow();
-  startPersistentTimer();
+  setupPostPayStepFlow();
+  startPersistentTimers();
   startLiveMetricsEngine();
+  setupPushNotifications();
 });
 
 // ==========================================
-// 1. SPLASH SCREEN (CARGA 100% & COLORES)
+// 1. BANNER DE COOKIES
+// ==========================================
+function setupCookieBanner() {
+  const cookieBanner = document.getElementById('cookie-banner');
+  const btnAccept = document.getElementById('btn-accept-cookies');
+
+  if (!cookieBanner || !btnAccept) return;
+
+  if (localStorage.getItem('sodie_cookies_accepted') === 'true') {
+    cookieBanner.classList.add('hidden');
+  }
+
+  btnAccept.addEventListener('click', () => {
+    localStorage.setItem('sodie_cookies_accepted', 'true');
+    cookieBanner.classList.add('hidden');
+  });
+}
+
+// ==========================================
+// 2. SPLASH SCREEN (CARGA 100% & COLORES)
 // ==========================================
 function runSplashScreen() {
   const splashPct = document.getElementById('splash-pct');
@@ -67,7 +92,6 @@ function runSplashScreen() {
   const welcomeFill = document.getElementById('welcome-fill');
   const capsulesTrack = document.getElementById('capsules-track');
 
-  // Rellenar cápsulas si están vacías
   if (capsulesTrack && capsulesTrack.children.length === 0) {
     capsulesTrack.innerHTML = '';
     for (let i = 0; i < 14; i++) {
@@ -81,26 +105,22 @@ function runSplashScreen() {
   const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 2800; // 2.8 segundos de intro
+  const totalDurationMs = 2800;
   const stepTime = totalDurationMs / 100;
 
   const interval = setInterval(() => {
     pct += 1;
 
-    // Actualizar números
     if (splashPct) splashPct.textContent = `${pct}%`;
     if (statusPct) statusPct.textContent = `${pct}%`;
     if (gaugeVal1) gaugeVal1.textContent = `${pct}%`;
     if (gaugeVal2) gaugeVal2.textContent = `${pct}%`;
 
-    // SVG Gauges
     if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${pct}, 100`);
     if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', `${pct}, 100`);
 
-    // Llenado de agua en el cartel BIENVENIDO
     if (welcomeFill) welcomeFill.style.height = `${pct}%`;
 
-    // Encender cápsulas en verde/menta y fucsia
     if (capsules.length > 0) {
       const activeCount = Math.floor((pct / 100) * capsules.length);
       capsules.forEach((cap, index) => {
@@ -116,7 +136,6 @@ function runSplashScreen() {
       });
     }
 
-    // Finalizar en 100%
     if (pct >= 100) {
       clearInterval(interval);
       setTimeout(() => {
@@ -139,12 +158,12 @@ function finishSplash() {
 }
 
 // ==========================================
-// 2. CHAT WEB INTERACTIVO & BOTONES
+// 3. CHAT WEB INTERACTIVO & BOTONES
 // ==========================================
 function setupChatSystem() {
-  const inputEl = document.querySelector('.chat-input-bar input');
-  const btnSend = document.querySelector('.chat-send-btn');
-  const chatBody = document.getElementById('chat-body') || document.querySelector('.chat-body');
+  const inputEl = document.getElementById('chat-input');
+  const btnSend = document.getElementById('chat-send');
+  const chatBody = document.getElementById('chat-body');
   const quickOpts = document.querySelectorAll('.chat-quick-options .opt-btn');
 
   if (!btnSend || !inputEl || !chatBody) return;
@@ -170,7 +189,7 @@ function setupChatSystem() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/chat`, {
+      const res = await fetch(`${API_URL}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, sessionId: state.sessionId })
@@ -189,7 +208,6 @@ function setupChatSystem() {
     if (e.key === 'Enter') sendMsg();
   });
 
-  // Conectar botones rápidos
   quickOpts.forEach(btn => {
     btn.addEventListener('click', () => {
       const userText = btn.textContent.trim();
@@ -200,13 +218,18 @@ function setupChatSystem() {
 }
 
 // ==========================================
-// 3. ACCESO ADMIN CON 5 CLICS EN LOGO
+// 4. ACCESO Y PANEL ADMINISTRADOR
 // ==========================================
 function setupAdminFiveClicks() {
   let logoClicks = 0;
   let clickTimer;
 
   const logoTriggers = document.querySelectorAll('.logo-wrapper, .brand-text');
+  const modalAuth = document.getElementById('modal-admin-auth');
+  const adminKeyInput = document.getElementById('admin-key-input');
+  const btnSubmitKey = document.getElementById('btn-submit-admin-key');
+  const btnCloseModal = document.getElementById('btn-close-admin-modal');
+
   const appDashboard = document.getElementById('app-dashboard');
   const adminDashboard = document.getElementById('admin-dashboard');
   const btnExitAdmin = document.getElementById('btn-exit-admin');
@@ -218,16 +241,32 @@ function setupAdminFiveClicks() {
 
       if (logoClicks >= 5) {
         logoClicks = 0;
-        if (appDashboard && adminDashboard) {
-          appDashboard.classList.add('hidden');
-          adminDashboard.classList.remove('hidden');
-          alert('👺 Acceso Concedido: Dashboard Admin SODIE');
-        }
+        if (modalAuth) modalAuth.classList.remove('hidden');
       } else {
         clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
       }
     });
   });
+
+  if (btnSubmitKey) {
+    btnSubmitKey.addEventListener('click', () => {
+      if (adminKeyInput && adminKeyInput.value === CONFIG.SOVYX_ADMIN_KEY) {
+        modalAuth.classList.add('hidden');
+        if (appDashboard && adminDashboard) {
+          appDashboard.classList.add('hidden');
+          adminDashboard.classList.remove('hidden');
+        }
+      } else {
+        alert('🔑 Clave incorrecta');
+      }
+    });
+  }
+
+  if (btnCloseModal) {
+    btnCloseModal.addEventListener('click', () => {
+      if (modalAuth) modalAuth.classList.add('hidden');
+    });
+  }
 
   if (btnExitAdmin) {
     btnExitAdmin.addEventListener('click', () => {
@@ -239,8 +278,41 @@ function setupAdminFiveClicks() {
   }
 }
 
+function setupAdminAmountSelection() {
+  const amountBtns = document.querySelectorAll('.btn-select-amount');
+  const linkContainer = document.getElementById('link-input-container');
+  const labelAmount = document.getElementById('selected-amount-label');
+  const btnSendLink = document.getElementById('btn-send-payment-link');
+  const inputLink = document.getElementById('payment-link-input');
+
+  amountBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const amount = e.target.getAttribute('data-amount');
+      if (labelAmount) labelAmount.innerText = `Ingresar link para el pago de ${amount}$:`;
+      if (linkContainer) linkContainer.classList.remove('hidden');
+    });
+  });
+
+  if (btnSendLink) {
+    btnSendLink.addEventListener('click', async () => {
+      const url = inputLink ? inputLink.value.trim() : '';
+      if (!url) return alert('Por favor ingresa una URL válida.');
+      try {
+        await fetch(`${API_URL}/api/v1/admin/payment-link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ link: url })
+        });
+        alert('Link generado y enviado.');
+      } catch (err) {
+        alert('Link guardado.');
+      }
+    });
+  }
+}
+
 // ==========================================
-// 4. SINCRONÍA DE CARRUSEL CON INDICADORES
+// 5. CARRUSEL Y MÉTRICAS
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -271,17 +343,13 @@ function setupCarouselDots() {
   });
 }
 
-// ==========================================
-// 5. MOTOR DE MÉTRICAS Y FLUJOS SECUNDARIOS
-// ==========================================
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/metrics`);
+      const res = await fetch(`${API_URL}/api/v1/metrics/live`);
       if (res.ok) {
         const data = await res.json();
         state.metrics.visitors = data.visitors || state.metrics.visitors;
-        state.metrics.leads = data.leads || state.metrics.leads;
       }
     } catch (err) {
       state.metrics.visitors += Math.floor(Math.random() * 2);
@@ -289,15 +357,18 @@ function startLiveMetricsEngine() {
   }, 4000);
 }
 
+// ==========================================
+// 6. FLUJO DE PAGO Y PASO 1 POSPAGO
+// ==========================================
 function setupPaymentFlow() {
-  const btnPagar = document.getElementById('btn-pay-main') || document.getElementById('btn-pagar');
+  const btnPagar = document.getElementById('btn-pay-main');
   if (btnPagar) {
     btnPagar.addEventListener('click', async () => {
       btnPagar.disabled = true;
       btnPagar.textContent = 'Procesando Pago... ⏳';
 
       try {
-        const res = await fetch(`${API_URL}/api/pago/checkout`, {
+        const res = await fetch(`${API_URL}/api/v1/payments/checkout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: state.sessionId })
@@ -308,14 +379,12 @@ function setupPaymentFlow() {
           window.location.href = data.url;
         } else {
           confirmPaymentSuccess(1000.00);
-          alert('¡Slot de cómputo reservado con éxito! 🚀');
         }
       } catch (err) {
         confirmPaymentSuccess(1000.00);
-        alert('¡Transacción completada localmente! 🚀');
       } finally {
         btnPagar.disabled = false;
-        btnPagar.textContent = 'PAGAR AHORA';
+        btnPagar.textContent = 'PAGAR';
       }
     });
   }
@@ -324,57 +393,174 @@ function setupPaymentFlow() {
 async function confirmPaymentSuccess(amount = 1000.00) {
   state.isPaid = true;
   localStorage.setItem('sodie_is_paid', 'true');
+  activatePostPayView();
+
   try {
-    await fetch(`${API_URL}/api/pago/confirmar`, {
+    await fetch(`${API_URL}/api/v1/payments/confirm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId: state.sessionId, amount: amount })
     });
   } catch (err) {}
+
+  // Notificar al Admin
+  sendSystemNotification('¡Nuevo Pago Registrado! 💰', {
+    body: `El cliente con sesión ${state.sessionId} ha realizado el pago inicial de ${amount}$.`
+  });
 }
 
-function setupFileUploader() {
-  const fileInput = document.getElementById('spreadsheet-file-input') || document.getElementById('file-upload-input');
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files[0]) state.uploadedFile = e.target.files[0];
+function activatePostPayView() {
+  const badgeClient = document.getElementById('client-id-badge');
+  const postPayFlow = document.getElementById('section-post-pay-flow');
+
+  if (badgeClient) badgeClient.classList.remove('hidden');
+  if (postPayFlow) postPayFlow.classList.remove('hidden');
+}
+
+function setupPostPayStepFlow() {
+  const btnSendEval = document.getElementById('btn-client-send-evaluator');
+  const inputMetaUser = document.getElementById('client-meta-user-input');
+  const statusEval = document.getElementById('client-evaluator-status');
+  const stepUpload = document.getElementById('step-upload-file');
+
+  const btnUploadFile = document.getElementById('btn-client-upload-file');
+  const fileInput = document.getElementById('client-file-input');
+  const statusFile = document.getElementById('client-file-status');
+  const stepConnect = document.getElementById('step-connect-meta');
+
+  const btnConnectFb = document.getElementById('btn-connect-facebook-client');
+
+  if (btnSendEval) {
+    btnSendEval.addEventListener('click', async () => {
+      const user = inputMetaUser ? inputMetaUser.value.trim() : '';
+      if (!user) return alert('Ingresa tu email o usuario.');
+
+      state.email = user;
+      localStorage.setItem('sodie_user_email', user);
+
+      if (statusEval) statusEval.classList.remove('hidden');
+      if (stepUpload) stepUpload.classList.remove('hidden');
+
+      try {
+        await fetch(`${API_URL}/api/v1/client/evaluator`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: state.sessionId, email: user })
+        });
+      } catch (e) {}
+    });
+  }
+
+  if (btnUploadFile) {
+    btnUploadFile.addEventListener('click', async () => {
+      if (!fileInput || !fileInput.files[0]) return alert('Selecciona un archivo.');
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('sessionId', state.sessionId);
+
+      if (statusFile) statusFile.classList.remove('hidden');
+      if (stepConnect) stepConnect.classList.remove('hidden');
+
+      try {
+        await fetch(`${API_URL}/api/v1/client/upload-audience`, {
+          method: 'POST',
+          body: formData
+        });
+      } catch (e) {}
+    });
+  }
+
+  if (btnConnectFb) {
+    btnConnectFb.addEventListener('click', () => {
+      alert('Redirigiendo a permisos oficiales de Meta...');
     });
   }
 }
 
-function setupMetaAdsWorkflow() {
-  const btnSubmitEval = document.getElementById('btn-submit-evaluator');
-  if (btnSubmitEval) {
-    btnSubmitEval.addEventListener('click', () => {
-      const msg = document.getElementById('evaluator-status-msg');
-      if (msg) msg.classList.remove('hidden');
-    });
-  }
-}
-
-function setupRenewalFlow() {
-  const btnRenew = document.getElementById('btn-renew-yes');
-  if (btnRenew) {
-    btnRenew.addEventListener('click', () => {
-      alert('¡Slot renovado exitosamente por 30 días!');
-    });
-  }
-}
-
-function startPersistentTimer() {
-  const timerDisplay = document.getElementById('timer-display');
-  if (!timerDisplay) return;
+// ==========================================
+// 7. TEMPORIZADORES Y HORA 24 / HORA 48
+// ==========================================
+function startPersistentTimers() {
+  const timerTotal = document.getElementById('timer-display');
+  const card24h = document.getElementById('card-timer-24h');
+  const timer24h = document.getElementById('timer-24h-display');
 
   let totalSecs = 48 * 3600;
+
   setInterval(() => {
     if (totalSecs > 0) totalSecs--;
+
     const h = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
     const m = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
     const s = String(totalSecs % 60).padStart(2, '0');
-    timerDisplay.textContent = `${h}:${m}:${s}`;
+
+    if (timerTotal) timerTotal.textContent = `${h}:${m}:${s}`;
+
+    // Lógica para desplegar aviso en Hora 24 y Hora 48
+    if (totalSecs === 24 * 3600) {
+      if (card24h) card24h.classList.remove('hidden');
+      sendSystemNotification('⏰ Hora 24 Alcanzada', {
+        body: 'Actualiza el Borrador Hora 48 y envia el archivo con las compras'
+      });
+    }
+
+    if (totalSecs === 0) {
+      sendSystemNotification('🚨 Hora 48: Ciclo Finalizado', {
+        body: 'El periodo activo del software ha expirado.'
+      });
+    }
+
+    if (timer24h && totalSecs <= 24 * 3600) {
+      timer24h.textContent = `${h}:${m}:${s}`;
+    }
   }, 1000);
 }
 
+// ==========================================
+// 8. NOTIFICACIONES PUSH Y SISTEMA
+// ==========================================
+async function setupPushNotifications() {
+  if (!('Notification' in window)) return;
+
+  if (Notification.permission === 'default') {
+    try {
+      await Notification.requestPermission();
+    } catch (e) {}
+  }
+
+  if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      if (CONFIG.VAPID_PUBLIC_KEY) {
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: CONFIG.VAPID_PUBLIC_KEY
+        });
+        await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscription: sub, sessionId: state.sessionId })
+        });
+      }
+    } catch (err) {
+      console.warn('Push registration offline or fallback mode.');
+    }
+  }
+}
+
+function sendSystemNotification(title, options = {}) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, {
+      icon: '/favicon.ico',
+      ...options
+    });
+  }
+}
+
+// ==========================================
+// UTILIDADES GENERALES
+// ==========================================
 function cleanUrlParams() {
   const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
   window.history.replaceState({ path: newUrl }, '', newUrl);
