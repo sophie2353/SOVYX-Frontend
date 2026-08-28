@@ -13,13 +13,14 @@ const state = {
   selectedAmount: 1000, // Monto por defecto ($1,000 USD iniciales)
   currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($9K), 'MONTHLY_30D' ($5K)
   uploadedFile: null,
+  elapsedHours: 0, // Horas transcurridas en la prueba
   // Métricas iniciales fijas
   metrics: {
     visitors: 1504,      // Clics / Visitas a la app
-    leads: 75,         // Clientes Objetivo (lleno por defecto)
+    leads: 75,           // Clientes Objetivo
     conversionRate: "4.8%",
-    reach: 15000,      // Alcance Meta
-    spend: "$15",      // Inversión Meta
+    reach: 15000,        // Alcance Meta
+    spend: "$15",        // Inversión Meta
     liveViewers: 21
   }
 };
@@ -40,7 +41,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn('Backend SODIE local fallback.');
   }
 
-  // Verificar estado de pago desde la URL (redirección pasarela / callback)
+  // Verificar estado de pago desde la URL
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment') || urlParams.get('paid');
   const clientId = urlParams.get('client_id');
@@ -239,13 +240,13 @@ function setupChatSystem() {
       
       let botReply = "Procesando tu consulta...";
       if (payload === 'acceder') {
-        botReply = "Perfecto. Haz clic en el botón PAGAR del panel P.F para reservar tu slot inicial de $1,000 USD (o $1 USD si estás en modo de prueba).";
+        botReply = "Perfecto. Haz clic en el botón PAGAR del panel P.F para reservar tu slot inicial de $1,000 USD.";
       } else if (payload === 'metodos_pago') {
-        botReply = "Aceptamos tarjetas globales vía pasarela segura, transferencia y criptoactivos. El flujo se divide en: $1,000 iniciales, $9,000 a las 48h con resultados, y $5,000 para mantenimiento a 30 días.";
+        botReply = "Aceptamos tarjetas globales vía pasarela segura, transferencia y criptoactivos.";
       } else if (payload === 'ecommerce') {
-        botReply = "Protocolo Ecommerce activado: Inyección directa de audiencias optimizadas para escalar facturación sobre los 100K€.";
+        botReply = "Protocolo Ecommerce activado: Inyección directa de audiencias optimizadas.";
       } else if (payload === 'como_funciona') {
-        botReply = "SODIE integra IA1 (audiencias), IA2 (conversión) e IA3 (análisis de métricas). Conectas tu Meta Ads Manager y el sistema ejecuta borradores optimizados automáticamente.";
+        botReply = "SODIE integra IA1 (audiencias), IA2 (conversión) e IA3 (análisis). Inyectamos la segmentación directamente al borrador de Meta Ads.";
       }
 
       sendMsg(userText, botReply);
@@ -254,7 +255,7 @@ function setupChatSystem() {
 }
 
 // ==========================================
-// 4. ACCESO Y PANEL ADMINISTRADOR (CON BIOMETRÍA)
+// 4. ACCESO Y PANEL ADMINISTRADOR (BIOMETRÍA)
 // ==========================================
 function setupAdminFiveClicks() {
   let logoClicks = 0;
@@ -279,7 +280,7 @@ function setupAdminFiveClicks() {
         logoClicks = 0;
         if (modalAuth) {
           modalAuth.classList.remove('hidden');
-          injectBiometricButton(modalAuth); // Inyectar o asegurar botón de huella
+          injectBiometricButton(modalAuth);
         }
       } else {
         clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
@@ -318,7 +319,6 @@ function setupAdminFiveClicks() {
   }
 }
 
-// Inyectar o activar la Autenticación Biométrica (WebAuthn / Huella / FaceID)
 function injectBiometricButton(modalAuth) {
   if (document.getElementById('btn-biometric-auth')) return;
 
@@ -384,10 +384,7 @@ function setupAdminAmountSelection() {
         let res = await fetch(`${API_URL}/api/pagos/admin/set-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            amount: state.selectedAmount,
-            paymentUrl: url
-          })
+          body: JSON.stringify({ amount: state.selectedAmount, paymentUrl: url })
         });
 
         if (!res.ok) {
@@ -398,7 +395,6 @@ function setupAdminAmountSelection() {
           });
         }
 
-        const data = await res.json();
         alert(`Link guardado exitosamente para el monto de $${state.selectedAmount}.`);
         if (linkContainer) linkContainer.classList.add('hidden');
       } catch (err) {
@@ -441,12 +437,10 @@ function setupCarouselDots() {
   });
 }
 
-// Mantiene las métricas iniciales proyectadas en el DOM
 function renderInitialMetrics() {
   updateMetricsUI(state.metrics);
 }
 
-// Función centralizada para actualizar elementos visuales de métricas (Clics, Inversión, Alcance, Clientes)
 function updateMetricsUI(metricsData) {
   const visitorsEl = document.getElementById('metric-visitors') || document.getElementById('metric-clicks');
   const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients');
@@ -459,7 +453,7 @@ function updateMetricsUI(metricsData) {
   if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
 }
 
-// --- ESCUCHADOR SSE (Server-Sent Events) PARA ACTUALIZACIÓN EN TIEMPO REAL ---
+// --- ESCUCHADOR SSE PARA ACTUALIZACIÓN EN TIEMPO REAL DESDE METASERVICE ---
 function setupSSEMetricsStream() {
   if (!window.EventSource) {
     console.warn("EventSource SSE no es soportado por este navegador.");
@@ -473,12 +467,11 @@ function setupSSEMetricsStream() {
     try {
       const data = JSON.parse(event.data);
       if (data && data.metrics) {
-        // Actualizar el estado con la nueva información recibida de Meta
         Object.assign(state.metrics, data.metrics);
         updateMetricsUI(state.metrics);
 
-        sendSystemNotification('📊 Métricas de Campaña Actualizadas', {
-          body: `Clics actuales: ${state.metrics.visitors} | Inversión: ${state.metrics.spend}`
+        sendSystemNotification('📊 Métricas de Meta Ads En Vivo', {
+          body: `Visitas: ${state.metrics.visitors} | Alcance: ${state.metrics.reach} | Inversión: ${state.metrics.spend}`
         });
       }
     } catch (e) {
@@ -486,7 +479,7 @@ function setupSSEMetricsStream() {
     }
   };
 
-  eventSource.onerror = (err) => {
+  eventSource.onerror = () => {
     console.warn("Conexión SSE interrumpida. Reintentando dinámicamente...");
   };
 }
@@ -495,9 +488,8 @@ function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
       let res = await fetch(`${API_URL}/api/v1/metrics/live`);
-      if (!res.ok) {
-        res = await fetch(`${API_URL}/api/ia3/live`);
-      }
+      if (!res.ok) res = await fetch(`${API_URL}/api/ia3/live`);
+      
       if (res.ok) {
         const data = await res.json();
         if (data.visitors) {
@@ -521,7 +513,6 @@ function setupPaymentFlow() {
 
       try {
         let res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}`);
-        
         if (res.ok) {
           const data = await res.json();
           if (data.paymentUrl) {
@@ -529,7 +520,6 @@ function setupPaymentFlow() {
             return;
           }
         }
-
         confirmPaymentSuccess(state.selectedAmount, state.sessionId);
       } catch (err) {
         confirmPaymentSuccess(state.selectedAmount, state.sessionId);
@@ -589,10 +579,8 @@ async function syncPaymentStatusWithBackend() {
   const activeId = localStorage.getItem('sodie_client_id') || 'cliente_1';
   try {
     const res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}`);
-    if (res.ok) {
-      if (state.isPaid) {
-        activatePostPayView(activeId);
-      }
+    if (res.ok && state.isPaid) {
+      activatePostPayView(activeId);
     }
   } catch (e) {}
 }
@@ -602,7 +590,9 @@ function updatePriceDisplay(postPriceText) {
   if (pricePost) pricePost.textContent = postPriceText;
 }
 
-// Envío del borrador y disparador de actualización de métricas desde el cliente
+// ==========================================
+// 6.B INYECCIÓN Y ACTIVACIÓN VÍA METASERVICE (NUEVA DATA + CONFIRMACIÓN BORRADOR) 👺💅🏽
+// ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
   const inputMetaUser = document.getElementById('client-meta-user-input');
@@ -615,7 +605,9 @@ function setupPostPayStepFlow() {
   const stepConnect = document.getElementById('step-connect-meta');
 
   const btnConnectFb = document.getElementById('btn-connect-facebook-client');
+  const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
 
+  // Paso 1: Evaluador Meta User / Email
   if (btnSendEval) {
     btnSendEval.addEventListener('click', async () => {
       const user = inputMetaUser ? inputMetaUser.value.trim() : '';
@@ -645,53 +637,96 @@ function setupPostPayStepFlow() {
     });
   }
 
+  // Paso 2: Subida de nueva data CSV (Generalizada por la IA1 y guardada en Mongo Audiencia)
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
-      if (!fileInput || !fileInput.files[0]) return alert('Selecciona un archivo.');
+      if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo CSV.');
 
+      const file = fileInput.files[0];
       const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
+      formData.append('file', file);
       formData.append('sessionId', state.sessionId);
 
-      if (statusFile) statusFile.classList.remove('hidden');
-      if (stepConnect) stepConnect.classList.remove('hidden');
+      if (statusFile) {
+        statusFile.textContent = 'Procesando masivo CSV con IA1... ⏳';
+        statusFile.classList.remove('hidden');
+      }
 
       try {
-        // Al enviar el borrador/archivo de audiencia, el backend responderá o notificará vía SSE con los nuevos números de Meta
-        let res = await fetch(`${API_URL}/api/v1/client/upload-audience`, {
+        let res = await fetch(`${API_URL}/api/upload-csv`, {
           method: 'POST',
           body: formData
         });
 
         if (!res.ok) {
-          res = await fetch(`${API_URL}/api/upload`, {
+          res = await fetch(`${API_URL}/api/v1/client/upload-audience`, {
             method: 'POST',
             body: formData
           });
-
-          if (!res.ok) {
-            await fetch(`${API_URL}/api/ia1/upload`, {
-              method: 'POST',
-              body: formData
-            });
-          }
         }
 
-        if (res.ok) {
-          const result = await res.json();
-          if (result.metrics) {
-            Object.assign(state.metrics, result.metrics);
-            updateMetricsUI(state.metrics);
-          }
+        const data = await res.json();
+        if (data.ok || data.success) {
+          if (statusFile) statusFile.textContent = '✅ Audiencia generalizada y guardada en BD. Conecta Meta y confirma el borrador.';
+          if (stepConnect) stepConnect.classList.remove('hidden');
+          alert('Data masiva procesada por IA1. Ya puedes activar el borrador.');
+        } else {
+          alert(`Aviso: ${data.error || 'Ocurrió un error al procesar la data.'}`);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Error al subir CSV:', e);
+        alert('Error de red al subir el archivo CSV.');
+      }
     });
   }
 
+  // Paso 3: Conectar Facebook / Meta Ads
   if (btnConnectFb) {
     btnConnectFb.addEventListener('click', () => {
-      alert('Redirigiendo a permisos oficiales de Meta...');
+      alert('Redirigiendo a permisos oficiales de Meta Ads Manager...');
       window.location.href = `${API_URL}/api/auth/facebook`;
+    });
+  }
+
+  // 🔥 Paso 4: CONFIRMAR EXISTENCIA E INYECTAR BORRADOR EN METASERVICE 👺💅🏽
+  if (btnConfirmDraft) {
+    btnConfirmDraft.addEventListener('click', async () => {
+      btnConfirmDraft.disabled = true;
+      btnConfirmDraft.textContent = 'Inyectando audiencia y activando en Meta... 🚀';
+
+      // Determinación automática del borrador según el tramo de tiempo
+      const targetDraftName = state.elapsedHours >= 24 ? 'Prueba hora 48' : 'Prueba hora 24';
+
+      try {
+        const res = await fetch(`${API_URL}/api/ia1/confirmar-borrador`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: state.sessionId,
+            nombreBorrador: targetDraftName,
+            token: localStorage.getItem('sodie_fb_token') || '',
+            adAccountId: localStorage.getItem('sodie_ad_account') || ''
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`¡Borrador "${targetDraftName}" confirmado, inyectado y activado exitosamente en Meta Ads!`);
+          if (data.result && data.result.metrics) {
+            Object.assign(state.metrics, data.result.metrics);
+            updateMetricsUI(state.metrics);
+          }
+        } else {
+          alert(`Aviso: ${data.message || data.error || 'No se pudo activar el borrador.'}`);
+        }
+      } catch (err) {
+        console.error('Error confirmando borrador:', err);
+        alert('Error conectando con metaService para confirmar el borrador.');
+      } finally {
+        btnConfirmDraft.disabled = false;
+        btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR';
+      }
     });
   }
 }
@@ -709,6 +744,9 @@ function startPersistentTimers() {
   setInterval(() => {
     if (totalSecs > 0) totalSecs--;
 
+    const totalHoursElapsed = Math.floor((48 * 3600 - totalSecs) / 3600);
+    state.elapsedHours = totalHoursElapsed; // Actualizar horas transcurridas en el estado
+
     const h = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
     const m = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
     const s = String(totalSecs % 60).padStart(2, '0');
@@ -718,13 +756,13 @@ function startPersistentTimers() {
     if (totalSecs === 24 * 3600) {
       if (card24h) card24h.classList.remove('hidden');
       sendSystemNotification('⏰ Hora 24 Alcanzada', {
-        body: 'Actualiza el Borrador Hora 48 y envía el archivo con las compras.'
+        body: 'Actualiza a "Prueba hora 48" y envía la nueva data de compras.'
       });
     }
 
     if (totalSecs === 0) {
       sendSystemNotification('🚨 Hora 48 Alcanzada - Siguiente Tramo ($9,000)', {
-        body: 'El primer ciclo de 48H ha finalizado con éxito. Se habilita el cobro de $9,000 USD y posterior renovación a 30 días ($5,000 USD).'
+        body: 'El primer ciclo de 48H ha finalizado con éxito. Se habilita el cobro de $9,000 USD.'
       });
       state.currentStage = 'POST_48H';
       updatePriceDisplay('9.000$');
