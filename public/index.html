@@ -77,12 +77,28 @@
   </div>
 
   <!-- ========================================== -->
+  <!-- MODAL INGRESO CLAVE ADMIN                  -->
+  <!-- ========================================== -->
+  <div id="modal-admin-auth" class="modal-overlay hidden">
+    <div class="glass-card-dash modal-auth-box">
+      <h3 class="section-title fuchsia-txt">Acceso Administrador 👺</h3>
+      <p class="step-desc" style="margin-bottom: 12px;">Ingresar clave para acceder al panel:</p>
+      <div class="input-group-flow">
+        <input type="password" id="admin-key-input" placeholder="Clave de acceso..." />
+        <button id="btn-submit-admin-key" class="btn-pf-action">Entrar</button>
+      </div>
+      <button id="btn-close-admin-modal" class="btn-pf-action btn-danger" style="margin-top: 10px; width: 100%;">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- 2. DASHBOARD MAIN                          -->
   <!-- ========================================== -->
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
         <span class="brand-text">SODIE</span>
+        <span id="client-id-badge" class="badge-client" style="margin-left: 10px; font-weight: bold; color: #00ffcc;">ID: Cliente#1</span>
       </div>
       <div class="dash-header-right">
         <button id="btn-menu" class="btn-icon">
@@ -98,12 +114,12 @@
     <!-- MÉTRICAS DE RENDIMIENTO -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
-      <div class="metrics-slider">
+      <div class="metrics-slider" id="metrics-slider">
         
         <!-- Alcance -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
-          <div class="card-value">15.000</div>
+          <div class="card-value" id="metric-alcance-val">15.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -115,7 +131,7 @@
         <!-- Inversión -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
-          <div class="card-value">40$</div>
+          <div class="card-value" id="metric-inversion-val">40$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -124,10 +140,10 @@
           <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
         </article>
 
-        <!-- Vistas -->
+        <!-- Visitas (Vistas) -->
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Vistas</span><span class="dots">•••</span></div>
-          <div class="card-value">1.504</div>
+          <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-vistas-val">1.504</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -136,22 +152,10 @@
           <div class="card-foot"><span>Estado</span><span class="mint-txt">Activo</span></div>
         </article>
 
-        <!-- Activos -->
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
-          <div class="card-value">100</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,40 Q50,20 100,10 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Retención</span><span class="mint-txt">98%</span></div>
-        </article>
-
         <!-- Clientes Objetivo -->
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes Objetivo</span><span class="dots">•••</span></div>
-          <div class="card-value">2</div>
+          <div class="card-head"><span>Clientes</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-objetivo-val">2</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -162,12 +166,24 @@
 
       </div>
 
-      <div class="slider-dots-indicator">
+      <div class="slider-dots-indicator" id="slider-dots">
         <span class="dot active"></span>
         <span class="dot"></span>
         <span class="dot"></span>
         <span class="dot"></span>
-        <span class="dot"></span>
+      </div>
+    </section>
+
+    <!-- SECUENCIA Y EVALUADOR CLIENTE -->
+    <section class="glass-card-dash flow-container" style="margin-bottom: 20px;">
+      <div id="step-evaluator-client" class="step-card">
+        <h3 class="section-title">Evaluador en Meta</h3>
+        <p class="step-desc">Ingresa tu email o usuario para gestionar el acceso:</p>
+        <div class="input-group-flow" style="margin-top: 10px;">
+          <input type="text" id="client-meta-user-input" placeholder="email / usuario" />
+          <button id="btn-client-send-evaluator" class="btn-pf-action">Enviar</button>
+        </div>
+        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Enviado correctamente. Esperando aprobación...</p>
       </div>
     </section>
 
@@ -182,13 +198,14 @@
       </div>
       <div id="chat-body" class="chat-body">
         <div class="incoming-simple">
-          <p>Hola, ¿los costos incluyen la calibración de la IA?</p>
+          <p>SODIE es un software que automatiza la segmentación clonando la lista de compradores de tus infoproductos y aumentando el ROAS en 24 horas. Donde lo actualizas cada vez que llega la hora 24</p>
         </div>
       </div>
       <div class="chat-quick-options">
-        <button class="opt-btn" id="opt-btn-1" data-reply="Nuestros planes se adaptan al volumen de cómputo que requiera tu campaña.">1. Ver Planes</button>
-        <button class="opt-btn" id="opt-btn-2" data-reply="Sí, la calibración espejo está incluida dentro del nodo asignado.">2. Calibración IA</button>
-        <button class="opt-btn" id="opt-btn-3" data-reply="El soporte opera las 24 horas del día de manera automatizada.">3. Soporte 24/7</button>
+        <button class="opt-btn" id="opt-btn-1" data-reply="Para realizar la gestión debes sincronizar la base de datos de tus compradores y configurar la actualización automática cada 24 horas.">¿Que gestión debo hacer?</button>
+        <button class="opt-btn" id="opt-btn-2" data-reply="Aceptamos tarjetas de crédito, débito, transferencias y pasarelas de pago automatizadas.">Métodos de Pago</button>
+        <button class="opt-btn" id="opt-btn-3" data-reply="Debes ingresar la lista de compradores de tus infoproductos y los datos de la cuenta de anuncios.">¿Que datos debo ingresar?</button>
+        <button class="opt-btn" id="opt-btn-4" data-reply="Es compatible con plataformas Ecommerce e Infoproductos integrando tu CRM o base de datos.">Ecommerce</button>
       </div>
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
@@ -207,10 +224,17 @@
       <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- TEMPORIZADOR 48H -->
+    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H) -->
+    <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
+      <h3 class="section-title mint-txt">Tiempo Hora 48</h3>
+      <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
+      <span class="timer-sub">Tiempo para siguiente borrador</span>
+    </section>
+
+    <!-- TEMPORIZADOR TIEMPO TOTAL (48H) -->
     <section class="glass-card-dash timer-section">
-      <span class="timer-label">TIEMPO RESTANTE</span>
-      <div id="timer-display" class="timer-digits">47:59:44</div>
+      <span class="timer-label">TIEMPO TOTAL</span>
+      <div id="timer-display" class="timer-digits">48:00:00</div>
       <span class="timer-sub">TIEMPO CON SOFTWARE ACTIVO</span>
     </section>
   </main>
@@ -242,7 +266,7 @@
             <button class="btn-select-amount" data-amount="5000">5.000$</button>
           </div>
           
-          <!-- Contenedor dinámico de asignación de link -->
+          <!-- Contenedor dinámico desplegable al presionar un monto -->
           <div id="link-input-container" class="link-input-wrapper hidden" style="margin-top: 10px;">
             <label id="selected-amount-label">Ingresar link para el pago:</label>
             <div class="input-group-flow">
@@ -252,11 +276,12 @@
           </div>
         </div>
 
-        <!-- Evaluador Meta -->
+        <!-- Evaluador Meta Admin -->
         <div class="admin-group">
-          <label>Evaluador en Meta</label>
+          <label>Evaluador en Meta (Datos recibidos)</label>
           <div class="input-group-flow" style="margin-bottom: 6px;">
-            <input type="text" id="meta-user-input" placeholder="email / usuario" />
+            <input type="text" id="admin-meta-user-display" placeholder="Esperando datos del cliente..." readonly />
+            <button id="btn-copy-client-data" class="btn-pf-action">Copiar</button>
           </div>
           <button id="btn-admin-approve-evaluator" class="btn-pf-action">Aprobar Cliente</button>
         </div>
@@ -274,11 +299,10 @@
           <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Vincular Facebook Oficial 🗿</button>
         </div>
 
-        <!-- Borrador Final -->
+        <!-- Borrador Final (Solo botón Listo) -->
         <div class="admin-group">
           <label>Borrador Final ("Prueba Hora 24")</label>
-          <input type="file" id="draft-file-input" class="file-input-custom" />
-          <button id="btn-upload-draft" class="btn-pf-action">Guardar Borrador</button>
+          <button id="btn-draft-ready" class="btn-pf-action">Listo</button>
         </div>
 
         <!-- Cierre General -->
@@ -290,6 +314,18 @@
       </div>
     </section>
   </main>
+
+  <!-- ========================================== -->
+  <!-- 4. BANNER DE COOKIES                       -->
+  <!-- ========================================== -->
+  <div id="cookie-banner" class="glass-card-dash cookie-banner-box">
+    <p class="step-desc">
+      Utilizamos cookies para optimizar la experiencia en SODIE y procesar las métricas en tiempo real.
+    </p>
+    <button id="btn-accept-cookies" class="btn-pf-action" style="margin-top: 8px; width: 100%;">
+      Aceptar
+    </button>
+  </div>
 
   <script src="app.js"></script>
 </body>
