@@ -27,7 +27,12 @@ localStorage.setItem('sodie_session_id', state.sessionId);
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch(`${API_URL}/api/v1/config`);
-    if (res.ok) Object.assign(CONFIG, await res.json());
+    if (res.ok) {
+      Object.assign(CONFIG, await res.json());
+    } else {
+      const resFallback = await fetch(`${API_URL}/api/config`);
+      if (resFallback.ok) Object.assign(CONFIG, await resFallback.json());
+    }
   } catch (err) {
     console.warn('Backend SODIE local fallback.');
   }
@@ -158,7 +163,7 @@ function finishSplash() {
 }
 
 // ==========================================
-// 3. CHAT WEB INTERACTIVO & BOTONES
+// 3. CHAT WEB INTERACTIVO & BOTONES (IA2)
 // ==========================================
 function setupChatSystem() {
   const inputEl = document.getElementById('chat-input');
@@ -189,11 +194,20 @@ function setupChatSystem() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/v1/chat/message`, {
+      let res = await fetch(`${API_URL}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, sessionId: state.sessionId })
       });
+
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, sessionId: state.sessionId })
+        });
+      }
+
       const data = await res.json();
       appendMsg(data.reply || 'Sistema SODIE: Solicitud recibida. Calibrando parámetros.', false);
     } catch (err) {
@@ -298,11 +312,18 @@ function setupAdminAmountSelection() {
       const url = inputLink ? inputLink.value.trim() : '';
       if (!url) return alert('Por favor ingresa una URL válida.');
       try {
-        await fetch(`${API_URL}/api/v1/admin/payment-link`, {
+        let res = await fetch(`${API_URL}/api/v1/admin/payment-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ link: url })
         });
+        if (!res.ok) {
+          await fetch(`${API_URL}/api/admin/payment-link`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ link: url })
+          });
+        }
         alert('Link generado y enviado.');
       } catch (err) {
         alert('Link guardado.');
@@ -312,7 +333,7 @@ function setupAdminAmountSelection() {
 }
 
 // ==========================================
-// 5. CARRUSEL Y MÉTRICAS
+// 5. CARRUSEL Y MÉTRICAS (IA3)
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -346,7 +367,10 @@ function setupCarouselDots() {
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/v1/metrics/live`);
+      let res = await fetch(`${API_URL}/api/v1/metrics/live`);
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/api/ia3/live`);
+      }
       if (res.ok) {
         const data = await res.json();
         state.metrics.visitors = data.visitors || state.metrics.visitors;
@@ -358,7 +382,7 @@ function startLiveMetricsEngine() {
 }
 
 // ==========================================
-// 6. FLUJO DE PAGO Y PASO 1 POSPAGO
+// 6. FLUJO DE PAGO Y PASO 1 POSPAGO (KONTIGO / META CAPI)
 // ==========================================
 function setupPaymentFlow() {
   const btnPagar = document.getElementById('btn-pay-main');
@@ -368,11 +392,20 @@ function setupPaymentFlow() {
       btnPagar.textContent = 'Procesando Pago... ⏳';
 
       try {
-        const res = await fetch(`${API_URL}/api/v1/payments/checkout`, {
+        let res = await fetch(`${API_URL}/api/v1/payments/checkout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: state.sessionId })
         });
+        
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/pagos/checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: state.sessionId })
+          });
+        }
+
         const data = await res.json();
 
         if (data.ok && data.url) {
@@ -396,11 +429,19 @@ async function confirmPaymentSuccess(amount = 1000.00) {
   activatePostPayView();
 
   try {
-    await fetch(`${API_URL}/api/v1/payments/confirm`, {
+    let res = await fetch(`${API_URL}/api/v1/payments/confirm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId: state.sessionId, amount: amount })
     });
+
+    if (!res.ok) {
+      await fetch(`${API_URL}/api/webhooks/kontigo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: state.sessionId, amount: amount, event: 'PAYMENT_CONFIRMED' })
+      });
+    }
   } catch (err) {}
 
   // Notificar al Admin
@@ -442,11 +483,19 @@ function setupPostPayStepFlow() {
       if (stepUpload) stepUpload.classList.remove('hidden');
 
       try {
-        await fetch(`${API_URL}/api/v1/client/evaluator`, {
+        let res = await fetch(`${API_URL}/api/v1/client/evaluator`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: state.sessionId, email: user })
         });
+
+        if (!res.ok) {
+          await fetch(`${API_URL}/api/onboarding/evaluator`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: state.sessionId, email: user })
+          });
+        }
       } catch (e) {}
     });
   }
@@ -463,10 +512,24 @@ function setupPostPayStepFlow() {
       if (stepConnect) stepConnect.classList.remove('hidden');
 
       try {
-        await fetch(`${API_URL}/api/v1/client/upload-audience`, {
+        let res = await fetch(`${API_URL}/api/v1/client/upload-audience`, {
           method: 'POST',
           body: formData
         });
+
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/upload`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!res.ok) {
+            await fetch(`${API_URL}/api/ia1/upload`, {
+              method: 'POST',
+              body: formData
+            });
+          }
+        }
       } catch (e) {}
     });
   }
@@ -474,6 +537,7 @@ function setupPostPayStepFlow() {
   if (btnConnectFb) {
     btnConnectFb.addEventListener('click', () => {
       alert('Redirigiendo a permisos oficiales de Meta...');
+      window.location.href = `${API_URL}/api/auth/facebook`;
     });
   }
 }
@@ -537,11 +601,20 @@ async function setupPushNotifications() {
           userVisibleOnly: true,
           applicationServerKey: CONFIG.VAPID_PUBLIC_KEY
         });
-        await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
+        
+        let res = await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ subscription: sub, sessionId: state.sessionId })
         });
+
+        if (!res.ok) {
+          await fetch(`${API_URL}/api/notifications/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription: sub, sessionId: state.sessionId })
+          });
+        }
       }
     } catch (err) {
       console.warn('Push registration offline or fallback mode.');
