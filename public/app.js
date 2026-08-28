@@ -2,7 +2,7 @@
 // SODIE Core OS - Application Logic (app.js)
 // ==========================================
 
-const API_URL = 'https://sovyx-backend.onrender.com';
+const API_URL = 'https://api.sodie.app';
 const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '23555', META_APP_ID: '', VAPID_PUBLIC_KEY: '' };
 
 const state = {
