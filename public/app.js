@@ -3,7 +3,7 @@
 // ==========================================
 
 const API_URL = 'https://sovyx-backend.onrender.com';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', META_APP_ID: '', VAPID_PUBLIC_KEY: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '23555', META_APP_ID: '', VAPID_PUBLIC_KEY: '' };
 
 const state = {
   sessionId: localStorage.getItem('sodie_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
