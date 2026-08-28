@@ -251,7 +251,7 @@ function setupChatSystem() {
 }
 
 // ==========================================
-// 4. ACCESO Y PANEL ADMINISTRADOR
+// 4. ACCESO Y PANEL ADMINISTRADOR (CON BIOMETRÍA)
 // ==========================================
 function setupAdminFiveClicks() {
   let logoClicks = 0;
@@ -274,7 +274,10 @@ function setupAdminFiveClicks() {
 
       if (logoClicks >= 5) {
         logoClicks = 0;
-        if (modalAuth) modalAuth.classList.remove('hidden');
+        if (modalAuth) {
+          modalAuth.classList.remove('hidden');
+          injectBiometricButton(modalAuth); // Añadir botón de huella dinámicamente si no existe
+        }
       } else {
         clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
       }
@@ -311,6 +314,48 @@ function setupAdminFiveClicks() {
   }
 }
 
+// Inyectar botón de huella dactilar / FaceID en el modal de admin de forma nativa
+function injectBiometricButton(modalAuth) {
+  if (document.getElementById('btn-biometric-auth')) return; // Ya existe
+
+  const container = modalAuth.querySelector('.modal-content, div') || modalAuth;
+  const bioBtn = document.createElement('button');
+  bioBtn.id = 'btn-biometric-auth';
+  bioBtn.type = 'button';
+  bioBtn.textContent = '👆 USAR HUELLA / FACEID';
+  bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 10px; background: #10B981; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;';
+  
+  bioBtn.addEventListener('click', async () => {
+    if (!window.PublicKeyCredential) {
+      alert("Tu dispositivo o navegador no soporta WebAuthn biométrico.");
+      return;
+    }
+    try {
+      const challenge = new Uint8Array([21, 31, 105, 78, 18, 45, 66, 32]);
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: challenge,
+          timeout: 60000,
+          userVerification: "required",
+          rpId: window.location.hostname,
+        }
+      });
+
+      if (assertion) {
+        modalAuth.classList.add('hidden');
+        document.getElementById('app-dashboard')?.classList.add('hidden');
+        document.getElementById('admin-dashboard')?.classList.remove('hidden');
+        alert("🧬 ¡Acceso autorizado por biometría!");
+      }
+    } catch (err) {
+      console.warn("Autenticación biométrica cancelada o fallida:", err);
+      alert("No se pudo verificar la huella.");
+    }
+  });
+
+  container.appendChild(bioBtn);
+}
+
 function setupAdminAmountSelection() {
   const amountBtns = document.querySelectorAll('.btn-select-amount');
   const linkContainer = document.getElementById('link-input-container');
@@ -331,16 +376,13 @@ function setupAdminAmountSelection() {
       const url = inputLink ? inputLink.value.trim() : '';
       if (!url) return alert('Por favor ingresa una URL válida.');
 
-      const targetClientId = state.selectedAmount === 1 ? 'test_admin' : 'cliente_1';
-
       try {
-        let res = await fetch(`${API_URL}/api/pagos/admin/set-payment-link`, {
+        let res = await fetch(`${API_URL}/api/pagos/admin/set-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            clientId: targetClientId,
             amount: state.selectedAmount,
-            rawPaymentUrl: url
+            paymentUrl: url
           })
         });
 
@@ -348,12 +390,12 @@ function setupAdminAmountSelection() {
           res = await fetch(`${API_URL}/api/v1/admin/payment-link`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ clientId: targetClientId, amount: state.selectedAmount, link: url })
+            body: JSON.stringify({ amount: state.selectedAmount, paymentUrl: url })
           });
         }
 
         const data = await res.json();
-        alert(`Link guardado exitosamente en DB para ${targetClientId} ($${state.selectedAmount}).`);
+        alert(`Link guardado exitosamente para el monto de $${state.selectedAmount}.`);
         if (linkContainer) linkContainer.classList.add('hidden');
       } catch (err) {
         alert('Enlace asignado localmente en modo contingencia.');
@@ -413,7 +455,7 @@ function startLiveMetricsEngine() {
 }
 
 // ==========================================
-// 6. FLUJO DE PAGO Y RUTAS /API/PAGOS
+// 6. FLUJO DE PAGO DINÁMICO (/API/PAGOS)
 // ==========================================
 function setupPaymentFlow() {
   const btnPagar = document.getElementById('btn-pay-main');
@@ -422,11 +464,9 @@ function setupPaymentFlow() {
       btnPagar.disabled = true;
       btnPagar.textContent = 'Procesando Pago... ⏳';
 
-      const targetClientId = state.selectedAmount === 1 ? 'test_admin' : (localStorage.getItem('sodie_client_id') || 'cliente_1');
-
       try {
-        // Solicitamos la URL de pago desde routes/pagos
-        let res = await fetch(`${API_URL}/api/pagos/client/${targetClientId}/payment-info`);
+        // Consultar el link dinámico directamente al backend según el monto seleccionado
+        let res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}`);
         
         if (res.ok) {
           const data = await res.json();
@@ -436,26 +476,10 @@ function setupPaymentFlow() {
           }
         }
 
-        // Fallback al endpoint de creación directa de checkout
-        res = await fetch(`${API_URL}/api/pagos/checkout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            sessionId: state.sessionId, 
-            clientId: targetClientId,
-            amount: state.selectedAmount 
-          })
-        });
-
-        const checkoutData = await res.json();
-
-        if (checkoutData.ok && checkoutData.url) {
-          window.location.href = checkoutData.url;
-        } else {
-          confirmPaymentSuccess(state.selectedAmount, targetClientId);
-        }
+        // Fallback simulado si el servidor no responde
+        confirmPaymentSuccess(state.selectedAmount, state.sessionId);
       } catch (err) {
-        confirmPaymentSuccess(state.selectedAmount, targetClientId);
+        confirmPaymentSuccess(state.selectedAmount, state.sessionId);
       } finally {
         btnPagar.disabled = false;
         btnPagar.textContent = 'PAGAR';
@@ -487,9 +511,8 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
     }
   } catch (err) {}
 
-  // Notificar al Admin
   sendSystemNotification('¡Nuevo Pago Registrado! 💰', {
-    body: `Cliente ${clientId} ha confirmado el pago de $${amount} USD.`
+    body: `Transacción confirmada por $${amount} USD.`
   });
 }
 
@@ -506,26 +529,16 @@ function activatePostPayView(clientId = null) {
   }
 
   if (postPayFlow) postPayFlow.classList.remove('hidden');
-  if (pfCard) pfCard.classList.add('hidden'); // Ocultar bloque de pago inicial una vez completado
+  if (pfCard) pfCard.classList.add('hidden');
 }
 
 async function syncPaymentStatusWithBackend() {
   const activeId = localStorage.getItem('sodie_client_id') || 'cliente_1';
   try {
-    const res = await fetch(`${API_URL}/api/pagos/client/${activeId}/payment-info`);
+    const res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}`);
     if (res.ok) {
-      const data = await res.json();
-      if (data.status === 'PAID') {
-        state.isPaid = true;
-        localStorage.setItem('sodie_is_paid', 'true');
+      if (state.isPaid) {
         activatePostPayView(activeId);
-      }
-      
-      // Actualizar vista de precios dinámicamente si aplica (1K -> 9K -> 5K)
-      if (data.currentStage === 'POST_48H') {
-        updatePriceDisplay('9.000$');
-      } else if (data.currentStage === 'MONTHLY_30D') {
-        updatePriceDisplay('5.000$');
       }
     }
   } catch (e) {}
@@ -639,7 +652,6 @@ function startPersistentTimers() {
 
     if (timerTotal) timerTotal.textContent = `${h}:${m}:${s}`;
 
-    // Lógica para desplegar aviso en Hora 24 y Hora 48
     if (totalSecs === 24 * 3600) {
       if (card24h) card24h.classList.remove('hidden');
       sendSystemNotification('⏰ Hora 24 Alcanzada', {
