@@ -277,8 +277,17 @@ body {
 .dash-header { display: flex; justify-content: space-between; align-items: center; }
 .dash-header-right { display: flex; align-items: center; gap: 8px; }
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
-.badge-client { font-size: 0.75rem; background: rgba(0, 255, 204, 0.15); border: 1px solid var(--neon-mint); padding: 2px 8px; border-radius: 10px; color: var(--neon-mint); }
-.btn-icon { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; }
+.badge-client {
+  font-size: 0.75rem;
+  background: rgba(0, 255, 204, 0.15);
+  border: 1px solid var(--neon-mint);
+  padding: 3px 8px;
+  border-radius: 8px;
+  color: var(--neon-mint);
+  box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+  font-weight: 700;
+}
+.btn-icon { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: #fff; }
 
 .glass-card-dash {
   background: linear-gradient(135deg, rgba(0, 255, 204, 0.07) 0%, rgba(10, 3, 22, 0.45) 100%);
@@ -301,8 +310,61 @@ body {
 /* PANEL ADMIN */
 .admin-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
 .admin-group label { font-size: 0.8rem; color: var(--text-sub); display: block; margin-bottom: 4px; }
-.admin-btns { display: flex; gap: 6px; }
-.admin-btns button { flex: 1; padding: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: #fff; cursor: pointer; }
+
+.admin-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-select-amount {
+  flex: 1;
+  min-width: 65px;
+  padding: 8px;
+  background: rgba(255, 0, 122, 0.1);
+  border: 1px solid var(--neon-fuchsia);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.btn-select-amount:hover,
+.btn-select-amount:active {
+  background: var(--neon-fuchsia);
+  box-shadow: 0 0 12px rgba(255, 0, 122, 0.6);
+  transform: translateY(-1px);
+}
+
+.link-input-wrapper {
+  animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* MODAL DE AUTENTICACIÓN ADMIN */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(5, 1, 10, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-auth-box {
+  width: 100%;
+  max-width: 340px;
+}
 
 /* MÉTRICAS & CARRUSEL (CON SNAP SCROLL CORREGIDO) */
 .metrics-slider { 
@@ -312,7 +374,6 @@ body {
   scrollbar-width: none; 
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  /* Añadido para cálculo preciso del padding al deslizar */
   scroll-padding-inline: 0px; 
 }
 .metrics-slider::-webkit-scrollbar { display: none; }
@@ -325,7 +386,7 @@ body {
   flex-direction: column; 
   justify-content: space-between; 
   border-radius: 18px; 
-  scroll-snap-align: start; /* Cambiado a start para alineación exacta con el índice */
+  scroll-snap-align: start;
 }
 
 /* PUNTOS INDICADORES DEL CARRUSEL */
@@ -359,7 +420,18 @@ body {
 .input-group-flow input { background: rgba(10, 4, 20, 0.6); border: 1px solid var(--neon-mint); border-radius: 10px; padding: 10px; color: #fff; outline: none; }
 .file-input-custom { margin-bottom: 12px; color: var(--text-sub); width: 100%; }
 .style-wait-msg { font-size: 0.85rem; margin-top: 8px; text-align: center; }
-.btn-fb { background: linear-gradient(180deg, rgba(255, 0, 122, 0.3) 0%, rgba(180, 0, 90, 0.1) 100%); border-color: var(--neon-fuchsia); color: #fff; }
+
+.btn-fb { 
+  background: rgba(24, 119, 242, 0.15) !important; 
+  border-color: #1877f2 !important; 
+  color: #ffffff !important; 
+}
+
+.btn-fb:hover {
+  background: #1877f2 !important;
+  box-shadow: 0 0 12px rgba(24, 119, 242, 0.6) !important;
+}
+
 .row-btns-renew { display: flex; gap: 10px; margin-top: 10px; }
 
 /* CHAT WEB HEADER & CUPOS BADGE */
@@ -418,3 +490,34 @@ body {
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
 .timer-digits { font-size: 3rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; }
 .timer-sub { font-size: 0.65rem; color: var(--text-sub); letter-spacing: 1px; }
+
+/* ========================================================= */
+/* 3. BANNER DE COOKIES & FLOTANTES                          */
+/* ========================================================= */
+.cookie-banner-box {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 380px;
+  z-index: 9999;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 204, 0.2);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  backdrop-filter: blur(16px);
+  background: rgba(10, 3, 22, 0.9);
+  border-radius: 16px;
+  animation: slideUpCookie 0.4s ease-out;
+}
+
+@keyframes slideUpCookie {
+  from {
+    transform: translate(-50%, 100px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
