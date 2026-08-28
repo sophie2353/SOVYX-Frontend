@@ -286,14 +286,16 @@ function setupAdminFiveClicks() {
 
   if (btnSubmitKey) {
     btnSubmitKey.addEventListener('click', () => {
-      if (adminKeyInput && adminKeyInput.value === CONFIG.SOVYX_ADMIN_KEY) {
+      const valorIngresado = adminKeyInput ? adminKeyInput.value.trim() : '';
+      // Acepta la clave correcta o un bypass de emergencia si estás muy cansado ("admin2026")
+      if (valorIngresado === '23555' || valorIngresado === 'admin2026') {
         modalAuth.classList.add('hidden');
         if (appDashboard && adminDashboard) {
           appDashboard.classList.add('hidden');
           adminDashboard.classList.remove('hidden');
         }
       } else {
-        alert('🔑 Clave incorrecta');
+        alert('🔑 Clave incorrecta. Escribe 23555');
       }
     });
   }
