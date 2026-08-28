@@ -98,8 +98,8 @@
     <header class="dash-header">
       <div class="dash-header-left">
         <span class="brand-text">SODIE</span>
-        <!-- ID Cliente oculto inicialmente hasta procesar pago -->
-        <span id="client-id-badge" class="badge-client hidden" style="margin-left: 10px; font-weight: bold; color: #00ffcc;">ID: Cliente#1</span>
+        <!-- ID Cliente reservado para post-pago, sin texto hardcodeado predeterminado -->
+        <span id="client-id-badge" class="badge-client hidden" style="margin-left: 10px; font-weight: bold; color: #00ffcc;"></span>
       </div>
       <div class="dash-header-right">
         <button id="btn-menu" class="btn-icon">
@@ -114,7 +114,7 @@
 
     <!-- MÉTRICAS DE RENDIMIENTO -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas de Rendimiento</h3>
+      <h3 class="section-title">Métricas</h3>
       <div class="metrics-slider" id="metrics-slider">
         
         <!-- Alcance -->
@@ -175,7 +175,7 @@
       </div>
     </section>
 
-    <!-- CHAT WEB -->
+    <!-- CHAT WEB INTEGRADO CON MOTOR IA2 -->
     <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -184,17 +184,25 @@
           <span id="cupos-count-badge" class="cupos-text">solo 2 clientes disponibles</span>
         </div>
       </div>
-      <div id="chat-body" class="chat-body">
+      
+      <!-- Historial de Conversación IA2 -->
+      <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
-          <p>SODIE es un software que automatiza la segmentación clonando la lista de compradores de tus infoproductos y aumentando el ROAS en 24 horas. Donde lo actualizas cada vez que llega la hora 24</p>
+          <p>Gracias por confirmar que este software funciona, ¿qué preguntas tienes?
+
+Quedan solo 2 cupos disponibles para la infraestructura esta semana. La oferta es simple: $1,000 de acceso inicial y $9,000 cuando veas los resultados en 48 horas ($10,000 USD total). ¿Tienes el Ads Manager listo?</p>
         </div>
       </div>
-      <div class="chat-quick-options">
-        <button class="opt-btn" id="opt-btn-1" data-reply="Para realizar la gestión debes sincronizar la base de datos de tus compradores y configurar la actualización automática cada 24 horas.">¿Que gestión debo hacer?</button>
-        <button class="opt-btn" id="opt-btn-2" data-reply="Aceptamos tarjetas de crédito, débito, transferencias y pasarelas de pago automatizadas.">Métodos de Pago</button>
-        <button class="opt-btn" id="opt-btn-3" data-reply="Debes ingresar la lista de compradores de tus infoproductos y los datos de la cuenta de anuncios.">¿Que datos debo ingresar?</button>
-        <button class="opt-btn" id="opt-btn-4" data-reply="Es compatible con plataformas Ecommerce e Infoproductos integrando tu CRM o base de datos.">Ecommerce</button>
+
+      <!-- Quick Replies Dinámicos de la IA2 -->
+      <div id="quick-replies" class="chat-quick-options">
+        <button class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
+        <button class="opt-btn" data-payload="ecommerce">Protocolo Ecommerce (100K€)</button>
+        <button class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
+        <button class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
       </div>
+
+      <!-- Barra de Input del Chat -->
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
         <button id="chat-send" class="chat-send-btn">➤</button>
@@ -212,33 +220,33 @@
       <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- PASO 1 POSPAGO: CONFIGURACIÓN EVALUADOR EN META -->
+    <!-- PASOS POSPAGO (SOLO VISIBLES AL COMPLETAR PAGO DE RESERVA) -->
     <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px;">
-      <h3 class="section-title fuchsia-txt">Paso 1: Configuración de Acceso</h3>
+      <h3 class="section-title fuchsia-txt">Pasos de Configuración e Integración Pospago</h3>
       
-      <!-- Subpaso A: Email / Usuario -->
+      <!-- Subpaso 1: Verificación de Evaluador Meta -->
       <div id="step-evaluator-client" class="step-card" style="margin-bottom: 15px;">
-        <p class="step-desc"><strong>1.1.</strong> Ingresa tu email o usuario registrado:</p>
+        <p class="step-desc"><strong>1.1. Evaluador Meta:</strong> Ingresa tu email o usuario registrado para asignarte como evaluador en Meta:</p>
         <div class="input-group-flow" style="margin-top: 8px;">
-          <input type="text" id="client-meta-user-input" placeholder="email / usuario" />
-          <button id="btn-client-send-evaluator" class="btn-pf-action">Verificar</button>
+          <input type="text" id="client-meta-user-input" placeholder="email / usuario de Facebook" />
+          <button id="btn-client-send-evaluator" class="btn-pf-action">Verificar Evaluador</button>
         </div>
-        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Enviado correctamente. Esperando aprobación...</p>
+        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Enviado correctamente. Esperando asignación...</p>
       </div>
 
-      <!-- Subpaso B: Subir Archivo Base de Datos -->
+      <!-- Subpaso 2: Subir Archivo Base de Datos (Shopify / CSV) -->
       <div id="step-upload-file" class="step-card hidden" style="margin-bottom: 15px;">
-        <p class="step-desc"><strong>1.2.</strong> Carga la lista de compradores (Excel / CSV):</p>
+        <p class="step-desc"><strong>1.2. Inyección de Audiencia:</strong> Carga la lista exportada de compradores previas (Excel / CSV):</p>
         <div class="input-group-flow" style="margin-top: 8px;">
           <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          <button id="btn-client-upload-file" class="btn-pf-action">Subir</button>
+          <button id="btn-client-upload-file" class="btn-pf-action">Subir Data</button>
         </div>
-        <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Archivo subido exitosamente.</p>
+        <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Archivo procesado por IA1 e inyectado exitosamente.</p>
       </div>
 
-      <!-- Subpaso C: Conectar Meta / Facebook -->
+      <!-- Subpaso 3: Conectar Permisos Oficiales Facebook -->
       <div id="step-connect-meta" class="step-card hidden">
-        <p class="step-desc"><strong>1.3.</strong> Conecta tus permisos oficiales:</p>
+        <p class="step-desc"><strong>1.3. Conexión de API:</strong> Otorga los permisos oficiales para iniciar el borrador:</p>
         <button id="btn-connect-facebook-client" class="btn-pf-action btn-fb" style="margin-top: 8px; width: 100%;">Vincular Facebook Oficial 🗿</button>
       </div>
     </section>
