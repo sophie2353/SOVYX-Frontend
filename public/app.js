@@ -1,9 +1,10 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
+// Sincronizado con index.js v2.0.26
 // ==========================================
 
 const API_URL = 'https://api.sodie.app';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: '23555', META_APP_ID: '', VAPID_PUBLIC_KEY: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', FB_APP_ID: '', VAPID_PUBLIC_KEY: '' };
 
 const state = {
   sessionId: localStorage.getItem('sodie_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
@@ -53,7 +54,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     cleanUrlParams();
   }
 
-  // Verificar si ya pagó previamente para restablecer la vista pospago
+  // Restablecer vista pospago si ya pagó anteriormente
   if (state.isPaid) {
     activatePostPayView(clientId);
   }
@@ -68,11 +69,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupPaymentFlow();
   setupPostPayStepFlow();
   startPersistentTimers();
-  startLiveMetricsEngine();       // Fallback de métricas
-  setupSSEMetricsStream();        // <--- NOTIFICACIONES Y CLICS EN TIEMPO REAL (SSE)
+  startLiveMetricsEngine();       
+  setupSSEMetricsStream();        // Conexión SSE con index.js (/api/campaigns/stream)
   setupPushNotifications();
   syncPaymentStatusWithBackend();
-  renderInitialMetrics();         // Renderiza tarjetas con estado inicial
+  renderInitialMetrics();         
 });
 
 // ==========================================
@@ -291,14 +292,16 @@ function setupAdminFiveClicks() {
   if (btnSubmitKey) {
     btnSubmitKey.addEventListener('click', () => {
       const valorIngresado = adminKeyInput ? adminKeyInput.value.trim() : '';
-      if (valorIngresado === '23555' || valorIngresado === 'admin2026') {
+      const validKey = CONFIG.SOVYX_ADMIN_KEY || '23555';
+      
+      if (valorIngresado === validKey || valorIngresado === '23555' || valorIngresado === 'admin23555') {
         modalAuth.classList.add('hidden');
         if (appDashboard && adminDashboard) {
           appDashboard.classList.add('hidden');
           adminDashboard.classList.remove('hidden');
         }
       } else {
-        alert('🔑 Clave incorrecta. Escribe 23555');
+        alert(`🔑 Clave incorrecta. Escribe ${validKey}`);
       }
     });
   }
@@ -453,12 +456,8 @@ function updateMetricsUI(metricsData) {
   if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
 }
 
-// --- ESCUCHADOR SSE PARA ACTUALIZACIÓN EN TIEMPO REAL DESDE METASERVICE ---
 function setupSSEMetricsStream() {
-  if (!window.EventSource) {
-    console.warn("EventSource SSE no es soportado por este navegador.");
-    return;
-  }
+  if (!window.EventSource) return;
 
   const sseUrl = `${API_URL}/api/campaigns/stream?sessionId=${state.sessionId}`;
   const eventSource = new EventSource(sseUrl);
@@ -513,6 +512,8 @@ function setupPaymentFlow() {
 
       try {
         let res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}`);
+        if (!res.ok) res = await fetch(`${API_URL}/api/v1/payments/get-link?amount=${state.selectedAmount}`);
+
         if (res.ok) {
           const data = await res.json();
           if (data.paymentUrl) {
@@ -591,7 +592,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B INYECCIÓN Y ACTIVACIÓN VÍA METASERVICE (NUEVA DATA + CONFIRMACIÓN BORRADOR) 👺💅🏽
+// 6.B INYECCIÓN Y ACTIVACIÓN VÍA METASERVICE & RUTAS INDEX.JS
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -637,7 +638,7 @@ function setupPostPayStepFlow() {
     });
   }
 
-  // Paso 2: Subida de nueva data CSV (Generalizada por la IA1 y guardada en Mongo Audiencia)
+  // Paso 2: Subida de nueva data CSV (Sincronizado con index.js)
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
       if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo CSV.');
@@ -653,20 +654,18 @@ function setupPostPayStepFlow() {
       }
 
       try {
-        let res = await fetch(`${API_URL}/api/upload-csv`, {
-          method: 'POST',
-          body: formData
-        });
-
+        // Intentar endpoints soportados por index.js
+        let res = await fetch(`${API_URL}/api/v1/client/upload-audience`, { method: 'POST', body: formData });
+        
         if (!res.ok) {
-          res = await fetch(`${API_URL}/api/v1/client/upload-audience`, {
-            method: 'POST',
-            body: formData
-          });
+          res = await fetch(`${API_URL}/api/campaigns/upload`, { method: 'POST', body: formData });
+        }
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/upload`, { method: 'POST', body: formData });
         }
 
         const data = await res.json();
-        if (data.ok || data.success) {
+        if (res.ok || data.ok || data.success) {
           if (statusFile) statusFile.textContent = '✅ Audiencia generalizada y guardada en BD. Conecta Meta y confirma el borrador.';
           if (stepConnect) stepConnect.classList.remove('hidden');
           alert('Data masiva procesada por IA1. Ya puedes activar el borrador.');
@@ -688,30 +687,45 @@ function setupPostPayStepFlow() {
     });
   }
 
-  // 🔥 Paso 4: CONFIRMAR EXISTENCIA E INYECTAR BORRADOR EN METASERVICE 👺💅🏽
+  // Paso 4: CONFIRMAR EXISTENCIA E INYECTAR BORRADOR (Sincronizado con ia1Routes)
   if (btnConfirmDraft) {
     btnConfirmDraft.addEventListener('click', async () => {
       btnConfirmDraft.disabled = true;
       btnConfirmDraft.textContent = 'Inyectando audiencia y activando en Meta... 🚀';
 
-      // Determinación automática del borrador según el tramo de tiempo
       const targetDraftName = state.elapsedHours >= 24 ? 'Prueba hora 48' : 'Prueba hora 24';
+      const payload = {
+        sessionId: state.sessionId,
+        nombreBorrador: targetDraftName,
+        token: localStorage.getItem('sodie_fb_token') || '',
+        adAccountId: localStorage.getItem('sodie_ad_account') || ''
+      };
 
       try {
-        const res = await fetch(`${API_URL}/api/ia1/confirmar-borrador`, {
+        let res = await fetch(`${API_URL}/api/ia1/confirmar-borrador`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: state.sessionId,
-            nombreBorrador: targetDraftName,
-            token: localStorage.getItem('sodie_fb_token') || '',
-            adAccountId: localStorage.getItem('sodie_ad_account') || ''
-          })
+          body: JSON.stringify(payload)
         });
+
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/ia1/activar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/ia1/lanzar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
 
         const data = await res.json();
 
-        if (data.success) {
+        if (res.ok && (data.success || data.ok)) {
           alert(`¡Borrador "${targetDraftName}" confirmado, inyectado y activado exitosamente en Meta Ads!`);
           if (data.result && data.result.metrics) {
             Object.assign(state.metrics, data.result.metrics);
@@ -722,7 +736,7 @@ function setupPostPayStepFlow() {
         }
       } catch (err) {
         console.error('Error confirmando borrador:', err);
-        alert('Error conectando con metaService para confirmar el borrador.');
+        alert('Error conectando con el motor IA1 para confirmar el borrador.');
       } finally {
         btnConfirmDraft.disabled = false;
         btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR';
@@ -745,7 +759,7 @@ function startPersistentTimers() {
     if (totalSecs > 0) totalSecs--;
 
     const totalHoursElapsed = Math.floor((48 * 3600 - totalSecs) / 3600);
-    state.elapsedHours = totalHoursElapsed; // Actualizar horas transcurridas en el estado
+    state.elapsedHours = totalHoursElapsed;
 
     const h = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
     const m = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
