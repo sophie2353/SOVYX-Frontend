@@ -98,7 +98,6 @@
     <header class="dash-header">
       <div class="dash-header-left">
         <span class="brand-text">SODIE</span>
-        <!-- ID Cliente reservado para post-pago, oculto por defecto -->
         <span id="client-id-badge" class="badge-client hidden" style="margin-left: 10px; font-weight: bold; color: #00ffcc;"></span>
       </div>
       <div class="dash-header-right">
@@ -175,7 +174,7 @@
       </div>
     </section>
 
-    <!-- TARJETAS DE MÉTRICAS META EN VIVO (DESPLEGADAS TRAS CONFIRMAR BORRADOR) -->
+    <!-- TARJETAS DE MÉTRICAS META EN VIVO -->
     <section id="meta-live-metrics-container" class="glass-card-dash hidden" style="margin-bottom: 20px;">
       <h3 class="section-title mint-txt">📊 Métricas Meta Ads en Tiempo Real</h3>
       <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
@@ -208,7 +207,6 @@
         </div>
       </div>
       
-      <!-- Historial de Conversación IA2 -->
       <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
           <p>Gracias por confirmar que este software funciona, ¿qué preguntas tienes? 
@@ -217,7 +215,6 @@
         </div>
       </div>
 
-      <!-- Quick Replies Dinámicos de la IA2 -->
       <div id="quick-replies" class="chat-quick-options">
         <button class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
         <button class="opt-btn" data-payload="ecommerce">Ecommerce</button>
@@ -225,16 +222,15 @@
         <button class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
       </div>
 
-      <!-- Barra de Input del Chat -->
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
         <button id="chat-send" class="chat-send-btn">➤</button>
       </div>
     </section>
 
-    <!-- P.F (PAGO FINAL) - VISIBLE POR DEFECTO -->
+    <!-- P.F (PAGO INICIAL) -->
     <section id="pf-card" class="glass-card-dash pf-section">
-      <h3 class="section-title">P.F (Pago Final)</h3>
+      <h3 class="section-title">P.F (Pago Inicial)</h3>
       <div class="pf-summary-list">
         <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">1.000$</strong></div>
         <div class="pf-row"><span>Pago después de resultados</span><strong id="price-post">9.000$</strong></div>
@@ -243,11 +239,26 @@
       <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
     </section>
 
-    <!-- PASOS POSPAGO - OCULTO POR DEFECTO HASTA PAGAR -->
+    <!-- PAGO FINAL POST HORA 48 ($9,000 / $5,000) -->
+    <section id="card-pago-hora48" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 class="section-title mint-txt">⚡ Liquidación Final - Hora 48</h3>
+      <p class="step-desc" style="margin-bottom: 15px;">Ciclo de 48 horas completado. Selecciona la opción de pago asignada para mantener el software activo:</p>
+      
+      <div class="pf-summary-list" style="margin-bottom: 15px;">
+        <div class="pf-row"><span>Monto Estándar (Resultados Completos)</span><strong class="mint-txt">9.000$ USD</strong></div>
+        <div class="pf-row"><span>Monto Ajustado / Oferta Especial</span><strong class="fuchsia-txt">5.000$ USD</strong></div>
+      </div>
+
+      <div class="input-group-flow" style="gap: 10px;">
+        <button id="btn-pay-hora48-9000" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000;">Pagar $9.000 USD</button>
+        <button id="btn-pay-hora48-5000" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff;">Pagar $5.000 USD</button>
+      </div>
+    </section>
+
+    <!-- PASOS POSPAGO -->
     <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px;">
       <h3 class="section-title fuchsia-txt">Pasos de Configuración e Integración Pospago</h3>
       
-      <!-- Subpaso 1: Verificación de Evaluador Meta -->
       <div id="step-evaluator-client" class="step-card" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>1.1. Evaluador Meta:</strong> Ingresa tu email o usuario registrado para asignarte como evaluador en Meta:</p>
         <div class="input-group-flow" style="margin-top: 8px;">
@@ -257,7 +268,6 @@
         <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Enviado correctamente. Esperando asignación...</p>
       </div>
 
-      <!-- Subpaso 2: Subir Archivo Base de Datos (Shopify / CSV) -->
       <div id="step-upload-file" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>1.2. Inyección de Audiencia:</strong> Carga la lista exportada de compradores previas (Excel / CSV):</p>
         <div class="input-group-flow" style="margin-top: 8px;">
@@ -267,13 +277,11 @@
         <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Archivo procesado por IA1 e inyectado exitosamente.</p>
       </div>
 
-      <!-- Subpaso 3: Conectar Permisos Oficiales Facebook -->
       <div id="step-connect-meta" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>1.3. Conexión de API:</strong> Otorga los permisos oficiales para iniciar el borrador:</p>
         <button id="btn-connect-facebook-client" class="btn-pf-action btn-fb" style="margin-top: 8px; width: 100%;">Vincular Facebook Oficial 🗿</button>
       </div>
 
-      <!-- Subpaso 4: Confirmar y Activar Borrador en Meta Ads -->
       <div id="card-draft-section" class="step-card hidden">
         <p class="step-desc"><strong>1.4. Inyección Final:</strong> Activa el borrador generado por IA1 directamente en Meta Ads Manager:</p>
         <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 8px; width: 100%; background: #10B981;">CONFIRMAR Y ACTIVAR BORRADOR 🚀</button>
@@ -296,7 +304,7 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- 3. DASHBOARD ADMIN (PROTEGIDO / OCULTO)   -->
+  <!-- 3. DASHBOARD ADMIN                         -->
   <!-- ========================================== -->
   <main id="admin-dashboard" class="dashboard-container hidden">
     <header class="dash-header">
@@ -312,7 +320,6 @@
       <h3 class="section-title fuchsia-txt">Módulos de Configuración y Pagos Requeridos</h3>
       <div class="admin-grid">
         
-        <!-- Selección de Pago Requerido y Generación de Link -->
         <div class="admin-group">
           <label>Seleccionar Pago Requerido</label>
           <div class="admin-btns">
@@ -322,7 +329,6 @@
             <button class="btn-select-amount" data-amount="5000">5.000$</button>
           </div>
           
-          <!-- Contenedor dinámico desplegable al presionar un monto -->
           <div id="link-input-container" class="link-input-wrapper hidden" style="margin-top: 10px;">
             <label id="selected-amount-label">Ingresar link para el pago:</label>
             <div class="input-group-flow">
@@ -332,7 +338,6 @@
           </div>
         </div>
 
-        <!-- Evaluador Meta Admin -->
         <div class="admin-group">
           <label>Evaluador en Meta (Datos recibidos)</label>
           <div class="input-group-flow" style="margin-bottom: 6px;">
@@ -342,26 +347,22 @@
           <button id="btn-admin-approve-evaluator" class="btn-pf-action">Aprobar Cliente</button>
         </div>
 
-        <!-- Subir Hoja de Cálculo -->
         <div class="admin-group">
           <label>Hoja de Cálculo (Excel / CSV)</label>
           <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
           <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Datos</button>
         </div>
 
-        <!-- Facebook Oficial -->
         <div class="admin-group">
           <label>Permisos de Integración Oficial</label>
           <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Vincular Facebook</button>
         </div>
 
-        <!-- Borrador Final (Solo botón Listo) -->
         <div class="admin-group">
           <label>Borrador #1 ("Prueba Hora 24")</label>
           <button id="btn-draft-ready" class="btn-pf-action">Listo</button>
         </div>
 
-        <!-- Cierre General -->
         <div class="admin-group" style="margin-top: 10px;">
           <label>Cierre General de Dashboard</label>
           <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
