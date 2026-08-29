@@ -1,6 +1,9 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
 // Sincronizado con index.js v2.0.26
+// IA1: Procesamiento de archivos / audiencias (CSV)
+// IA2: Cierre de ventas y atención estratégica
+// IA3: Métricas y análisis en vivo
 // ==========================================
 
 const API_URL = 'https://api.sodie.app';
@@ -18,7 +21,7 @@ const state = {
   // Métricas iniciales
   metrics: {
     visitors: 1504,      // Clics / Visitas a la app
-    leads: 75,           // Clientes Objetivo
+    leads: 2,            // Clientes Objetivo / Cupos ocupados
     conversionRate: "4.8%",
     reach: 15420,        // Alcance Meta
     spend: "$15",        // Inversión Meta
@@ -175,7 +178,7 @@ function finishSplash() {
 }
 
 // ==========================================
-// 3. CHAT WEB INTERACTIVO & BOTONES (IA2)
+// 3. CHAT WEB INTERACTIVO & MOTOR DE CIERRE (IA2)
 // ==========================================
 function setupChatSystem() {
   const inputEl = document.getElementById('chat-input');
@@ -193,6 +196,23 @@ function setupChatSystem() {
     chatBody.scrollTop = chatBody.scrollHeight;
   };
 
+  const getIA2SmartResponse = (msg) => {
+    const lower = msg.toLowerCase().trim();
+    if (lower.includes('ecommerce') || lower.includes('tienda') || lower.includes('e-commerce')) {
+      return "IA2 [Cierre]: Protocolo Ecommerce activado. IA2 analiza la intención de compra directa e inyecta audiencias de alto valor comercial para maximizar el ROAS de tu tienda.";
+    }
+    if (lower.includes('acceder') || lower.includes('comprar') || lower.includes('empezar') || lower.includes('pagar')) {
+      return "IA2 [Cierre]: Excelente decisión. Selecciona la opción PAGAR para reservar tu slot inicial de $1,000 USD y comenzar la sincronización.";
+    }
+    if (lower.includes('metodo') || lower.includes('forma') || lower.includes('tarjeta') || lower.includes('pago')) {
+      return "IA2 [Cierre]: Procesamos pagos seguros globales vía pasarela automatizada, tarjetas internacionales y transferencia de contingencia.";
+    }
+    if (lower.includes('funciona') || lower.includes('que hace') || lower.includes('como es')) {
+      return "IA2 [Cierre]: SODIE opera con IA1 (procesamiento masivo CSV), IA2 (cierre e inyección de audiencias activas) e IA3 (supervisión en vivo).";
+    }
+    return null;
+  };
+
   const sendMsg = async (customText = null, customReply = null) => {
     const text = customText || inputEl.value.trim();
     if (!text) return;
@@ -201,39 +221,38 @@ function setupChatSystem() {
     if (!customText) inputEl.value = '';
 
     if (customReply) {
-      setTimeout(() => appendMsg(customReply, false), 400);
+      setTimeout(() => appendMsg(customReply, false), 350);
       return;
     }
 
+    const smartLocalReply = getIA2SmartResponse(text);
+
     try {
-      let res = await fetch(`${API_URL}/api/v1/chat/message`, {
+      let res = await fetch(`${API_URL}/api/ia2/conversar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, sessionId: state.sessionId })
+        body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage })
       });
 
       if (!res.ok) {
-        res = await fetch(`${API_URL}/api/chat`, {
+        res = await fetch(`${API_URL}/api/v1/chat/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: text, sessionId: state.sessionId })
         });
       }
 
-      if (!res.ok) {
-        res = await fetch(`${API_URL}/api/ia2/conversar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, sessionId: state.sessionId })
-        });
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.reply || data.response || smartLocalReply || 'IA2 [Cierre]: Mensaje procesado. Listo para continuar con la inyección.';
+        appendMsg(reply, false);
+      } else {
+        appendMsg(smartLocalReply || 'IA2 [Cierre]: Plan Ecommerce y conversión activa. Procesando tu slot estratégico.', false);
       }
-
-      const data = await res.json();
-      appendMsg(data.reply || 'Sistema SOVYX IA2: Plan Ecommerce detectado. Procesando slot y estrategia de conversión.', false);
     } catch (err) {
       setTimeout(() => {
-        appendMsg('Sistema SOVYX IA2: Plan Ecommerce detectado. Procesando slot y estrategia de conversión.', false);
-      }, 500);
+        appendMsg(smartLocalReply || 'IA2 [Cierre]: Plan Ecommerce y conversión activa. Procesando tu slot estratégico.', false);
+      }, 400);
     }
   };
 
@@ -247,17 +266,7 @@ function setupChatSystem() {
       const userText = btn.textContent.trim();
       const payload = btn.getAttribute('data-payload');
       
-      let botReply = "Procesando tu consulta...";
-      if (payload === 'acceder') {
-        botReply = "Perfecto. Haz clic en el botón PAGAR del panel P.F para reservar tu slot inicial de $1,000 USD.";
-      } else if (payload === 'metodos_pago') {
-        botReply = "Aceptamos tarjetas globales vía pasarela segura, transferencia y criptoactivos.";
-      } else if (payload === 'ecommerce') {
-        botReply = "Protocolo Ecommerce activado: Inyección directa de audiencias optimizadas vía IA2.";
-      } else if (payload === 'como_funciona') {
-        botReply = "SODIE integra IA1 (audiencias), IA2 (conversión) e IA3 (análisis). Inyectamos la segmentación directamente al borrador de Meta Ads.";
-      }
-
+      let botReply = getIA2SmartResponse(userText) || getIA2SmartResponse(payload || '');
       sendMsg(userText, botReply);
     });
   });
@@ -432,7 +441,7 @@ function injectBiometricButton(modalAuth) {
 }
 
 // ==========================================
-// 4.B SELECCIÓN E INYECCIÓN DE RUTAS DE PASARELA (9.000$ & 5.000$)
+// 4.B SELECCIÓN E INYECCIÓN DE RUTAS DE PASARELA ($9.000 & $5.000)
 // ==========================================
 function setupAdminAmountSelection() {
   const amountBtns = document.querySelectorAll('.btn-select-amount');
@@ -543,12 +552,12 @@ function renderInitialMetrics() {
 
 function updateMetricsUI(metricsData) {
   const visitorsEl = document.getElementById('metric-visitors') || document.getElementById('metric-clicks');
-  const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients');
+  const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients') || document.getElementById('metric-cupos-val');
   const reachEl = document.getElementById('metric-reach');
   const spendEl = document.getElementById('metric-spend');
 
   if (visitorsEl) visitorsEl.textContent = metricsData.visitors || state.metrics.visitors;
-  if (leadsEl) leadsEl.textContent = metricsData.leads || state.metrics.leads;
+  if (leadsEl) leadsEl.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
   if (reachEl) reachEl.textContent = metricsData.reach ? metricsData.reach.toLocaleString() : state.metrics.reach.toLocaleString();
   if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
 
@@ -559,7 +568,7 @@ function updateMetricsUI(metricsData) {
 
   if (liveReach) liveReach.textContent = (metricsData.reach || state.metrics.reach).toLocaleString();
   if (liveVisitors) liveVisitors.textContent = (metricsData.visitors || state.metrics.visitors).toLocaleString();
-  if (liveLeads) liveLeads.textContent = metricsData.leads || state.metrics.leads;
+  if (liveLeads) liveLeads.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
   if (liveConversion) liveConversion.textContent = metricsData.conversionRate || state.metrics.conversionRate;
 }
 
@@ -601,7 +610,7 @@ function startLiveMetricsEngine() {
         if (data.visitors) {
           state.metrics.visitors = data.visitors;
           if (data.reach) state.metrics.reach = data.reach;
-          if (data.leads) state.metrics.leads = data.leads;
+          if (data.leads !== undefined) state.metrics.leads = data.leads;
           if (data.conversionRate) state.metrics.conversionRate = data.conversionRate;
           updateMetricsUI(state.metrics);
         }
@@ -722,7 +731,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B INYECCIÓN Y ACTIVACIÓN VÍA METASERVICE & RUTAS INDEX.JS
+// 6.B INYECCIÓN Y ACTIVACIÓN VÍA METASERVICE & RUTAS INDEX.JS (IA1 Carga de Archivos)
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -738,6 +747,30 @@ function setupPostPayStepFlow() {
   const btnConnectFb = document.getElementById('btn-connect-facebook-client');
   const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
 
+  // Sincronización de Email con Panel Admin en tiempo real
+  const updateAdminEmailDisplay = (val) => {
+    const adminDisplays = document.querySelectorAll('#admin-email-display, #admin-client-email, .admin-email-sync');
+    adminDisplays.forEach(el => {
+      if (val) {
+        el.textContent = val;
+        el.classList.remove('text-sub');
+        el.classList.add('mint-txt');
+      } else {
+        el.textContent = 'Esperando data...';
+      }
+    });
+  };
+
+  if (inputMetaUser) {
+    inputMetaUser.addEventListener('input', (e) => {
+      updateAdminEmailDisplay(e.target.value.trim());
+    });
+    if (state.email) {
+      inputMetaUser.value = state.email;
+      updateAdminEmailDisplay(state.email);
+    }
+  }
+
   if (btnSendEval) {
     btnSendEval.addEventListener('click', async () => {
       const user = inputMetaUser ? inputMetaUser.value.trim() : '';
@@ -745,6 +778,7 @@ function setupPostPayStepFlow() {
 
       state.email = user;
       localStorage.setItem('sodie_user_email', user);
+      updateAdminEmailDisplay(user);
 
       if (statusEval) statusEval.classList.remove('hidden');
       if (stepUpload) stepUpload.classList.remove('hidden');
@@ -800,7 +834,7 @@ function setupPostPayStepFlow() {
           alert(`Aviso: ${data.error || 'Ocurrió un error al procesar la data.'}`);
         }
       } catch (e) {
-        console.error('Error al subir CSV:', e);
+        console.error('Error al subir CSV con IA1:', e);
         alert('Error de red al subir el archivo CSV.');
       }
     });
@@ -856,7 +890,7 @@ function setupPostPayStepFlow() {
         }
 
         if (res.ok || data.success || data.ok) {
-          alert(`¡Borrador "${targetDraftName}" confirmado, inyectado y activado exitosamente en Meta Ads!`);
+          alert(`¡Borrador "${targetDraftName}" confirmed, inyectado y activado exitosamente en Meta Ads!`);
 
           if (data.result && data.result.metrics) {
             Object.assign(state.metrics, data.result.metrics);
