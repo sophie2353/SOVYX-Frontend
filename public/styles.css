@@ -533,8 +533,38 @@ body {
 .pf-row { display: flex; justify-content: space-between; color: var(--text-sub); }
 .pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; }
 
-.btn-pf-action { width: 100%; padding: 12px 0; background: linear-gradient(180deg, rgba(0, 255, 204, 0.25) 0%, rgba(0, 180, 140, 0.08) 100%); border: 1.5px solid var(--neon-mint); border-radius: 12px; color: var(--neon-mint); font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 0 12px rgba(0, 255, 204, 0.2); }
+.btn-pf-action { width: 100%; padding: 12px 0; background: linear-gradient(180deg, rgba(0, 255, 204, 0.25) 0%, rgba(0, 180, 140, 0.08) 100%); border: 1.5px solid var(--neon-mint); border-radius: 12px; color: var(--neon-mint); font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 0 12px rgba(0, 255, 204, 0.2); transition: all 0.25s ease; }
+.btn-pf-action:hover { box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); transform: translateY(-1px); }
 .btn-danger { border-color: var(--neon-fuchsia); color: var(--neon-fuchsia); background: rgba(255, 0, 122, 0.1); }
+
+/* SECCIÓN ESPECÍFICA PAGO HORA 48 ($9K / $5K) */
+#card-pago-hora48 .input-group-flow {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+#btn-pay-hora48-9000 {
+  background: var(--neon-mint) !important;
+  color: var(--bg-dark) !important;
+  border-color: var(--neon-mint) !important;
+  box-shadow: 0 0 14px rgba(0, 255, 204, 0.4);
+}
+
+#btn-pay-hora48-9000:hover {
+  box-shadow: 0 0 22px rgba(0, 255, 204, 0.8);
+}
+
+#btn-pay-hora48-5000 {
+  background: var(--neon-fuchsia) !important;
+  color: #ffffff !important;
+  border-color: var(--neon-fuchsia) !important;
+  box-shadow: 0 0 14px rgba(255, 0, 122, 0.4);
+}
+
+#btn-pay-hora48-5000:hover {
+  box-shadow: 0 0 22px rgba(255, 0, 122, 0.8);
+}
 
 .timer-section { text-align: center; }
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
@@ -603,4 +633,3 @@ body {
     grid-column: 1 / -1;
   }
 }
-
