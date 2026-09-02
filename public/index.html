@@ -81,12 +81,26 @@
     </div>
   </div>
 
-  <!-- VISTA CUPOS AGOTADOS -->
+  <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA ACTIVADA -->
   <div id="view-sold-out" class="full-screen hidden">
-    <div class="glass-card-dash text-center">
+    <div class="glass-card-dash text-center" style="max-width: 480px; padding: 25px;">
       <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
-      <p class="step-desc" style="margin-top: 10px;">El acceso al software se encuentra cerrado actualmente.</p>
-      <button ic="btn-submit-list-" class="btn-pf-actiion">Unirme a la lista de Espera</button>
+      <p class="step-desc" style="margin-top: 10px;">El acceso directo al software SODIE está cerrado por límite de capacidad.</p>
+      
+      <!-- CONTENEDOR LISTA DE ESPERA Y NOTIFICACIONES -->
+      <div id="waitlist-card-box" class="glass-card-dash" style="margin-top: 20px; border: 1px solid #d946ef;">
+        <h3 class="section-title mint-txt">Unirse a la Lista de Espera</h3>
+        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Activa las notificaciones para ser el primero en recibir acceso al liberar un cupo (Cupo 3+ $5,000/mes):</p>
+        
+        <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px; margin-bottom: 10px;" />
+        
+        <button id="btn-enable-notifications" class="btn-pf-action" style="width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
+          Activar Notificaciones y Unirme
+        </button>
+        <p id="waitlist-status-msg" class="mint-txt hidden" style="margin-top: 10px; font-size: 0.85rem;">
+          ✅ ¡Estás en la lista de espera! Te notificaremos al abrirse un cupo.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -106,7 +120,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN                          -->
+  <!-- 2. DASHBOARD MAIN (CLIENTE)                -->
   <!-- ========================================== -->
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
@@ -125,7 +139,7 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR (ACTUALIZADAS SEGÚN PUNTO 7) -->
+    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
@@ -157,7 +171,7 @@
         <!-- 3. Visitas -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-visitors">80</div>
+          <div class="card-value" id="metric-visitors">82</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -169,7 +183,7 @@
         <!-- 4. Activos -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-activos">1</div>
+          <div class="card-value" id="metric-activos">3</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,40 Q50,20 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="3" />
@@ -181,7 +195,7 @@
         <!-- 5. Clics en "Ir a Pagar" -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-pay-clicks">342</div>
+          <div class="card-value" id="metric-pay-clicks">8</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,35 Q50,15 100,25 T200,8" fill="none" stroke="#d946ef" stroke-width="3" />
@@ -214,6 +228,47 @@
       </div>
     </section>
 
+    <!-- ========================================== -->
+    <!-- COMPARATIVA SECUENCIAL CON SODIE VS SIN SODIE -->
+    <!-- ========================================== -->
+    <section id="section-sodie-comparison" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+      <h3 class="section-title fuchsia-txt"> Resultados Comparativos con SODIE vs Sin SODIE</h3>
+      
+      <!-- HORA 24 COMPARATIVA -->
+      <div id="comp-hora-24" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px;">
+        <h4 class="mint-txt">Finalizado: Hora 24</h4>
+        <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+          <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 8px;">
+            <strong style="color: #ff4d4d;">Sin SODIE</strong>
+            <p class="step-desc">ROAS: <strong>1.2x</strong></p>
+            <p class="step-desc">CPA: <strong>$28.50 USD</strong></p>
+          </div>
+          <div>
+            <strong class="mint-txt">Con SODIE</strong>
+            <p class="step-desc">ROAS: <strong class="mint-txt">3.8x</strong></p>
+            <p class="step-desc">CPA: <strong class="mint-txt">$9.10 USD</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- HORA 48 COMPARATIVA -->
+      <div id="comp-hora-48" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; border-top: 1px stroke #00ffcc;">
+        <h4 class="fuchsia-txt">Finalizado: Hora 48</h4>
+        <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+          <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 8px;">
+            <strong style="color: #ff4d4d;">Sin SODIE</strong>
+            <p class="step-desc">ROAS: <strong>1.4x</strong></p>
+            <p class="step-desc">Ventas totales: <strong>12</strong></p>
+          </div>
+          <div>
+            <strong class="mint-txt">Con SODIE</strong>
+            <p class="step-desc">ROAS: <strong class="mint-txt">5.2x</strong></p>
+            <p class="step-desc">Ventas totales: <strong class="mint-txt">68</strong></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- TARJETAS DE MÉTRICAS META EN VIVO -->
     <section id="meta-live-metrics-container" class="glass-card-dash hidden" style="margin-bottom: 20px;">
       <h3 class="section-title mint-txt">Métricas Meta Ads en Tiempo Real</h3>
@@ -227,7 +282,7 @@
           <div id="live-metric-visitors" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">1,504</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
-          <span class="gauge-label">Clientes</span>
+          <span class="gauge-label">Clientes / Leads</span>
           <div id="live-metric-leads" class="timer-digits fuchsia-txt" style="font-size: 1.6rem; margin-top: 5px;">2</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
@@ -237,16 +292,14 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- NUEVA SECCIÓN DE VIDEO CON EL BORRADOR     -->
-    <!-- ========================================== -->
+    <!-- SECCIÓN DE VIDEO CON EL BORRADOR -->
     <section class="glass-card-dash video-section" style="margin-bottom: 20px;">
       <div class="chat-header">
-        <h3 class="section-title mint-txt">🎥 Demostración del Borrador en Vivo</h3>
+        <h3 class="section-title mint-txt">Demostración del Borrador en Vivo</h3>
         <span class="badge-client" style="color: #00ffcc; border-color: #00ffcc;">20-30 segs</span>
       </div>
       <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">
-        Observa cómo subimos la lista de compradores desde SODIE, se crea automáticamente la campaña con borrador sin segmentación manual y se publica en Meta Ads actualizando el dashboard en tiempo récord.
+        Observa cómo subimos la lista de compradores desde SODIE, se crea automáticamente la campaña con borrador sin segmentación manual y se publica en Meta Ads.
       </p>
       
       <div class="video-container-glass">
@@ -255,14 +308,9 @@
           Tu navegador no soporta la reproducción de video HTML5.
         </video>
       </div>
-
-      <div class="video-status-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.85rem;">
-        <span class="mint-txt">Tiempo de publicación: <strong>20-30 segundos</strong></span>
-        <span class="step-desc">Campaña optimizada $40/48H</span>
-      </div>
     </section>
 
-    <!-- CHAT WEB INTEGRADO CON MOTOR IA2 (MENSAJE Y PREGUNTAS ACTUALIZADOS) -->
+    <!-- CHAT WEB INTEGRADO CON MOTOR IA2 -->
     <section class="glass-card-dash chat-section" style="margin-bottom: 20px;">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -274,7 +322,7 @@
       
       <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
-          <p>Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados dividido en 3 partes para ver resultados post SODIE y decidir activar la suscripción. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
+          <p>Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
         </div>
       </div>
 
@@ -292,9 +340,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
     <!-- FORMULARIO BASE DEL USUARIO (PASO 0 - OBLIGATORIO) -->
-    <!-- ========================================== -->
     <section id="section-user-form" class="glass-card-dash flow-container" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
       <h3 class="section-title mint-txt">Paso 0: Registro Obligatorio del Cliente</h3>
       <p class="step-desc" style="margin-bottom: 12px;">Completa tus datos personales obligatorios antes de continuar al pago del slot inicial de $1,000 USD:</p>
@@ -342,100 +388,116 @@
       </form>
     </section>
 
-    <!-- P.F (PAGO INICIAL) -->
+    <!-- P.F (PAGO INICIAL $1,000) -->
     <section id="pf-card" class="glass-card-dash pf-section hidden">
       <h3 class="section-title">P.F (Pago Inicial)</h3>
       <div class="pf-summary-list">
         <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">1.000$</strong></div>
-        <div class="pf-row"><span>Pago después de resultados (48H)</span><strong id="price-post">9.000$</strong></div>
+        <div class="pf-row"><span>Pago después de resultados (Hora 48-72-96)</span><strong id="price-post">9.000$</strong></div>
         <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">10.000$</strong></div>
       </div>
-      <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
+      <button id="btn-pay-main" class="btn-pf-action">PAGAR $1,000 USD</button>
     </section>
 
-    <!-- PAGO FINAL POST HORA 48 ($9,000 / $5,000) -->
-    <section id="card-pago-hora48" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
-      <h3 class="section-title mint-txt"> Liquidación Final - Hora 48</h3>
-      <p class="step-desc" style="margin-bottom: 15px;">Ciclo de 48 horas completado. Selecciona la opción de pago asignada para mantener el software activo:</p>
+    <!-- ========================================== -->
+    <!-- PAGOS RECURRENTES CADA 24H (HORA 48 - 72 - 96) -->
+    <!-- ========================================== -->
+    <section id="card-pago-recurring" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 id="recurring-title" class="section-title mint-txt"> Liquidación de Ciclo - Hora 48</h3>
+      <p id="recurring-desc" class="step-desc" style="margin-bottom: 15px;">Completa la renovación para mantener los borradores e inyección activa:</p>
       
       <div class="pf-summary-list" style="margin-bottom: 15px;">
-        <div class="pf-row"><span>Resultados Completos</span><strong class="mint-txt">9.000$ USD</strong></div>
+        <div class="pf-row"><span id="recurring-label-a">Monto Estándar</span><strong id="recurring-val-a" class="mint-txt">9.000$ USD</strong></div>
       </div>
 
       <div class="input-group-flow" style="gap: 10px;">
-        <button id="btn-pay-hora48-9000" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000;">Pagar $9.000 USD</button>
+        <button id="btn-pay-recurring-a" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000;">Pagar A</button>
+        <button id="btn-pay-recurring-b" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff;">Pagar B</button>
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- PASOS POSPAGO COMPLETOS (PASOS 1 AL 5)     -->
-    <!-- ========================================== -->
+    <!-- PASOS POSPAGO (PASOS 1 AL 5) -->
     <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px;">
       <h3 class="section-title fuchsia-txt">Pasos de Configuración e Integración Pospago</h3>
       
-      <!-- Paso 1: Contrato post Kontigo -->
+      <!-- Paso 1: Contrato -->
       <div id="step-contract-client" class="step-card" style="margin-bottom: 15px;">
-        <p class="step-desc"><strong>Paso 1: Contrato de Servicio (Post Kontigo)</strong></p>
-        <p class="step-desc" style="margin-top: 4px;">Descarga tu contrato generado, fírmalo y adjúntalo para validación inmediata:</p>
-        <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <a id="btn-download-contract" href="#" class="btn-pf-action" style="text-decoration: none; text-align: center; background: #3b82f6;">📥 Descargar Contrato PDF</a>
+        <p class="step-desc"><strong>Paso 1: Contrato de Servicio</strong></p>
+        <div style="margin-top: 8px;">
+          <a id="btn-download-contract" href="#" class="btn-pf-action" style="text-decoration: none; text-align: center; background: #3b82f6; display: inline-block;">📥 Descargar Contrato PDF</a>
         </div>
         <div class="input-group-flow" style="margin-top: 10px;">
           <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
           <button id="btn-client-send-contract" class="btn-pf-action">Enviar Contrato</button>
         </div>
-        <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de firma de contrato...</p>
+        <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de firma...</p>
       </div>
 
-      <!-- Paso 2: Asignar Evaluador -->
+      <!-- Paso 2: Evaluador -->
       <div id="step-evaluator-client" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>Paso 2: Asignación de Evaluador Meta</strong></p>
-        <p class="step-desc" style="margin-top: 4px;">Ingresa tu email o usuario de Facebook para darte acceso de evaluador:</p>
         <div class="input-group-flow" style="margin-top: 8px;">
           <input type="text" id="client-meta-user-input" placeholder="email / usuario de Facebook" />
           <button id="btn-client-send-evaluator" class="btn-pf-action">Guardar Evaluador</button>
         </div>
-        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de evaluador por Administrador...</p>
+        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de evaluador...</p>
       </div>
 
       <!-- Paso 3: Vincular Facebook -->
       <div id="step-connect-meta" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>Paso 3: Vincular Facebook</strong></p>
-        <p class="step-desc" style="margin-top: 4px;">Acepta ser evaluador y conecta con tu cuenta oficial de Meta Ads:</p>
         <button id="btn-connect-facebook-client" class="btn-pf-action btn-fb" style="margin-top: 8px; width: 100%;">Vincular Facebook Oficial 🗿</button>
       </div>
 
       <!-- Paso 4: Subir CSV -->
       <div id="step-upload-file" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>Paso 4: Subir Archivo CSV de Compradores</strong></p>
-        <p class="step-desc" style="margin-top: 4px;">Carga la lista exportada de tus compradores previos para la clonación por IA1:</p>
         <div class="input-group-flow" style="margin-top: 8px;">
           <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
           <button id="btn-client-upload-file" class="btn-pf-action">Subir CSV</button>
         </div>
-        <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">✅ Archivo CSV procesado por IA1 e inyectado exitosamente.</p>
+        <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">✅ Archivo CSV procesado e inyectado.</p>
       </div>
 
       <!-- Paso 5: Crear Borrador 'Prueba Hora 24' -->
       <div id="card-draft-section" class="step-card hidden">
         <p class="step-desc"><strong>Paso 5: Crear Borrador "Prueba Hora 24"</strong></p>
-        <p class="step-desc" style="margin-top: 4px;">Agrega el presupuesto diario de $40 USD + visual y deja vacía la segmentación para activación de IA1:</p>
-        <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 10px; width: 100%; background: #10B981; font-weight: bold; font-size: 1.05rem;">Listo / Lanzar Borrador 🚀</button>
+        <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 10px; width: 100%; background: #10B981; font-weight: bold;">Listo / Lanzar Borrador 🚀</button>
       </div>
     </section>
 
-    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H / HORA 24) -->
+    <!-- ========================================== -->
+    <!-- SECCIÓN DE MÉTRICAS POST HORA 96           -->
+    <!-- ========================================== -->
+    <section id="section-post-hora96-metrics" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 class="section-title mint-txt">Métricas Consolidadas Post Hora 96</h3>
+      
+      <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+        <div class="glass-card-dash text-center">
+          <span class="gauge-label">Métricas del Cliente (Facturación)</span>
+          <div id="post96-client-revenue" class="timer-digits mint-txt" style="font-size: 1.5rem; margin-top: 5px;">$48,500 USD</div>
+        </div>
+        <div class="glass-card-dash text-center">
+          <span class="gauge-label">Comisión SODIE (0%)</span>
+          <div id="post96-my-commission" class="timer-digits fuchsia-txt" style="font-size: 1.5rem; margin-top: 5px;">$9,700 USD</div>
+        </div>
+      </div>
+      
+      <p class="step-desc" style="margin-top: 12px; text-align: center;">Conectado exitosamente con Hotmart / Stripe en modo retención mensual.</p>
+    </section>
+
+    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H) -->
     <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
       <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
       <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
       <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
     </section>
 
-    <!-- TEMPORIZADOR TIEMPO TOTAL (48H) -->
+    <!-- TEMPORIZADOR TIEMPO TOTAL (HORA 48 - 72 - 96) -->
     <section class="glass-card-dash timer-section">
-      <span class="timer-label">TIEMPO TOTAL</span>
+      <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
-      <span class="timer-sub">TIEMPO CON SOFTWARE ACTIVO</span>
+      <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
     </section>
   </main>
 
@@ -466,7 +528,7 @@
           </div>
           
           <div id="link-input-container" class="link-input-wrapper hidden" style="margin-top: 10px;">
-            <label id="selected-amount-label">Ingresar link para el pago:</label>
+            <label id="selected-amount-label">Ingresar link (si hace falta):</label>
             <div class="input-group-flow">
               <input type="url" id="payment-link-input" placeholder="https://link.depago.com/..." />
               <button id="btn-send-payment-link" class="btn-pf-action">Enviar</button>
@@ -500,8 +562,16 @@
         </div>
 
         <div class="admin-group" style="margin-top: 10px;">
-          <label>Activar lista de espera</label>
+          <label>Cierre General de Dashboard</label>
           <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
+        </div>
+
+        <!-- BOTÓN ACTIVAR LISTA DE ESPERA (ABAJO DE CERRAR DASHBOARD) -->
+        <div class="admin-group" style="margin-top: 15px; border-top: 1px dashed rgba(217,70,239,0.5); padding-top: 12px;">
+          <label class="fuchsia-txt" style="font-weight: bold;">Gestión de Lista de Espera 👺</label>
+          <button id="btn-toggle-waitlist" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
+            🔥 Activar Modo Lista de Espera
+          </button>
         </div>
 
       </div>
