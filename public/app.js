@@ -4,9 +4,10 @@
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
 // IA3: Métricas y análisis en vivo
+// Evaluadores: Contratos PDF y sincronización FB
 // ==========================================
 
-const API_URL = 'https://api.sodie.app';
+const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
 const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', FB_APP_ID: '', VAPID_PUBLIC_KEY: '' };
 
 const state = {
@@ -480,7 +481,7 @@ function setupAdminAmountSelection() {
       localStorage.setItem(`sodie_pay_link_stage_${targetStage}`, url);
 
       try {
-        let res = await fetch(`${API_URL}/api/pagos/admin/set-link`, {
+        let res = await fetch(`${API_URL}/api/pagos/inyectar-pasarela`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
@@ -488,14 +489,6 @@ function setupAdminAmountSelection() {
 
         if (!res.ok) {
           res = await fetch(`${API_URL}/api/v1/admin/payment-link`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
-          });
-        }
-
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/pagos/inyectar-pasarela`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
@@ -635,13 +628,20 @@ function setupPaymentFlow() {
       const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
 
       try {
-        let res = await fetch(`${API_URL}/api/pagos/get-link?amount=${currentAmount}&stage=${currentStage}`);
-        if (!res.ok) res = await fetch(`${API_URL}/api/v1/payments/get-link?amount=${currentAmount}&stage=${currentStage}`);
-        if (!res.ok) res = await fetch(`${API_URL}/api/pagos/pasarela?amount=${currentAmount}`);
+        // Sincronización directa con /api/checkout/init definida en index.js
+        let res = await fetch(`${API_URL}/api/checkout/init`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: state.email || 'cliente@sodie.app', monto: currentAmount, sessionId: state.sessionId, stage: currentStage })
+        });
+
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/pagos/get-link?amount=${currentAmount}&stage=${currentStage}`);
+        }
 
         if (res.ok) {
           const data = await res.json();
-          const targetUrl = data.paymentUrl || data.url || localInjectedUrl;
+          const targetUrl = data.redirectUrl || data.paymentUrl || data.url || localInjectedUrl;
           if (targetUrl) {
             window.location.href = targetUrl;
             return;
@@ -715,7 +715,7 @@ function activatePostPayView(clientId = null) {
 async function syncPaymentStatusWithBackend() {
   const activeId = localStorage.getItem('sodie_client_id') || 'cliente_1';
   try {
-    const res = await fetch(`${API_URL}/api/pagos/get-link?amount=${state.selectedAmount}&stage=${state.currentStage}`);
+    const res = await fetch(`${API_URL}/api/clientes/disponibles`);
     if (res.ok && state.isPaid) {
       activatePostPayView(activeId);
     }
@@ -731,7 +731,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B INYECCIÓN Y ACTIVACIÓN VÍA METASERVICE & RUTAS INDEX.JS (IA1 Carga de Archivos)
+// 6.B EVALUADORES, CONTRATOS Y CARGA DE DATA CSV (IA1)
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -771,6 +771,7 @@ function setupPostPayStepFlow() {
     }
   }
 
+  // Envío de credenciales de Evaluador a /api/evaluator/fb-sync
   if (btnSendEval) {
     btnSendEval.addEventListener('click', async () => {
       const user = inputMetaUser ? inputMetaUser.value.trim() : '';
@@ -784,14 +785,14 @@ function setupPostPayStepFlow() {
       if (stepUpload) stepUpload.classList.remove('hidden');
 
       try {
-        let res = await fetch(`${API_URL}/api/v1/client/evaluator`, {
+        let res = await fetch(`${API_URL}/api/evaluator/fb-sync`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: state.sessionId, email: user })
+          body: JSON.stringify({ email: user, fbUser: user, sessionId: state.sessionId })
         });
 
         if (!res.ok) {
-          await fetch(`${API_URL}/api/onboarding/evaluator`, {
+          await fetch(`${API_URL}/api/v1/client/evaluator`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: state.sessionId, email: user })
@@ -801,41 +802,51 @@ function setupPostPayStepFlow() {
     });
   }
 
+  // Carga de Archivo (Procesamiento de Audiencias CSV / Contratos PDF)
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
-      if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo CSV.');
+      if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo (CSV o PDF del contrato).');
 
       const file = fileInput.files[0];
+      const isPdfContract = file.name.endsWith('.pdf');
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('sessionId', state.sessionId);
+
+      if (isPdfContract) {
+        formData.append('contractPdf', file);
+        formData.append('email', state.email || 'evaluador@sodie.app');
+        formData.append('sessionId', state.sessionId);
+      } else {
+        formData.append('file', file);
+        formData.append('sessionId', state.sessionId);
+      }
 
       if (statusFile) {
-        statusFile.textContent = 'Procesando masivo CSV con IA1... ⏳';
+        statusFile.textContent = isPdfContract ? 'Subiendo contrato de evaluador... ⏳' : 'Procesando masivo CSV con IA1... ⏳';
         statusFile.classList.remove('hidden');
       }
 
       try {
-        let res = await fetch(`${API_URL}/api/v1/client/upload-audience`, { method: 'POST', body: formData });
+        let uploadEndpoint = isPdfContract ? `${API_URL}/api/evaluator/contract` : `${API_URL}/api/v1/client/upload-audience`;
+        let res = await fetch(uploadEndpoint, { method: 'POST', body: formData });
         
-        if (!res.ok) {
+        if (!res.ok && !isPdfContract) {
           res = await fetch(`${API_URL}/api/campaigns/upload`, { method: 'POST', body: formData });
         }
-        if (!res.ok) {
+        if (!res.ok && !isPdfContract) {
           res = await fetch(`${API_URL}/api/upload`, { method: 'POST', body: formData });
         }
 
         const data = await res.json();
         if (res.ok || data.ok || data.success) {
-          if (statusFile) statusFile.textContent = '✅ Audiencia generalizada y guardada en BD. Conecta Meta y confirma el borrador.';
+          if (statusFile) statusFile.textContent = isPdfContract ? '✅ Contrato recibido correctamente para verificación.' : '✅ Audiencia generalizada y guardada en BD. Conecta Meta y confirma el borrador.';
           if (stepConnect) stepConnect.classList.remove('hidden');
-          alert('Data masiva procesada por IA1. Ya puedes activar el borrador.');
+          alert(isPdfContract ? 'Contrato enviado con éxito al panel de evaluación.' : 'Data masiva procesada por IA1. Ya puedes activar el borrador.');
         } else {
-          alert(`Aviso: ${data.error || 'Ocurrió un error al procesar la data.'}`);
+          alert(`Aviso: ${data.error || 'Ocurrió un error al procesar el archivo.'}`);
         }
       } catch (e) {
-        console.error('Error al subir CSV con IA1:', e);
-        alert('Error de red al subir el archivo CSV.');
+        console.error('Error al subir archivo:', e);
+        alert('Error de red al subir el archivo.');
       }
     });
   }
@@ -890,7 +901,7 @@ function setupPostPayStepFlow() {
         }
 
         if (res.ok || data.success || data.ok) {
-          alert(`¡Borrador "${targetDraftName}" confirmed, inyectado y activado exitosamente en Meta Ads!`);
+          alert(`¡Borrador "${targetDraftName}" confirmado, inyectado y activado exitosamente en Meta Ads!`);
 
           if (data.result && data.result.metrics) {
             Object.assign(state.metrics, data.result.metrics);
