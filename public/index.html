@@ -9,6 +9,19 @@
 <body>
 
   <!-- ========================================== -->
+  <!-- BURBUJA / TOAST DE NOTIFICACIÓN EN VIVO    -->
+  <!-- ========================================== -->
+  <div id="toast-notification" class="toast-bubble hidden">
+    <div class="toast-content">
+      <span class="toast-icon"></span>
+      <div class="toast-text">
+        <strong id="toast-title">Acceso Cliente #1 Concedido</strong>
+        <p id="toast-body">1 Cupo Disponible</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- 1. SPLASH SCREEN                           -->
   <!-- ========================================== -->
   <div id="view-splash" class="full-screen">
@@ -73,6 +86,7 @@
     <div class="glass-card-dash text-center">
       <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
       <p class="step-desc" style="margin-top: 10px;">El acceso al software se encuentra cerrado actualmente.</p>
+      <button ic="btn-submit-list-" class="btn-pf-actiion">Unirme a la lista de Espera</button>
     </div>
   </div>
 
@@ -111,24 +125,12 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR -->
+    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR (ACTUALIZADAS SEGÚN PUNTO 7) -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas</h3>
+      <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
         
-        <!-- Alcance -->
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-reach">15.000</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
-            </svg>
-          </div>
-          <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
-        </article>
-
-        <!-- Inversión -->
+        <!-- 1. Inversión -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
           <div class="card-value" id="metric-spend">40$</div>
@@ -137,31 +139,67 @@
               <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span>Variación</span><span class="fuchsia-txt">-1.50%</span></div>
+          <div class="card-foot"><span>Presupuesto 48H</span><span class="fuchsia-txt">$40.00</span></div>
         </article>
 
-        <!-- Visitas (Vistas) -->
+        <!-- 2. Alcance -->
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-reach">2.000</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
+        </article>
+
+        <!-- 3. Visitas -->
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-visitors">1.504</div>
+          <div class="card-value" id="metric-visitors">80</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
               <path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span>Estado</span><span class="mint-txt">Activo</span></div>
+          <div class="card-foot"><span>Tráfico Activo</span><span class="mint-txt">En vivo</span></div>
         </article>
 
-        <!-- Clientes Objetivo -->
+        <!-- 4. Activos -->
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clientes</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-leads">2</div>
+          <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-activos">1</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-              <path d="M0,30 Q50,30 100,15 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" />
+              <path d="M0,40 Q50,20 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span>Meta</span><span class="fuchsia-txt">Pendiente</span></div>
+          <div class="card-foot"><span>Estado Sistema</span><span class="mint-txt">Online</span></div>
+        </article>
+
+        <!-- 5. Clics en "Ir a Pagar" -->
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-pay-clicks">342</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,35 Q50,15 100,25 T200,8" fill="none" stroke="#d946ef" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Intención Alta</span><span class="fuchsia-txt">+28%</span></div>
+        </article>
+
+        <!-- 6. Cupos Disponibles -->
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Cupos Disponibles</span><span class="dots">•••</span></div>
+          <div class="card-value fuchsia-txt" id="metric-cupos-val">2</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+              <path d="M0,10 Q50,30 100,20 T200,50" fill="none" stroke="#d946ef" stroke-width="3" />
+            </svg>
+          </div>
+          <div class="card-foot"><span>Límite Inicial</span><span class="fuchsia-txt">Solo 2</span></div>
         </article>
 
       </div>
@@ -171,12 +209,14 @@
         <span class="dot"></span>
         <span class="dot"></span>
         <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
       </div>
     </section>
 
     <!-- TARJETAS DE MÉTRICAS META EN VIVO -->
     <section id="meta-live-metrics-container" class="glass-card-dash hidden" style="margin-bottom: 20px;">
-      <h3 class="section-title mint-txt">📊 Métricas Meta Ads en Tiempo Real</h3>
+      <h3 class="section-title mint-txt">Métricas Meta Ads en Tiempo Real</h3>
       <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Alcance Meta</span>
@@ -187,8 +227,8 @@
           <div id="live-metric-visitors" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">1,504</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
-          <span class="gauge-label">Clientes / Leads</span>
-          <div id="live-metric-leads" class="timer-digits fuchsia-txt" style="font-size: 1.6rem; margin-top: 5px;">75</div>
+          <span class="gauge-label">Clientes</span>
+          <div id="live-metric-leads" class="timer-digits fuchsia-txt" style="font-size: 1.6rem; margin-top: 5px;">2</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Conversión</span>
@@ -197,25 +237,49 @@
       </div>
     </section>
 
-    <!-- CHAT WEB INTEGRADO CON MOTOR IA2 -->
-    <section class="glass-card-dash chat-section">
+    <!-- ========================================== -->
+    <!-- NUEVA SECCIÓN DE VIDEO CON EL BORRADOR     -->
+    <!-- ========================================== -->
+    <section class="glass-card-dash video-section" style="margin-bottom: 20px;">
+      <div class="chat-header">
+        <h3 class="section-title mint-txt">🎥 Demostración del Borrador en Vivo</h3>
+        <span class="badge-client" style="color: #00ffcc; border-color: #00ffcc;">20-30 segs</span>
+      </div>
+      <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">
+        Observa cómo subimos la lista de compradores desde SODIE, se crea automáticamente la campaña con borrador sin segmentación manual y se publica en Meta Ads actualizando el dashboard en tiempo récord.
+      </p>
+      
+      <div class="video-container-glass">
+        <video id="sodie-demo-video" controls poster="poster-demo.jpg" style="width: 100%; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.3); background: #000;">
+          <source src="sodie-demo-borrador.mp4" type="video/mp4">
+          Tu navegador no soporta la reproducción de video HTML5.
+        </video>
+      </div>
+
+      <div class="video-status-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.85rem;">
+        <span class="mint-txt">Tiempo de publicación: <strong>20-30 segundos</strong></span>
+        <span class="step-desc">Campaña optimizada $40/48H</span>
+      </div>
+    </section>
+
+    <!-- CHAT WEB INTEGRADO CON MOTOR IA2 (MENSAJE Y PREGUNTAS ACTUALIZADOS) -->
+    <section class="glass-card-dash chat-section" style="margin-bottom: 20px;">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
         <div class="cupos-badge">
           <span class="purple-neon-dot"></span>
-          <span id="cupos-count-badge" class="cupos-text">solo 2 clientes disponibles</span>
+          <span id="cupos-count-badge" class="cupos-text">solo 2 cupos disponibles</span>
         </div>
       </div>
       
       <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
-          <p>Gracias por confirmar que este software funciona, ¿qué preguntas tienes? 
-         SODIE es un software que automatiza la segmentación clonando la lista de compradores de tus infoproductos y aumentando el ROAS en 24 horas. Donde lo actualizas cada vez que llega la hora 24. 
-            La oferta es simple: $1,000 de acceso inicial y $9,000 cuando veas los resultados en 48 horas ($10,000 USD total). ¿Tienes el Ads Manager listo?</p>
+          <p>Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados dividido en 3 partes para ver resultados post SODIE y decidir activar la suscripción. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
         </div>
       </div>
 
       <div id="quick-replies" class="chat-quick-options">
+        <button class="opt-btn" data-payload="cupo_3">¿Qué ocurre al cupo 3?</button>
         <button class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
         <button class="opt-btn" data-payload="ecommerce">Ecommerce</button>
         <button class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
@@ -228,12 +292,62 @@
       </div>
     </section>
 
+    <!-- ========================================== -->
+    <!-- FORMULARIO BASE DEL USUARIO (PASO 0 - OBLIGATORIO) -->
+    <!-- ========================================== -->
+    <section id="section-user-form" class="glass-card-dash flow-container" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 class="section-title mint-txt">Paso 0: Registro Obligatorio del Cliente</h3>
+      <p class="step-desc" style="margin-bottom: 12px;">Completa tus datos personales obligatorios antes de continuar al pago del slot inicial de $1,000 USD:</p>
+      
+      <form id="form-user-base" onsubmit="event.preventDefault();">
+        <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          
+          <div class="form-group-field">
+            <label for="user-age" class="step-desc" style="font-weight: bold; color: #fff;">Edad *</label>
+            <input type="number" id="user-age" placeholder="Ej: 30" min="18" max="99" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+
+          <div class="form-group-field">
+            <label for="user-email" class="step-desc" style="font-weight: bold; color: #fff;">Email *</label>
+            <input type="email" id="user-email" placeholder="cliente@ejemplo.com" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+
+          <div class="form-group-field">
+            <label for="user-phone" class="step-desc" style="font-weight: bold; color: #fff;">Número de Teléfono *</label>
+            <input type="tel" id="user-phone" placeholder="+1 234 567 8900" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+
+          <div class="form-group-field">
+            <label for="user-city" class="step-desc" style="font-weight: bold; color: #fff;">Ciudad *</label>
+            <input type="text" id="user-city" placeholder="Ciudad" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+
+          <div class="form-group-field">
+            <label for="user-country" class="step-desc" style="font-weight: bold; color: #fff;">País *</label>
+            <input type="text" id="user-country" placeholder="País" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+
+          <div class="form-group-field">
+            <label for="user-zip" class="step-desc" style="font-weight: bold; color: #fff;">Código Postal *</label>
+            <input type="text" id="user-zip" placeholder="Zip Code" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+
+        </div>
+
+        <div style="margin-top: 15px;">
+          <button type="button" id="btn-submit-user-data" class="btn-pf-action" style="width: 100%; font-size: 1.1rem; padding: 14px; background: linear-gradient(135deg, #00ffcc, #10b981); color: #000; font-weight: bold;">
+            Ir a Pagar
+          </button>
+        </div>
+      </form>
+    </section>
+
     <!-- P.F (PAGO INICIAL) -->
-    <section id="pf-card" class="glass-card-dash pf-section">
+    <section id="pf-card" class="glass-card-dash pf-section hidden">
       <h3 class="section-title">P.F (Pago Inicial)</h3>
       <div class="pf-summary-list">
         <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">1.000$</strong></div>
-        <div class="pf-row"><span>Pago después de resultados</span><strong id="price-post">9.000$</strong></div>
+        <div class="pf-row"><span>Pago después de resultados (48H)</span><strong id="price-post">9.000$</strong></div>
         <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">10.000$</strong></div>
       </div>
       <button id="btn-pay-main" class="btn-pf-action">PAGAR</button>
@@ -241,58 +355,80 @@
 
     <!-- PAGO FINAL POST HORA 48 ($9,000 / $5,000) -->
     <section id="card-pago-hora48" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
-      <h3 class="section-title mint-txt">⚡ Liquidación Final - Hora 48</h3>
+      <h3 class="section-title mint-txt"> Liquidación Final - Hora 48</h3>
       <p class="step-desc" style="margin-bottom: 15px;">Ciclo de 48 horas completado. Selecciona la opción de pago asignada para mantener el software activo:</p>
       
       <div class="pf-summary-list" style="margin-bottom: 15px;">
-        <div class="pf-row"><span>Monto Estándar (Resultados Completos)</span><strong class="mint-txt">9.000$ USD</strong></div>
-        <div class="pf-row"><span>Monto Ajustado / Oferta Especial</span><strong class="fuchsia-txt">5.000$ USD</strong></div>
+        <div class="pf-row"><span>Resultados Completos</span><strong class="mint-txt">9.000$ USD</strong></div>
       </div>
 
       <div class="input-group-flow" style="gap: 10px;">
         <button id="btn-pay-hora48-9000" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000;">Pagar $9.000 USD</button>
-        <button id="btn-pay-hora48-5000" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff;">Pagar $5.000 USD</button>
       </div>
     </section>
 
-    <!-- PASOS POSPAGO -->
+    <!-- ========================================== -->
+    <!-- PASOS POSPAGO COMPLETOS (PASOS 1 AL 5)     -->
+    <!-- ========================================== -->
     <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px;">
       <h3 class="section-title fuchsia-txt">Pasos de Configuración e Integración Pospago</h3>
       
-      <div id="step-evaluator-client" class="step-card" style="margin-bottom: 15px;">
-        <p class="step-desc"><strong>1.1. Evaluador Meta:</strong> Ingresa tu email o usuario registrado para asignarte como evaluador en Meta:</p>
+      <!-- Paso 1: Contrato post Kontigo -->
+      <div id="step-contract-client" class="step-card" style="margin-bottom: 15px;">
+        <p class="step-desc"><strong>Paso 1: Contrato de Servicio (Post Kontigo)</strong></p>
+        <p class="step-desc" style="margin-top: 4px;">Descarga tu contrato generado, fírmalo y adjúntalo para validación inmediata:</p>
+        <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <a id="btn-download-contract" href="#" class="btn-pf-action" style="text-decoration: none; text-align: center; background: #3b82f6;">📥 Descargar Contrato PDF</a>
+        </div>
+        <div class="input-group-flow" style="margin-top: 10px;">
+          <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
+          <button id="btn-client-send-contract" class="btn-pf-action">Enviar Contrato</button>
+        </div>
+        <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de firma de contrato...</p>
+      </div>
+
+      <!-- Paso 2: Asignar Evaluador -->
+      <div id="step-evaluator-client" class="step-card hidden" style="margin-bottom: 15px;">
+        <p class="step-desc"><strong>Paso 2: Asignación de Evaluador Meta</strong></p>
+        <p class="step-desc" style="margin-top: 4px;">Ingresa tu email o usuario de Facebook para darte acceso de evaluador:</p>
         <div class="input-group-flow" style="margin-top: 8px;">
           <input type="text" id="client-meta-user-input" placeholder="email / usuario de Facebook" />
-          <button id="btn-client-send-evaluator" class="btn-pf-action">Verificar Evaluador</button>
+          <button id="btn-client-send-evaluator" class="btn-pf-action">Guardar Evaluador</button>
         </div>
-        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Enviado correctamente. Esperando asignación...</p>
+        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de evaluador por Administrador...</p>
       </div>
 
-      <div id="step-upload-file" class="step-card hidden" style="margin-bottom: 15px;">
-        <p class="step-desc"><strong>1.2. Inyección de Audiencia:</strong> Carga la lista exportada de compradores previas (Excel / CSV):</p>
-        <div class="input-group-flow" style="margin-top: 8px;">
-          <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          <button id="btn-client-upload-file" class="btn-pf-action">Subir Data</button>
-        </div>
-        <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Archivo procesado por IA1 e inyectado exitosamente.</p>
-      </div>
-
+      <!-- Paso 3: Vincular Facebook -->
       <div id="step-connect-meta" class="step-card hidden" style="margin-bottom: 15px;">
-        <p class="step-desc"><strong>1.3. Conexión de API:</strong> Otorga los permisos oficiales para iniciar el borrador:</p>
+        <p class="step-desc"><strong>Paso 3: Vincular Facebook</strong></p>
+        <p class="step-desc" style="margin-top: 4px;">Acepta ser evaluador y conecta con tu cuenta oficial de Meta Ads:</p>
         <button id="btn-connect-facebook-client" class="btn-pf-action btn-fb" style="margin-top: 8px; width: 100%;">Vincular Facebook Oficial 🗿</button>
       </div>
 
+      <!-- Paso 4: Subir CSV -->
+      <div id="step-upload-file" class="step-card hidden" style="margin-bottom: 15px;">
+        <p class="step-desc"><strong>Paso 4: Subir Archivo CSV de Compradores</strong></p>
+        <p class="step-desc" style="margin-top: 4px;">Carga la lista exportada de tus compradores previos para la clonación por IA1:</p>
+        <div class="input-group-flow" style="margin-top: 8px;">
+          <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+          <button id="btn-client-upload-file" class="btn-pf-action">Subir CSV</button>
+        </div>
+        <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">✅ Archivo CSV procesado por IA1 e inyectado exitosamente.</p>
+      </div>
+
+      <!-- Paso 5: Crear Borrador 'Prueba Hora 24' -->
       <div id="card-draft-section" class="step-card hidden">
-        <p class="step-desc"><strong>1.4. Inyección Final:</strong> Activa el borrador generado por IA1 directamente en Meta Ads Manager:</p>
-        <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 8px; width: 100%; background: #10B981;">CONFIRMAR Y ACTIVAR BORRADOR 🚀</button>
+        <p class="step-desc"><strong>Paso 5: Crear Borrador "Prueba Hora 24"</strong></p>
+        <p class="step-desc" style="margin-top: 4px;">Agrega el presupuesto diario de $40 USD + visual y deja vacía la segmentación para activación de IA1:</p>
+        <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 10px; width: 100%; background: #10B981; font-weight: bold; font-size: 1.05rem;">Listo / Lanzar Borrador 🚀</button>
       </div>
     </section>
 
-    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H) -->
+    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H / HORA 24) -->
     <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
-      <h3 class="section-title mint-txt">Tiempo Hora 48</h3>
+      <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
       <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
-      <span class="timer-sub">Tiempo para siguiente borrador</span>
+      <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
     </section>
 
     <!-- TEMPORIZADOR TIEMPO TOTAL (48H) -->
@@ -364,7 +500,7 @@
         </div>
 
         <div class="admin-group" style="margin-top: 10px;">
-          <label>Cierre General de Dashboard</label>
+          <label>Activar lista de espera</label>
           <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
         </div>
 
