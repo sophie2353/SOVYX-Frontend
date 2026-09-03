@@ -4,7 +4,7 @@
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
 // IA3: Métricas y análisis en vivo
-// Evaluadores: Contratos PDF, lista de espera y pasarelas de pago
+// Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas y Subida Admin
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -70,19 +70,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupChatSystem();
   setupAdminFiveClicks();
   setupAdminAmountSelection();
+  setupAdminUploadAndExport();
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
   startPersistentTimers();
   startLiveMetricsEngine();       
-  setupSSEMetricsStream();        // Conexión SSE con index.js (/api/campaigns/stream)
+  setupSSEMetricsStream();        
   setupPushNotifications();
   syncPaymentStatusWithBackend();
   renderInitialMetrics();         
 });
 
 // ==========================================
-// 1. BANNER DE COOKIES Y REGISTRO EN LISTA DE ESPERA
+// 1. BANNER DE COOKIES Y REGISTRO EN LISTA DE ESPERA (SODIE V4)
 // ==========================================
 function setupCookieBanner() {
   const cookieBanner = document.getElementById('cookie-banner');
@@ -121,7 +122,8 @@ function setupWaitlistFlow() {
     btnWaitlist.textContent = 'Procesando registro... ⏳';
 
     try {
-      let res = await fetch(`${API_URL}/api/lista-espera`, {
+      // Intento 1: Endpoint prioritario SODIE V4
+      let res = await fetch(`${API_URL}/api/v1/waitlist/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,6 +133,15 @@ function setupWaitlistFlow() {
           stage: state.currentStage
         })
       });
+
+      // Intento 2: Rutas alternas según index.js
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/api/lista-espera`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, phone, sessionId: state.sessionId })
+        });
+      }
 
       if (!res.ok) {
         res = await fetch(`${API_URL}/api/v1/waitlist`, {
@@ -144,10 +155,10 @@ function setupWaitlistFlow() {
         state.email = email;
         localStorage.setItem('sodie_user_email', email);
         if (statusMsg) {
-          statusMsg.textContent = '✅ Registrado en la lista de espera correctamente.';
+          statusMsg.textContent = '✅ Registrado en la lista de espera SODIE V4 correctamente.';
           statusMsg.classList.remove('hidden');
         }
-        alert('🎉 ¡Te has unido exitosamente a la lista de espera!');
+        alert('🎉 ¡Te has unido exitosamente a la lista de espera SODIE V4!');
         if (inputEmail) inputEmail.value = '';
         if (inputPhone) inputPhone.value = '';
       } else {
@@ -546,14 +557,27 @@ function setupAdminAmountSelection() {
       localStorage.setItem(`sodie_pay_link_stage_${targetStage}`, url);
 
       try {
-        let res = await fetch(`${API_URL}/api/pagos/inyectar-pasarela`, {
+        // Rutas primarias y secundarias de la pasarela según index.js
+        let targetEndpoint = targetStage === 'POST_48H' 
+          ? `${API_URL}/api/pasarela/admin/post48-link`
+          : `${API_URL}/api/pasarela/admin/set-link`;
+
+        let res = await fetch(targetEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
+          body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage, adminKey: CONFIG.SOVYX_ADMIN_KEY })
         });
 
         if (!res.ok) {
-          res = await fetch(`${API_URL}/api/v1/admin/payment-link`, {
+          res = await fetch(`${API_URL}/api/pasarela`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
+          });
+        }
+
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/pagos/admin`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
@@ -568,6 +592,70 @@ function setupAdminAmountSelection() {
         if (inputLink) inputLink.value = '';
         if (linkContainer) linkContainer.classList.add('hidden');
       }
+    });
+  }
+}
+
+// ==========================================
+// 4.C SUBIDA ADMIN (VIDEOS, PDF, EXCEL) & EXPORTACIÓN CSV HORA 48
+// ==========================================
+function setupAdminUploadAndExport() {
+  const btnUploadAdminFile = document.getElementById('btn-admin-upload-file');
+  const adminFileInput = document.getElementById('admin-file-input');
+  const adminUploadStatus = document.getElementById('admin-upload-status');
+  const btnExportCsv = document.getElementById('btn-export-hora48-csv');
+
+  // Subida de archivos desde el Panel Admin
+  if (btnUploadAdminFile && adminFileInput) {
+    btnUploadAdminFile.addEventListener('click', async () => {
+      if (!adminFileInput.files || !adminFileInput.files[0]) {
+        return alert('Selecciona un archivo (Video, PDF o Excel) para subir.');
+      }
+
+      const file = adminFileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('uploadedBy', 'admin');
+
+      if (adminUploadStatus) {
+        adminUploadStatus.textContent = 'Subiendo archivo al servidor... ⏳';
+        adminUploadStatus.classList.remove('hidden');
+      }
+
+      try {
+        let res = await fetch(`${API_URL}/api/admin/uploads`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/v1/admin/uploads`, {
+            method: 'POST',
+            body: formData
+          });
+        }
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok || data.success) {
+          if (adminUploadStatus) adminUploadStatus.textContent = '✅ Archivo subido y sincronizado correctamente.';
+          alert('¡Archivo publicado con éxito en la plataforma!');
+          adminFileInput.value = '';
+        } else {
+          alert(`Error: ${data.message || data.error || 'No se pudo subir el archivo.'}`);
+        }
+      } catch (err) {
+        console.error('Error en subida admin:', err);
+        alert('Error de conexión al subir el archivo.');
+      }
+    });
+  }
+
+  // Exportación de datos CSV "SODIE Clientes Hora 48"
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', () => {
+      const exportUrl = `${API_URL}/api/admin/export/export-clientes-hora48`;
+      window.open(exportUrl, '_blank');
     });
   }
 }
@@ -633,7 +721,7 @@ function updateMetricsUI(metricsData) {
 function setupSSEMetricsStream() {
   if (!window.EventSource) return;
 
-  const sseUrl = `${API_URL}/api/campaigns/stream?sessionId=${state.sessionId}`;
+  const sseUrl = `${API_URL}/api/v1/metrics/live?sessionId=${state.sessionId}`;
   const eventSource = new EventSource(sseUrl);
 
   eventSource.onmessage = (event) => {
@@ -665,8 +753,8 @@ function startLiveMetricsEngine() {
       
       if (res.ok) {
         const data = await res.json();
-        if (data.visitors) {
-          state.metrics.visitors = data.visitors;
+        if (data.visitors || data.reach) {
+          if (data.visitors) state.metrics.visitors = data.visitors;
           if (data.reach) state.metrics.reach = data.reach;
           if (data.leads !== undefined) state.metrics.leads = data.leads;
           if (data.conversionRate) state.metrics.conversionRate = data.conversionRate;
@@ -693,20 +781,21 @@ function setupPaymentFlow() {
       const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
 
       try {
-        // Sincronización directa con /api/checkout/init definida en index.js
-        let res = await fetch(`${API_URL}/api/checkout/init`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: state.email || 'cliente@sodie.app', monto: currentAmount, sessionId: state.sessionId, stage: currentStage })
-        });
+        // 1. Endpoint general de consulta pasarela
+        let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}`);
 
+        // 2. Checkout Init en index.js
         if (!res.ok) {
-          res = await fetch(`${API_URL}/api/pagos/get-link?amount=${currentAmount}&stage=${currentStage}`);
+          res = await fetch(`${API_URL}/api/checkout/init`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: state.email || 'cliente@sodie.app', monto: currentAmount, sessionId: state.sessionId, stage: currentStage })
+          });
         }
 
         if (res.ok) {
           const data = await res.json();
-          const targetUrl = data.redirectUrl || data.paymentUrl || data.url || localInjectedUrl;
+          const targetUrl = data.redirectUrl || data.paymentUrl || data.directPayLink || data.url || localInjectedUrl;
           if (targetUrl) {
             window.location.href = targetUrl;
             return;
@@ -741,7 +830,7 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   activatePostPayView(clientId);
 
   try {
-    let res = await fetch(`${API_URL}/api/pagos/confirm`, {
+    let res = await fetch(`${API_URL}/api/pago/confirm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId: state.sessionId, clientId: clientId, amount: amount, stage: state.currentStage })
