@@ -8,6 +8,8 @@
   --neon-purple: #d230ff;
   --text-main: #ffffff;
   --text-sub: #b2a4cd;
+  --glass-border: rgba(0, 255, 204, 0.45);
+  --glass-bg: linear-gradient(135deg, rgba(0, 255, 204, 0.07) 0%, rgba(10, 3, 22, 0.55) 100%);
 }
 
 *, *::before, *::after {
@@ -30,11 +32,45 @@ body {
   width: 100%;
 }
 
-/* CLASES DE UTILIDAD */
+/* CLASES UTILITARIAS Y TEXTO */
 .fuchsia-txt { color: var(--neon-fuchsia); }
 .mint-txt { color: var(--neon-mint); }
+.purple-txt { color: var(--neon-purple); }
+.text-sub { color: var(--text-sub); }
 .hidden { display: none !important; }
 .text-center { text-align: center; }
+
+/* INPUTS GENERALES Y BOTONES DESHABILITADOS */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"] {
+  width: 100%;
+  background: rgba(10, 4, 20, 0.7);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+input:focus {
+  border-color: var(--neon-mint);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+button:disabled,
+.btn-disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.6) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
 
 /* ========================================================= */
 /* 1. SPLASH SCREEN (HUD LÍQUIDO FUTURISTA)                  */
@@ -72,13 +108,14 @@ body {
   text-align: center;
 }
 
-/* LOGO SODIE (ORBITRON) */
+/* LOGO SODIE */
 .logo-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: -5px;
+  cursor: pointer;
 }
 
 .logo-title {
@@ -177,7 +214,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* GAUGES HUD (CÍRCULOS PERFECTOS) */
+/* GAUGES HUD */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -265,7 +302,7 @@ body {
 }
 
 /* ========================================================= */
-/* 2. DASHBOARD MAIN                                         */
+/* 2. DASHBOARD MAIN & CONTENEDORES                          */
 /* ========================================================= */
 
 .dashboard-container {
@@ -276,7 +313,8 @@ body {
 
 .dash-header { display: flex; justify-content: space-between; align-items: center; }
 .dash-header-right { display: flex; align-items: center; gap: 8px; }
-.brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; }
+.brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; cursor: pointer; }
+
 .badge-client {
   font-size: 0.75rem;
   background: rgba(0, 255, 204, 0.15);
@@ -287,11 +325,13 @@ body {
   box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
   font-weight: 700;
 }
-.btn-icon { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: #fff; }
+
+.btn-icon { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: #fff; transition: transform 0.2s ease; }
+.btn-icon:hover { transform: scale(1.1); }
 
 .glass-card-dash {
-  background: linear-gradient(135deg, rgba(0, 255, 204, 0.07) 0%, rgba(10, 3, 22, 0.45) 100%);
-  border: 1.5px solid rgba(0, 255, 204, 0.45);
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
   border-top: 2px solid rgba(0, 255, 204, 0.85);
   border-bottom: 1.5px solid rgba(0, 255, 204, 0.25);
   border-radius: 20px;
@@ -305,9 +345,12 @@ body {
     0 0 15px rgba(0, 255, 204, 0.12);
 }
 
-.section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
-/* PANEL ADMIN */
+/* ========================================================= */
+/* 3. PANEL ADMIN Y BIOMETRÍA (v4)                           */
+/* ========================================================= */
+
 .admin-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
 .admin-group label { font-size: 0.8rem; color: var(--text-sub); display: block; margin-bottom: 4px; }
 
@@ -321,24 +364,26 @@ body {
 .btn-select-amount {
   flex: 1;
   min-width: 65px;
-  padding: 8px;
+  padding: 10px 8px;
   background: rgba(255, 0, 122, 0.1);
   border: 1px solid var(--neon-fuchsia);
-  border-radius: 8px;
+  border-radius: 10px;
   color: #fff;
   cursor: pointer;
   font-weight: bold;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
 .btn-select-amount:hover,
 .btn-select-amount:active {
   background: var(--neon-fuchsia);
-  box-shadow: 0 0 12px rgba(255, 0, 122, 0.6);
+  box-shadow: 0 0 14px rgba(255, 0, 122, 0.7);
   transform: translateY(-1px);
 }
 
-/* BOTÓN DE ACCESO BIOMÉTRICO (ADMIN) */
+/* BOTÓN DE ACCESO BIOMÉTRICO (ADMIN / WEBAUTHN v4) */
+#btn-biometric-auth,
 .btn-admin-biometric {
   display: flex;
   align-items: center;
@@ -346,7 +391,7 @@ body {
   gap: 10px;
   width: 100%;
   padding: 12px;
-  background: rgba(0, 255, 204, 0.08);
+  background: rgba(0, 255, 204, 0.12);
   border: 1.5px solid var(--neon-mint);
   border-radius: 12px;
   color: var(--neon-mint);
@@ -354,26 +399,25 @@ body {
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(0, 255, 204, 0.2);
+  box-shadow: 0 0 14px rgba(0, 255, 204, 0.25);
   transition: all 0.25s ease;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
+#btn-biometric-auth:hover,
 .btn-admin-biometric:hover {
   background: var(--neon-mint);
   color: var(--bg-dark);
-  box-shadow: 0 0 20px var(--neon-mint);
+  box-shadow: 0 0 22px var(--neon-mint);
   transform: translateY(-1px);
-}
-
-.btn-admin-biometric svg, 
-.btn-admin-biometric .bio-icon-placeholder {
-  font-size: 1.2rem;
-  filter: drop-shadow(0 0 6px currentColor);
 }
 
 .link-input-wrapper {
   animation: fadeInDown 0.3s ease;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 @keyframes fadeInDown {
@@ -386,8 +430,8 @@ body {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  background: rgba(5, 1, 10, 0.85);
-  backdrop-filter: blur(10px);
+  background: rgba(5, 1, 10, 0.88);
+  backdrop-filter: blur(12px);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -398,9 +442,17 @@ body {
 .modal-auth-box {
   width: 100%;
   max-width: 340px;
+  background: linear-gradient(135deg, rgba(20, 5, 35, 0.95) 0%, rgba(5, 1, 10, 0.98) 100%);
+  border: 1.5px solid var(--neon-fuchsia);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(255, 0, 122, 0.3);
 }
 
-/* MÉTRICAS & CARRUSEL (CON SNAP SCROLL CORREGIDO) */
+/* ========================================================= */
+/* 4. MÉTRICAS, CARRUSEL & IA3 (REAL-TIME SSE)               */
+/* ========================================================= */
+
 .metrics-slider { 
   display: flex; 
   gap: 14px; 
@@ -421,13 +473,15 @@ body {
   justify-content: space-between; 
   border-radius: 18px; 
   scroll-snap-align: start;
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.05) 0%, rgba(10, 3, 22, 0.6) 100%);
+  border: 1px solid rgba(0, 255, 204, 0.3);
 }
 
 /* TARJETAS DE MÉTRICAS PARA CLIENTES */
 .metrics-slider .metric-square.client-metric-card {
-  background: linear-gradient(135deg, rgba(210, 48, 255, 0.06) 0%, rgba(10, 3, 22, 0.6) 100%);
-  border: 1.5px solid rgba(210, 48, 255, 0.35);
-  border-top: 2px solid rgba(210, 48, 255, 0.7);
+  background: linear-gradient(135deg, rgba(210, 48, 255, 0.08) 0%, rgba(10, 3, 22, 0.7) 100%);
+  border: 1.5px solid rgba(210, 48, 255, 0.4);
+  border-top: 2px solid rgba(210, 48, 255, 0.85);
   box-shadow: 
     inset 0 1px 2px rgba(210, 48, 255, 0.3),
     0 8px 22px rgba(0, 0, 0, 0.6);
@@ -437,6 +491,14 @@ body {
 .client-metric-card .metric-number {
   color: #fff;
   font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* PUNTOS INDICADORES DEL CARRUSEL */
@@ -464,27 +526,37 @@ body {
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
-/* PASOS Y FLUJOS DE ENTRADA */
-.step-desc { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px; }
-.input-group-flow { display: flex; flex-direction: column; gap: 8px; }
-.input-group-flow input { background: rgba(10, 4, 20, 0.6); border: 1px solid var(--neon-mint); border-radius: 10px; padding: 10px; color: #fff; outline: none; }
-.file-input-custom { margin-bottom: 12px; color: var(--text-sub); width: 100%; }
+/* ========================================================= */
+/* 5. PASOS Y FLUJOS DE ENTRADA (EVALUADOR & CSV / IA1)     */
+/* ========================================================= */
+
+.step-desc { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4; }
+.input-group-flow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.file-input-custom { margin-bottom: 12px; color: var(--text-sub); width: 100%; font-size: 0.82rem; }
 .style-wait-msg { font-size: 0.85rem; margin-top: 8px; text-align: center; }
 
+/* BOTÓN OFICIAL DE FACEBOOK / META */
 .btn-fb { 
-  background: rgba(24, 119, 242, 0.15) !important; 
-  border-color: #1877f2 !important; 
+  background: rgba(24, 119, 242, 0.18) !important; 
+  border: 1.5px solid #1877f2 !important; 
   color: #ffffff !important; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-fb:hover {
   background: #1877f2 !important;
-  box-shadow: 0 0 12px rgba(24, 119, 242, 0.6) !important;
+  box-shadow: 0 0 16px rgba(24, 119, 242, 0.7) !important;
 }
 
 .row-btns-renew { display: flex; gap: 10px; margin-top: 10px; }
 
-/* CHAT WEB HEADER & CUPOS BADGE */
+/* ========================================================= */
+/* 6. CHAT WEB INTERACTIVO & MOTOR DE CIERRE (IA2)           */
+/* ========================================================= */
+
 .chat-header {
   display: flex;
   justify-content: space-between;
@@ -516,28 +588,118 @@ body {
   letter-spacing: 0.5px;
 }
 
-.chat-body { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
-.incoming-simple p { background: rgba(0, 255, 204, 0.12); border: 1px solid rgba(0, 255, 204, 0.4); border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 0.85rem; color: #fff; max-width: 85%; }
-.outgoing-simple p { background: rgba(255, 0, 122, 0.15); border: 1px solid rgba(255, 0, 122, 0.4); border-radius: 12px 12px 2px 12px; padding: 10px 14px; font-size: 0.85rem; color: #fff; max-width: 85%; margin-left: auto; }
+.chat-body { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  margin: 12px 0; 
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.incoming-simple p { 
+  background: rgba(0, 255, 204, 0.12); 
+  border: 1px solid rgba(0, 255, 204, 0.4); 
+  border-radius: 12px 12px 12px 2px; 
+  padding: 10px 14px; 
+  font-size: 0.85rem; 
+  color: #fff; 
+  max-width: 88%; 
+}
+
+.outgoing-simple p { 
+  background: rgba(255, 0, 122, 0.15); 
+  border: 1px solid rgba(255, 0, 122, 0.4); 
+  border-radius: 12px 12px 2px 12px; 
+  padding: 10px 14px; 
+  font-size: 0.85rem; 
+  color: #fff; 
+  max-width: 88%; 
+  margin-left: auto; 
+}
 
 .chat-quick-options { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; scrollbar-width: none; }
 .chat-quick-options::-webkit-scrollbar { display: none; }
-.opt-btn { flex: 0 0 auto; background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0, 255, 204, 0.5); border-radius: 20px; padding: 6px 12px; color: var(--neon-mint); font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.opt-btn { 
+  flex: 0 0 auto; 
+  background: rgba(0, 255, 204, 0.08); 
+  border: 1px solid rgba(0, 255, 204, 0.5); 
+  border-radius: 20px; 
+  padding: 6px 12px; 
+  color: var(--neon-mint); 
+  font-size: 0.75rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  white-space: nowrap; 
+  transition: all 0.2s ease;
+}
+
+.opt-btn:hover {
+  background: var(--neon-mint);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px var(--neon-mint);
+}
 
 .chat-input-bar { display: flex; gap: 8px; }
-.chat-input-bar input { flex: 1; background: rgba(10, 4, 20, 0.5); border: 1px solid rgba(0, 255, 204, 0.35); border-radius: 10px; padding: 8px 12px; color: #fff; font-size: 0.8rem; outline: none; }
-.chat-send-btn { background: var(--neon-mint); border: none; border-radius: 10px; width: 36px; color: #05010a; font-weight: 800; cursor: pointer; }
+.chat-input-bar input { flex: 1; }
+.chat-send-btn { 
+  background: var(--neon-mint); 
+  border: none; 
+  border-radius: 10px; 
+  width: 40px; 
+  color: #05010a; 
+  font-weight: 800; 
+  cursor: pointer; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
 
-/* ACCIONES DE PAGO Y BOTONES */
+.chat-send-btn:hover {
+  box-shadow: 0 0 12px var(--neon-mint);
+  transform: scale(1.05);
+}
+
+/* ========================================================= */
+/* 7. ACCIONES DE PAGO Y BOTONES NATIVOS                     */
+/* ========================================================= */
+
 .pf-summary-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.9rem; }
 .pf-row { display: flex; justify-content: space-between; color: var(--text-sub); }
-.pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; }
+.pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; font-weight: bold; }
 
-.btn-pf-action { width: 100%; padding: 12px 0; background: linear-gradient(180deg, rgba(0, 255, 204, 0.25) 0%, rgba(0, 180, 140, 0.08) 100%); border: 1.5px solid var(--neon-mint); border-radius: 12px; color: var(--neon-mint); font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 0 12px rgba(0, 255, 204, 0.2); transition: all 0.25s ease; }
-.btn-pf-action:hover { box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); transform: translateY(-1px); }
-.btn-danger { border-color: var(--neon-fuchsia); color: var(--neon-fuchsia); background: rgba(255, 0, 122, 0.1); }
+.btn-pf-action { 
+  width: 100%; 
+  padding: 12px 0; 
+  background: linear-gradient(180deg, rgba(0, 255, 204, 0.25) 0%, rgba(0, 180, 140, 0.08) 100%); 
+  border: 1.5px solid var(--neon-mint); 
+  border-radius: 12px; 
+  color: var(--neon-mint); 
+  font-weight: 700; 
+  font-size: 0.95rem; 
+  cursor: pointer; 
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.2); 
+  transition: all 0.25s ease; 
+}
 
-/* SECCIÓN ESPECÍFICA PAGO HORA 48 ($9K / $5K) */
+.btn-pf-action:hover { 
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); 
+  transform: translateY(-1px); 
+}
+
+.btn-danger { 
+  border-color: var(--neon-fuchsia) !important; 
+  color: var(--neon-fuchsia) !important; 
+  background: rgba(255, 0, 122, 0.1) !important; 
+}
+
+.btn-danger:hover {
+  box-shadow: 0 0 18px rgba(255, 0, 122, 0.6) !important;
+}
+
+/* BOTONES ESPECÍFICOS DE PAGO HORA 48 ($9,000 / $5,000) */
 #card-pago-hora48 .input-group-flow {
   display: flex;
   flex-direction: row;
@@ -549,6 +711,7 @@ body {
   color: var(--bg-dark) !important;
   border-color: var(--neon-mint) !important;
   box-shadow: 0 0 14px rgba(0, 255, 204, 0.4);
+  font-weight: 800;
 }
 
 #btn-pay-hora48-9000:hover {
@@ -560,20 +723,23 @@ body {
   color: #ffffff !important;
   border-color: var(--neon-fuchsia) !important;
   box-shadow: 0 0 14px rgba(255, 0, 122, 0.4);
+  font-weight: 800;
 }
 
 #btn-pay-hora48-5000:hover {
   box-shadow: 0 0 22px rgba(255, 0, 122, 0.8);
 }
 
+/* TEMPORIZADORES Y RECTAS FINALES */
 .timer-section { text-align: center; }
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
-.timer-digits { font-size: 3rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; }
+.timer-digits { font-size: 3rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; font-family: 'Orbitron', sans-serif; }
 .timer-sub { font-size: 0.65rem; color: var(--text-sub); letter-spacing: 1px; }
 
 /* ========================================================= */
-/* 3. BANNER DE COOKIES & FLOTANTES                          */
+/* 8. BANNER DE COOKIES & FLOTANTES                          */
 /* ========================================================= */
+
 .cookie-banner-box {
   position: fixed;
   bottom: 20px;
@@ -586,7 +752,7 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 204, 0.2);
   border: 1px solid rgba(0, 255, 204, 0.4);
   backdrop-filter: blur(16px);
-  background: rgba(10, 3, 22, 0.9);
+  background: rgba(10, 3, 22, 0.92);
   border-radius: 16px;
   animation: slideUpCookie 0.4s ease-out;
 }
@@ -602,7 +768,10 @@ body {
   }
 }
 
-/* RESPONSIVE LAPTOP / DESKTOP */
+/* ========================================================= */
+/* 9. ADAPTACIÓN RESPONSIVE DESKTOP                          */
+/* ========================================================= */
+
 @media (min-width: 900px) {
   .dashboard-container {
     max-width: 1100px;
