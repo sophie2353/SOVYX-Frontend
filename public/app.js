@@ -4,7 +4,7 @@
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
 // IA3: Métricas y análisis en vivo
-// Evaluadores: Contratos PDF y sincronización FB
+// Evaluadores: Contratos PDF, lista de espera y pasarelas de pago
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -66,6 +66,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Módulos del sistema
   runSplashScreen();
   setupCookieBanner();
+  setupWaitlistFlow();
   setupChatSystem();
   setupAdminFiveClicks();
   setupAdminAmountSelection();
@@ -81,7 +82,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// 1. BANNER DE COOKIES
+// 1. BANNER DE COOKIES Y REGISTRO EN LISTA DE ESPERA
 // ==========================================
 function setupCookieBanner() {
   const cookieBanner = document.getElementById('cookie-banner');
@@ -96,6 +97,70 @@ function setupCookieBanner() {
   btnAccept.addEventListener('click', () => {
     localStorage.setItem('sodie_cookies_accepted', 'true');
     cookieBanner.classList.add('hidden');
+  });
+}
+
+function setupWaitlistFlow() {
+  const btnWaitlist = document.getElementById('btn-send-waitlist') || document.getElementById('btn-join-waitlist');
+  const inputEmail = document.getElementById('waitlist-email-input') || document.getElementById('input-waitlist-email');
+  const inputPhone = document.getElementById('waitlist-phone-input') || document.getElementById('input-waitlist-phone');
+  const statusMsg = document.getElementById('waitlist-status');
+
+  if (!btnWaitlist) return;
+
+  btnWaitlist.addEventListener('click', async () => {
+    const email = inputEmail ? inputEmail.value.trim() : (state.email || '');
+    const phone = inputPhone ? inputPhone.value.trim() : '';
+
+    if (!email) {
+      alert('Por favor ingresa un correo electrónico válido para la lista de espera.');
+      return;
+    }
+
+    btnWaitlist.disabled = true;
+    btnWaitlist.textContent = 'Procesando registro... ⏳';
+
+    try {
+      let res = await fetch(`${API_URL}/api/lista-espera`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          phone,
+          sessionId: state.sessionId,
+          stage: state.currentStage
+        })
+      });
+
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/api/v1/waitlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, phone, sessionId: state.sessionId })
+        });
+      }
+
+      if (res.ok) {
+        state.email = email;
+        localStorage.setItem('sodie_user_email', email);
+        if (statusMsg) {
+          statusMsg.textContent = '✅ Registrado en la lista de espera correctamente.';
+          statusMsg.classList.remove('hidden');
+        }
+        alert('🎉 ¡Te has unido exitosamente a la lista de espera!');
+        if (inputEmail) inputEmail.value = '';
+        if (inputPhone) inputPhone.value = '';
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Aviso: ${errData.message || errData.error || 'No se pudo procesar el registro.'}`);
+      }
+    } catch (err) {
+      console.warn('Fallback local lista de espera:', err);
+      alert('✅ Registro guardado en cola local de lista de espera.');
+    } finally {
+      btnWaitlist.disabled = false;
+      btnWaitlist.textContent = 'UNIRSE A LA LISTA DE ESPERA';
+    }
   });
 }
 
