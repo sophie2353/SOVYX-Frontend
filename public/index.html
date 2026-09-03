@@ -81,24 +81,48 @@
     </div>
   </div>
 
-  <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA ACTIVADA -->
+  <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA ACTIVADA (18 CUPOS FASE 1) -->
   <div id="view-sold-out" class="full-screen hidden">
-    <div class="glass-card-dash text-center" style="max-width: 480px; padding: 25px;">
+    <div class="glass-card-dash text-center" style="max-width: 520px; padding: 25px; margin: 20px auto;">
       <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
       <p class="step-desc" style="margin-top: 10px;">El acceso directo al software SODIE está cerrado por límite de capacidad.</p>
       
-      <!-- CONTENEDOR LISTA DE ESPERA Y NOTIFICACIONES -->
-      <div id="waitlist-card-box" class="glass-card-dash" style="margin-top: 20px; border: 1px solid #d946ef;">
-        <h3 class="section-title mint-txt">Unirse a la Lista de Espera</h3>
-        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Activa las notificaciones para ser el primero en recibir acceso al liberar un cupo (Cupo 3+ $5,000/mes):</p>
+      <!-- CONTENEDOR REGISTRO LISTA DE ESPERA Y SODIE V4 (18 CUPOS FASE 1) -->
+      <div id="waitlist-card-box" class="glass-card-dash" style="margin-top: 20px; border: 1px solid #d946ef; text-align: left;">
+        <h3 class="section-title mint-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
+        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">
+          Registra tus datos para asegurar tu cupo en SODIE V4. Acceso exclusivo con autenticación biométrica:
+        </p>
         
-        <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px; margin-bottom: 10px;" />
-        
-        <button id="btn-enable-notifications" class="btn-pf-action" style="width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
-          Activar Notificaciones y Unirme
-        </button>
-        <p id="waitlist-status-msg" class="mint-txt hidden" style="margin-top: 10px; font-size: 0.85rem;">
-          ✅ ¡Estás en la lista de espera! Te notificaremos al abrirse un cupo.
+        <form id="form-v4-waitlist" onsubmit="event.preventDefault();">
+          <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="text" id="v4-user-name" placeholder="Nombre completo *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px;" />
+            <input type="text" id="v4-user-company" placeholder="Compañía / Marca *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px;" />
+          </div>
+          
+          <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px; margin-top: 10px;" />
+          
+          <input type="password" id="v4-user-password" placeholder="Contraseña de acceso *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px; margin-top: 10px;" />
+
+          <!-- BOTÓN REGISTRO BIOMETRÍA -->
+          <div style="margin-top: 12px;">
+            <button type="button" id="btn-register-biometrics" class="btn-pf-action" style="width: 100%; background: rgba(0, 255, 204, 0.15); border: 1px solid #00ffcc; color: #00ffcc;">
+              ☝️ Registrar Biometría (Huella / Face ID)
+            </button>
+            <span id="biometric-status-tag" class="step-desc" style="display: block; font-size: 0.75rem; margin-top: 4px; color: #888;">Estatus biometría: Pendiente</span>
+          </div>
+          
+          <button id="btn-enable-notifications" type="submit" class="btn-pf-action" style="width: 100%; background: #d946ef; color: #fff; font-weight: bold; margin-top: 15px;">
+            Reservar Slot en Lista de Espera (Cupo 3+ $5,000/mes)
+          </button>
+        </form>
+
+        <div style="margin-top: 15px; border-top: 1px stroke rgba(255,255,255,0.1); padding-top: 10px; text-align: center;">
+          <a href="#" id="btn-open-v4-login" class="mint-txt" style="text-decoration: underline; font-size: 0.9rem;">¿Ya tienes cuenta? Iniciar Sesión en SODIE V4</a>
+        </div>
+
+        <p id="waitlist-status-msg" class="mint-txt hidden" style="margin-top: 10px; font-size: 0.85rem; text-align: center;">
+          ✅ ¡Estás en la lista de espera de SODIE V4! Te notificaremos al abrirse un cupo.
         </p>
       </div>
     </div>
@@ -120,12 +144,35 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. DASHBOARD MAIN (CLIENTE)                -->
+  <!-- MODAL LOGIN SODIE V4 (CLAVE O BIOMETRÍA)   -->
+  <!-- ========================================== -->
+  <div id="modal-v4-auth" class="modal-overlay hidden">
+    <div class="glass-card-dash modal-auth-box">
+      <h3 class="section-title mint-txt">Iniciar Sesión SODIE V4 ⚡</h3>
+      <p class="step-desc" style="margin-bottom: 12px;">Ingresa con tus credenciales registradas:</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="password" id="v4-login-key-input" placeholder="Contraseña de usuario..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
+        <button id="btn-submit-v4-key" class="btn-pf-action" style="background: #00ffcc; color: #000; font-weight: bold;">Entrar con Clave</button>
+      </div>
+
+      <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; text-align: center;">
+        <button id="btn-login-biometrics-v4" class="btn-pf-action" style="width: 100%; background: rgba(217,70,239,0.2); border: 1px solid #d946ef; color: #fff;">
+          👆 Ingresar con Biometría (10 segs)
+        </button>
+      </div>
+
+      <button id="btn-close-v4-modal" class="btn-pf-action btn-danger" style="margin-top: 12px; width: 100%;">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. DASHBOARD MAIN (CLIENTE / SODIE V4)     -->
   <!-- ========================================== -->
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
-        <span class="brand-text">SODIE</span>
+        <span id="header-brand-title" class="brand-text">SODIE</span>
         <span id="client-id-badge" class="badge-client hidden" style="margin-left: 10px; font-weight: bold; color: #00ffcc;"></span>
       </div>
       <div class="dash-header-right">
@@ -213,7 +260,7 @@
               <path d="M0,10 Q50,30 100,20 T200,50" fill="none" stroke="#d946ef" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span>Límite Inicial</span><span class="fuchsia-txt">Solo 2</span></div>
+          <div class="card-foot"><span id="metric-cupos-label">Límite Inicial</span><span id="metric-cupos-sub" class="fuchsia-txt">Solo 2</span></div>
         </article>
 
       </div>
@@ -232,7 +279,7 @@
     <!-- COMPARATIVA SECUENCIAL CON SODIE VS SIN SODIE -->
     <!-- ========================================== -->
     <section id="section-sodie-comparison" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
-      <h3 class="section-title fuchsia-txt"> Resultados Comparativos con SODIE vs Sin SODIE</h3>
+      <h3 class="section-title fuchsia-txt">Resultados Comparativos con SODIE vs Sin SODIE</h3>
       
       <!-- HORA 24 COMPARATIVA -->
       <div id="comp-hora-24" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px;">
@@ -310,7 +357,7 @@
       </div>
     </section>
 
-    <!-- CHAT WEB INTEGRADO CON MOTOR IA2 -->
+    <!-- SECCIÓN CHAT WEB INTEGRADO CON MOTOR IA2 -->
     <section class="glass-card-dash chat-section" style="margin-bottom: 20px;">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -322,7 +369,7 @@
       
       <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
-          <p>Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
+          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
         </div>
       </div>
 
@@ -337,6 +384,38 @@
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
         <button id="chat-send" class="chat-send-btn">➤</button>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE MÉTRICAS EN TIEMPO REAL DE LOS DOS EVALUADORES (CIERRE 2/2) -->
+    <section id="section-evaluators-metrics" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 class="section-title mint-txt">Métricas en Tiempo Real de los Evaluadores (Hora 24 y 48) 👺</h3>
+      <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+        <div class="glass-card-dash text-center">
+          <span class="gauge-label mint-txt">Evaluador #1 (Hora 24)</span>
+          <div id="eval-metric-h24" class="timer-digits mint-txt" style="font-size: 1.4rem; margin-top: 5px;">ROAS 4.1x | CPA $8.20</div>
+        </div>
+        <div class="glass-card-dash text-center">
+          <span class="gauge-label fuchsia-txt">Evaluador #2 (Hora 48)</span>
+          <div id="eval-metric-h48" class="timer-digits fuchsia-txt" style="font-size: 1.4rem; margin-top: 5px;">ROAS 5.8x | CPA $6.90</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN SODIE V4 SLIDES HORIZONTALES (DISEÑOS & CAPTURAS) -->
+    <section id="section-v4-slides" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+      <h3 class="section-title fuchsia-txt">SODIE V4 - Vistas y Módulos de Arquitectura</h3>
+      <p class="step-desc" style="margin-bottom: 12px;">Desliza horizontalmente para revisar los prototipos de interfaz de la nueva versión V4:</p>
+      
+      <div class="v4-horizontal-slider" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin;">
+        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #d946ef;">
+          <img src="slide-v4-1.png" alt="Slide V4 1" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
+          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #1</span>
+        </div>
+        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #00ffcc;">
+          <img src="slide-v4-2.png" alt="Slide V4 2" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
+          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #2</span>
+        </div>
       </div>
     </section>
 
@@ -388,15 +467,26 @@
       </form>
     </section>
 
-    <!-- P.F (PAGO INICIAL $1,000) -->
+    <!-- P.F (PAGO INICIAL $1,000) / CONTENEDOR REEMPLAZABLE POR UNIR A LISTA DE ESPERA -->
     <section id="pf-card" class="glass-card-dash pf-section hidden">
-      <h3 class="section-title">P.F (Pago Inicial)</h3>
-      <div class="pf-summary-list">
-        <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">1.000$</strong></div>
-        <div class="pf-row"><span>Pago después de resultados (Hora 48-72-96)</span><strong id="price-post">9.000$</strong></div>
-        <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">10.000$</strong></div>
+      <div id="pf-standard-content">
+        <h3 class="section-title">P.F (Pago Inicial)</h3>
+        <div class="pf-summary-list">
+          <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">1.000$</strong></div>
+          <div class="pf-row"><span>Pago después de resultados (Hora 48-72-96)</span><strong id="price-post">9.000$</strong></div>
+          <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">10.000$</strong></div>
+        </div>
+        <button id="btn-pay-main" class="btn-pf-action">PAGAR $1,000 USD</button>
       </div>
-      <button id="btn-pay-main" class="btn-pf-action">PAGAR $1,000 USD</button>
+
+      <!-- REEMPLAZO DINÁMICO CUANDO 2/2 SE COMPLETA -->
+      <div id="pf-waitlist-replacement" class="hidden text-center" style="padding: 10px;">
+        <h3 class="section-title fuchsia-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
+        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Los cupos directos se agotaron. Regístrate para entrar en la cohorte SODIE V4.</p>
+        <button id="btn-trigger-waitlist-modal" class="btn-pf-action" style="background: #d946ef; color: #fff; width: 100%; font-weight: bold;">
+          🚀 Unirme a Lista de Espera SODIE V4
+        </button>
+      </div>
     </section>
 
     <!-- ========================================== -->
@@ -493,6 +583,13 @@
       <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
     </section>
 
+    <!-- CRONÓMETRO SODIE V4 (CUENTA REGRESIVA 72-96H PARA PRÓXIMO BORRADOR) -->
+    <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+      <h3 class="section-title fuchsia-txt">Lanzamiento Próximo Borrador V4</h3>
+      <div id="timer-v4-display" class="timer-digits fuchsia-txt" style="font-size: 2.2rem; margin: 10px 0;">72:00:00</div>
+      <span class="timer-sub">Cuenta regresiva activa para inyección programada de audiencias V4</span>
+    </section>
+
     <!-- TEMPORIZADOR TIEMPO TOTAL (HORA 48 - 72 - 96) -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
@@ -518,6 +615,7 @@
       <h3 class="section-title fuchsia-txt">Módulos de Configuración y Pagos Requeridos</h3>
       <div class="admin-grid">
         
+        <!-- SELECCIONAR PAGO Y LINKS DE PASARELA -->
         <div class="admin-group">
           <label>Seleccionar Pago Requerido</label>
           <div class="admin-btns">
@@ -536,6 +634,7 @@
           </div>
         </div>
 
+        <!-- DATOS DE EVALUADOR META -->
         <div class="admin-group">
           <label>Evaluador en Meta (Datos recibidos)</label>
           <div class="input-group-flow" style="margin-bottom: 6px;">
@@ -545,32 +644,79 @@
           <button id="btn-admin-approve-evaluator" class="btn-pf-action">Aprobar Cliente</button>
         </div>
 
+        <!-- CARGAR HOJA DE CÁLCULO (EXCEL / CSV) -->
         <div class="admin-group">
           <label>Hoja de Cálculo (Excel / CSV)</label>
           <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
           <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Datos</button>
         </div>
 
+        <!-- SUBIR VIDEO DE DEMOSTRACIÓN AL DASHBOARD -->
+        <div class="admin-group">
+          <label class="mint-txt">Subir Video Demostrativo a Dashboard</label>
+          <div class="input-group-flow">
+            <input type="file" id="admin-video-input" class="file-input-custom" accept="video/mp4, video/webm" />
+            <button id="btn-upload-admin-video" class="btn-pf-action">Mostrar en Dashboard 🎬</button>
+          </div>
+        </div>
+
+        <!-- SUBIR CONTRATO PDF PARA DESCARGA DE CLIENTES -->
+        <div class="admin-group">
+          <label class="mint-txt">Subir Documento Contrato PDF</label>
+          <div class="input-group-flow">
+            <input type="file" id="admin-contract-file-input" class="file-input-custom" accept=".pdf" />
+            <button id="btn-upload-admin-contract" class="btn-pf-action">Publicar PDF 📄</button>
+          </div>
+        </div>
+
+        <!-- SUBIR IMÁGENES SLIDES SODIE V4 -->
+        <div class="admin-group">
+          <label class="fuchsia-txt">Subir Capturas / Diseños para Slides V4</label>
+          <div class="input-group-flow">
+            <input type="file" id="admin-v4-images-input" class="file-input-custom" accept="image/*" multiple />
+            <button id="btn-upload-v4-images" class="btn-pf-action">Cargar Slides 📸</button>
+          </div>
+        </div>
+
+        <!-- INTEGRACIÓN FACEBOOK -->
         <div class="admin-group">
           <label>Permisos de Integración Oficial</label>
           <button id="btn-connect-facebook" class="btn-pf-action btn-fb">Vincular Facebook</button>
         </div>
 
+        <!-- ESTADO BORRADOR -->
         <div class="admin-group">
           <label>Borrador #1 ("Prueba Hora 24")</label>
           <button id="btn-draft-ready" class="btn-pf-action">Listo</button>
         </div>
 
+        <!-- BOTÓN EXPORTAR DATA A CSV -->
+        <div class="admin-group">
+          <label class="mint-txt">Exportación de Base de Datos</label>
+          <button id="btn-export-data" class="btn-pf-action" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: bold;">
+            Exportar Data (SODIE Clientes Hora 48 .CSV)
+          </button>
+        </div>
+
+        <!-- CIERRE GENERAL DE DASHBOARD (2/2) -->
         <div class="admin-group" style="margin-top: 10px;">
           <label>Cierre General de Dashboard</label>
           <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
         </div>
 
-        <!-- BOTÓN ACTIVAR LISTA DE ESPERA (ABAJO DE CERRAR DASHBOARD) -->
+        <!-- GESTIÓN DE LISTA DE ESPERA (TOGGLE CERRAR / ACTIVAR) -->
         <div class="admin-group" style="margin-top: 15px; border-top: 1px dashed rgba(217,70,239,0.5); padding-top: 12px;">
           <label class="fuchsia-txt" style="font-weight: bold;">Gestión de Lista de Espera 👺</label>
           <button id="btn-toggle-waitlist" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
             🔥 Activar Modo Lista de Espera
+          </button>
+        </div>
+
+        <!-- ACTIVAR SODIE V4 CON MÓDULOS BIOMÉTRICOS -->
+        <div class="admin-group" style="margin-top: 10px;">
+          <label class="mint-txt" style="font-weight: bold;">Plataforma SODIE V4</label>
+          <button id="btn-toggle-sodie-v4" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #00ffcc; color: #000; font-weight: bold;">
+            ⚡ Activar SODIE V4 (Biometría + Slides)
           </button>
         </div>
 
