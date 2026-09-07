@@ -9,14 +9,14 @@
 <body>
 
   <!-- ========================================== -->
-  <!-- BURBUJA / TOAST DE NOTIFICACIÓN EN VIVO    -->
+  <!-- TOAST DE NOTIFICACIÓN EN VIVO             -->
   <!-- ========================================== -->
   <div id="toast-notification" class="toast-bubble hidden">
     <div class="toast-content">
       <span class="toast-icon"></span>
       <div class="toast-text">
         <strong id="toast-title">Acceso Cliente #1 Concedido</strong>
-        <p id="toast-body">1 Cupo Disponible</p>
+        <p id="toast-body">2 Cupos Disponibles</p>
       </div>
     </div>
   </div>
@@ -81,13 +81,13 @@
     </div>
   </div>
 
-  <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA ACTIVADA (18 CUPOS FASE 1) -->
+  <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA ACTIVADA -->
   <div id="view-sold-out" class="full-screen hidden">
     <div class="glass-card-dash text-center" style="max-width: 520px; padding: 25px; margin: 20px auto;">
-      <h2 class="fuchsia-txt">CUPOS AGOTADOS 👺</h2>
-      <p class="step-desc" style="margin-top: 10px;">El acceso directo al software SODIE está cerrado por límite de capacidad.</p>
+      <h2 class="fuchsia-txt">CUPOS AGOTADOS</h2>
+      <p class="step-desc" style="margin-top: 10px;">El acceso directo al software SODIE está cerrado por límite de capacidad (2/2 cupos ocupados).</p>
       
-      <!-- CONTENEDOR REGISTRO LISTA DE ESPERA Y SODIE V4 (18 CUPOS FASE 1) -->
+      <!-- CONTENEDOR REGISTRO LISTA DE ESPERA Y SODIE V4 -->
       <div id="waitlist-card-box" class="glass-card-dash" style="margin-top: 20px; border: 1px solid #d946ef; text-align: left;">
         <h3 class="section-title mint-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
         <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">
@@ -107,7 +107,7 @@
           <!-- BOTÓN REGISTRO BIOMETRÍA -->
           <div style="margin-top: 12px;">
             <button type="button" id="btn-register-biometrics" class="btn-pf-action" style="width: 100%; background: rgba(0, 255, 204, 0.15); border: 1px solid #00ffcc; color: #00ffcc;">
-              ☝️ Registrar Biometría (Huella / Face ID)
+              Registrar Biometría (Huella / Face ID)
             </button>
             <span id="biometric-status-tag" class="step-desc" style="display: block; font-size: 0.75rem; margin-top: 4px; color: #888;">Estatus biometría: Pendiente</span>
           </div>
@@ -148,7 +148,7 @@
   <!-- ========================================== -->
   <div id="modal-v4-auth" class="modal-overlay hidden">
     <div class="glass-card-dash modal-auth-box">
-      <h3 class="section-title mint-txt">Iniciar Sesión SODIE V4 ⚡</h3>
+      <h3 class="section-title mint-txt">Iniciar Sesión SODIE V4</h3>
       <p class="step-desc" style="margin-bottom: 12px;">Ingresa con tus credenciales registradas:</p>
       
       <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -158,7 +158,7 @@
 
       <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; text-align: center;">
         <button id="btn-login-biometrics-v4" class="btn-pf-action" style="width: 100%; background: rgba(217,70,239,0.2); border: 1px solid #d946ef; color: #fff;">
-          👆 Ingresar con Biometría (10 segs)
+          Ingresar con Biometría (10 segs)
         </button>
       </div>
 
@@ -186,7 +186,7 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR -->
+    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR (40$ INVERSIÓN, 2.000 ALCANCE Y 2 CUPOS) -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
@@ -200,7 +200,7 @@
               <path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span>Presupuesto 48H</span><span class="fuchsia-txt">$40.00</span></div>
+          <div class="card-foot"><span>Presupuesto Pruebas</span><span class="fuchsia-txt">$40.00</span></div>
         </article>
 
         <!-- 2. Alcance -->
@@ -212,7 +212,7 @@
               <path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span>Incremento</span><span class="mint-txt">+12.5%</span></div>
+          <div class="card-foot"><span>Audiencia Objetivos</span><span class="mint-txt">2K personas</span></div>
         </article>
 
         <!-- 3. Visitas -->
@@ -260,7 +260,7 @@
               <path d="M0,10 Q50,30 100,20 T200,50" fill="none" stroke="#d946ef" stroke-width="3" />
             </svg>
           </div>
-          <div class="card-foot"><span id="metric-cupos-label">Límite Inicial</span><span id="metric-cupos-sub" class="fuchsia-txt">Solo 2</span></div>
+          <div class="card-foot"><span id="metric-cupos-label">Exclusividad</span><span id="metric-cupos-sub" class="fuchsia-txt">Solo 2</span></div>
         </article>
 
       </div>
@@ -281,7 +281,6 @@
     <section id="section-sodie-comparison" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
       <h3 class="section-title fuchsia-txt">Resultados Comparativos con SODIE vs Sin SODIE</h3>
       
-      <!-- HORA 24 COMPARATIVA -->
       <div id="comp-hora-24" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px;">
         <h4 class="mint-txt">Finalizado: Hora 24</h4>
         <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
@@ -298,7 +297,6 @@
         </div>
       </div>
 
-      <!-- HORA 48 COMPARATIVA -->
       <div id="comp-hora-48" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; border-top: 1px stroke #00ffcc;">
         <h4 class="fuchsia-txt">Finalizado: Hora 48</h4>
         <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
@@ -322,7 +320,7 @@
       <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Alcance Meta</span>
-          <div id="live-metric-reach" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">15,420</div>
+          <div id="live-metric-reach" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">2,000</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Visitas</span>
@@ -339,7 +337,7 @@
       </div>
     </section>
 
-    <!-- SECCIÓN DE VIDEO CON EL BORRADOR -->
+    <!-- SECCIÓN DE VIDEO DEMO -->
     <section class="glass-card-dash video-section" style="margin-bottom: 20px;">
       <div class="chat-header">
         <h3 class="section-title mint-txt">Demostración del Borrador en Vivo</h3>
@@ -357,7 +355,7 @@
       </div>
     </section>
 
-    <!-- SECCIÓN CHAT WEB INTEGRADO CON MOTOR IA2 -->
+    <!-- SECCIÓN CHAT WEB -->
     <section class="glass-card-dash chat-section" style="margin-bottom: 20px;">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
@@ -369,7 +367,7 @@
       
       <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
-          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
+          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutes con contrato firmado. Conoce todo con estas preguntas</p>
         </div>
       </div>
 
@@ -387,128 +385,60 @@
       </div>
     </section>
 
-    <!-- SECCIÓN DE MÉTRICAS EN TIEMPO REAL DE LOS DOS EVALUADORES (CIERRE 2/2) -->
-    <section id="section-evaluators-metrics" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
-      <h3 class="section-title mint-txt">Métricas en Tiempo Real de los Evaluadores (Hora 24 y 48) 👺</h3>
-      <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-        <div class="glass-card-dash text-center">
-          <span class="gauge-label mint-txt">Evaluador #1 (Hora 24)</span>
-          <div id="eval-metric-h24" class="timer-digits mint-txt" style="font-size: 1.4rem; margin-top: 5px;">ROAS 4.1x | CPA $8.20</div>
-        </div>
-        <div class="glass-card-dash text-center">
-          <span class="gauge-label fuchsia-txt">Evaluador #2 (Hora 48)</span>
-          <div id="eval-metric-h48" class="timer-digits fuchsia-txt" style="font-size: 1.4rem; margin-top: 5px;">ROAS 5.8x | CPA $6.90</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN SODIE V4 SLIDES HORIZONTALES (DISEÑOS & CAPTURAS) -->
-    <section id="section-v4-slides" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
-      <h3 class="section-title fuchsia-txt">SODIE V4 - Vistas y Módulos de Arquitectura</h3>
-      <p class="step-desc" style="margin-bottom: 12px;">Desliza horizontalmente para revisar los prototipos de interfaz de la nueva versión V4:</p>
-      
-      <div class="v4-horizontal-slider" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin;">
-        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #d946ef;">
-          <img src="slide-v4-1.png" alt="Slide V4 1" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
-          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #1</span>
-        </div>
-        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #00ffcc;">
-          <img src="slide-v4-2.png" alt="Slide V4 2" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
-          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #2</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- FORMULARIO BASE DEL USUARIO (PASO 0 - OBLIGATORIO) -->
-    <section id="section-user-form" class="glass-card-dash flow-container" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
-      <h3 class="section-title mint-txt">Paso 0: Registro Obligatorio del Cliente</h3>
-      <p class="step-desc" style="margin-bottom: 12px;">Completa tus datos personales obligatorios antes de continuar al pago del slot inicial de $1,000 USD:</p>
-      
-      <form id="form-user-base" onsubmit="event.preventDefault();">
-        <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
-          
-          <div class="form-group-field">
-            <label for="user-age" class="step-desc" style="font-weight: bold; color: #fff;">Edad *</label>
-            <input type="number" id="user-age" placeholder="Ej: 30" min="18" max="99" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-          </div>
-
-          <div class="form-group-field">
-            <label for="user-email" class="step-desc" style="font-weight: bold; color: #fff;">Email *</label>
-            <input type="email" id="user-email" placeholder="cliente@ejemplo.com" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-          </div>
-
-          <div class="form-group-field">
-            <label for="user-phone" class="step-desc" style="font-weight: bold; color: #fff;">Número de Teléfono *</label>
-            <input type="tel" id="user-phone" placeholder="+1 234 567 8900" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-          </div>
-
-          <div class="form-group-field">
-            <label for="user-city" class="step-desc" style="font-weight: bold; color: #fff;">Ciudad *</label>
-            <input type="text" id="user-city" placeholder="Ciudad" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-          </div>
-
-          <div class="form-group-field">
-            <label for="user-country" class="step-desc" style="font-weight: bold; color: #fff;">País *</label>
-            <input type="text" id="user-country" placeholder="País" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-          </div>
-
-          <div class="form-group-field">
-            <label for="user-zip" class="step-desc" style="font-weight: bold; color: #fff;">Código Postal *</label>
-            <input type="text" id="user-zip" placeholder="Zip Code" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-          </div>
-
-        </div>
-
-        <div style="margin-top: 15px;">
-          <button type="button" id="btn-submit-user-data" class="btn-pf-action" style="width: 100%; font-size: 1.1rem; padding: 14px; background: linear-gradient(135deg, #00ffcc, #10b981); color: #000; font-weight: bold;">
-            Ir a Pagar
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <!-- P.F (PAGO INICIAL $1,000) / CONTENEDOR REEMPLAZABLE POR UNIR A LISTA DE ESPERA -->
-    <section id="pf-card" class="glass-card-dash pf-section hidden">
+    <!-- TARJETA PAGO INICIAL $1,000 (PAGO DE RESERVA DIRECTA) -->
+    <section id="pf-card" class="glass-card-dash pf-section" style="margin-bottom: 20px;">
       <div id="pf-standard-content">
-        <h3 class="section-title">P.F (Pago Inicial)</h3>
+        <h3 class="section-title">P.F (Reserva de Slot Exclusivo)</h3>
         <div class="pf-summary-list">
           <div class="pf-row"><span>Pago inicial</span><strong id="price-initial">1.000$</strong></div>
-          <div class="pf-row"><span>Pago después de resultados (Hora 48-72-96)</span><strong id="price-post">9.000$</strong></div>
+          <div class="pf-row"><span>Pago después de resultados con Binance (Hora 48-72-96)</span><strong id="price-post">9.000$</strong></div>
           <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">10.000$</strong></div>
         </div>
-        <button id="btn-pay-main" class="btn-pf-action">PAGAR $1,000 USD</button>
+        <button id="btn-pay-main" class="btn-pf-action" style="margin-top: 12px; width: 100%; font-size: 1.1rem; padding: 14px; background: linear-gradient(135deg, #00ffcc, #10b981); color: #000; font-weight: bold;">
+          PAGAR $1,000 USD
+        </button>
       </div>
 
-      <!-- REEMPLAZO DINÁMICO CUANDO 2/2 SE COMPLETA -->
+      <!-- REEMPLAZO SI SE LLENAN LOS CUPOS -->
       <div id="pf-waitlist-replacement" class="hidden text-center" style="padding: 10px;">
         <h3 class="section-title fuchsia-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
-        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Los cupos directos se agotaron. Regístrate para entrar en la cohorte SODIE V4.</p>
+        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Los 2 cupos directos están ocupados. Regístrate para entrar en la cohorte SODIE V4.</p>
         <button id="btn-trigger-waitlist-modal" class="btn-pf-action" style="background: #d946ef; color: #fff; width: 100%; font-weight: bold;">
-          🚀 Unirme a Lista de Espera SODIE V4
+         Unirme a Lista de Espera SODIE V4
         </button>
       </div>
     </section>
 
     <!-- ========================================== -->
-    <!-- PAGOS RECURRENTES CADA 24H (HORA 48 - 72 - 96) -->
+    <!-- CRONÓMETROS Y TEMPORIZADORES (ANTES DEL POSPAGO) -->
     <!-- ========================================== -->
-    <section id="card-pago-recurring" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
-      <h3 id="recurring-title" class="section-title mint-txt"> Liquidación de Ciclo - Hora 48</h3>
-      <p id="recurring-desc" class="step-desc" style="margin-bottom: 15px;">Completa la renovación para mantener los borradores e inyección activa:</p>
-      
-      <div class="pf-summary-list" style="margin-bottom: 15px;">
-        <div class="pf-row"><span id="recurring-label-a">Monto Estándar</span><strong id="recurring-val-a" class="mint-txt">9.000$ USD</strong></div>
-      </div>
 
-      <div class="input-group-flow" style="gap: 10px;">
-        <button id="btn-pay-recurring-a" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000;">Pagar A</button>
-        <button id="btn-pay-recurring-b" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff;">Pagar B</button>
-      </div>
+    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H) -->
+    <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
+      <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
+      <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
+      <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
     </section>
 
-    <!-- PASOS POSPAGO (PASOS 1 AL 5) -->
-    <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px;">
-      <h3 class="section-title fuchsia-txt">Pasos de Configuración e Integración Pospago</h3>
+    <!-- CRONÓMETRO SODIE V4 (CUENTA REGRESIVA 72-96H) -->
+    <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+      <h3 class="section-title fuchsia-txt">Lanzamiento Próximo Borrador V4</h3>
+      <div id="timer-v4-display" class="timer-digits fuchsia-txt" style="font-size: 2.2rem; margin: 10px 0;">72:00:00</div>
+      <span class="timer-sub">Cuenta regresiva activa para inyección programada de audiencias V4</span>
+    </section>
+
+    <!-- TEMPORIZADOR TIEMPO TOTAL (HORA 48 - 72 - 96) -->
+    <section class="glass-card-dash timer-section" style="margin-bottom: 20px;">
+      <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
+      <div id="timer-display" class="timer-digits">48:00:00</div>
+      <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- PASOS POSPAGO (SÓLO TRAS PAGAR LOS $1,000 USD) -->
+    <!-- ========================================== -->
+    <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+      <h3 class="section-title fuchsia-txt">Pasos de Integración Pospago</h3>
       
       <!-- Paso 1: Contrato -->
       <div id="step-contract-client" class="step-card" style="margin-bottom: 15px;">
@@ -518,19 +448,22 @@
         </div>
         <div class="input-group-flow" style="margin-top: 10px;">
           <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
-          <button id="btn-client-send-contract" class="btn-pf-action">Enviar Contrato</button>
+          <button id="btn-client-send-contract" class="btn-pf-action">Enviar Contrato Firmado</button>
         </div>
         <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de firma...</p>
       </div>
 
-      <!-- Paso 2: Evaluador -->
+      <!-- Paso 2: Asignación de Evaluador Meta (EMAIL / USUARIO DE FACEBOOK DEL CLIENTE) -->
       <div id="step-evaluator-client" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>Paso 2: Asignación de Evaluador Meta</strong></p>
+        <p class="step-desc" style="font-size: 0.8rem; color: #aaa; margin-top: 4px;">
+          Ingresa el correo o usuario de tu cuenta de Facebook. Te enviaremos la solicitud para que la aceptes en Meta Ads:
+        </p>
         <div class="input-group-flow" style="margin-top: 8px;">
-          <input type="text" id="client-meta-user-input" placeholder="email / usuario de Facebook" />
-          <button id="btn-client-send-evaluator" class="btn-pf-action">Guardar Evaluador</button>
+          <input type="text" id="client-meta-user-input" placeholder="Tu correo / usuario de Facebook *" required />
+          <button id="btn-client-send-evaluator" class="btn-pf-action">Enviar a Admin</button>
         </div>
-        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de evaluador...</p>
+        <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Enviado. Te agregaremos como evaluador para que aceptes la invitación.</p>
       </div>
 
       <!-- Paso 3: Vincular Facebook -->
@@ -556,9 +489,54 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- SECCIÓN DE MÉTRICAS POST HORA 96           -->
-    <!-- ========================================== -->
+    <!-- PAGOS RECURRENTES CADA 24H (HORA 48 - 72 - 96) -->
+    <section id="card-pago-recurring" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 id="recurring-title" class="section-title mint-txt">Liquidación de Ciclo - Hora 48</h3>
+      <p id="recurring-desc" class="step-desc" style="margin-bottom: 15px;">Completa la renovación para mantener los borradores e inyección activa:</p>
+      
+      <div class="pf-summary-list" style="margin-bottom: 15px;">
+        <div class="pf-row"><span id="recurring-label-a">Monto Estándar</span><strong id="recurring-val-a" class="mint-txt">9.000$ USD</strong></div>
+      </div>
+
+      <div class="input-group-flow" style="gap: 10px;">
+        <button id="btn-pay-recurring-a" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000;">Pagar A</button>
+        <button id="btn-pay-recurring-b" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff;">Pagar B</button>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE MÉTRICAS DE EVALUADORES -->
+    <section id="section-evaluators-metrics" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
+      <h3 class="section-title mint-txt">Métricas en Tiempo Real de los Evaluadores (Hora 24 y 48) 👺</h3>
+      <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+        <div class="glass-card-dash text-center">
+          <span class="gauge-label mint-txt">Evaluador #1 (Hora 24)</span>
+          <div id="eval-metric-h24" class="timer-digits mint-txt" style="font-size: 1.4rem; margin-top: 5px;">ROAS 4.1x | CPA $8.20</div>
+        </div>
+        <div class="glass-card-dash text-center">
+          <span class="gauge-label fuchsia-txt">Evaluador #2 (Hora 48)</span>
+          <div id="eval-metric-h48" class="timer-digits fuchsia-txt" style="font-size: 1.4rem; margin-top: 5px;">ROAS 5.8x | CPA $6.90</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SODIE V4 SLIDES HORIZONTALES -->
+    <section id="section-v4-slides" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+      <h3 class="section-title fuchsia-txt">SODIE V4 - Vistas y Módulos de Arquitectura</h3>
+      <p class="step-desc" style="margin-bottom: 12px;">Desliza horizontalmente para revisar los prototipos de interfaz de la nueva versión V4:</p>
+      
+      <div class="v4-horizontal-slider" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin;">
+        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #d946ef;">
+          <img src="slide-v4-1.png" alt="Slide V4 1" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
+          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #1</span>
+        </div>
+        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #00ffcc;">
+          <img src="slide-v4-2.png" alt="Slide V4 2" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
+          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #2</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE MÉTRICAS POST HORA 96 -->
     <section id="section-post-hora96-metrics" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
       <h3 class="section-title mint-txt">Métricas Consolidadas Post Hora 96</h3>
       
@@ -575,31 +553,10 @@
       
       <p class="step-desc" style="margin-top: 12px; text-align: center;">Conectado exitosamente con Hotmart / Stripe en modo retención mensual.</p>
     </section>
-
-    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H) -->
-    <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
-      <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
-      <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
-      <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
-    </section>
-
-    <!-- CRONÓMETRO SODIE V4 (CUENTA REGRESIVA 72-96H PARA PRÓXIMO BORRADOR) -->
-    <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
-      <h3 class="section-title fuchsia-txt">Lanzamiento Próximo Borrador V4</h3>
-      <div id="timer-v4-display" class="timer-digits fuchsia-txt" style="font-size: 2.2rem; margin: 10px 0;">72:00:00</div>
-      <span class="timer-sub">Cuenta regresiva activa para inyección programada de audiencias V4</span>
-    </section>
-
-    <!-- TEMPORIZADOR TIEMPO TOTAL (HORA 48 - 72 - 96) -->
-    <section class="glass-card-dash timer-section">
-      <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
-      <div id="timer-display" class="timer-digits">48:00:00</div>
-      <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
-    </section>
   </main>
 
   <!-- ========================================== -->
-  <!-- 3. DASHBOARD ADMIN                         -->
+  <!-- 3. DASHBOARD ADMIN (COPIAR USUARIOS / EVALUADORES) -->
   <!-- ========================================== -->
   <main id="admin-dashboard" class="dashboard-container hidden">
     <header class="dash-header">
@@ -612,36 +569,17 @@
     </header>
 
     <section class="glass-card-dash">
-      <h3 class="section-title fuchsia-txt">Módulos de Configuración y Pagos Requeridos</h3>
+      <h3 class="section-title fuchsia-txt">Módulos de Configuración y Control</h3>
       <div class="admin-grid">
-        
-        <!-- SELECCIONAR PAGO Y LINKS DE PASARELA -->
-        <div class="admin-group">
-          <label>Seleccionar Pago Requerido</label>
-          <div class="admin-btns">
-            <button class="btn-select-amount" data-amount="1">1$</button>
-            <button class="btn-select-amount" data-amount="1000">1.000$</button>
-            <button class="btn-select-amount" data-amount="9000">9.000$</button>
-            <button class="btn-select-amount" data-amount="5000">5.000$</button>
-          </div>
-          
-          <div id="link-input-container" class="link-input-wrapper hidden" style="margin-top: 10px;">
-            <label id="selected-amount-label">Ingresar link (si hace falta):</label>
-            <div class="input-group-flow">
-              <input type="url" id="payment-link-input" placeholder="https://link.depago.com/..." />
-              <button id="btn-send-payment-link" class="btn-pf-action">Enviar</button>
-            </div>
-          </div>
-        </div>
 
-        <!-- DATOS DE EVALUADOR META -->
-        <div class="admin-group">
-          <label>Evaluador en Meta (Datos recibidos)</label>
-          <div class="input-group-flow" style="margin-bottom: 6px;">
-            <input type="text" id="admin-meta-user-display" placeholder="Esperando datos del cliente..." readonly />
-            <button id="btn-copy-client-data" class="btn-pf-action">Copiar</button>
+        <!-- COPIAR DATO DEL CLIENTE PARA ASIGNAR EVALUADOR -->
+        <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px;">
+          <label class="mint-txt" style="font-weight: bold;">Usuario / Correo de Facebook enviado por el cliente</label>
+          <div class="input-group-flow" style="margin-top: 6px; margin-bottom: 6px;">
+            <input type="text" id="admin-meta-user-display" placeholder="Esperando que el cliente envíe sus datos..." readonly style="color: #00ffcc; font-weight: bold;" />
+            <button id="btn-copy-client-data" class="btn-pf-action" style="background: #00ffcc; color: #000; font-weight: bold;">Copiar Usuario</button>
           </div>
-          <button id="btn-admin-approve-evaluator" class="btn-pf-action">Aprobar Cliente</button>
+          <button id="btn-admin-approve-evaluator" class="btn-pf-action" style="width: 100%;">Aprobar e Iniciar Evaluador en Meta</button>
         </div>
 
         <!-- CARGAR HOJA DE CÁLCULO (EXCEL / CSV) -->
@@ -690,7 +628,7 @@
           <button id="btn-draft-ready" class="btn-pf-action">Listo</button>
         </div>
 
-        <!-- BOTÓN EXPORTAR DATA A CSV -->
+        <!-- EXPORTAR DATA A CSV -->
         <div class="admin-group">
           <label class="mint-txt">Exportación de Base de Datos</label>
           <button id="btn-export-data" class="btn-pf-action" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: bold;">
@@ -704,7 +642,7 @@
           <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
         </div>
 
-        <!-- GESTIÓN DE LISTA DE ESPERA (TOGGLE CERRAR / ACTIVAR) -->
+        <!-- GESTIÓN DE LISTA DE ESPERA -->
         <div class="admin-group" style="margin-top: 15px; border-top: 1px dashed rgba(217,70,239,0.5); padding-top: 12px;">
           <label class="fuchsia-txt" style="font-weight: bold;">Gestión de Lista de Espera 👺</label>
           <button id="btn-toggle-waitlist" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
