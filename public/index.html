@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SODIE</title>
   <link rel="stylesheet" href="styles.css">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1754371812277932');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 </head>
 <body>
 
@@ -117,7 +134,7 @@
           </button>
         </form>
 
-        <div style="margin-top: 15px; border-top: 1px stroke rgba(255,255,255,0.1); padding-top: 10px; text-align: center;">
+        <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; text-align: center;">
           <a href="#" id="btn-open-v4-login" class="mint-txt" style="text-decoration: underline; font-size: 0.9rem;">¿Ya tienes cuenta? Iniciar Sesión en SODIE V4</a>
         </div>
 
@@ -186,7 +203,7 @@
       </div>
     </header>
 
-    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR (40$ INVERSIÓN, 2.000 ALCANCE Y 2 CUPOS) -->
+    <!-- MÉTRICAS DE RENDIMIENTO ESTÁNDAR -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
@@ -275,9 +292,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
     <!-- COMPARATIVA SECUENCIAL CON SODIE VS SIN SODIE -->
-    <!-- ========================================== -->
     <section id="section-sodie-comparison" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
       <h3 class="section-title fuchsia-txt">Resultados Comparativos con SODIE vs Sin SODIE</h3>
       
@@ -297,7 +312,7 @@
         </div>
       </div>
 
-      <div id="comp-hora-48" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; border-top: 1px stroke #00ffcc;">
+      <div id="comp-hora-48" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; border-top: 1px solid #00ffcc;">
         <h4 class="fuchsia-txt">Finalizado: Hora 48</h4>
         <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
           <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 8px;">
@@ -385,7 +400,7 @@
       </div>
     </section>
 
-    <!-- TARJETA PAGO INICIAL $1,000 (PAGO DE RESERVA DIRECTA) -->
+    <!-- TARJETA PAGO INICIAL $1,000 -->
     <section id="pf-card" class="glass-card-dash pf-section" style="margin-bottom: 20px;">
       <div id="pf-standard-content">
         <h3 class="section-title">P.F (Reserva de Slot Exclusivo)</h3>
@@ -409,34 +424,26 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- CRONÓMETROS Y TEMPORIZADORES (ANTES DEL POSPAGO) -->
-    <!-- ========================================== -->
-
-    <!-- CRONÓMETRO PRÓXIMO BORRADOR (24H) -->
+    <!-- CRONÓMETROS Y TEMPORIZADORES -->
     <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
       <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
       <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
       <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
     </section>
 
-    <!-- CRONÓMETRO SODIE V4 (CUENTA REGRESIVA 72-96H) -->
     <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
       <h3 class="section-title fuchsia-txt">Lanzamiento Próximo Borrador V4</h3>
       <div id="timer-v4-display" class="timer-digits fuchsia-txt" style="font-size: 2.2rem; margin: 10px 0;">72:00:00</div>
       <span class="timer-sub">Cuenta regresiva activa para inyección programada de audiencias V4</span>
     </section>
 
-    <!-- TEMPORIZADOR TIEMPO TOTAL (HORA 48 - 72 - 96) -->
     <section class="glass-card-dash timer-section" style="margin-bottom: 20px;">
       <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
       <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
     </section>
 
-    <!-- ========================================== -->
-    <!-- PASOS POSPAGO (SÓLO TRAS PAGAR LOS $1,000 USD) -->
-    <!-- ========================================== -->
+    <!-- PASOS POSPAGO -->
     <section id="section-post-pay-flow" class="glass-card-dash flow-container hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
       <h3 class="section-title fuchsia-txt">Pasos de Integración Pospago</h3>
       
@@ -453,7 +460,7 @@
         <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">⏳ Esperando confirmación de firma...</p>
       </div>
 
-      <!-- Paso 2: Asignación de Evaluador Meta (EMAIL / USUARIO DE FACEBOOK DEL CLIENTE) -->
+      <!-- Paso 2: Asignación de Evaluador Meta -->
       <div id="step-evaluator-client" class="step-card hidden" style="margin-bottom: 15px;">
         <p class="step-desc"><strong>Paso 2: Asignación de Evaluador Meta</strong></p>
         <p class="step-desc" style="font-size: 0.8rem; color: #aaa; margin-top: 4px;">
@@ -482,14 +489,14 @@
         <p id="client-file-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">✅ Archivo CSV procesado e inyectado.</p>
       </div>
 
-      <!-- Paso 5: Crear Borrador 'Prueba Hora 24' -->
+      <!-- Paso 5: Crear Borrador -->
       <div id="card-draft-section" class="step-card hidden">
         <p class="step-desc"><strong>Paso 5: Crear Borrador "Prueba Hora 24"</strong></p>
         <button id="btn-confirm-draft" class="btn-pf-action" style="margin-top: 10px; width: 100%; background: #10B981; font-weight: bold;">Listo / Lanzar Borrador 🚀</button>
       </div>
     </section>
 
-    <!-- PAGOS RECURRENTES CADA 24H (HORA 48 - 72 - 96) -->
+    <!-- PAGOS RECURRENTES CADA 24H -->
     <section id="card-pago-recurring" class="glass-card-dash pf-section hidden" style="margin-bottom: 20px; border: 1px solid #00ffcc;">
       <h3 id="recurring-title" class="section-title mint-txt">Liquidación de Ciclo - Hora 48</h3>
       <p id="recurring-desc" class="step-desc" style="margin-bottom: 15px;">Completa la renovación para mantener los borradores e inyección activa:</p>
@@ -556,7 +563,7 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- 3. DASHBOARD ADMIN (COPIAR USUARIOS / EVALUADORES) -->
+  <!-- 3. DASHBOARD ADMIN                         -->
   <!-- ========================================== -->
   <main id="admin-dashboard" class="dashboard-container hidden">
     <header class="dash-header">
@@ -572,7 +579,7 @@
       <h3 class="section-title fuchsia-txt">Módulos de Configuración y Control</h3>
       <div class="admin-grid">
 
-        <!-- COPIAR DATO DEL CLIENTE PARA ASIGNAR EVALUADOR -->
+        <!-- COPIAR DATO DEL CLIENTE -->
         <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px;">
           <label class="mint-txt" style="font-weight: bold;">Usuario / Correo de Facebook enviado por el cliente</label>
           <div class="input-group-flow" style="margin-top: 6px; margin-bottom: 6px;">
@@ -582,14 +589,14 @@
           <button id="btn-admin-approve-evaluator" class="btn-pf-action" style="width: 100%;">Aprobar e Iniciar Evaluador en Meta</button>
         </div>
 
-        <!-- CARGAR HOJA DE CÁLCULO (EXCEL / CSV) -->
+        <!-- CARGAR HOJA DE CÁLCULO -->
         <div class="admin-group">
           <label>Hoja de Cálculo (Excel / CSV)</label>
           <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
           <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Datos</button>
         </div>
 
-        <!-- SUBIR VIDEO DE DEMOSTRACIÓN AL DASHBOARD -->
+        <!-- SUBIR VIDEO DE DEMOSTRACIÓN -->
         <div class="admin-group">
           <label class="mint-txt">Subir Video Demostrativo a Dashboard</label>
           <div class="input-group-flow">
@@ -598,7 +605,7 @@
           </div>
         </div>
 
-        <!-- SUBIR CONTRATO PDF PARA DESCARGA DE CLIENTES -->
+        <!-- SUBIR CONTRATO PDF -->
         <div class="admin-group">
           <label class="mint-txt">Subir Documento Contrato PDF</label>
           <div class="input-group-flow">
@@ -607,7 +614,7 @@
           </div>
         </div>
 
-        <!-- SUBIR IMÁGENES SLIDES SODIE V4 -->
+        <!-- SUBIR IMÁGENES SLIDES V4 -->
         <div class="admin-group">
           <label class="fuchsia-txt">Subir Capturas / Diseños para Slides V4</label>
           <div class="input-group-flow">
@@ -636,7 +643,7 @@
           </button>
         </div>
 
-        <!-- CIERRE GENERAL DE DASHBOARD (2/2) -->
+        <!-- CIERRE GENERAL DE DASHBOARD -->
         <div class="admin-group" style="margin-top: 10px;">
           <label>Cierre General de Dashboard</label>
           <button id="btn-admin-close-dashboard" class="btn-pf-action btn-danger">Cerrar Dashboard Principal (2/2)</button>
@@ -650,7 +657,7 @@
           </button>
         </div>
 
-        <!-- ACTIVAR SODIE V4 CON MÓDULOS BIOMÉTRICOS -->
+        <!-- ACTIVAR SODIE V4 -->
         <div class="admin-group" style="margin-top: 10px;">
           <label class="mint-txt" style="font-weight: bold;">Plataforma SODIE V4</label>
           <button id="btn-toggle-sodie-v4" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #00ffcc; color: #000; font-weight: bold;">
