@@ -4,7 +4,7 @@
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
 // IA3: Métricas y análisis en vivo
-// Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas y Subida Admin
+// Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas, Meta CAPI y Subida Admin
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -71,6 +71,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAdminFiveClicks();
   setupAdminAmountSelection();
   setupAdminUploadAndExport();
+  setupAdminManualCapiPayment(); // ✅ Nueva integración para disparo manual a Meta CAPI
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
@@ -646,6 +647,76 @@ function setupAdminUploadAndExport() {
       window.open(exportUrl, '_blank');
     });
   }
+}
+
+// ==========================================
+// 4.D CONFIRMACIÓN DE PAGO MANUAL Y DISPARO A META CONVERSIONS API (CAPI)
+// ==========================================
+function setupAdminManualCapiPayment() {
+  const btnApproveSlot1 = document.getElementById('btn-approve-slot-1');
+  const btnApproveSlot2 = document.getElementById('btn-approve-slot-2');
+  const inputManualEmail = document.getElementById('admin-manual-client-email');
+  const inputManualAmount = document.getElementById('admin-manual-payment-amount');
+
+  const executeCapiApproval = async (slotNumber) => {
+    const clientEmail = (inputManualEmail ? inputManualEmail.value.trim() : '') || state.email || 'cliente@sovyx.com';
+    const amount = (inputManualAmount ? Number(inputManualAmount.value) : null) || state.selectedAmount || 10000;
+    const adminKey = CONFIG.SOVYX_ADMIN_KEY || 'admin23555';
+
+    if (!confirm(`¿Confirmar aprobación manual del Slot #${slotNumber} por $${amount.toLocaleString()} USD e inyectar evento 'Purchase' en Meta CAPI?`)) {
+      return;
+    }
+
+    try {
+      let res = await fetch(`${API_URL}/api/admin/uploads/confirmar-pago-manual`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminKey,
+          slotNumber,
+          emailCliente: clientEmail,
+          monto: amount
+        })
+      });
+
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/api/v1/admin/confirmar-pago-manual`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            adminKey,
+            slotNumber,
+            emailCliente: clientEmail,
+            monto: amount
+          })
+        });
+      }
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok || data.success) {
+        alert(`🟢 ¡Pago del Slot #${slotNumber} aprobado con éxito!\n\nResultado Meta CAPI: ${data.capiResult?.success ? 'ENVÍO EXITOSO ✅' : 'AVISO / REVISAR CONSOLA ⚠️'}`);
+        
+        // Actualizar métricas visuales locales del panel
+        if (state.metrics.leads > 0) {
+          state.metrics.leads -= 1;
+        }
+        updateMetricsUI(state.metrics);
+
+        sendSystemNotification('🎉 Conversión Registrada en Meta CAPI', {
+          body: `Pago manual de $${amount.toLocaleString()} USD confirmado para el Slot #${slotNumber}.`
+        });
+      } else {
+        alert(`🔴 Error: ${data.error || 'No se pudo completar la aprobación manual.'}`);
+      }
+    } catch (err) {
+      console.error('Error procesando el pago manual y CAPI:', err);
+      alert('Error de comunicación con el servidor al procesar el pago manual.');
+    }
+  };
+
+  if (btnApproveSlot1) btnApproveSlot1.addEventListener('click', () => executeCapiApproval(1));
+  if (btnApproveSlot2) btnApproveSlot2.addEventListener('click', () => executeCapiApproval(2));
 }
 
 // ==========================================
