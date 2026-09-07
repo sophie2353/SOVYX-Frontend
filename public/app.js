@@ -1,6 +1,6 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
-// Sincronizado con index.js v2.0.26
+// Sincronizado con index.js v2.0.26 y routes/pasarela.js
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
 // IA3: Métricas y análisis en vivo
@@ -21,11 +21,11 @@ const state = {
   elapsedHours: 0, // Horas transcurridas en la prueba
   // Métricas iniciales
   metrics: {
-    visitors: 1504,      // Clics / Visitas a la app
+    visitors: 80,      // Clics / Visitas a la app
     leads: 2,            // Clientes Objetivo / Cupos ocupados
-    conversionRate: "4.8%",
-    reach: 15420,        // Alcance Meta
-    spend: "$15",        // Inversión Meta
+    conversionRate: "2%",
+    reach: 2.000,        // Alcance Meta
+    spend: "$40",        // Inversión Meta
     liveViewers: 21
   }
 };
@@ -122,7 +122,6 @@ function setupWaitlistFlow() {
     btnWaitlist.textContent = 'Procesando registro... ⏳';
 
     try {
-      // Intento 1: Endpoint prioritario SODIE V4
       let res = await fetch(`${API_URL}/api/v1/waitlist/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,7 +133,6 @@ function setupWaitlistFlow() {
         })
       });
 
-      // Intento 2: Rutas alternas según index.js
       if (!res.ok) {
         res = await fetch(`${API_URL}/api/lista-espera`, {
           method: 'POST',
@@ -395,7 +393,7 @@ function setupAdminFiveClicks() {
           adminDashboard.classList.remove('hidden');
         }
       } else {
-        alert(`🔑 Clave incorrecta. Escribe ${validKey}`);
+        alert(`Clave incorrecta. Escribe ${validKey}`);
       }
     });
   }
@@ -423,7 +421,7 @@ function injectBiometricButton(modalAuth) {
   const bioBtn = document.createElement('button');
   bioBtn.id = 'btn-biometric-auth';
   bioBtn.type = 'button';
-  bioBtn.textContent = '👆 DESBLOQUEAR CON HUELLA / FACEID';
+  bioBtn.textContent = 'DESBLOQUEAR CON HUELLA / FACEID';
   bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 12px; background: #10B981; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);';
   
   bioBtn.addEventListener('click', async () => {
@@ -436,7 +434,7 @@ function injectBiometricButton(modalAuth) {
         appDashboard.classList.add('hidden');
         adminDashboard.classList.remove('hidden');
       }
-      sendSystemNotification("🔑 Acceso Administrador", { body: "Autenticación biométrica exitosa." });
+      sendSystemNotification("Acceso Administrador", { body: "Autenticación biométrica exitosa." });
     };
 
     if (!window.PublicKeyCredential) {
@@ -462,7 +460,7 @@ function injectBiometricButton(modalAuth) {
           });
           if (assertion) success = true;
         } catch (getErr) {
-          console.warn("Autenticación con credencial guardada no completada, iniciando registro directo:", getErr);
+          console.warn("Autenticación con credencial guardada no completada:", getErr);
         }
       }
 
@@ -482,9 +480,7 @@ function injectBiometricButton(modalAuth) {
                 { type: "public-key", alg: -7 },  // ES256
                 { type: "public-key", alg: -257 } // RS256
               ],
-              authenticatorSelection: {
-                userVerification: "preferred"
-              },
+              authenticatorSelection: { userVerification: "preferred" },
               timeout: 60000
             }
           });
@@ -495,7 +491,7 @@ function injectBiometricButton(modalAuth) {
             success = true;
           }
         } catch (createErr) {
-          console.warn("Registro WebAuthn falló o fue cancelado:", createErr);
+          console.warn("Registro WebAuthn cancelado:", createErr);
           if (createErr.name === 'NotAllowedError') {
             alert("Operación cancelada por el usuario.");
             return;
@@ -518,7 +514,7 @@ function injectBiometricButton(modalAuth) {
 }
 
 // ==========================================
-// 4.B SELECCIÓN E INYECCIÓN DE RUTAS DE PASARELA ($9.000 & $5.000)
+// 4.B SELECCIÓN E INYECCIÓN DE RUTAS DE PASARELA ($1K, $9K, $5K) - CONECTADO A routes/pasarela.js
 // ==========================================
 function setupAdminAmountSelection() {
   const amountBtns = document.querySelectorAll('.btn-select-amount');
@@ -533,7 +529,7 @@ function setupAdminAmountSelection() {
       state.selectedAmount = amt;
       
       if (amt === 9000) {
-        state.currentStage = 'POST_48H';
+        state.currentStage = 'POST_48H’‘POST_72H’‘POST_96H’;
       } else if (amt === 5000) {
         state.currentStage = 'MONTHLY_30D';
       } else {
@@ -557,38 +553,33 @@ function setupAdminAmountSelection() {
       localStorage.setItem(`sodie_pay_link_stage_${targetStage}`, url);
 
       try {
-        // Rutas primarias y secundarias de la pasarela según index.js
-        let targetEndpoint = targetStage === 'POST_48H' 
-          ? `${API_URL}/api/pasarela/admin/post48-link`
-          : `${API_URL}/api/pasarela/admin/set-link`;
-
-        let res = await fetch(targetEndpoint, {
+        // Enviar link personalizado para el usuario actual utilizando la API de pasarela
+        let res = await fetch(`${API_URL}/api/pasarela/admin/set-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage, adminKey: CONFIG.SOVYX_ADMIN_KEY })
+          body: JSON.stringify({ 
+            amount: targetAmount, 
+            paymentUrl: url, 
+            stage: targetStage, 
+            adminKey: CONFIG.SOVYX_ADMIN_KEY,
+            sessionId: state.sessionId,
+            userEmail: state.email
+          })
         });
 
         if (!res.ok) {
           res = await fetch(`${API_URL}/api/pasarela`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
+            body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage, sessionId: state.sessionId })
           });
         }
 
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/pagos/admin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage })
-          });
-        }
-
-        alert(`✅ Nueva ruta de pasarela inyectada con éxito para el monto de $${targetAmount.toLocaleString()} USD (${targetStage}).`);
+        alert(`✅ Link de pasarela enviado exitosamente por $${targetAmount.toLocaleString()} USD al usuario.`);
         if (inputLink) inputLink.value = '';
         if (linkContainer) linkContainer.classList.add('hidden');
       } catch (err) {
-        alert(`✅ Ruta de pasarela de $${targetAmount.toLocaleString()} USD inyectada localmente en modo contingencia.`);
+        alert(`✅ Link de pasarela de $${targetAmount.toLocaleString()} USD guardado localmente.`);
         if (inputLink) inputLink.value = '';
         if (linkContainer) linkContainer.classList.add('hidden');
       }
@@ -605,7 +596,6 @@ function setupAdminUploadAndExport() {
   const adminUploadStatus = document.getElementById('admin-upload-status');
   const btnExportCsv = document.getElementById('btn-export-hora48-csv');
 
-  // Subida de archivos desde el Panel Admin
   if (btnUploadAdminFile && adminFileInput) {
     btnUploadAdminFile.addEventListener('click', async () => {
       if (!adminFileInput.files || !adminFileInput.files[0]) {
@@ -651,7 +641,6 @@ function setupAdminUploadAndExport() {
     });
   }
 
-  // Exportación de datos CSV "SODIE Clientes Hora 48"
   if (btnExportCsv) {
     btnExportCsv.addEventListener('click', () => {
       const exportUrl = `${API_URL}/api/admin/export/export-clientes-hora48`;
@@ -721,19 +710,34 @@ function updateMetricsUI(metricsData) {
 function setupSSEMetricsStream() {
   if (!window.EventSource) return;
 
-  const sseUrl = `${API_URL}/api/v1/metrics/live?sessionId=${state.sessionId}`;
+  const sseUrl = `${API_URL}/api/pasarela/sse?sessionId=${state.sessionId}`;
   const eventSource = new EventSource(sseUrl);
 
   eventSource.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      if (data && data.metrics) {
+      
+      // Evento: El administrador envió un link de pasarela directamente
+      if (data.type === 'PAYMENT_LINK_READY' || data.paymentUrl) {
+        const linkUrl = data.paymentUrl || data.url;
+        localStorage.setItem(`sodie_pay_link_${state.selectedAmount}`, linkUrl);
+        sendSystemNotification("💳 Link de Pago Listo", {
+          body: `El administrador ha asignado tu enlace de pago por $${state.selectedAmount.toLocaleString()} USD.`
+        });
+        alert(`🎉 ¡El Administrador ha generado tu link de pago! Haz clic en PAGAR para completar la transacción.`);
+      }
+
+      // Evento: Actualización de métricas o slots
+      if (data.metrics) {
         Object.assign(state.metrics, data.metrics);
         updateMetricsUI(state.metrics);
+      }
 
-        sendSystemNotification('📊 Métricas de Meta Ads En Vivo', {
-          body: `Visitas: ${state.metrics.visitors} | Alcance: ${state.metrics.reach} | Inversión: ${state.metrics.spend}`
-        });
+      if (data.type === 'SLOT_UPDATED' || data.remainingSlots !== undefined) {
+        if (data.remainingSlots !== undefined) {
+          state.metrics.leads = data.remainingSlots;
+          updateMetricsUI(state.metrics);
+        }
       }
     } catch (e) {
       console.error("Error al procesar evento SSE:", e);
@@ -741,23 +745,22 @@ function setupSSEMetricsStream() {
   };
 
   eventSource.onerror = () => {
-    console.warn("Conexión SSE interrumpida. Reintentando dinámicamente...");
+    console.warn("Conexión SSE de pasarela reconectando...");
   };
 }
 
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
-      let res = await fetch(`${API_URL}/api/v1/metrics/live`);
-      if (!res.ok) res = await fetch(`${API_URL}/api/ia3/live`);
+      let res = await fetch(`${API_URL}/api/pasarela/slots`);
+      if (!res.ok) res = await fetch(`${API_URL}/api/v1/metrics/live`);
       
       if (res.ok) {
         const data = await res.json();
-        if (data.visitors || data.reach) {
+        if (data.slots !== undefined || data.leads !== undefined) {
+          state.metrics.leads = data.slots !== undefined ? data.slots : data.leads;
           if (data.visitors) state.metrics.visitors = data.visitors;
           if (data.reach) state.metrics.reach = data.reach;
-          if (data.leads !== undefined) state.metrics.leads = data.leads;
-          if (data.conversionRate) state.metrics.conversionRate = data.conversionRate;
           updateMetricsUI(state.metrics);
         }
       }
@@ -766,7 +769,7 @@ function startLiveMetricsEngine() {
 }
 
 // ==========================================
-// 6. FLUJO DE PAGO DINÁMICO & RUTAS DE PASARELA ($1K, $9K, $5K)
+// 6. FLUJO DE PAGO DINÁMICO & RUTAS DE PASARELA (/routes/pasarela.js)
 // ==========================================
 function setupPaymentFlow() {
   const btnPagar = document.getElementById('btn-pay-main');
@@ -781,10 +784,9 @@ function setupPaymentFlow() {
       const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
 
       try {
-        // 1. Endpoint general de consulta pasarela
-        let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}`);
+        // Consultar link configurado en routes/pasarela.js
+        let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
 
-        // 2. Checkout Init en index.js
         if (!res.ok) {
           res = await fetch(`${API_URL}/api/checkout/init`, {
             method: 'POST',
@@ -795,7 +797,7 @@ function setupPaymentFlow() {
 
         if (res.ok) {
           const data = await res.json();
-          const targetUrl = data.redirectUrl || data.paymentUrl || data.directPayLink || data.url || localInjectedUrl;
+          const targetUrl = data.paymentUrl || data.redirectUrl || data.directPayLink || data.url || localInjectedUrl;
           if (targetUrl) {
             window.location.href = targetUrl;
             return;
@@ -807,6 +809,7 @@ function setupPaymentFlow() {
           return;
         }
 
+        // Si no hay redirección configurada, procesar confirmación directa y descontar slot
         confirmPaymentSuccess(currentAmount, state.sessionId);
       } catch (err) {
         if (localInjectedUrl) {
@@ -830,23 +833,39 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   activatePostPayView(clientId);
 
   try {
-    let res = await fetch(`${API_URL}/api/pago/confirm`, {
+    // 1. Notificar cobro/pago exitoso a routes/pasarela.js
+    let res = await fetch(`${API_URL}/api/pasarela/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: state.sessionId, clientId: clientId, amount: amount, stage: state.currentStage })
+      body: JSON.stringify({ 
+        sessionId: state.sessionId, 
+        clientId: clientId, 
+        amount: amount, 
+        stage: state.currentStage,
+        email: state.email 
+      })
     });
 
-    if (!res.ok) {
-      await fetch(`${API_URL}/api/webhooks/kontigo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: state.sessionId, amount: amount, event: 'PAYMENT_CONFIRMED', stage: state.currentStage })
-      });
+    // 2. Descontar el slot/cupo en el backend admin
+    let slotRes = await fetch(`${API_URL}/api/pasarela/decrease-slot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: state.sessionId, amount: amount })
+    });
+
+    if (slotRes.ok) {
+      const slotData = await slotRes.json();
+      if (slotData.remainingSlots !== undefined) {
+        state.metrics.leads = slotData.remainingSlots;
+        updateMetricsUI(state.metrics);
+      }
     }
-  } catch (err) {}
+  } catch (err) {
+    console.warn("Error en la sincronización del pago:", err);
+  }
 
   sendSystemNotification('¡Nuevo Pago Registrado! 💰', {
-    body: `Transacción confirmada por $${amount.toLocaleString()} USD.`
+    body: `Transacción confirmada por $${amount.toLocaleString()} USD. Slot descontado en el panel.`
   });
 }
 
@@ -869,9 +888,13 @@ function activatePostPayView(clientId = null) {
 async function syncPaymentStatusWithBackend() {
   const activeId = localStorage.getItem('sodie_client_id') || 'cliente_1';
   try {
-    const res = await fetch(`${API_URL}/api/clientes/disponibles`);
-    if (res.ok && state.isPaid) {
-      activatePostPayView(activeId);
+    const res = await fetch(`${API_URL}/api/pasarela/status?sessionId=${state.sessionId}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.isPaid || state.isPaid) {
+        state.isPaid = true;
+        activatePostPayView(activeId);
+      }
     }
   } catch (e) {}
 }
@@ -885,7 +908,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B EVALUADORES, CONTRATOS Y CARGA DE DATA CSV (IA1)
+// 6.B EVALUADORES, CONTRATOS Y CARGA DE DATA CSV (IA1) Y NOTIFICACIÓN AL ADMIN
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -901,7 +924,6 @@ function setupPostPayStepFlow() {
   const btnConnectFb = document.getElementById('btn-connect-facebook-client');
   const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
 
-  // Sincronización de Email con Panel Admin en tiempo real
   const updateAdminEmailDisplay = (val) => {
     const adminDisplays = document.querySelectorAll('#admin-email-display, #admin-client-email, .admin-email-sync');
     adminDisplays.forEach(el => {
@@ -925,38 +947,51 @@ function setupPostPayStepFlow() {
     }
   }
 
-  // Envío de credenciales de Evaluador a /api/evaluator/fb-sync
+  // Envío de credenciales / usuario Facebook del cliente
   if (btnSendEval) {
     btnSendEval.addEventListener('click', async () => {
       const user = inputMetaUser ? inputMetaUser.value.trim() : '';
       if (!user) return alert('Ingresa tu email o usuario.');
 
       state.email = user;
+      state.fbUser = user;
       localStorage.setItem('sodie_user_email', user);
+      localStorage.setItem('sodie_fb_user', user);
       updateAdminEmailDisplay(user);
 
       if (statusEval) statusEval.classList.remove('hidden');
       if (stepUpload) stepUpload.classList.remove('hidden');
 
       try {
-        let res = await fetch(`${API_URL}/api/evaluator/fb-sync`, {
+        // Notificar usuario de Facebook al panel admin vía pasarela/evaluator
+        let res = await fetch(`${API_URL}/api/pasarela/notify-facebook-user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user, fbUser: user, sessionId: state.sessionId })
+          body: JSON.stringify({ 
+            email: user, 
+            fbUser: user, 
+            sessionId: state.sessionId 
+          })
         });
 
         if (!res.ok) {
-          await fetch(`${API_URL}/api/v1/client/evaluator`, {
+          await fetch(`${API_URL}/api/evaluator/fb-sync`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: state.sessionId, email: user })
+            body: JSON.stringify({ email: user, fbUser: user, sessionId: state.sessionId })
           });
         }
-      } catch (e) {}
+
+        sendSystemNotification("👤 Usuario Sincronizado", {
+          body: `Usuario de Meta/Facebook (${user}) enviado al administrador.`
+        });
+      } catch (e) {
+        console.warn("Fallback local para sincronización de usuario Meta.");
+      }
     });
   }
 
-  // Carga de Archivo (Procesamiento de Audiencias CSV / Contratos PDF)
+  // Carga de Archivo CSV / Contratos PDF
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
       if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo (CSV o PDF del contrato).');
@@ -985,9 +1020,6 @@ function setupPostPayStepFlow() {
         
         if (!res.ok && !isPdfContract) {
           res = await fetch(`${API_URL}/api/campaigns/upload`, { method: 'POST', body: formData });
-        }
-        if (!res.ok && !isPdfContract) {
-          res = await fetch(`${API_URL}/api/upload`, { method: 'POST', body: formData });
         }
 
         const data = await res.json();
@@ -1039,13 +1071,6 @@ function setupPostPayStepFlow() {
             body: JSON.stringify(payload)
           });
         }
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/ia1/lanzar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-        }
 
         let data = {};
         try {
@@ -1065,24 +1090,16 @@ function setupPostPayStepFlow() {
           updateMetricsUI(state.metrics);
 
           const originalMetricsSection = document.querySelector('.metrics-section');
-          if (originalMetricsSection) {
-            originalMetricsSection.classList.add('hidden');
-          }
+          if (originalMetricsSection) originalMetricsSection.classList.add('hidden');
 
           const liveMetricsContainer = document.getElementById('meta-live-metrics-container');
-          if (liveMetricsContainer) {
-            liveMetricsContainer.classList.remove('hidden');
-          }
+          if (liveMetricsContainer) liveMetricsContainer.classList.remove('hidden');
 
           const cardDraftSection = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
-          if (cardDraftSection) {
-            cardDraftSection.classList.add('hidden');
-          }
+          if (cardDraftSection) cardDraftSection.classList.add('hidden');
 
           const card24h = document.getElementById('card-timer-24h');
-          if (card24h) {
-            card24h.classList.remove('hidden');
-          }
+          if (card24h) card24h.classList.remove('hidden');
 
           sendSystemNotification('🚀 Campaña de Meta Ads Activa', {
             body: `Se inyectó la segmentación de IA1 a "${targetDraftName}". Monitoreando métricas en vivo.`
