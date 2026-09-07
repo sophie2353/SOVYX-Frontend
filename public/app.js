@@ -21,10 +21,10 @@ const state = {
   elapsedHours: 0, // Horas transcurridas en la prueba
   // Métricas iniciales
   metrics: {
-    visitors: 80,      // Clics / Visitas a la app
+    visitors: 80,        // Clics / Visitas a la app
     leads: 2,            // Clientes Objetivo / Cupos ocupados
     conversionRate: "2%",
-    reach: 2.000,        // Alcance Meta
+    reach: 2000,         // Alcance Meta
     spend: "$40",        // Inversión Meta
     liveViewers: 21
   }
@@ -529,7 +529,7 @@ function setupAdminAmountSelection() {
       state.selectedAmount = amt;
       
       if (amt === 9000) {
-        state.currentStage = 'POST_48H’‘POST_72H’‘POST_96H’;
+        state.currentStage = 'POST_48H';
       } else if (amt === 5000) {
         state.currentStage = 'MONTHLY_30D';
       } else {
@@ -553,7 +553,6 @@ function setupAdminAmountSelection() {
       localStorage.setItem(`sodie_pay_link_stage_${targetStage}`, url);
 
       try {
-        // Enviar link personalizado para el usuario actual utilizando la API de pasarela
         let res = await fetch(`${API_URL}/api/pasarela/admin/set-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -717,7 +716,6 @@ function setupSSEMetricsStream() {
     try {
       const data = JSON.parse(event.data);
       
-      // Evento: El administrador envió un link de pasarela directamente
       if (data.type === 'PAYMENT_LINK_READY' || data.paymentUrl) {
         const linkUrl = data.paymentUrl || data.url;
         localStorage.setItem(`sodie_pay_link_${state.selectedAmount}`, linkUrl);
@@ -727,7 +725,6 @@ function setupSSEMetricsStream() {
         alert(`🎉 ¡El Administrador ha generado tu link de pago! Haz clic en PAGAR para completar la transacción.`);
       }
 
-      // Evento: Actualización de métricas o slots
       if (data.metrics) {
         Object.assign(state.metrics, data.metrics);
         updateMetricsUI(state.metrics);
@@ -784,7 +781,6 @@ function setupPaymentFlow() {
       const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
 
       try {
-        // Consultar link configurado en routes/pasarela.js
         let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
 
         if (!res.ok) {
@@ -809,7 +805,6 @@ function setupPaymentFlow() {
           return;
         }
 
-        // Si no hay redirección configurada, procesar confirmación directa y descontar slot
         confirmPaymentSuccess(currentAmount, state.sessionId);
       } catch (err) {
         if (localInjectedUrl) {
@@ -833,7 +828,6 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   activatePostPayView(clientId);
 
   try {
-    // 1. Notificar cobro/pago exitoso a routes/pasarela.js
     let res = await fetch(`${API_URL}/api/pasarela/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -846,7 +840,6 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
       })
     });
 
-    // 2. Descontar el slot/cupo en el backend admin
     let slotRes = await fetch(`${API_URL}/api/pasarela/decrease-slot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -963,7 +956,6 @@ function setupPostPayStepFlow() {
       if (stepUpload) stepUpload.classList.remove('hidden');
 
       try {
-        // Notificar usuario de Facebook al panel admin vía pasarela/evaluator
         let res = await fetch(`${API_URL}/api/pasarela/notify-facebook-user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -991,7 +983,7 @@ function setupPostPayStepFlow() {
     });
   }
 
-  // Carga de Archivo CSV / Contratos PDF
+  // Carga de Archivo CSV de Infoproductores / Contratos PDF
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
       if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo (CSV o PDF del contrato).');
@@ -1007,6 +999,9 @@ function setupPostPayStepFlow() {
       } else {
         formData.append('file', file);
         formData.append('sessionId', state.sessionId);
+        formData.append('nicho', 'infoproductos'); // Categórico para infoproductores
+        formData.append('token', localStorage.getItem('sodie_fb_token') || '');
+        formData.append('adAccountId', localStorage.getItem('sodie_ad_account') || '');
       }
 
       if (statusFile) {
@@ -1015,18 +1010,22 @@ function setupPostPayStepFlow() {
       }
 
       try {
-        let uploadEndpoint = isPdfContract ? `${API_URL}/api/evaluator/contract` : `${API_URL}/api/v1/client/upload-audience`;
+        // ✅ Conectado directamente con routes/uploadRoutes.js
+        let uploadEndpoint = isPdfContract 
+          ? `${API_URL}/api/evaluator/contract` 
+          : `${API_URL}/api/upload-csv`;
+
         let res = await fetch(uploadEndpoint, { method: 'POST', body: formData });
         
         if (!res.ok && !isPdfContract) {
-          res = await fetch(`${API_URL}/api/campaigns/upload`, { method: 'POST', body: formData });
+          res = await fetch(`${API_URL}/api/v1/client/upload-audience`, { method: 'POST', body: formData });
         }
 
         const data = await res.json();
         if (res.ok || data.ok || data.success) {
-          if (statusFile) statusFile.textContent = isPdfContract ? '✅ Contrato recibido correctamente para verificación.' : '✅ Audiencia generalizada y guardada en BD. Conecta Meta y confirma el borrador.';
+          if (statusFile) statusFile.textContent = isPdfContract ? '✅ Contrato recibido correctamente para verificación.' : '✅ CSV procesado por IA1 e inyectado en Meta. Procede a confirmar el borrador.';
           if (stepConnect) stepConnect.classList.remove('hidden');
-          alert(isPdfContract ? 'Contrato enviado con éxito al panel de evaluación.' : 'Data masiva procesada por IA1. Ya puedes activar el borrador.');
+          alert(isPdfContract ? 'Contrato enviado con éxito al panel de evaluación.' : '¡Lista de clientes cargada exitosamente!');
         } else {
           alert(`Aviso: ${data.error || 'Ocurrió un error al procesar el archivo.'}`);
         }
