@@ -20,9 +20,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
 body {
   background: var(--bg-dark);
   background-image: radial-gradient(circle at 50% 30%, #320754 0%, #110228 60%, #040008 100%);
+  background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -45,20 +51,22 @@ input[type="text"],
 input[type="email"],
 input[type="tel"],
 input[type="number"],
-input[type="password"] {
+input[type="password"],
+select,
+textarea {
   width: 100%;
   background: rgba(10, 4, 20, 0.7);
   border: 1px solid rgba(0, 255, 204, 0.4);
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   outline: none;
   transition: all 0.3s ease;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-input:focus {
+input:focus, select:focus, textarea:focus {
   border-color: var(--neon-mint);
   box-shadow: 0 0 12px rgba(0, 255, 204, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -86,6 +94,7 @@ button:disabled,
   justify-content: center;
   align-items: center;
   transition: opacity 0.6s ease, visibility 0.6s ease;
+  padding: 16px;
 }
 
 .full-screen.hidden {
@@ -96,9 +105,8 @@ button:disabled,
 
 .splash-content {
   width: 100%;
-  max-width: 360px;
-  height: 100%;
-  max-height: 680px;
+  max-width: 380px;
+  max-height: 90vh;
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
@@ -106,6 +114,7 @@ button:disabled,
   justify-content: center;
   gap: 20px;
   text-align: center;
+  overflow-y: auto;
 }
 
 /* LOGO SODIE */
@@ -120,7 +129,7 @@ button:disabled,
 
 .logo-title {
   font-family: 'Orbitron', sans-serif !important;
-  font-size: 3.8rem !important;
+  font-size: clamp(2.8rem, 8vw, 3.8rem) !important;
   font-weight: 900;
   background: linear-gradient(180deg, #FFFFFF 20%, #A5B8EC 100%);
   -webkit-background-clip: text;
@@ -134,7 +143,7 @@ button:disabled,
 
 .logo-title .serif-s {
   font-family: 'Orbitron', sans-serif !important;
-  font-size: 4.5rem !important;
+  font-size: clamp(3.2rem, 9vw, 4.5rem) !important;
   color: var(--neon-fuchsia) !important;
   -webkit-text-fill-color: var(--neon-fuchsia) !important;
   filter: drop-shadow(0 0 30px rgba(255, 0, 122, 1));
@@ -214,7 +223,7 @@ button:disabled,
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* GAUGES HUD */
+/* GAUGES HUD CON FONDO LIQUID GLASS */
 .splash-gauges {
   display: flex;
   justify-content: space-between;
@@ -240,14 +249,21 @@ button:disabled,
   position: relative;
   width: 90px; height: 90px;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at 30% 30%, #2b1a3d 0%, #0a0412 80%);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-top: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 8px 16px rgba(0, 0, 0, 0.6);
+  box-shadow: 
+    inset 0 2px 6px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(0, 255, 204, 0.15);
 }
 
 .gauge-ring { width: 90px; height: 90px; transform: rotate(-90deg); position: absolute; }
-.ring-thin-bg { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 2.5; }
+.ring-thin-bg { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 2.5; }
 .ring-thin-fill { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dasharray 0.05s linear; }
 
 .mint-stroke { stroke: var(--neon-mint); filter: drop-shadow(0 0 6px var(--neon-mint)); }
@@ -294,9 +310,9 @@ button:disabled,
   position: relative;
   z-index: 2;
   font-family: 'Orbitron', sans-serif !important;
-  font-size: 1.7rem; 
+  font-size: clamp(1.3rem, 5vw, 1.7rem); 
   font-weight: 900; 
-  letter-spacing: 8px;
+  letter-spacing: 6px;
   color: #ffffff;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 12px rgba(255, 255, 255, 0.6);
 }
@@ -306,12 +322,13 @@ button:disabled,
 /* ========================================================= */
 
 .dashboard-container {
-  width: 100%; max-width: 412px;
+  width: 100%; max-width: 440px;
   padding: 16px;
   display: flex; flex-direction: column; gap: 16px;
+  margin: 0 auto;
 }
 
-.dash-header { display: flex; justify-content: space-between; align-items: center; }
+.dash-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .dash-header-right { display: flex; align-items: center; gap: 8px; }
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; cursor: pointer; }
 
@@ -343,6 +360,7 @@ button:disabled,
     inset 0 -2px 8px rgba(0, 0, 0, 0.5),
     0 10px 28px rgba(0, 0, 0, 0.7),
     0 0 15px rgba(0, 255, 204, 0.12);
+  width: 100%;
 }
 
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
@@ -362,8 +380,7 @@ button:disabled,
 }
 
 .btn-select-amount {
-  flex: 1;
-  min-width: 65px;
+  flex: 1 1 65px;
   padding: 10px 8px;
   background: rgba(255, 0, 122, 0.1);
   border: 1px solid var(--neon-fuchsia);
@@ -373,6 +390,7 @@ button:disabled,
   font-weight: bold;
   font-size: 0.85rem;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
 .btn-select-amount:hover,
@@ -432,6 +450,7 @@ button:disabled,
   width: 100vw; height: 100vh;
   background: rgba(5, 1, 10, 0.88);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -453,6 +472,10 @@ button:disabled,
 /* 4. MÉTRICAS, CARRUSEL & IA3 (REAL-TIME SSE)               */
 /* ========================================================= */
 
+.metrics-section {
+  width: 100%;
+}
+
 .metrics-slider { 
   display: flex; 
   gap: 14px; 
@@ -461,6 +484,7 @@ button:disabled,
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scroll-padding-inline: 0px; 
+  padding-bottom: 4px;
 }
 .metrics-slider::-webkit-scrollbar { display: none; }
 
@@ -647,7 +671,8 @@ button:disabled,
   background: var(--neon-mint); 
   border: none; 
   border-radius: 10px; 
-  width: 40px; 
+  width: 44px; 
+  height: 44px;
   color: #05010a; 
   font-weight: 800; 
   cursor: pointer; 
@@ -655,6 +680,7 @@ button:disabled,
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .chat-send-btn:hover {
@@ -682,6 +708,10 @@ button:disabled,
   cursor: pointer; 
   box-shadow: 0 0 12px rgba(0, 255, 204, 0.2); 
   transition: all 0.25s ease; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-pf-action:hover { 
@@ -733,11 +763,107 @@ button:disabled,
 /* TEMPORIZADORES Y RECTAS FINALES */
 .timer-section { text-align: center; }
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
-.timer-digits { font-size: 3rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; font-family: 'Orbitron', sans-serif; }
+.timer-digits { font-size: clamp(2.2rem, 7vw, 3rem); font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; font-family: 'Orbitron', sans-serif; }
 .timer-sub { font-size: 0.65rem; color: var(--text-sub); letter-spacing: 1px; }
 
 /* ========================================================= */
-/* 8. BANNER DE COOKIES & FLOTANTES                          */
+/* 8. CONFIRMACIÓN DE PAGO (HTML CONFIRMACIÓN DE PAGO 💅🏽👺) */
+/* ========================================================= */
+
+.card-confirmacion-pago {
+  border-color: var(--neon-mint);
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.12) 0%, rgba(10, 3, 22, 0.85) 100%);
+  position: relative;
+  overflow: hidden;
+  animation: confirmGlow 3s infinite alternate;
+}
+
+@keyframes confirmGlow {
+  0% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.2), inset 0 0 10px rgba(0, 255, 204, 0.1); }
+  100% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.5), inset 0 0 20px rgba(0, 255, 204, 0.25); }
+}
+
+.confirm-status-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 12px auto;
+  border-radius: 50%;
+  background: rgba(0, 255, 204, 0.15);
+  border: 2px solid var(--neon-mint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--neon-mint);
+  box-shadow: 0 0 20px var(--neon-mint);
+}
+
+.confirm-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.receipt-box {
+  background: rgba(5, 1, 10, 0.7);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.receipt-row .label {
+  color: var(--text-sub);
+}
+
+.receipt-row .value {
+  color: #fff;
+  font-weight: 600;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.82rem;
+}
+
+.receipt-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 2px 0;
+}
+
+.success-badge-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(0, 255, 204, 0.2);
+  border: 1px solid var(--neon-mint);
+  color: var(--neon-mint);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ========================================================= */
+/* 9. BANNER DE COOKIES & FLOTANTES                          */
 /* ========================================================= */
 
 .cookie-banner-box {
@@ -745,13 +871,14 @@ button:disabled,
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
+  width: calc(100% - 32px);
   max-width: 380px;
   z-index: 9999;
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 204, 0.2);
   border: 1px solid rgba(0, 255, 204, 0.4);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   background: rgba(10, 3, 22, 0.92);
   border-radius: 16px;
   animation: slideUpCookie 0.4s ease-out;
@@ -769,14 +896,24 @@ button:disabled,
 }
 
 /* ========================================================= */
-/* 9. ADAPTACIÓN RESPONSIVE DESKTOP                          */
+/* 10. ADAPTACIÓN RESPONSIVE DESKTOP Y TABLET                */
 /* ========================================================= */
+
+@media (min-width: 600px) {
+  #card-pago-hora48 .input-group-flow {
+    flex-direction: row;
+  }
+  
+  .confirm-actions {
+    flex-direction: row;
+  }
+}
 
 @media (min-width: 900px) {
   .dashboard-container {
     max-width: 1100px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     grid-gap: 20px;
     align-items: start;
     padding: 30px;
@@ -795,10 +932,48 @@ button:disabled,
   }
 
   .metrics-slider .metric-square {
-    flex: 1;
+    flex: 1 1 0px;
   }
 
   .timer-section {
     grid-column: 1 / -1;
+  }
+
+  .card-confirmacion-pago {
+    grid-column: 1 / -1;
+    max-width: 650px;
+    margin: 0 auto;
+  }
+
+  .splash-gauges {
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+  
+  .glass-card-dash {
+    padding: 14px;
+  }
+  
+  .gauge-card {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .gauge-ring {
+    width: 75px;
+    height: 75px;
+  }
+
+  .logo-title {
+    font-size: 2.5rem !important;
+  }
+  
+  .logo-title .serif-s {
+    font-size: 3rem !important;
   }
 }
