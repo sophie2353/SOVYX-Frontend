@@ -1,9 +1,9 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
-// Sincronizado con index.js v2.0.26 y routes/pasarela.js
+// Sincronizado con index.js v2.0.26 y routes/facebookRoutes.js
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
-// IA3: Métricas y análisis en vivo
+// IA3: Métricas y análisis en vivo de Meta Ads & CAPI
 // Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas, Meta CAPI, Subida Admin y OAuth Meta Connect
 // ==========================================
 
@@ -19,7 +19,7 @@ const state = {
   currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($9K), 'MONTHLY_30D' ($5K)
   uploadedFile: null,
   elapsedHours: 0, // Horas transcurridas en la prueba
-  // Métricas iniciales
+  // Métricas iniciales / de contingencia
   metrics: {
     visitors: 80,        // Clics / Visitas a la app
     leads: 2,            // Clientes Objetivo / Cupos ocupados
@@ -71,7 +71,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAdminFiveClicks();
   setupAdminAmountSelection();
   setupAdminUploadAndExport();
-  setupAdminManualCapiPayment(); // ✅ Nueva integración para disparo manual a Meta CAPI
+  setupAdminManualCapiPayment(); // ✅ Disparo manual a Meta CAPI
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
@@ -81,6 +81,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupPushNotifications();
   syncPaymentStatusWithBackend();
   renderInitialMetrics();         
+
+  // Carga inicial de métricas desde el backend de Facebook/Meta para el dashboard
+  loadDashboardMetrics(state.sessionId);
 });
 
 // ==========================================
@@ -392,6 +395,8 @@ function setupAdminFiveClicks() {
         if (appDashboard && adminDashboard) {
           appDashboard.classList.add('hidden');
           adminDashboard.classList.remove('hidden');
+          // Cargar métricas administrativas / globales
+          loadDashboardMetrics(state.sessionId);
         }
       } else {
         alert(`Clave incorrecta. Escribe ${validKey}`);
@@ -434,6 +439,7 @@ function injectBiometricButton(modalAuth) {
       if (appDashboard && adminDashboard) {
         appDashboard.classList.add('hidden');
         adminDashboard.classList.remove('hidden');
+        loadDashboardMetrics(state.sessionId);
       }
       sendSystemNotification("Acceso Administrador", { body: "Autenticación biométrica exitosa." });
     };
@@ -695,7 +701,7 @@ function setupAdminManualCapiPayment() {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok || data.success) {
-        alert(`🟢 ¡Pago del Slot #${slotNumber} aprobado con éxito!\n\nResultado Meta CAPI: ${data.capiResult?.success ? 'ENVÍO EXITOSO ✅' : 'AVISO / REVISAR CONSOLA ⚠️'}`);
+        alert(`🟢 ¡Pago del Slot #${slotNumber} approved con éxito!\n\nResultado Meta CAPI: ${data.capiResult?.success ? 'ENVÍO EXITOSO ✅' : 'AVISO / REVISAR CONSOLA ⚠️'}`);
         
         // Actualizar métricas visuales locales del panel
         if (state.metrics.leads > 0) {
@@ -720,7 +726,7 @@ function setupAdminManualCapiPayment() {
 }
 
 // ==========================================
-// 5. CARRUSEL Y MÉTRICAS (IA3 + SSE REAL TIME)
+// 5. CARRUSEL Y MÉTRICAS (IA3 + SSE REAL TIME + FB GRAPH API)
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -777,6 +783,55 @@ function updateMetricsUI(metricsData) {
   if (liveConversion) liveConversion.textContent = metricsData.conversionRate || state.metrics.conversionRate;
 }
 
+// ✅ CONSUMO EN TIEMPO REAL DEL ENDPOINT /api/facebook/metrics/:userId
+async function loadDashboardMetrics(targetUserId = state.sessionId) {
+  try {
+    const res = await fetch(`${API_URL}/api/facebook/metrics/${targetUserId}`);
+    if (!res.ok) return;
+
+    const data = await res.json();
+    if (data.success && data.metrics) {
+      const m = data.metrics;
+      state.metrics.visitors = m.clicks || state.metrics.visitors;
+      state.metrics.reach = m.reach ? parseInt(m.reach) : state.metrics.reach;
+      state.metrics.spend = m.spend ? `$${m.spend}` : state.metrics.spend;
+      state.metrics.conversionRate = m.ctr ? `${m.ctr}%` : state.metrics.conversionRate;
+
+      updateMetricsUI(state.metrics);
+    }
+  } catch (err) {
+    console.warn("No se pudieron consultar métricas de Facebook para el usuario:", err);
+  }
+}
+
+// ✅ CREACIÓN DE CAMPAÑA VÍA /api/facebook/campaigns
+async function createFacebookCampaign(campaignData) {
+  try {
+    const payload = {
+      userId: state.sessionId,
+      name: campaignData.name || 'Campaña SODIE OS',
+      objective: campaignData.objective || 'OUTCOME_TRAFFIC',
+      dailyBudget: campaignData.dailyBudget || 1000
+    };
+
+    const res = await fetch(`${API_URL}/api/facebook/campaigns`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(`🚀 Campaña creada exitosamente en Meta Ads. ID: ${data.campaignId}`);
+      loadDashboardMetrics(state.sessionId); // Refrescar métricas del dashboard
+    } else {
+      alert(`Aviso al crear campaña: ${data.error || 'Revise configuración de Meta.'}`);
+    }
+  } catch (err) {
+    console.error("Error al disparar la creación de campaña:", err);
+  }
+}
+
 function setupSSEMetricsStream() {
   if (!window.EventSource) return;
 
@@ -820,6 +875,7 @@ function setupSSEMetricsStream() {
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
+      // 1. Métricas internas / Slots
       let res = await fetch(`${API_URL}/api/pasarela/slots`);
       if (!res.ok) res = await fetch(`${API_URL}/api/v1/metrics/live`);
       
@@ -832,8 +888,12 @@ function startLiveMetricsEngine() {
           updateMetricsUI(state.metrics);
         }
       }
+
+      // 2. Refrescar métricas en vivo desde Meta Ads
+      await loadDashboardMetrics(state.sessionId);
+
     } catch (err) {}
-  }, 5000);
+  }, 10000); // Consulta periódica cada 10s
 }
 
 // ==========================================
@@ -1081,7 +1141,6 @@ function setupPostPayStepFlow() {
       }
 
       try {
-        // ✅ Conectado directamente con routes/uploadRoutes.js
         let uploadEndpoint = isPdfContract 
           ? `${API_URL}/api/evaluator/contract` 
           : `${API_URL}/api/upload-csv`;
@@ -1107,10 +1166,9 @@ function setupPostPayStepFlow() {
     });
   }
 
-  // ✅ CONEXIÓN Y VINCULACIÓN AUTOMÁTICA CON FB GRAPH API (/api/facebook/connect)
+  // ✅ CONEXIÓN DIRECTA CON /api/facebook/connect
   if (btnConnectFb) {
     btnConnectFb.addEventListener('click', async () => {
-      // Si el cliente usa FB SDK en cliente o token en LocalStorage
       const storedToken = localStorage.getItem('sodie_fb_token');
 
       if (typeof FB !== 'undefined') {
@@ -1177,6 +1235,9 @@ function setupPostPayStepFlow() {
           }
           updateMetricsUI(state.metrics);
 
+          // Cargar métricas actualizadas desde Graph API
+          await loadDashboardMetrics(state.sessionId);
+
           const originalMetricsSection = document.querySelector('.metrics-section');
           if (originalMetricsSection) originalMetricsSection.classList.add('hidden');
 
@@ -1207,10 +1268,11 @@ function setupPostPayStepFlow() {
   }
 }
 
-// Función auxiliar para llamar al backend /api/facebook/connect
+// ✅ Función simplificada: Envía el token al backend y delega la extracción y guardado
 async function autoConnectFacebookAccount(userAccessToken) {
   try {
     const userId = state.sessionId || state.email || 'cliente_temp_1';
+
     let res = await fetch(`${API_URL}/api/facebook/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1223,8 +1285,11 @@ async function autoConnectFacebookAccount(userAccessToken) {
       if (data.data.act_id) localStorage.setItem('sodie_ad_account', data.data.act_id);
       if (data.data.pixel_id) localStorage.setItem('sodie_pixel_id', data.data.pixel_id);
 
-      alert(`✅ ¡Cuenta de Meta vinculada en segundos!\nCuenta: ${data.data.act_id}\nPixel ID: ${data.data.pixel_id || 'Autodetectado'}`);
+      alert(`✅ ¡Cuenta de Meta vinculada exitosamente!\nCuenta: ${data.data.act_id}\nPixel ID: ${data.data.pixel_id || 'Detectado'}`);
       
+      // Cargar métricas en vivo inmediatamente al conectar
+      await loadDashboardMetrics(userId);
+
       const stepDraft = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
       if (stepDraft) stepDraft.classList.remove('hidden');
     } else {
