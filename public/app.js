@@ -20,7 +20,7 @@ const state = {
   uploadedFile: null,
   elapsedHours: 0, // Horas transcurridas en la prueba
   // Métricas iniciales / de contingencia
-  metrics: {
+  metrics: JSON.parse(localStorage.getItem('sodie_custom_metrics')) || {
     visitors: 80,        // Clics / Visitas a la app
     leads: 2,            // Clientes Objetivo / Cupos ocupados
     conversionRate: "2%",
@@ -72,6 +72,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAdminAmountSelection();
   setupAdminUploadAndExport();
   setupAdminManualCapiPayment(); // ✅ Disparo manual a Meta CAPI
+  setupAdminMetricsOverride();   // ✅ NUEVO: Edición y actualización directa de métricas desde el Admin
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
@@ -726,6 +727,94 @@ function setupAdminManualCapiPayment() {
 }
 
 // ==========================================
+// 4.E ACTUALIZACIÓN DIRECTA DE MÉTRICAS DESDE EL PANEL ADMIN (NUEVO)
+// ==========================================
+function setupAdminMetricsOverride() {
+  const adminDashboard = document.getElementById('admin-dashboard');
+  if (!adminDashboard) return;
+
+  let metricsFormContainer = document.getElementById('admin-metrics-control-panel');
+
+  if (!metricsFormContainer) {
+    metricsFormContainer = document.createElement('div');
+    metricsFormContainer.id = 'admin-metrics-control-panel';
+    metricsFormContainer.className = 'admin-card-section';
+    metricsFormContainer.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0, 0, 0, 0.4); border: 1px solid #10B981; border-radius: 10px; color: #fff;';
+    
+    metricsFormContainer.innerHTML = `
+      <h3 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase;">📊 Control Directo de Métricas del Dashboard</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+        <div>
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Clics / Clics</label>
+          <input type="number" id="admin-input-visitors" value="${state.metrics.visitors}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Clientes / Cupos</label>
+          <input type="number" id="admin-input-leads" value="${state.metrics.leads}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Alcance Meta</label>
+          <input type="number" id="admin-input-reach" value="${state.metrics.reach}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Inversión Meta</label>
+          <input type="text" id="admin-input-spend" value="${state.metrics.spend}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Tasa Conversión</label>
+          <input type="text" id="admin-input-conversion" value="${state.metrics.conversionRate}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
+        </div>
+      </div>
+      <button id="btn-admin-save-metrics" style="margin-top: 15px; width: 100%; padding: 10px; background: #10B981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;">
+        ⚡ Actualizar Dashboard de Métricas en Tiempo Real
+      </button>
+    `;
+
+    adminDashboard.appendChild(metricsFormContainer);
+  }
+
+  const btnSaveMetrics = document.getElementById('btn-admin-save-metrics');
+  if (btnSaveMetrics) {
+    btnSaveMetrics.addEventListener('click', async () => {
+      const v = Number(document.getElementById('admin-input-visitors').value) || 0;
+      const l = Number(document.getElementById('admin-input-leads').value) || 0;
+      const r = Number(document.getElementById('admin-input-reach').value) || 0;
+      const s = document.getElementById('admin-input-spend').value || "$0";
+      const c = document.getElementById('admin-input-conversion').value || "0%";
+
+      state.metrics.visitors = v;
+      state.metrics.leads = l;
+      state.metrics.reach = r;
+      state.metrics.spend = s;
+      state.metrics.conversionRate = c;
+
+      // Guardar localmente
+      localStorage.setItem('sodie_custom_metrics', JSON.stringify(state.metrics));
+
+      // Actualizar UI general
+      updateMetricsUI(state.metrics);
+
+      // Notificar al backend sobre la actualización manual del Admin
+      try {
+        await fetch(`${API_URL}/api/facebook/metrics/override`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: state.sessionId,
+            adminKey: CONFIG.SOVYX_ADMIN_KEY,
+            metrics: state.metrics
+          })
+        });
+      } catch (err) {
+        console.warn("Métricas guardadas localmente en interfaz.");
+      }
+
+      alert("✅ Métricas del Dashboard actualizadas con éxito.");
+    });
+  }
+}
+
+// ==========================================
 // 5. CARRUSEL Y MÉTRICAS (IA3 + SSE REAL TIME + FB GRAPH API)
 // ==========================================
 function setupCarouselDots() {
@@ -762,23 +851,25 @@ function renderInitialMetrics() {
 }
 
 function updateMetricsUI(metricsData) {
+  // Selectores para las tarjetas principales del Dashboard
   const visitorsEl = document.getElementById('metric-visitors') || document.getElementById('metric-clicks');
   const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients') || document.getElementById('metric-cupos-val');
   const reachEl = document.getElementById('metric-reach');
   const spendEl = document.getElementById('metric-spend');
 
-  if (visitorsEl) visitorsEl.textContent = metricsData.visitors || state.metrics.visitors;
+  if (visitorsEl) visitorsEl.textContent = metricsData.visitors !== undefined ? metricsData.visitors : state.metrics.visitors;
   if (leadsEl) leadsEl.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
-  if (reachEl) reachEl.textContent = metricsData.reach ? metricsData.reach.toLocaleString() : state.metrics.reach.toLocaleString();
+  if (reachEl) reachEl.textContent = (metricsData.reach !== undefined ? metricsData.reach : state.metrics.reach).toLocaleString();
   if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
 
+  // Selectores secundarios / Vista en vivo pospago
   const liveReach = document.getElementById('live-metric-reach');
   const liveVisitors = document.getElementById('live-metric-visitors');
   const liveLeads = document.getElementById('live-metric-leads');
   const liveConversion = document.getElementById('live-metric-conversion');
 
-  if (liveReach) liveReach.textContent = (metricsData.reach || state.metrics.reach).toLocaleString();
-  if (liveVisitors) liveVisitors.textContent = (metricsData.visitors || state.metrics.visitors).toLocaleString();
+  if (liveReach) liveReach.textContent = (metricsData.reach !== undefined ? metricsData.reach : state.metrics.reach).toLocaleString();
+  if (liveVisitors) liveVisitors.textContent = (metricsData.visitors !== undefined ? metricsData.visitors : state.metrics.visitors).toLocaleString();
   if (liveLeads) liveLeads.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
   if (liveConversion) liveConversion.textContent = metricsData.conversionRate || state.metrics.conversionRate;
 }
@@ -792,9 +883,9 @@ async function loadDashboardMetrics(targetUserId = state.sessionId) {
     const data = await res.json();
     if (data.success && data.metrics) {
       const m = data.metrics;
-      state.metrics.visitors = m.clicks || state.metrics.visitors;
+      state.metrics.visitors = m.clicks !== undefined ? m.clicks : state.metrics.visitors;
       state.metrics.reach = m.reach ? parseInt(m.reach) : state.metrics.reach;
-      state.metrics.spend = m.spend ? `$${m.spend}` : state.metrics.spend;
+      state.metrics.spend = m.spend ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
       state.metrics.conversionRate = m.ctr ? `${m.ctr}%` : state.metrics.conversionRate;
 
       updateMetricsUI(state.metrics);
@@ -1226,7 +1317,7 @@ function setupPostPayStepFlow() {
         }
 
         if (res.ok || data.success || data.ok) {
-          alert(`¡Borrador "${targetDraftName}" confirmado, inyectado y activado exitosamente en Meta Ads!`);
+          alert(`¡Borrador "${targetDraftName}" confirmed, inyectado y activado exitosamente en Meta Ads!`);
 
           if (data.result && data.result.metrics) {
             Object.assign(state.metrics, data.result.metrics);
