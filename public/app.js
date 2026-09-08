@@ -4,7 +4,7 @@
 // IA1: Procesamiento de archivos / audiencias (CSV)
 // IA2: Cierre de ventas y atención estratégica
 // IA3: Métricas y análisis en vivo
-// Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas, Meta CAPI y Subida Admin
+// Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas, Meta CAPI, Subida Admin y OAuth Meta Connect
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -972,7 +972,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B EVALUADORES, CONTRATOS Y CARGA DE DATA CSV (IA1) Y NOTIFICACIÓN AL ADMIN
+// 6.B EVALUADORES, CONTRATOS Y CARGA DE DATA CSV (IA1) Y CONEXIÓN META GRAPH API
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -985,7 +985,7 @@ function setupPostPayStepFlow() {
   const statusFile = document.getElementById('client-file-status');
   const stepConnect = document.getElementById('step-connect-meta');
 
-  const btnConnectFb = document.getElementById('btn-connect-facebook-client');
+  const btnConnectFb = document.getElementById('btn-connect-facebook-client') || document.getElementById('btnConnectFB');
   const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
 
   const updateAdminEmailDisplay = (val) => {
@@ -1045,7 +1045,7 @@ function setupPostPayStepFlow() {
           });
         }
 
-        sendSystemNotification("👤 Usuario Sincronizado", {
+        sendSystemNotification("Usuario Sincronizado", {
           body: `Usuario de Meta/Facebook (${user}) enviado al administrador.`
         });
       } catch (e) {
@@ -1107,10 +1107,28 @@ function setupPostPayStepFlow() {
     });
   }
 
+  // ✅ CONEXIÓN Y VINCULACIÓN AUTOMÁTICA CON FB GRAPH API (/api/facebook/connect)
   if (btnConnectFb) {
-    btnConnectFb.addEventListener('click', () => {
-      alert('Redirigiendo a permisos oficiales de Meta Ads Manager...');
-      window.location.href = `${API_URL}/api/auth/facebook`;
+    btnConnectFb.addEventListener('click', async () => {
+      // Si el cliente usa FB SDK en cliente o token en LocalStorage
+      const storedToken = localStorage.getItem('sodie_fb_token');
+
+      if (typeof FB !== 'undefined') {
+        FB.login(async (response) => {
+          if (response.authResponse) {
+            const userAccessToken = response.authResponse.accessToken;
+            localStorage.setItem('sodie_fb_token', userAccessToken);
+            await autoConnectFacebookAccount(userAccessToken);
+          } else {
+            alert('El usuario canceló la autorización de Facebook.');
+          }
+        }, { scope: 'ads_management,ads_read,business_management' });
+      } else if (storedToken) {
+        await autoConnectFacebookAccount(storedToken);
+      } else {
+        alert('Redirigiendo a permisos oficiales de Meta Ads Manager...');
+        window.location.href = `${API_URL}/api/auth/facebook`;
+      }
     });
   }
 
@@ -1186,6 +1204,35 @@ function setupPostPayStepFlow() {
         btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR 🚀';
       }
     });
+  }
+}
+
+// Función auxiliar para llamar al backend /api/facebook/connect
+async function autoConnectFacebookAccount(userAccessToken) {
+  try {
+    const userId = state.sessionId || state.email || 'cliente_temp_1';
+    let res = await fetch(`${API_URL}/api/facebook/connect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, userAccessToken })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (data.data.act_id) localStorage.setItem('sodie_ad_account', data.data.act_id);
+      if (data.data.pixel_id) localStorage.setItem('sodie_pixel_id', data.data.pixel_id);
+
+      alert(`✅ ¡Cuenta de Meta vinculada en segundos!\nCuenta: ${data.data.act_id}\nPixel ID: ${data.data.pixel_id || 'Autodetectado'}`);
+      
+      const stepDraft = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
+      if (stepDraft) stepDraft.classList.remove('hidden');
+    } else {
+      alert(`Error al vincular con Meta: ${data.error || 'No se detectó cuenta de anuncios activa.'}`);
+    }
+  } catch (err) {
+    console.error('Error conectando con /api/facebook/connect:', err);
+    alert('Error al sincronizar tu cuenta de Facebook.');
   }
 }
 
