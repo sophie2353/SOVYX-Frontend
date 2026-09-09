@@ -1,10 +1,8 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
-// Sincronizado con index.js v2.0.26 y routes/facebookRoutes.js
-// IA1: Procesamiento de archivos / audiencias (CSV)
-// IA2: Cierre de ventas y atención estratégica
-// IA3: Métricas y análisis en vivo de Meta Ads & CAPI
-// Evaluadores: Contratos PDF, Lista de Espera V4, Pasarelas, Meta CAPI, Subida Admin y OAuth Meta Connect
+// Sincronizado con index.html / index.js v2.0.28
+// Esquema de Cobro: $1K inicial + $3K (Hora 48) + $3K (Hora 72) + $3K (Hora 96) + $5K/mes
+// Restricción: 2 Cupos Únicos Exclusivos
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -15,24 +13,23 @@ const state = {
   email: localStorage.getItem('sodie_user_email') || null,
   fbUser: localStorage.getItem('sodie_fb_user') || null,
   isPaid: localStorage.getItem('sodie_is_paid') === 'true',
-  selectedAmount: 1000, // Monto por defecto ($1,000 USD iniciales)
-  currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($9K), 'MONTHLY_30D' ($5K)
+  selectedAmount: 1000, // Monto por defecto ($1,000 USD inicial)
+  currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($3K), 'POST_72H' ($3K), 'POST_96H' ($3K), 'MONTHLY_30D' ($5K)
   uploadedFile: null,
-  elapsedHours: 0, // Horas transcurridas en la prueba
-  // Métricas iniciales / de contingencia
+  elapsedHours: 0,
   metrics: JSON.parse(localStorage.getItem('sodie_custom_metrics')) || {
-    visitors: 80,        // Clics / Visitas a la app
-    leads: 2,            // Clientes Objetivo / Cupos ocupados
+    visitors: 80,
+    leads: 2,            // ⚡ 2 Cupos totales estrictos
     conversionRate: "2%",
-    reach: 2000,         // Alcance Meta
-    spend: "$40",        // Inversión Meta
+    reach: 2000,
+    spend: "$40",
     liveViewers: 21
   }
 };
 
 localStorage.setItem('sodie_session_id', state.sessionId);
 
-// --- INICIALIZACIÓN PRINCIPAL ---
+// --- INICIALIZACIÓN PRINCIPAL Y FLUJO DE CARGA ---
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch(`${API_URL}/api/v1/config`);
@@ -58,12 +55,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     cleanUrlParams();
   }
 
-  // Restablecer vista pospago si ya pagó anteriormente
   if (state.isPaid) {
     activatePostPayView(clientId);
   }
 
-  // Módulos del sistema
+  // Inicialización de módulos
   runSplashScreen();
   setupCookieBanner();
   setupWaitlistFlow();
@@ -71,8 +67,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAdminFiveClicks();
   setupAdminAmountSelection();
   setupAdminUploadAndExport();
-  setupAdminManualCapiPayment(); // ✅ Disparo manual a Meta CAPI
-  setupAdminMetricsOverride();   // ✅ NUEVO: Edición y actualización directa de métricas desde el Admin
+  setupAdminManualCapiPayment(); 
+  setupAdminMetricsOverride();   
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
@@ -83,12 +79,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   syncPaymentStatusWithBackend();
   renderInitialMetrics();         
 
-  // Carga inicial de métricas desde el backend de Facebook/Meta para el dashboard
   loadDashboardMetrics(state.sessionId);
 });
 
 // ==========================================
-// 1. BANNER DE COOKIES Y REGISTRO EN LISTA DE ESPERA (SODIE V4)
+// 1. BANNER DE COOKIES Y LISTA DE ESPERA
 // ==========================================
 function setupCookieBanner() {
   const cookieBanner = document.getElementById('cookie-banner');
@@ -119,7 +114,7 @@ function setupWaitlistFlow() {
     const phone = inputPhone ? inputPhone.value.trim() : '';
 
     if (!email) {
-      alert('Por favor ingresa un correo electrónico válido para la lista de espera.');
+      alert('Ingresa un correo electrónico válido para registrarte.');
       return;
     }
 
@@ -130,12 +125,7 @@ function setupWaitlistFlow() {
       let res = await fetch(`${API_URL}/api/v1/waitlist/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          phone,
-          sessionId: state.sessionId,
-          stage: state.currentStage
-        })
+        body: JSON.stringify({ email, phone, sessionId: state.sessionId, stage: state.currentStage })
       });
 
       if (!res.ok) {
@@ -146,22 +136,14 @@ function setupWaitlistFlow() {
         });
       }
 
-      if (!res.ok) {
-        res = await fetch(`${API_URL}/api/v1/waitlist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, phone, sessionId: state.sessionId })
-        });
-      }
-
       if (res.ok) {
         state.email = email;
         localStorage.setItem('sodie_user_email', email);
         if (statusMsg) {
-          statusMsg.textContent = '✅ Registrado en la lista de espera SODIE V4 correctamente.';
+          statusMsg.textContent = '✅ Registrado en la lista de espera correctamente.';
           statusMsg.classList.remove('hidden');
         }
-        alert('🎉 ¡Te has unido exitosamente a la lista de espera SODIE V4!');
+        alert('🎉 ¡Te has registrado exitosamente en la lista de espera!');
         if (inputEmail) inputEmail.value = '';
         if (inputPhone) inputPhone.value = '';
       } else {
@@ -169,8 +151,7 @@ function setupWaitlistFlow() {
         alert(`Aviso: ${errData.message || errData.error || 'No se pudo procesar el registro.'}`);
       }
     } catch (err) {
-      console.warn('Fallback local lista de espera:', err);
-      alert('✅ Registro guardado en cola local de lista de espera.');
+      alert('✅ Registro guardado en la cola local de la lista de espera.');
     } finally {
       btnWaitlist.disabled = false;
       btnWaitlist.textContent = 'UNIRSE A LA LISTA DE ESPERA';
@@ -179,7 +160,7 @@ function setupWaitlistFlow() {
 }
 
 // ==========================================
-// 2. SPLASH SCREEN (CARGA 100% & COLORES)
+// 2. SPLASH SCREEN (PANTALLA DE CARGA 100%)
 // ==========================================
 function runSplashScreen() {
   const splashPct = document.getElementById('splash-pct');
@@ -205,7 +186,7 @@ function runSplashScreen() {
   const capsules = document.querySelectorAll('.capsules-track .capsule');
 
   let pct = 0;
-  const totalDurationMs = 2800;
+  const totalDurationMs = 2400;
   const stepTime = totalDurationMs / 100;
 
   const interval = setInterval(() => {
@@ -225,11 +206,7 @@ function runSplashScreen() {
       const activeCount = Math.floor((pct / 100) * capsules.length);
       capsules.forEach((cap, index) => {
         if (index < activeCount) {
-          if (index >= 6 && index <= 8) {
-            cap.className = 'capsule cap-fuchsia';
-          } else {
-            cap.className = 'capsule cap-mint';
-          }
+          cap.className = (index >= 6 && index <= 8) ? 'capsule cap-fuchsia' : 'capsule cap-mint';
         } else {
           cap.className = 'capsule cap-dark';
         }
@@ -238,9 +215,7 @@ function runSplashScreen() {
 
     if (pct >= 100) {
       clearInterval(interval);
-      setTimeout(() => {
-        finishSplash();
-      }, 400);
+      setTimeout(() => finishSplash(), 300);
     }
   }, stepTime);
 }
@@ -248,17 +223,15 @@ function runSplashScreen() {
 function finishSplash() {
   const splash = document.getElementById('view-splash') || document.querySelector('.full-screen');
   if (splash) {
-    splash.style.transition = 'opacity 0.6s ease, visibility 0.6s ease';
+    splash.style.transition = 'opacity 0.5s ease, visibility 0.5s ease';
     splash.style.opacity = '0';
     splash.style.visibility = 'hidden';
-    setTimeout(() => {
-      splash.classList.add('hidden');
-    }, 600);
+    setTimeout(() => splash.classList.add('hidden'), 500);
   }
 }
 
 // ==========================================
-// 3. CHAT WEB INTERACTIVO & MOTOR DE CIERRE (IA2)
+// 3. CHAT INTERACTIVO (PETICIÓN DIRECTA IA2 A BACKEND)
 // ==========================================
 function setupChatSystem() {
   const inputEl = document.getElementById('chat-input');
@@ -268,71 +241,78 @@ function setupChatSystem() {
 
   if (!btnSend || !inputEl || !chatBody) return;
 
-  const appendMsg = (text, isOutgoing) => {
+  const appendMsg = (text, isOutgoing, isLoading = false) => {
     const msgDiv = document.createElement('div');
     msgDiv.className = isOutgoing ? 'outgoing-simple' : 'incoming-simple';
+    if (isLoading) msgDiv.classList.add('loading-msg');
     msgDiv.innerHTML = `<p>${escapeHTML(text)}</p>`;
     chatBody.appendChild(msgDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
+    return msgDiv;
   };
 
-  const getIA2SmartResponse = (msg) => {
-    const lower = msg.toLowerCase().trim();
-    if (lower.includes('ecommerce') || lower.includes('tienda') || lower.includes('e-commerce')) {
-      return "IA2 [Cierre]: Protocolo Ecommerce activado. IA2 analiza la intención de compra directa e inyecta audiencias de alto valor comercial para maximizar el ROAS de tu tienda.";
-    }
-    if (lower.includes('acceder') || lower.includes('comprar') || lower.includes('empezar') || lower.includes('pagar')) {
-      return "IA2 [Cierre]: Excelente decisión. Selecciona la opción PAGAR para reservar tu slot inicial de $1,000 USD y comenzar la sincronización.";
-    }
-    if (lower.includes('metodo') || lower.includes('forma') || lower.includes('tarjeta') || lower.includes('pago')) {
-      return "IA2 [Cierre]: Procesamos pagos seguros globales vía pasarela automatizada, tarjetas internacionales y transferencia de contingencia.";
-    }
-    if (lower.includes('funciona') || lower.includes('que hace') || lower.includes('como es')) {
-      return "IA2 [Cierre]: SODIE opera con IA1 (procesamiento masivo CSV), IA2 (cierre e inyección de audiencias activas) e IA3 (supervisión en vivo).";
-    }
-    return null;
+  const updateMsg = (msgDiv, newText) => {
+    if (!msgDiv) return;
+    msgDiv.classList.remove('loading-msg');
+    const p = msgDiv.querySelector('p');
+    if (p) p.textContent = newText;
+    chatBody.scrollTop = chatBody.scrollHeight;
   };
 
-  const sendMsg = async (customText = null, customReply = null) => {
+  const sendMsg = async (customText = null) => {
     const text = customText || inputEl.value.trim();
     if (!text) return;
 
+    // 1. Renderiza mensaje de usuario
     appendMsg(text, true);
     if (!customText) inputEl.value = '';
 
-    if (customReply) {
-      setTimeout(() => appendMsg(customReply, false), 350);
-      return;
-    }
+    inputEl.disabled = true;
+    btnSend.disabled = true;
 
-    const smartLocalReply = getIA2SmartResponse(text);
+    // 2. Muestra indicador "Pensando..." en UI
+    const loadingDiv = appendMsg('Pensando respuesta... 🧠', false, true);
 
     try {
+      // 3. Petición POST directa al Backend
       let res = await fetch(`${API_URL}/api/ia2/conversar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage })
+        body: JSON.stringify({
+          message: text,
+          sessionId: state.sessionId,
+          stage: state.currentStage,
+          email: state.email
+        })
       });
 
       if (!res.ok) {
         res = await fetch(`${API_URL}/api/v1/chat/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, sessionId: state.sessionId })
+          body: JSON.stringify({
+            message: text,
+            sessionId: state.sessionId,
+            stage: state.currentStage
+          })
         });
       }
 
       if (res.ok) {
         const data = await res.json();
-        const reply = data.reply || data.response || smartLocalReply || 'IA2 [Cierre]: Mensaje procesado. Listo para continuar con la inyección.';
-        appendMsg(reply, false);
+        const reply = data.reply || data.response || data.message || data.text || 'Sin respuesta del motor IA2.';
+        updateMsg(loadingDiv, reply);
       } else {
-        appendMsg(smartLocalReply || 'IA2 [Cierre]: Plan Ecommerce y conversión activa. Procesando tu slot estratégico.', false);
+        const errData = await res.json().catch(() => ({}));
+        updateMsg(loadingDiv, `❌ Error backend (${res.status}): ${errData.message || errData.error || 'Respuesta no válida del servidor.'}`);
       }
     } catch (err) {
-      setTimeout(() => {
-        appendMsg(smartLocalReply || 'IA2 [Cierre]: Plan Ecommerce y conversión activa. Procesando tu slot estratégico.', false);
-      }, 400);
+      console.error('Error enviando petición a IA2:', err);
+      updateMsg(loadingDiv, '❌ Error de conexión al servidor backend de IA2.');
+    } finally {
+      inputEl.disabled = false;
+      btnSend.disabled = false;
+      inputEl.focus();
     }
   };
 
@@ -344,16 +324,13 @@ function setupChatSystem() {
   quickOpts.forEach(btn => {
     btn.addEventListener('click', () => {
       const userText = btn.textContent.trim();
-      const payload = btn.getAttribute('data-payload');
-      
-      let botReply = getIA2SmartResponse(userText) || getIA2SmartResponse(payload || '');
-      sendMsg(userText, botReply);
+      sendMsg(userText);
     });
   });
 }
 
 // ==========================================
-// 4. ACCESO Y PANEL ADMINISTRADOR (BIOMETRÍA OPTIMIZADA)
+// 4. PANEL ADMINISTRADOR Y WEBAUTHN
 // ==========================================
 function setupAdminFiveClicks() {
   let logoClicks = 0;
@@ -396,11 +373,10 @@ function setupAdminFiveClicks() {
         if (appDashboard && adminDashboard) {
           appDashboard.classList.add('hidden');
           adminDashboard.classList.remove('hidden');
-          // Cargar métricas administrativas / globales
           loadDashboardMetrics(state.sessionId);
         }
       } else {
-        alert(`Clave incorrecta. Escribe ${validKey}`);
+        alert(`Clave incorrecta.`);
       }
     });
   }
@@ -429,7 +405,7 @@ function injectBiometricButton(modalAuth) {
   bioBtn.id = 'btn-biometric-auth';
   bioBtn.type = 'button';
   bioBtn.textContent = 'DESBLOQUEAR CON HUELLA / FACEID';
-  bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 12px; background: #10B981; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);';
+  bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 12px; background: #10B981; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem;';
   
   bioBtn.addEventListener('click', async () => {
     const appDashboard = document.getElementById('app-dashboard');
@@ -442,11 +418,10 @@ function injectBiometricButton(modalAuth) {
         adminDashboard.classList.remove('hidden');
         loadDashboardMetrics(state.sessionId);
       }
-      sendSystemNotification("Acceso Administrador", { body: "Autenticación biométrica exitosa." });
     };
 
     if (!window.PublicKeyCredential) {
-      alert("⚠️ Tu navegador no soporta biometría WebAuthn. Por favor utiliza la clave PIN de administrador.");
+      alert("Autenticación biométrica no disponible.");
       return;
     }
 
@@ -459,17 +434,10 @@ function injectBiometricButton(modalAuth) {
         try {
           const rawId = Uint8Array.from(atob(savedCredId), c => c.charCodeAt(0));
           const assertion = await navigator.credentials.get({
-            publicKey: {
-              challenge: challenge,
-              timeout: 60000,
-              userVerification: "preferred",
-              allowCredentials: [{ id: rawId, type: 'public-key' }]
-            }
+            publicKey: { challenge, timeout: 60000, userVerification: "preferred", allowCredentials: [{ id: rawId, type: 'public-key' }] }
           });
           if (assertion) success = true;
-        } catch (getErr) {
-          console.warn("Autenticación con credencial guardada no completada:", getErr);
-        }
+        } catch (e) {}
       }
 
       if (!success) {
@@ -477,17 +445,10 @@ function injectBiometricButton(modalAuth) {
           const userId = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
           const credential = await navigator.credentials.create({
             publicKey: {
-              challenge: challenge,
+              challenge,
               rp: { name: "SODIE Core OS", id: window.location.hostname || "localhost" },
-              user: {
-                id: userId,
-                name: "admin@sodie.app",
-                displayName: "SODIE Administrator"
-              },
-              pubKeyCredParams: [
-                { type: "public-key", alg: -7 },  // ES256
-                { type: "public-key", alg: -257 } // RS256
-              ],
+              user: { id: userId, name: "admin@sodie.app", displayName: "Administrator" },
+              pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
               authenticatorSelection: { userVerification: "preferred" },
               timeout: 60000
             }
@@ -498,22 +459,11 @@ function injectBiometricButton(modalAuth) {
             localStorage.setItem('sodie_bio_cred_id', rawIdStr);
             success = true;
           }
-        } catch (createErr) {
-          console.warn("Registro WebAuthn cancelado:", createErr);
-          if (createErr.name === 'NotAllowedError') {
-            alert("Operación cancelada por el usuario.");
-            return;
-          }
-        }
+        } catch (e) {}
       }
 
-      if (success) {
-        unlockAdmin();
-      } else {
-        unlockAdmin();
-      }
+      unlockAdmin();
     } catch (err) {
-      console.warn("Error general en flujo de biometría:", err);
       unlockAdmin();
     }
   });
@@ -522,7 +472,7 @@ function injectBiometricButton(modalAuth) {
 }
 
 // ==========================================
-// 4.B SELECCIÓN E INYECCIÓN DE RUTAS DE PASARELA ($1K, $9K, $5K) - CONECTADO A routes/pasarela.js
+// 4.B SELECCIÓN DE MONTOS ($1K, $3K, $5K)
 // ==========================================
 function setupAdminAmountSelection() {
   const amountBtns = document.querySelectorAll('.btn-select-amount');
@@ -536,15 +486,15 @@ function setupAdminAmountSelection() {
       const amt = Number(e.target.getAttribute('data-amount')) || 1000;
       state.selectedAmount = amt;
       
-      if (amt === 9000) {
-        state.currentStage = 'POST_48H';
+      if (amt === 3000) {
+        state.currentStage = state.elapsedHours >= 72 ? 'POST_96H' : (state.elapsedHours >= 48 ? 'POST_72H' : 'POST_48H');
       } else if (amt === 5000) {
         state.currentStage = 'MONTHLY_30D';
       } else {
         state.currentStage = 'INITIAL';
       }
 
-      if (labelAmount) labelAmount.innerText = `Ingresar link de pasarela para el cobro de $${amt.toLocaleString()} USD:`;
+      if (labelAmount) labelAmount.innerText = `Link de cobro para $${amt.toLocaleString()} USD (${state.currentStage}):`;
       if (linkContainer) linkContainer.classList.remove('hidden');
     });
   });
@@ -552,7 +502,7 @@ function setupAdminAmountSelection() {
   if (btnSendLink) {
     btnSendLink.addEventListener('click', async () => {
       const url = inputLink ? inputLink.value.trim() : '';
-      if (!url) return alert('Por favor ingresa una URL de pasarela válida.');
+      if (!url) return alert('Ingresa una URL válida.');
 
       const targetAmount = state.selectedAmount;
       const targetStage = state.currentStage;
@@ -561,32 +511,20 @@ function setupAdminAmountSelection() {
       localStorage.setItem(`sodie_pay_link_stage_${targetStage}`, url);
 
       try {
-        let res = await fetch(`${API_URL}/api/pasarela/admin/set-link`, {
+        await fetch(`${API_URL}/api/pasarela/admin/set-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            amount: targetAmount, 
-            paymentUrl: url, 
-            stage: targetStage, 
-            adminKey: CONFIG.SOVYX_ADMIN_KEY,
-            sessionId: state.sessionId,
-            userEmail: state.email
+            amount: targetAmount, paymentUrl: url, stage: targetStage, 
+            adminKey: CONFIG.SOVYX_ADMIN_KEY, sessionId: state.sessionId, userEmail: state.email 
           })
         });
 
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/pasarela`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: targetAmount, paymentUrl: url, stage: targetStage, sessionId: state.sessionId })
-          });
-        }
-
-        alert(`✅ Link de pasarela enviado exitosamente por $${targetAmount.toLocaleString()} USD al usuario.`);
+        alert(`✅ Link asignado para $${targetAmount.toLocaleString()} USD en la etapa ${targetStage}.`);
         if (inputLink) inputLink.value = '';
         if (linkContainer) linkContainer.classList.add('hidden');
       } catch (err) {
-        alert(`✅ Link de pasarela de $${targetAmount.toLocaleString()} USD guardado localmente.`);
+        alert(`✅ Link guardado localmente.`);
         if (inputLink) inputLink.value = '';
         if (linkContainer) linkContainer.classList.add('hidden');
       }
@@ -595,7 +533,7 @@ function setupAdminAmountSelection() {
 }
 
 // ==========================================
-// 4.C SUBIDA ADMIN (VIDEOS, PDF, EXCEL) & EXPORTACIÓN CSV HORA 48
+// 4.C ARCHIVOS Y EXPORTACIÓN ADMIN
 // ==========================================
 function setupAdminUploadAndExport() {
   const btnUploadAdminFile = document.getElementById('btn-admin-upload-file');
@@ -605,9 +543,7 @@ function setupAdminUploadAndExport() {
 
   if (btnUploadAdminFile && adminFileInput) {
     btnUploadAdminFile.addEventListener('click', async () => {
-      if (!adminFileInput.files || !adminFileInput.files[0]) {
-        return alert('Selecciona un archivo (Video, PDF o Excel) para subir.');
-      }
+      if (!adminFileInput.files || !adminFileInput.files[0]) return alert('Selecciona un archivo.');
 
       const file = adminFileInput.files[0];
       const formData = new FormData();
@@ -615,49 +551,34 @@ function setupAdminUploadAndExport() {
       formData.append('uploadedBy', 'admin');
 
       if (adminUploadStatus) {
-        adminUploadStatus.textContent = 'Subiendo archivo al servidor... ⏳';
+        adminUploadStatus.textContent = 'Subiendo archivo... ⏳';
         adminUploadStatus.classList.remove('hidden');
       }
 
       try {
-        let res = await fetch(`${API_URL}/api/admin/uploads`, {
-          method: 'POST',
-          body: formData
-        });
+        let res = await fetch(`${API_URL}/api/admin/uploads`, { method: 'POST', body: formData });
+        if (!res.ok) res = await fetch(`${API_URL}/api/v1/admin/uploads`, { method: 'POST', body: formData });
 
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/v1/admin/uploads`, {
-            method: 'POST',
-            body: formData
-          });
-        }
-
-        const data = await res.json().catch(() => ({}));
-
-        if (res.ok || data.success) {
-          if (adminUploadStatus) adminUploadStatus.textContent = '✅ Archivo subido y sincronizado correctamente.';
-          alert('¡Archivo publicado con éxito en la plataforma!');
+        if (res.ok) {
+          if (adminUploadStatus) adminUploadStatus.textContent = '✅ Archivo publicado exitosamente.';
+          alert('¡Archivo publicado!');
           adminFileInput.value = '';
-        } else {
-          alert(`Error: ${data.message || data.error || 'No se pudo subir el archivo.'}`);
         }
       } catch (err) {
-        console.error('Error en subida admin:', err);
-        alert('Error de conexión al subir el archivo.');
+        alert('Error al subir el archivo.');
       }
     });
   }
 
   if (btnExportCsv) {
     btnExportCsv.addEventListener('click', () => {
-      const exportUrl = `${API_URL}/api/admin/export/export-clientes-hora48`;
-      window.open(exportUrl, '_blank');
+      window.open(`${API_URL}/api/admin/export/export-clientes-hora48`, '_blank');
     });
   }
 }
 
 // ==========================================
-// 4.D CONFIRMACIÓN DE PAGO MANUAL Y DISPARO A META CONVERSIONS API (CAPI)
+// 4.D APROBACIÓN MANUAL Y META CAPI (2 CUPOS MAX)
 // ==========================================
 function setupAdminManualCapiPayment() {
   const btnApproveSlot1 = document.getElementById('btn-approve-slot-1');
@@ -666,11 +587,16 @@ function setupAdminManualCapiPayment() {
   const inputManualAmount = document.getElementById('admin-manual-payment-amount');
 
   const executeCapiApproval = async (slotNumber) => {
+    if (slotNumber > 2) {
+      alert("⚠️ SODIE OS sólo administra un máximo de 2 cupos exclusivos.");
+      return;
+    }
+
     const clientEmail = (inputManualEmail ? inputManualEmail.value.trim() : '') || state.email || 'cliente@sovyx.com';
-    const amount = (inputManualAmount ? Number(inputManualAmount.value) : null) || state.selectedAmount || 10000;
+    const amount = (inputManualAmount ? Number(inputManualAmount.value) : null) || state.selectedAmount || 1000;
     const adminKey = CONFIG.SOVYX_ADMIN_KEY || 'admin23555';
 
-    if (!confirm(`¿Confirmar aprobación manual del Slot #${slotNumber} por $${amount.toLocaleString()} USD e inyectar evento 'Purchase' en Meta CAPI?`)) {
+    if (!confirm(`¿Aprobar manualmente el Slot #${slotNumber} de 2 por $${amount.toLocaleString()} USD e inyectar evento Purchase en Meta CAPI?`)) {
       return;
     }
 
@@ -678,47 +604,33 @@ function setupAdminManualCapiPayment() {
       let res = await fetch(`${API_URL}/api/admin/uploads/confirmar-pago-manual`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          adminKey,
-          slotNumber,
-          emailCliente: clientEmail,
-          monto: amount
-        })
+        body: JSON.stringify({ adminKey, slotNumber, emailCliente: clientEmail, monto: amount, stage: state.currentStage })
       });
 
       if (!res.ok) {
         res = await fetch(`${API_URL}/api/v1/admin/confirmar-pago-manual`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            adminKey,
-            slotNumber,
-            emailCliente: clientEmail,
-            monto: amount
-          })
+          body: JSON.stringify({ adminKey, slotNumber, emailCliente: clientEmail, monto: amount, stage: state.currentStage })
         });
       }
 
       const data = await res.json().catch(() => ({}));
 
       if (res.ok || data.success) {
-        alert(`🟢 ¡Pago del Slot #${slotNumber} approved con éxito!\n\nResultado Meta CAPI: ${data.capiResult?.success ? 'ENVÍO EXITOSO ✅' : 'AVISO / REVISAR CONSOLA ⚠️'}`);
+        alert(`🟢 ¡Aprobación del Slot #${slotNumber}/2 completada exitosamente!`);
         
-        // Actualizar métricas visuales locales del panel
         if (state.metrics.leads > 0) {
           state.metrics.leads -= 1;
         }
         updateMetricsUI(state.metrics);
 
-        sendSystemNotification('🎉 Conversión Registrada en Meta CAPI', {
+        sendSystemNotification('🎉 Conversión Registrada', {
           body: `Pago manual de $${amount.toLocaleString()} USD confirmado para el Slot #${slotNumber}.`
         });
-      } else {
-        alert(`🔴 Error: ${data.error || 'No se pudo completar la aprobación manual.'}`);
       }
     } catch (err) {
-      console.error('Error procesando el pago manual y CAPI:', err);
-      alert('Error de comunicación con el servidor al procesar el pago manual.');
+      alert('Error de conexión al procesar el pago manual.');
     }
   };
 
@@ -727,7 +639,7 @@ function setupAdminManualCapiPayment() {
 }
 
 // ==========================================
-// 4.E ACTUALIZACIÓN DIRECTA DE MÉTRICAS DESDE EL PANEL ADMIN (NUEVO)
+// 4.E CONTROL DIRECTO DE MÉTRICAS ADMIN
 // ==========================================
 function setupAdminMetricsOverride() {
   const adminDashboard = document.getElementById('admin-dashboard');
@@ -742,15 +654,15 @@ function setupAdminMetricsOverride() {
     metricsFormContainer.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0, 0, 0, 0.4); border: 1px solid #10B981; border-radius: 10px; color: #fff;';
     
     metricsFormContainer.innerHTML = `
-      <h3 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase;">📊 Control Directo de Métricas del Dashboard</h3>
+      <h3 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase;">📊 Control Directo de Métricas (2 Cupos)</h3>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
         <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Clics / Clics</label>
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Visitas / Clics</label>
           <input type="number" id="admin-input-visitors" value="${state.metrics.visitors}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
         </div>
         <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Clientes / Cupos</label>
-          <input type="number" id="admin-input-leads" value="${state.metrics.leads}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
+          <label style="font-size: 0.8rem; display:block; color: #aaa;">Cupos (Max 2)</label>
+          <input type="number" id="admin-input-leads" max="2" value="${state.metrics.leads}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
         </div>
         <div>
           <label style="font-size: 0.8rem; display:block; color: #aaa;">Alcance Meta</label>
@@ -760,13 +672,9 @@ function setupAdminMetricsOverride() {
           <label style="font-size: 0.8rem; display:block; color: #aaa;">Inversión Meta</label>
           <input type="text" id="admin-input-spend" value="${state.metrics.spend}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
         </div>
-        <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Tasa Conversión</label>
-          <input type="text" id="admin-input-conversion" value="${state.metrics.conversionRate}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
-        </div>
       </div>
       <button id="btn-admin-save-metrics" style="margin-top: 15px; width: 100%; padding: 10px; background: #10B981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;">
-        ⚡ Actualizar Dashboard de Métricas en Tiempo Real
+        ⚡ Actualizar Dashboard
       </button>
     `;
 
@@ -776,46 +684,29 @@ function setupAdminMetricsOverride() {
   const btnSaveMetrics = document.getElementById('btn-admin-save-metrics');
   if (btnSaveMetrics) {
     btnSaveMetrics.addEventListener('click', async () => {
-      const v = Number(document.getElementById('admin-input-visitors').value) || 0;
-      const l = Number(document.getElementById('admin-input-leads').value) || 0;
-      const r = Number(document.getElementById('admin-input-reach').value) || 0;
-      const s = document.getElementById('admin-input-spend').value || "$0";
-      const c = document.getElementById('admin-input-conversion').value || "0%";
+      state.metrics.visitors = Number(document.getElementById('admin-input-visitors').value) || 0;
+      state.metrics.leads = Math.min(2, Number(document.getElementById('admin-input-leads').value) || 0);
+      state.metrics.reach = Number(document.getElementById('admin-input-reach').value) || 0;
+      state.metrics.spend = document.getElementById('admin-input-spend').value || "$0";
 
-      state.metrics.visitors = v;
-      state.metrics.leads = l;
-      state.metrics.reach = r;
-      state.metrics.spend = s;
-      state.metrics.conversionRate = c;
-
-      // Guardar localmente
       localStorage.setItem('sodie_custom_metrics', JSON.stringify(state.metrics));
-
-      // Actualizar UI general
       updateMetricsUI(state.metrics);
 
-      // Notificar al backend sobre la actualización manual del Admin
       try {
         await fetch(`${API_URL}/api/facebook/metrics/override`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: state.sessionId,
-            adminKey: CONFIG.SOVYX_ADMIN_KEY,
-            metrics: state.metrics
-          })
+          body: JSON.stringify({ userId: state.sessionId, adminKey: CONFIG.SOVYX_ADMIN_KEY, metrics: state.metrics })
         });
-      } catch (err) {
-        console.warn("Métricas guardadas localmente en interfaz.");
-      }
+      } catch (err) {}
 
-      alert("✅ Métricas del Dashboard actualizadas con éxito.");
+      alert("✅ Métricas actualizadas.");
     });
   }
 }
 
 // ==========================================
-// 5. CARRUSEL Y MÉTRICAS (IA3 + SSE REAL TIME + FB GRAPH API)
+// 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -825,16 +716,11 @@ function setupCarouselDots() {
   if (!slider || dots.length === 0 || cards.length === 0) return;
 
   slider.addEventListener('scroll', () => {
-    const scrollPos = slider.scrollLeft;
     const cardWidth = cards[0].offsetWidth + 14; 
-    const activeIdx = Math.round(scrollPos / cardWidth);
+    const activeIdx = Math.round(slider.scrollLeft / cardWidth);
 
     dots.forEach((dot, idx) => {
-      if (idx === activeIdx) {
-        dot.classList.add('active');
-      } else {
-        dot.classList.remove('active');
-      }
+      dot.classList.toggle('active', idx === activeIdx);
     });
   });
 
@@ -851,7 +737,6 @@ function renderInitialMetrics() {
 }
 
 function updateMetricsUI(metricsData) {
-  // Selectores para las tarjetas principales del Dashboard
   const visitorsEl = document.getElementById('metric-visitors') || document.getElementById('metric-clicks');
   const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients') || document.getElementById('metric-cupos-val');
   const reachEl = document.getElementById('metric-reach');
@@ -862,19 +747,15 @@ function updateMetricsUI(metricsData) {
   if (reachEl) reachEl.textContent = (metricsData.reach !== undefined ? metricsData.reach : state.metrics.reach).toLocaleString();
   if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
 
-  // Selectores secundarios / Vista en vivo pospago
   const liveReach = document.getElementById('live-metric-reach');
   const liveVisitors = document.getElementById('live-metric-visitors');
   const liveLeads = document.getElementById('live-metric-leads');
-  const liveConversion = document.getElementById('live-metric-conversion');
 
   if (liveReach) liveReach.textContent = (metricsData.reach !== undefined ? metricsData.reach : state.metrics.reach).toLocaleString();
   if (liveVisitors) liveVisitors.textContent = (metricsData.visitors !== undefined ? metricsData.visitors : state.metrics.visitors).toLocaleString();
   if (liveLeads) liveLeads.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
-  if (liveConversion) liveConversion.textContent = metricsData.conversionRate || state.metrics.conversionRate;
 }
 
-// ✅ CONSUMO EN TIEMPO REAL DEL ENDPOINT /api/facebook/metrics/:userId
 async function loadDashboardMetrics(targetUserId = state.sessionId) {
   try {
     const res = await fetch(`${API_URL}/api/facebook/metrics/${targetUserId}`);
@@ -886,48 +767,16 @@ async function loadDashboardMetrics(targetUserId = state.sessionId) {
       state.metrics.visitors = m.clicks !== undefined ? m.clicks : state.metrics.visitors;
       state.metrics.reach = m.reach ? parseInt(m.reach) : state.metrics.reach;
       state.metrics.spend = m.spend ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
-      state.metrics.conversionRate = m.ctr ? `${m.ctr}%` : state.metrics.conversionRate;
 
       updateMetricsUI(state.metrics);
     }
-  } catch (err) {
-    console.warn("No se pudieron consultar métricas de Facebook para el usuario:", err);
-  }
-}
-
-// ✅ CREACIÓN DE CAMPAÑA VÍA /api/facebook/campaigns
-async function createFacebookCampaign(campaignData) {
-  try {
-    const payload = {
-      userId: state.sessionId,
-      name: campaignData.name || 'Campaña SODIE OS',
-      objective: campaignData.objective || 'OUTCOME_TRAFFIC',
-      dailyBudget: campaignData.dailyBudget || 1000
-    };
-
-    const res = await fetch(`${API_URL}/api/facebook/campaigns`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    if (res.ok && data.success) {
-      alert(`🚀 Campaña creada exitosamente en Meta Ads. ID: ${data.campaignId}`);
-      loadDashboardMetrics(state.sessionId); // Refrescar métricas del dashboard
-    } else {
-      alert(`Aviso al crear campaña: ${data.error || 'Revise configuración de Meta.'}`);
-    }
-  } catch (err) {
-    console.error("Error al disparar la creación de campaña:", err);
-  }
+  } catch (err) {}
 }
 
 function setupSSEMetricsStream() {
   if (!window.EventSource) return;
 
-  const sseUrl = `${API_URL}/api/pasarela/sse?sessionId=${state.sessionId}`;
-  const eventSource = new EventSource(sseUrl);
+  const eventSource = new EventSource(`${API_URL}/api/pasarela/sse?sessionId=${state.sessionId}`);
 
   eventSource.onmessage = (event) => {
     try {
@@ -936,10 +785,7 @@ function setupSSEMetricsStream() {
       if (data.type === 'PAYMENT_LINK_READY' || data.paymentUrl) {
         const linkUrl = data.paymentUrl || data.url;
         localStorage.setItem(`sodie_pay_link_${state.selectedAmount}`, linkUrl);
-        sendSystemNotification("💳 Link de Pago Listo", {
-          body: `El administrador ha asignado tu enlace de pago por $${state.selectedAmount.toLocaleString()} USD.`
-        });
-        alert(`🎉 ¡El Administrador ha generado tu link de pago! Haz clic en PAGAR para completar la transacción.`);
+        alert(`🎉 ¡Tu link de pago de $${state.selectedAmount.toLocaleString()} USD ha sido asignado!`);
       }
 
       if (data.metrics) {
@@ -947,75 +793,50 @@ function setupSSEMetricsStream() {
         updateMetricsUI(state.metrics);
       }
 
-      if (data.type === 'SLOT_UPDATED' || data.remainingSlots !== undefined) {
-        if (data.remainingSlots !== undefined) {
-          state.metrics.leads = data.remainingSlots;
-          updateMetricsUI(state.metrics);
-        }
+      if (data.remainingSlots !== undefined) {
+        state.metrics.leads = Math.min(2, data.remainingSlots);
+        updateMetricsUI(state.metrics);
       }
-    } catch (e) {
-      console.error("Error al procesar evento SSE:", e);
-    }
-  };
-
-  eventSource.onerror = () => {
-    console.warn("Conexión SSE de pasarela reconectando...");
+    } catch (e) {}
   };
 }
 
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
-      // 1. Métricas internas / Slots
       let res = await fetch(`${API_URL}/api/pasarela/slots`);
-      if (!res.ok) res = await fetch(`${API_URL}/api/v1/metrics/live`);
-      
       if (res.ok) {
         const data = await res.json();
-        if (data.slots !== undefined || data.leads !== undefined) {
-          state.metrics.leads = data.slots !== undefined ? data.slots : data.leads;
-          if (data.visitors) state.metrics.visitors = data.visitors;
-          if (data.reach) state.metrics.reach = data.reach;
+        if (data.slots !== undefined) {
+          state.metrics.leads = Math.min(2, data.slots);
           updateMetricsUI(state.metrics);
         }
       }
-
-      // 2. Refrescar métricas en vivo desde Meta Ads
       await loadDashboardMetrics(state.sessionId);
-
     } catch (err) {}
-  }, 10000); // Consulta periódica cada 10s
+  }, 10000);
 }
 
 // ==========================================
-// 6. FLUJO DE PAGO DINÁMICO & RUTAS DE PASARELA (/routes/pasarela.js)
+// 6. FLUJO DE PAGO Y POSPAGO
 // ==========================================
 function setupPaymentFlow() {
   const btnPagar = document.getElementById('btn-pay-main');
   if (btnPagar) {
     btnPagar.addEventListener('click', async () => {
       btnPagar.disabled = true;
-      btnPagar.textContent = 'Procesando Pago... ⏳';
+      btnPagar.textContent = 'Procesando... ⏳';
 
       const currentAmount = state.selectedAmount;
       const currentStage = state.currentStage;
-
       const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
 
       try {
         let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
 
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/checkout/init`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: state.email || 'cliente@sodie.app', monto: currentAmount, sessionId: state.sessionId, stage: currentStage })
-          });
-        }
-
         if (res.ok) {
           const data = await res.json();
-          const targetUrl = data.paymentUrl || data.redirectUrl || data.directPayLink || data.url || localInjectedUrl;
+          const targetUrl = data.paymentUrl || data.redirectUrl || localInjectedUrl;
           if (targetUrl) {
             window.location.href = targetUrl;
             return;
@@ -1050,38 +871,26 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   activatePostPayView(clientId);
 
   try {
-    let res = await fetch(`${API_URL}/api/pasarela/confirm-payment`, {
+    await fetch(`${API_URL}/api/pasarela/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        sessionId: state.sessionId, 
-        clientId: clientId, 
-        amount: amount, 
-        stage: state.currentStage,
-        email: state.email 
-      })
+      body: JSON.stringify({ sessionId: state.sessionId, clientId, amount, stage: state.currentStage, email: state.email })
     });
 
     let slotRes = await fetch(`${API_URL}/api/pasarela/decrease-slot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: state.sessionId, amount: amount })
+      body: JSON.stringify({ sessionId: state.sessionId, amount })
     });
 
     if (slotRes.ok) {
       const slotData = await slotRes.json();
       if (slotData.remainingSlots !== undefined) {
-        state.metrics.leads = slotData.remainingSlots;
+        state.metrics.leads = Math.min(2, slotData.remainingSlots);
         updateMetricsUI(state.metrics);
       }
     }
-  } catch (err) {
-    console.warn("Error en la sincronización del pago:", err);
-  }
-
-  sendSystemNotification('¡Nuevo Pago Registrado! 💰', {
-    body: `Transacción confirmada por $${amount.toLocaleString()} USD. Slot descontado en el panel.`
-  });
+  } catch (err) {}
 }
 
 function activatePostPayView(clientId = null) {
@@ -1123,7 +932,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B EVALUADORES, CONTRATOS Y CARGA DE DATA CSV (IA1) Y CONEXIÓN META GRAPH API
+// 6.B EVALUADORES, CONTRATOS Y IA1
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -1153,16 +962,13 @@ function setupPostPayStepFlow() {
   };
 
   if (inputMetaUser) {
-    inputMetaUser.addEventListener('input', (e) => {
-      updateAdminEmailDisplay(e.target.value.trim());
-    });
+    inputMetaUser.addEventListener('input', (e) => updateAdminEmailDisplay(e.target.value.trim()));
     if (state.email) {
       inputMetaUser.value = state.email;
       updateAdminEmailDisplay(state.email);
     }
   }
 
-  // Envío de credenciales / usuario Facebook del cliente
   if (btnSendEval) {
     btnSendEval.addEventListener('click', async () => {
       const user = inputMetaUser ? inputMetaUser.value.trim() : '';
@@ -1178,37 +984,18 @@ function setupPostPayStepFlow() {
       if (stepUpload) stepUpload.classList.remove('hidden');
 
       try {
-        let res = await fetch(`${API_URL}/api/pasarela/notify-facebook-user`, {
+        await fetch(`${API_URL}/api/pasarela/notify-facebook-user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            email: user, 
-            fbUser: user, 
-            sessionId: state.sessionId 
-          })
+          body: JSON.stringify({ email: user, fbUser: user, sessionId: state.sessionId })
         });
-
-        if (!res.ok) {
-          await fetch(`${API_URL}/api/evaluator/fb-sync`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user, fbUser: user, sessionId: state.sessionId })
-          });
-        }
-
-        sendSystemNotification("Usuario Sincronizado", {
-          body: `Usuario de Meta/Facebook (${user}) enviado al administrador.`
-        });
-      } catch (e) {
-        console.warn("Fallback local para sincronización de usuario Meta.");
-      }
+      } catch (e) {}
     });
   }
 
-  // Carga de Archivo CSV de Infoproductores / Contratos PDF
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
-      if (!fileInput || !fileInput.files[0]) return alert('Por favor selecciona un archivo (CSV o PDF del contrato).');
+      if (!fileInput || !fileInput.files[0]) return alert('Selecciona un archivo (CSV o PDF del contrato).');
 
       const file = fileInput.files[0];
       const isPdfContract = file.name.endsWith('.pdf');
@@ -1221,43 +1008,29 @@ function setupPostPayStepFlow() {
       } else {
         formData.append('file', file);
         formData.append('sessionId', state.sessionId);
-        formData.append('nicho', 'infoproductos'); // Categórico para infoproductores
-        formData.append('token', localStorage.getItem('sodie_fb_token') || '');
-        formData.append('adAccountId', localStorage.getItem('sodie_ad_account') || '');
+        formData.append('nicho', 'infoproductos');
       }
 
       if (statusFile) {
-        statusFile.textContent = isPdfContract ? 'Subiendo contrato de evaluador... ⏳' : 'Procesando masivo CSV con IA1... ⏳';
+        statusFile.textContent = 'Procesando archivo... ⏳';
         statusFile.classList.remove('hidden');
       }
 
       try {
-        let uploadEndpoint = isPdfContract 
-          ? `${API_URL}/api/evaluator/contract` 
-          : `${API_URL}/api/upload-csv`;
-
+        let uploadEndpoint = isPdfContract ? `${API_URL}/api/evaluator/contract` : `${API_URL}/api/upload-csv`;
         let res = await fetch(uploadEndpoint, { method: 'POST', body: formData });
         
-        if (!res.ok && !isPdfContract) {
-          res = await fetch(`${API_URL}/api/v1/client/upload-audience`, { method: 'POST', body: formData });
-        }
-
-        const data = await res.json();
-        if (res.ok || data.ok || data.success) {
-          if (statusFile) statusFile.textContent = isPdfContract ? '✅ Contrato recibido correctamente para verificación.' : '✅ CSV procesado por IA1 e inyectado en Meta. Procede a confirmar el borrador.';
+        if (res.ok) {
+          if (statusFile) statusFile.textContent = '✅ Procesado correctamente.';
           if (stepConnect) stepConnect.classList.remove('hidden');
-          alert(isPdfContract ? 'Contrato enviado con éxito al panel de evaluación.' : '¡Lista de clientes cargada exitosamente!');
-        } else {
-          alert(`Aviso: ${data.error || 'Ocurrió un error al procesar el archivo.'}`);
+          alert('¡Archivo cargado exitosamente!');
         }
       } catch (e) {
-        console.error('Error al subir archivo:', e);
-        alert('Error de red al subir el archivo.');
+        alert('Error al subir el archivo.');
       }
     });
   }
 
-  // ✅ CONEXIÓN DIRECTA CON /api/facebook/connect
   if (btnConnectFb) {
     btnConnectFb.addEventListener('click', async () => {
       const storedToken = localStorage.getItem('sodie_fb_token');
@@ -1268,14 +1041,11 @@ function setupPostPayStepFlow() {
             const userAccessToken = response.authResponse.accessToken;
             localStorage.setItem('sodie_fb_token', userAccessToken);
             await autoConnectFacebookAccount(userAccessToken);
-          } else {
-            alert('El usuario canceló la autorización de Facebook.');
           }
         }, { scope: 'ads_management,ads_read,business_management' });
       } else if (storedToken) {
         await autoConnectFacebookAccount(storedToken);
       } else {
-        alert('Redirigiendo a permisos oficiales de Meta Ads Manager...');
         window.location.href = `${API_URL}/api/auth/facebook`;
       }
     });
@@ -1284,49 +1054,24 @@ function setupPostPayStepFlow() {
   if (btnConfirmDraft) {
     btnConfirmDraft.addEventListener('click', async () => {
       btnConfirmDraft.disabled = true;
-      btnConfirmDraft.textContent = 'Inyectando audiencia y activando en Meta... 🚀';
+      btnConfirmDraft.textContent = 'Activando en Meta... 🚀';
 
       const targetDraftName = state.elapsedHours >= 24 ? 'Prueba hora 48' : 'Prueba hora 24';
-      const payload = {
-        sessionId: state.sessionId,
-        nombreBorrador: targetDraftName,
-        token: localStorage.getItem('sodie_fb_token') || '',
-        adAccountId: localStorage.getItem('sodie_ad_account') || ''
-      };
 
       try {
         let res = await fetch(`${API_URL}/api/ia1/confirmar-borrador`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            sessionId: state.sessionId,
+            nombreBorrador: targetDraftName,
+            token: localStorage.getItem('sodie_fb_token') || '',
+            adAccountId: localStorage.getItem('sodie_ad_account') || ''
+          })
         });
 
-        if (!res.ok) {
-          res = await fetch(`${API_URL}/api/ia1/activar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-        }
-
-        let data = {};
-        try {
-          data = await res.json();
-        } catch(e) {
-          data = { success: true, ok: true };
-        }
-
-        if (res.ok || data.success || data.ok) {
-          alert(`¡Borrador "${targetDraftName}" confirmed, inyectado y activado exitosamente en Meta Ads!`);
-
-          if (data.result && data.result.metrics) {
-            Object.assign(state.metrics, data.result.metrics);
-          } else if (data.metrics) {
-            Object.assign(state.metrics, data.metrics);
-          }
-          updateMetricsUI(state.metrics);
-
-          // Cargar métricas actualizadas desde Graph API
+        if (res.ok) {
+          alert(`¡Borrador "${targetDraftName}" activado en Meta Ads!`);
           await loadDashboardMetrics(state.sessionId);
 
           const originalMetricsSection = document.querySelector('.metrics-section');
@@ -1340,17 +1085,9 @@ function setupPostPayStepFlow() {
 
           const card24h = document.getElementById('card-timer-24h');
           if (card24h) card24h.classList.remove('hidden');
-
-          sendSystemNotification('🚀 Campaña de Meta Ads Activa', {
-            body: `Se inyectó la segmentación de IA1 a "${targetDraftName}". Monitoreando métricas en vivo.`
-          });
-
-        } else {
-          alert(`Aviso: ${data.message || data.error || 'No se pudo activar el borrador en Meta.'}`);
         }
       } catch (err) {
-        console.error('Error confirmando borrador:', err);
-        alert('Error conectando con el motor IA1 para confirmar el borrador.');
+        alert('Error conectando con el motor IA2.');
       } finally {
         btnConfirmDraft.disabled = false;
         btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR 🚀';
@@ -1359,7 +1096,6 @@ function setupPostPayStepFlow() {
   }
 }
 
-// ✅ Función simplificada: Envía el token al backend y delega la extracción y guardado
 async function autoConnectFacebookAccount(userAccessToken) {
   try {
     const userId = state.sessionId || state.email || 'cliente_temp_1';
@@ -1376,37 +1112,30 @@ async function autoConnectFacebookAccount(userAccessToken) {
       if (data.data.act_id) localStorage.setItem('sodie_ad_account', data.data.act_id);
       if (data.data.pixel_id) localStorage.setItem('sodie_pixel_id', data.data.pixel_id);
 
-      alert(`✅ ¡Cuenta de Meta vinculada exitosamente!\nCuenta: ${data.data.act_id}\nPixel ID: ${data.data.pixel_id || 'Detectado'}`);
-      
-      // Cargar métricas en vivo inmediatamente al conectar
+      alert(`✅ Cuenta vinculada exitosamente.`);
       await loadDashboardMetrics(userId);
 
       const stepDraft = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
       if (stepDraft) stepDraft.classList.remove('hidden');
-    } else {
-      alert(`Error al vincular con Meta: ${data.error || 'No se detectó cuenta de anuncios activa.'}`);
     }
-  } catch (err) {
-    console.error('Error conectando con /api/facebook/connect:', err);
-    alert('Error al sincronizar tu cuenta de Facebook.');
-  }
+  } catch (err) {}
 }
 
 // ==========================================
-// 7. TEMPORIZADORES Y HORA 24 / HORA 48 / 30 DÍAS ($9,000 / $5,000)
+// 7. TEMPORIZADORES Y CICLOS DE HORA 48 / 72 / 96
 // ==========================================
 function startPersistentTimers() {
   const timerTotal = document.getElementById('timer-display');
   const card24h = document.getElementById('card-timer-24h');
   const timer24h = document.getElementById('timer-24h-display');
 
-  let totalSecs = 48 * 3600;
+  let totalSecs = 96 * 3600;
 
   setInterval(() => {
     if (totalSecs > 0) totalSecs--;
 
-    const totalHoursElapsed = Math.floor((48 * 3600 - totalSecs) / 3600);
-    state.elapsedHours = totalHoursElapsed;
+    const hoursPassed = Math.floor((96 * 3600 - totalSecs) / 3600);
+    state.elapsedHours = hoursPassed;
 
     const h = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
     const m = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
@@ -1414,81 +1143,47 @@ function startPersistentTimers() {
 
     if (timerTotal) timerTotal.textContent = `${h}:${m}:${s}`;
 
-    if (totalSecs === 24 * 3600) {
-      if (card24h) card24h.classList.remove('hidden');
-      sendSystemNotification('⏰ Hora 24 Alcanzada', {
-        body: 'Actualiza a "Prueba hora 48" y envía la nueva data de compras.'
-      });
-    }
-
-    if (totalSecs === 0) {
-      sendSystemNotification('🚨 Hora 48 Alcanzada - Siguiente Tramo ($9,000)', {
-        body: 'El primer ciclo de 48H ha finalizado con éxito. Se habilita el cobro de $9,000 USD.'
-      });
+    if (hoursPassed >= 48 && hoursPassed < 72) {
       state.currentStage = 'POST_48H';
-      state.selectedAmount = 9000;
-      updatePriceDisplay('9.000$');
+      state.selectedAmount = 3000;
+      updatePriceDisplay('3.000$ (Cuota 1/3 - Hora 48)');
+    } else if (hoursPassed >= 72 && hoursPassed < 96) {
+      state.currentStage = 'POST_72H';
+      state.selectedAmount = 3000;
+      updatePriceDisplay('3.000$ (Cuota 2/3 - Hora 72)');
+    } else if (hoursPassed >= 96) {
+      state.currentStage = 'POST_96H';
+      state.selectedAmount = 3000;
+      updatePriceDisplay('3.000$ (Cuota 3/3 - Hora 96)');
     }
 
-    if (timer24h && totalSecs <= 24 * 3600) {
+    if (hoursPassed >= 24 && card24h) {
+      card24h.classList.remove('hidden');
+    }
+
+    if (timer24h && totalSecs <= 72 * 3600) {
       timer24h.textContent = `${h}:${m}:${s}`;
     }
   }, 1000);
 }
 
 // ==========================================
-// 8. NOTIFICACIONES PUSH Y SISTEMA
+// 8. NOTIFICACIONES PUSH Y UTILIDADES
 // ==========================================
 async function setupPushNotifications() {
   if (!('Notification' in window)) return;
 
   if (Notification.permission === 'default') {
-    try {
-      await Notification.requestPermission();
-    } catch (e) {}
-  }
-
-  if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-    try {
-      const reg = await navigator.serviceWorker.register('/sw.js');
-      if (CONFIG.VAPID_PUBLIC_KEY) {
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: CONFIG.VAPID_PUBLIC_KEY
-        });
-        
-        let res = await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subscription: sub, sessionId: state.sessionId })
-        });
-
-        if (!res.ok) {
-          await fetch(`${API_URL}/api/notifications/subscribe`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subscription: sub, sessionId: state.sessionId })
-          });
-        }
-      }
-    } catch (err) {
-      console.warn('Push registration offline or fallback mode.');
-    }
+    try { await Notification.requestPermission(); } catch (e) {}
   }
 }
 
 function sendSystemNotification(title, options = {}) {
   if (Notification.permission === 'granted') {
-    new Notification(title, {
-      icon: '/favicon.ico',
-      ...options
-    });
+    new Notification(title, { icon: '/favicon.ico', ...options });
   }
 }
 
-// ==========================================
-// UTILIDADES GENERALES
-// ==========================================
 function cleanUrlParams() {
   const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
   window.history.replaceState({ path: newUrl }, '', newUrl);
