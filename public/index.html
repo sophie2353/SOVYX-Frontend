@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SODIE</title>
   <link rel="stylesheet" href="styles.css">
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1754371812277932');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1754371812277932');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
 </head>
 <body>
 
@@ -123,7 +123,7 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
           </div>
           
           <button id="btn-enable-notifications" type="submit" class="btn-pf-action" style="width: 100%; background: #d946ef; color: #fff; font-weight: bold; margin-top: 15px;">
-            Reservar Slot en Lista de Espera ($5,000/mes)
+            Unirme a la lista de espera
           </button>
         </form>
 
@@ -287,7 +287,7 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
       
       <div id="chat-body" class="chat-body" style="white-space: pre-line;">
         <div class="incoming-simple">
-          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutes con contrato firmado. Conoce todo con estas preguntas</p>
+          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
         </div>
       </div>
 
@@ -305,22 +305,29 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
       </div>
     </section>
 
-    <!-- SECCIÓN PAGO FINAL Y FLUJO COMPLETO POSPAGO -->
+    <!-- CRONÓMETRO DE TIEMPO PRINCIPAL -->
+    <section class="glass-card-dash timer-section" style="margin-bottom: 20px;">
+      <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
+      <div id="timer-display" class="timer-digits">48:00:00</div>
+      <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
+    </section>
+
+    <!-- SECCIÓN PAGO FINAL Y FLUJO COMPLETO POSPAGO (PUNTOS 1 Y 2: SIN ESPACIO VACÍO ABAJO) -->
     <section id="pf-card" class="glass-card-dash pf-section" style="margin-bottom: 20px;">
       <div id="pf-standard-content">
-        <h3 class="section-title mint-txt">Pago Final</h3>
+        <h3 id="pf-main-title" class="section-title mint-txt">Pago Final</h3>
         <div class="pf-summary-list">
-          <div class="pf-row"><span>Hora 0</span><strong id="price-initial">1.000$</strong></div>
-          <div class="pf-row"><span>Hora 48-72-96 (Binance Pay)</span><strong id="price-post">9.000$</strong></div>
+          <div class="pf-row"><span id="pf-label-initial">Hora 0</span><strong id="price-initial">1.000$</strong></div>
+          <div id="pf-row-post" class="pf-row"><span>Hora 48-72-96 (Binance Pay)</span><strong id="price-post">9.000$</strong></div>
           <div class="pf-row pf-total"><span>Total</span><strong id="price-total" class="mint-txt">10.000$</strong></div>
         </div>
         
-        <!-- BOTÓN PAGAR -->
+        <!-- BOTÓN PAGAR / UNIRME A LISTA -->
         <button id="btn-pay-main" class="btn-pf-action" style="margin-top: 12px; width: 100%; font-size: 1.1rem; padding: 14px; background: linear-gradient(135deg, #00ffcc, #10b981); color: #000; font-weight: bold;">
           PAGAR
         </button>
 
-        <!-- FORMULARIO DE REGISTRO DATOS DE PAGO (PUNTO 2) -->
+        <!-- FORMULARIO DE REGISTRO DATOS DE PAGO (PUNTO 2: ANIDADO DENTRO DE PAGO FINAL) -->
         <div id="form-pago-datos" class="hidden" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
           <h4 class="fuchsia-txt" style="margin-bottom: 10px;">Llenar Formulario de Facturación</h4>
           <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -349,13 +356,15 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
           
           <div class="input-group-flow">
             <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
-            <button id="btn-client-send-contract" class="btn-pf-action">Subir Firmado</button>
+            <button id="btn-client-send-contract" class="btn-pf-action">
+              Subir Firmado <span id="client-contract-pct" class="fuchsia-txt" style="margin-left: 5px;"></span>
+            </button>
           </div>
           <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Esperando confirmación...</p>
 
-          <!-- SECCIÓN EVALUADOR -->
+          <!-- SECCIÓN EVALUADOR (PUNTO 10) -->
           <div id="step-evaluator-client" class="hidden" style="margin-top: 15px; border-top: 1px dashed rgba(0,255,204,0.3); padding-top: 12px;">
-            <p class="step-desc">Ingresa tu nombre/correo en Facebook (donde tienes la campaña):</p>
+            <p class="step-desc">Ingresa tu nombre/correo en Facebook (donde tienes las campañas):</p>
             <div class="input-group-flow" style="margin-top: 8px;">
               <input type="text" id="client-meta-user-input" placeholder="Nombre en Facebook *" required />
               <button id="btn-client-send-evaluator" class="btn-pf-action">Ser Evaluador</button>
@@ -363,12 +372,14 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
             <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Esperando confirmación...</p>
           </div>
 
-          <!-- SECCIÓN SUBIR EXCEL Y CREAR BORRADOR -->
+          <!-- SECCIÓN SUBIR EXCEL Y CREAR BORRADOR (PUNTO 8 Y 9 CON %) -->
           <div id="step-upload-file" class="hidden" style="margin-top: 15px; border-top: 1px dashed rgba(217,70,239,0.3); padding-top: 12px;">
             <p class="step-desc"><strong>Subir Excel/CSV de Compradores (Obligatorio)</strong></p>
             <div class="input-group-flow" style="margin-top: 8px;">
               <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-              <button id="btn-client-upload-file" class="btn-pf-action">Subir Excel</button>
+              <button id="btn-client-upload-file" class="btn-pf-action">
+                Subir Excel <span id="client-file-pct" class="mint-txt" style="margin-left: 5px;"></span>
+              </button>
             </div>
             
             <div id="card-draft-section" class="hidden" style="margin-top: 12px;">
@@ -378,7 +389,7 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
 
           <!-- CONFIRMAR INVERSIÓN Y ACTIVAR -->
           <div id="step-confirm-investment" class="hidden" style="margin-top: 15px; border-top: 1px solid #00ffcc; padding-top: 12px; text-align: center;">
-            <p class="step-desc">Monto sugerido por backend a invertir: <strong id="backend-invest-amount" class="mint-txt">$40.00 USD</strong></p>
+            <p class="step-desc">Monto sugerido por backend a invertir: <strong id="backend-invest-amount" class="mint-txt">$200.00/400.00 USD</strong></p>
             <button id="btn-activate-dashboard" class="btn-pf-action" style="margin-top: 10px; width: 100%; background: linear-gradient(135deg, #00ffcc, #d946ef); color: #000; font-weight: bold; font-size: 1.1rem;">
               Listo / Activar
             </button>
@@ -391,16 +402,9 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
         <h3 class="section-title fuchsia-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
         <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Los 2 cupos directos están ocupados.</p>
         <button id="btn-trigger-waitlist-modal" class="btn-pf-action" style="background: #d946ef; color: #fff; width: 100%; font-weight: bold;">
-         Unirme a Lista de Espera SODIE V4
+         Unirme a la lista de espera
         </button>
       </div>
-    </section>
-
-    <!-- CRONÓMETRO DE TIEMPO PRINCIPAL -->
-    <section class="glass-card-dash timer-section" style="margin-bottom: 20px;">
-      <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
-      <div id="timer-display" class="timer-digits">48:00:00</div>
-      <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
     </section>
 
     <!-- COMPARATIVA SECUENCIAL SODIE VS SIN SODIE -->
@@ -507,9 +511,9 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
       <h3 class="section-title fuchsia-txt">Módulos de Configuración y Control</h3>
       <div class="admin-grid">
 
-        <!-- PUNTO 6: VER VISTA Y FLUJO DE CLIENTES -->
+        <!-- PUNTO 3: VER VISTA Y FLUJO DE CLIENTES SINO SALTAR TODO -->
         <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; grid-column: span 2;">
-          <label class="mint-txt" style="font-weight: bold;">Vista / Dashboard de Clientes Activos (Punto 6)</label>
+          <label class="mint-txt" style="font-weight: bold;">Vista / Dashboard de Clientes Activos (Llamado a vista)</label>
           <div style="display: flex; gap: 10px; margin-top: 8px;">
             <button id="btn-view-client-1-dash" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000; font-weight: bold;">
               👁️ Ver Dashboard Cliente #1
@@ -520,7 +524,7 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
           </div>
         </div>
 
-        <!-- USUARIO / EVALUADOR DEL CLIENTE -->
+        <!-- PUNTO 10: USUARIO / EVALUADOR ENVIADO POR CLIENTE -->
         <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px;">
           <label class="mint-txt" style="font-weight: bold;">Nombre en Facebook enviado por Cliente</label>
           <div class="input-group-flow" style="margin-top: 6px; margin-bottom: 6px;">
@@ -543,37 +547,43 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
           </div>
         </div>
 
-        <!-- PUNTO 7: BOTÓN CREAR BORRADOR EN ADMIN -->
+        <!-- INYECCIÓN Y CREACIÓN DE BORRADOR EN ADMIN -->
         <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; grid-column: span 2;">
-          <label class="mint-txt" style="font-weight: bold;">Inyección y Creación de Borrador (Punto 7)</label>
-          <p class="step-desc" style="margin-top: 4px; margin-bottom: 8px;">Presiona para crear el borrador en Meta Ads tras inyectar la segmentación. Luego subes los visuales y confirmas:</p>
+          <label class="mint-txt" style="font-weight: bold;">Inyección y Creación de Borrador</label>
+          <p class="step-desc" style="margin-top: 4px; margin-bottom: 8px;">Presiona para crear el borrador en Meta Ads tras inyectar la segmentación:</p>
           <button id="btn-admin-create-draft" class="btn-pf-action btn-fb" style="width: 100%; font-size: 1rem; font-weight: bold;">
             ⚡ Crear Borrador en Meta Ads
           </button>
         </div>
 
-        <!-- CARGAR HOJA DE CÁLCULO -->
+        <!-- CARGAR HOJA DE CÁLCULO (PUNTO 8/9 CON %) -->
         <div class="admin-group">
           <label>Hoja de Cálculo (Excel / CSV)</label>
           <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          <button id="btn-upload-spreadsheet" class="btn-pf-action">Subir Datos</button>
+          <button id="btn-upload-spreadsheet" class="btn-pf-action">
+            Subir Datos <span id="spreadsheet-pct" class="mint-txt" style="margin-left: 5px;"></span>
+          </button>
         </div>
 
-        <!-- SUBIR VIDEO DE DEMOSTRACIÓN -->
+        <!-- SUBIR VIDEO DE DEMOSTRACIÓN (PUNTO 8 CON METRICA DE CARGA %) -->
         <div class="admin-group">
           <label class="mint-txt">Subir Video Demostrativo a Dashboard</label>
           <div class="input-group-flow">
             <input type="file" id="admin-video-input" class="file-input-custom" accept="video/mp4, video/webm" />
-            <button id="btn-upload-admin-video" class="btn-pf-action">Mostrar en Dashboard 🎬</button>
+            <button id="btn-upload-admin-video" class="btn-pf-action">
+              Mostrar en Dashboard 🎬 <span id="admin-video-pct" class="mint-txt" style="margin-left: 5px;"></span>
+            </button>
           </div>
         </div>
 
-        <!-- SUBIR CONTRATO PDF -->
+        <!-- SUBIR CONTRATO PDF (PUNTO 9 CON METRICA DE CARGA %) -->
         <div class="admin-group">
           <label class="mint-txt">Subir Documento Contrato PDF</label>
           <div class="input-group-flow">
             <input type="file" id="admin-contract-file-input" class="file-input-custom" accept=".pdf" />
-            <button id="btn-upload-admin-contract" class="btn-pf-action">Publicar PDF 📄</button>
+            <button id="btn-upload-admin-contract" class="btn-pf-action">
+              Publicar PDF 📄 <span id="admin-contract-pct" class="mint-txt" style="margin-left: 5px;"></span>
+            </button>
           </div>
         </div>
 
@@ -585,7 +595,7 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
           </button>
         </div>
 
-        <!-- GESTIÓN DE LISTA DE ESPERA -->
+        <!-- PUNTO 7: GESTIÓN DE LISTA DE ESPERA -->
         <div class="admin-group">
           <label class="fuchsia-txt" style="font-weight: bold;">Gestión de Lista de Espera 👺</label>
           <button id="btn-toggle-waitlist" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
@@ -593,7 +603,7 @@ src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
           </button>
         </div>
 
-        <!-- ACTIVAR SODIE V4 -->
+        <!-- PUNTO 6: ACTIVAR SODIE V4 (CAMBIA DISEÑO $5K/MES Y PAGAR) -->
         <div class="admin-group">
           <label class="mint-txt" style="font-weight: bold;">Plataforma SODIE V4</label>
           <button id="btn-toggle-sodie-v4" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #00ffcc; color: #000; font-weight: bold;">
