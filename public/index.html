@@ -96,43 +96,43 @@
 
   <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA -->
   <div id="view-sold-out" class="full-screen hidden">
-    <div class="glass-card-dash text-center" style="max-width: 520px; padding: 25px; margin: 20px auto;">
+    <div class="glass-card-dash text-center sold-out-wrapper">
       <h2 class="fuchsia-txt">CUPOS AGOTADOS</h2>
-      <p class="step-desc" style="margin-top: 10px;">El acceso directo al software SODIE está cerrado por límite de capacidad (2/2 cupos ocupados).</p>
+      <p class="step-desc">El acceso directo al software SODIE está cerrado por límite de capacidad (2/2 cupos ocupados).</p>
       
-      <div id="waitlist-card-box" class="glass-card-dash" style="margin-top: 20px; border: 1px solid #d946ef; text-align: left;">
+      <div id="waitlist-card-box" class="glass-card-dash waitlist-box">
         <h3 class="section-title mint-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
-        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">
+        <p class="step-desc">
           Registra tus datos para asegurar tu cupo en SODIE V4:
         </p>
         
         <form id="form-v4-waitlist" onsubmit="event.preventDefault();">
-          <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="text" id="v4-user-name" placeholder="Nombre completo *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px;" />
-            <input type="text" id="v4-user-company" placeholder="Compañía / Marca *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px;" />
+          <div class="admin-grid two-cols">
+            <input type="text" id="v4-user-name" placeholder="Nombre completo *" required />
+            <input type="text" id="v4-user-company" placeholder="Compañía / Marca *" required />
           </div>
           
-          <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px; margin-top: 10px;" />
-          <input type="password" id="v4-user-password" placeholder="Contraseña de acceso *" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(217,70,239,0.4); color: #fff; border-radius: 8px; margin-top: 10px;" />
+          <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico *" required />
+          <input type="password" id="v4-user-password" placeholder="Contraseña de acceso *" required />
 
           <!-- REGISTRO CON BIOMETRÍA -->
-          <div style="margin-top: 12px;">
-            <button type="button" id="btn-register-biometrics" class="btn-pf-action" style="width: 100%; background: rgba(0, 255, 204, 0.15); border: 1px solid #00ffcc; color: #00ffcc;">
-              👆🏼 Registrar Biometría (Huella / Face ID)
+          <div class="biometrics-container">
+            <button type="button" id="btn-register-biometrics" class="btn-pf-action btn-biometric">
+              Registrar Biometría (Huella / Face ID)
             </button>
-            <span id="biometric-status-tag" class="step-desc" style="display: block; font-size: 0.75rem; margin-top: 4px; color: #888;">Estatus biometría: Pendiente</span>
+            <span id="biometric-status-tag" class="step-desc status-tag">Estatus biometría: Pendiente</span>
           </div>
           
-          <button id="btn-enable-notifications" type="submit" class="btn-pf-action" style="width: 100%; background: #d946ef; color: #fff; font-weight: bold; margin-top: 15px;">
+          <button id="btn-enable-notifications" type="submit" class="btn-pf-action btn-waitlist-submit">
             Unirme a la lista de espera
           </button>
         </form>
 
-        <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; text-align: center;">
-          <a href="#" id="btn-open-v4-login" class="mint-txt" style="text-decoration: underline; font-size: 0.9rem;">¿Ya tienes cuenta? Iniciar Sesión en SODIE V4</a>
+        <div class="link-wrapper">
+          <a href="#" id="btn-open-v4-login" class="mint-txt link-underline">¿Ya tienes cuenta? Iniciar Sesión en SODIE V4</a>
         </div>
 
-        <p id="waitlist-status-msg" class="mint-txt hidden" style="margin-top: 10px; font-size: 0.85rem; text-align: center;">
+        <p id="waitlist-status-msg" class="mint-txt hidden text-center">
           ✅ ¡Estás en la lista de espera de SODIE V4!
         </p>
       </div>
@@ -143,12 +143,12 @@
   <div id="modal-admin-auth" class="modal-overlay hidden">
     <div class="glass-card-dash modal-auth-box">
       <h3 class="section-title fuchsia-txt">Acceso Administrador 👺</h3>
-      <p class="step-desc" style="margin-bottom: 12px;">Ingresar clave para acceder al panel:</p>
+      <p class="step-desc">Ingresar clave para acceder al panel:</p>
       <div class="input-group-flow">
         <input type="password" id="admin-key-input" placeholder="Clave de acceso..." />
-        <button id="btn-submit-admin-key" class="btn-pf-action">Entrar</button>
+        <button type="button" id="btn-submit-admin-key" class="btn-pf-action">Entrar</button>
       </div>
-      <button id="btn-close-admin-modal" class="btn-pf-action btn-danger" style="margin-top: 10px; width: 100%;">Cancelar</button>
+      <button type="button" id="btn-close-admin-modal" class="btn-pf-action btn-danger">Cancelar</button>
     </div>
   </div>
 
@@ -156,20 +156,20 @@
   <div id="modal-v4-auth" class="modal-overlay hidden">
     <div class="glass-card-dash modal-auth-box">
       <h3 class="section-title mint-txt">Iniciar Sesión SODIE V4</h3>
-      <p class="step-desc" style="margin-bottom: 12px;">Ingresa con tus credenciales registradas:</p>
+      <p class="step-desc">Ingresa con tus credenciales registradas:</p>
       
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="password" id="v4-login-key-input" placeholder="Contraseña..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.4); color: #fff; border-radius: 8px;" />
-        <button id="btn-submit-v4-key" class="btn-pf-action" style="background: #00ffcc; color: #000; font-weight: bold;">Entrar con Clave</button>
+      <div class="form-stack">
+        <input type="password" id="v4-login-key-input" placeholder="Contraseña..." />
+        <button type="button" id="btn-submit-v4-key" class="btn-pf-action btn-mint-solid">Entrar con Clave</button>
       </div>
 
-      <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; text-align: center;">
-        <button id="btn-login-biometrics-v4" class="btn-pf-action" style="width: 100%; background: rgba(217,70,239,0.2); border: 1px solid #d946ef; color: #fff;">
-          🔑 Ingresar con Biometría (Huella / Face ID)
+      <div class="modal-footer-action">
+        <button type="button" id="btn-login-biometrics-v4" class="btn-pf-action btn-biometric-auth">
+          Ingresar con Biometría (Huella / Face ID)
         </button>
       </div>
 
-      <button id="btn-close-v4-modal" class="btn-pf-action btn-danger" style="margin-top: 12px; width: 100%;">Cancelar</button>
+      <button type="button" id="btn-close-v4-modal" class="btn-pf-action btn-danger">Cancelar</button>
     </div>
   </div>
 
@@ -177,13 +177,13 @@
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
-        <span id="header-brand-title" class="brand-text" style="cursor: pointer;">SODIE</span>
-        <span id="client-id-badge" class="badge-client hidden" style="margin-left: 10px; font-weight: bold; color: #00ffcc;"></span>
+        <span id="header-brand-title" class="brand-text">SODIE</span>
+        <span id="client-id-badge" class="badge-client hidden"></span>
       </div>
-      <div class="dash-header-right" style="display: flex; gap: 10px; align-items: center;">
+      <div class="dash-header-right">
         <!-- BOTÓN ACCESO ADMIN RÁPIDO -->
-        <button id="btn-open-admin-trigger" class="btn-icon" title="Acceso Admin">🔐</button>
-        <button id="btn-menu" class="btn-icon">
+        <button type="button" id="btn-open-admin-trigger" class="btn-icon" title="Acceso Admin">🔐</button>
+        <button type="button" id="btn-menu" class="btn-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -263,23 +263,23 @@
     </section>
 
     <!-- 2. DEMO BORRADOR VIDEO -->
-    <section class="glass-card-dash video-section" style="margin-bottom: 20px;">
+    <section class="glass-card-dash video-section">
       <div class="chat-header">
         <h3 class="section-title mint-txt">Demostración del Borrador en Vivo</h3>
-        <span class="badge-client" style="color: #00ffcc; border-color: #00ffcc;">20-30 segs</span>
+        <span class="badge-client badge-mint-border">20-30 segs</span>
       </div>
-      <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">
+      <p class="step-desc">
         Observa cómo subimos la lista de compradores desde SODIE, se crea automáticamente la campaña con borrador sin segmentación manual y se publica en Meta Ads.
       </p>
       <div class="video-container-glass">
-        <video id="sodie-demo-video" controls poster="poster-demo.jpg" style="width: 100%; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.3); background: #000;">
+        <video id="sodie-demo-video" controls poster="poster-demo.jpg" class="demo-video-player">
           <source src="sodie-demo-borrador.mp4" type="video/mp4">
         </video>
       </div>
     </section>
 
     <!-- 3. CHAT WEB INTEGRADO CON IA2 -->
-    <section class="glass-card-dash chat-section" style="margin-bottom: 20px;">
+    <section class="glass-card-dash chat-section">
       <div class="chat-header">
         <h3 class="section-title">Chat Web</h3>
         <div class="cupos-badge">
@@ -288,58 +288,58 @@
         </div>
       </div>
       
-      <div id="chat-body" class="chat-body" style="white-space: pre-line;">
+      <div id="chat-body" class="chat-body">
         <div class="incoming-simple">
           <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
         </div>
       </div>
 
       <div id="quick-replies" class="chat-quick-options">
-        <button class="opt-btn" data-payload="cupo_3">¿Qué ocurre al cupo 3?</button>
-        <button class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
-        <button class="opt-btn" data-payload="ecommerce">Ecommerce</button>
-        <button class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
-        <button class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
+        <button type="button" class="opt-btn" data-payload="cupo_3">¿Qué ocurre al cupo 3?</button>
+        <button type="button" class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
+        <button type="button" class="opt-btn" data-payload="ecommerce">Ecommerce</button>
+        <button type="button" class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
+        <button type="button" class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
       </div>
 
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
-        <button id="chat-send" class="chat-send-btn">➤</button>
+        <button type="button" id="chat-send" class="chat-send-btn">➤</button>
       </div>
     </section>
 
     <!-- 4. TARJETAS DE MÉTRICAS META EN VIVO -->
-    <section id="meta-live-metrics-container" class="glass-card-dash hidden" style="margin-bottom: 20px;">
+    <section id="meta-live-metrics-container" class="glass-card-dash hidden">
       <h3 class="section-title mint-txt">Métricas Meta Ads en Tiempo Real</h3>
-      <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+      <div class="admin-grid grid-2cols">
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Alcance Meta</span>
-          <div id="live-metric-reach" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">2,000</div>
+          <div id="live-metric-reach" class="timer-digits mint-txt">2,000</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Visitas</span>
-          <div id="live-metric-visitors" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">1,504</div>
+          <div id="live-metric-visitors" class="timer-digits mint-txt">1,504</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Clientes / Leads</span>
-          <div id="live-metric-leads" class="timer-digits fuchsia-txt" style="font-size: 1.6rem; margin-top: 5px;">2</div>
+          <div id="live-metric-leads" class="timer-digits fuchsia-txt">2</div>
         </div>
         <div class="metric-live-box glass-card-dash text-center">
           <span class="gauge-label">Conversión</span>
-          <div id="live-metric-conversion" class="timer-digits mint-txt" style="font-size: 1.6rem; margin-top: 5px;">4.8%</div>
+          <div id="live-metric-conversion" class="timer-digits mint-txt">4.8%</div>
         </div>
       </div>
     </section>
 
     <!-- 5. COMPARATIVA SECUENCIAL SODIE VS SIN SODIE -->
-    <section id="section-sodie-comparison" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+    <section id="section-sodie-comparison" class="glass-card-dash hidden border-fuchsia">
       <h3 class="section-title fuchsia-txt">Resultados Comparativos con SODIE vs Sin SODIE</h3>
       
-      <div id="comp-hora-24" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px;">
+      <div id="comp-hora-24" class="comparison-box hidden">
         <h4 class="mint-txt">Finalizado: Hora 24</h4>
-        <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
-          <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 8px;">
-            <strong style="color: #ff4d4d;">Sin SODIE</strong>
+        <div class="admin-grid two-cols">
+          <div class="col-divider-right">
+            <strong class="txt-danger">Sin SODIE</strong>
             <p class="step-desc">ROAS: <strong>1.2x</strong></p>
             <p class="step-desc">CPA: <strong>$28.50 USD</strong></p>
           </div>
@@ -351,11 +351,11 @@
         </div>
       </div>
 
-      <div id="comp-hora-48" class="comparison-box hidden" style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; border-top: 1px solid #00ffcc;">
+      <div id="comp-hora-48" class="comparison-box hidden border-top-mint">
         <h4 class="fuchsia-txt">Finalizado: Hora 48</h4>
-        <div class="admin-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
-          <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 8px;">
-            <strong style="color: #ff4d4d;">Sin SODIE</strong>
+        <div class="admin-grid two-cols">
+          <div class="col-divider-right">
+            <strong class="txt-danger">Sin SODIE</strong>
             <p class="step-desc">ROAS: <strong>1.4x</strong></p>
             <p class="step-desc">Ventas totales: <strong>12</strong></p>
           </div>
@@ -369,46 +369,46 @@
     </section>
 
     <!-- 6. SODIE V4 SLIDES HORIZONTALES -->
-    <section id="section-v4-slides" class="glass-card-dash hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+    <section id="section-v4-slides" class="glass-card-dash hidden border-fuchsia">
       <h3 class="section-title fuchsia-txt">SODIE V4 - Vistas y Módulos</h3>
-      <div class="v4-horizontal-slider" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">
-        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #d946ef;">
-          <img src="slide-v4-1.png" alt="Slide V4 1" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
-          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #1</span>
+      <div class="v4-horizontal-slider">
+        <div class="v4-slide-card border-fuchsia">
+          <img src="slide-v4-1.png" alt="Slide V4 1" class="img-responsive" />
+          <span class="step-desc font-bold">Módulo V4 #1</span>
         </div>
-        <div class="v4-slide-card" style="min-width: 220px; background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; border: 1px solid #00ffcc;">
-          <img src="slide-v4-2.png" alt="Slide V4 2" style="width: 100%; height: auto; border-radius: 6px; display: block;" />
-          <span class="step-desc" style="display: block; margin-top: 5px; font-weight: bold;">Módulo V4 #2</span>
+        <div class="v4-slide-card border-mint">
+          <img src="slide-v4-2.png" alt="Slide V4 2" class="img-responsive" />
+          <span class="step-desc font-bold">Módulo V4 #2</span>
         </div>
       </div>
     </section>
 
     <!-- 7. CRONÓMETROS SECUNDARIOS -->
-    <section id="card-timer-24h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px;">
+    <section id="card-timer-24h" class="glass-card-dash text-center hidden">
       <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
-      <div id="timer-24h-display" class="timer-digits" style="font-size: 2.2rem; margin: 10px 0;">24:00:00</div>
+      <div id="timer-24h-display" class="timer-digits">24:00:00</div>
       <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
     </section>
 
-    <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden" style="margin-bottom: 20px; border: 1px solid #d946ef;">
+    <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden border-fuchsia">
       <h3 class="section-title fuchsia-txt">Lanzamiento Próximo Borrador V4</h3>
-      <div id="timer-v4-display" class="timer-digits fuchsia-txt" style="font-size: 2.2rem; margin: 10px 0;">72:00:00</div>
+      <div id="timer-v4-display" class="timer-digits fuchsia-txt">72:00:00</div>
       <span class="timer-sub">Cuenta regresiva activa para inyección programada V4</span>
     </section>
 
     <!-- 8. SECCIÓN PAGO FINAL (PENÚLTIMO MÓDULO) -->
-    <section id="pf-card" class="glass-card-dash pf-section" style="margin-bottom: 20px;">
+    <section id="pf-card" class="glass-card-dash pf-section">
       <div id="pf-standard-content">
         <h3 id="pf-main-title" class="section-title mint-txt">Pago Final</h3>
         
         <div class="pf-summary-list">
           <div class="pf-row">
             <span id="pf-label-initial">Hora 0 (Reserva de Slot)</span>
-            <strong id="price-initial">1.000$</strong>
+            <strong id="price-initial" class="price-value">1.000$</strong>
           </div>
           <div id="pf-row-post" class="pf-row">
             <span>Post Resultados (Hora 48-72-96 con Binance Pay)</span>
-            <strong id="price-post">9.000$ <small style="font-weight: normal; font-size: 0.75rem; color: #aaa; display: block;">(3 cuotas de $3.000)</small></strong>
+            <strong id="price-post" class="price-value">9.000$ <small class="price-subtext">(3 cuotas de $3.000)</small></strong>
           </div>
           <div class="pf-row pf-total">
             <span>Total</span>
@@ -417,74 +417,74 @@
         </div>
         
         <!-- BOTÓN PRINCIPAL ÚNICO DE PAGO -->
-        <button id="btn-pay-main" class="btn-pf-action" style="margin-top: 15px; width: 100%; font-size: 1.1rem; padding: 14px; background: linear-gradient(135deg, #00ffcc, #10b981); color: #000; font-weight: bold;">
+        <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient">
           PAGAR
         </button>
 
         <!-- FORMULARIO DE FACTURACIÓN (OCULTO POR DEFECTO) -->
-        <div id="form-pago-datos" class="hidden" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
-          <h4 class="fuchsia-txt" style="margin-bottom: 10px;">Llenar Formulario de Facturación</h4>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; gap: 8px;">
-              <input type="number" id="pay-age" placeholder="Edad *" style="flex: 1; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #00ffcc; color: #fff; border-radius: 6px;" />
-              <input type="text" id="pay-country" placeholder="País *" style="flex: 1; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #00ffcc; color: #fff; border-radius: 6px;" />
+        <div id="form-pago-datos" class="hidden form-billing-box">
+          <h4 class="fuchsia-txt">Llenar Formulario de Facturación</h4>
+          <div class="form-stack-compact">
+            <div class="form-row-2">
+              <input type="number" id="pay-age" placeholder="Edad *" />
+              <input type="text" id="pay-country" placeholder="País *" />
             </div>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="pay-city" placeholder="Ciudad *" style="flex: 1; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #00ffcc; color: #fff; border-radius: 6px;" />
-              <input type="text" id="pay-zip" placeholder="Código Postal *" style="flex: 1; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #00ffcc; color: #fff; border-radius: 6px;" />
+            <div class="form-row-2">
+              <input type="text" id="pay-city" placeholder="Ciudad *" />
+              <input type="text" id="pay-zip" placeholder="Código Postal *" />
             </div>
-            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #00ffcc; color: #fff; border-radius: 6px;" />
+            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" />
             
-            <button id="btn-submit-pay-form" class="btn-pf-action" style="margin-top: 6px; background: #d946ef; color: #fff; font-weight: bold;">
+            <button type="button" id="btn-submit-pay-form" class="btn-pf-action btn-fuchsia-solid">
               Ir a Pagar
             </button>
           </div>
         </div>
 
         <!-- FLUJO DE CONTRATO Y EVALUADOR (OCULTO POR DEFECTO) -->
-        <div id="post-pago-contract-flow" class="hidden" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
-          <h4 class="mint-txt" style="margin-bottom: 8px;">Contrato de Servicio Firmado</h4>
-          <p class="step-desc" style="margin-bottom: 10px;">Descarga el PDF, fírmalo y súbelo para confirmar tu activación:</p>
+        <div id="post-pago-contract-flow" class="hidden contract-flow-box">
+          <h4 class="mint-txt">Contrato de Servicio Firmado</h4>
+          <p class="step-desc">Descarga el PDF, fírmalo y súbelo para confirmar tu activación:</p>
           
-          <a id="btn-download-contract" href="#" class="btn-pf-action" style="text-decoration: none; text-align: center; background: #3b82f6; display: block; margin-bottom: 10px;">📥 Descargar PDF Contrato</a>
+          <a id="btn-download-contract" href="#" class="btn-pf-action btn-blue-solid">📥 Descargar PDF Contrato</a>
           
           <div class="input-group-flow">
             <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
-            <button id="btn-client-send-contract" class="btn-pf-action">
-              Subir Firmado <span id="client-contract-pct" class="fuchsia-txt" style="margin-left: 5px;">0%</span>
+            <button type="button" id="btn-client-send-contract" class="btn-pf-action">
+              Subir Firmado <span id="client-contract-pct" class="fuchsia-txt">0%</span>
             </button>
           </div>
-          <p id="client-contract-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Esperando confirmación...</p>
+          <p id="client-contract-status" class="mint-txt hidden">Esperando confirmación...</p>
 
-          <!-- PUNTO 10: SECCIÓN EVALUADOR EN CLIENTE -->
-          <div id="step-evaluator-client" class="hidden" style="margin-top: 15px; border-top: 1px dashed rgba(0,255,204,0.3); padding-top: 12px;">
+          <!-- SECCIÓN EVALUADOR EN CLIENTE -->
+          <div id="step-evaluator-client" class="hidden evaluator-box">
             <p class="step-desc">Ingresa tu nombre/correo en Facebook (donde tienes las campañas):</p>
-            <div class="input-group-flow" style="margin-top: 8px;">
+            <div class="input-group-flow">
               <input type="text" id="client-meta-user-input" placeholder="Nombre / Correo en Facebook *" required />
-              <button id="btn-client-send-evaluator" class="btn-pf-action">Ser Evaluador</button>
+              <button type="button" id="btn-client-send-evaluator" class="btn-pf-action">Ser Evaluador</button>
             </div>
-            <p id="client-evaluator-status" class="mint-txt hidden" style="margin-top: 8px; font-size: 0.85rem;">Enviado a Admin. Esperando aprobación...</p>
+            <p id="client-evaluator-status" class="mint-txt hidden">Enviado a Admin. Esperando aprobación...</p>
           </div>
 
           <!-- SECCIÓN SUBIR EXCEL Y CREAR BORRADOR -->
-          <div id="step-upload-file" class="hidden" style="margin-top: 15px; border-top: 1px dashed rgba(217,70,239,0.3); padding-top: 12px;">
+          <div id="step-upload-file" class="hidden upload-excel-box">
             <p class="step-desc"><strong>Subir Excel/CSV de Compradores (Obligatorio)</strong></p>
-            <div class="input-group-flow" style="margin-top: 8px;">
+            <div class="input-group-flow">
               <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-              <button id="btn-client-upload-file" class="btn-pf-action">
-                Subir Excel <span id="client-file-pct" class="mint-txt" style="margin-left: 5px;">0%</span>
+              <button type="button" id="btn-client-upload-file" class="btn-pf-action">
+                Subir Excel <span id="client-file-pct" class="mint-txt">0%</span>
               </button>
             </div>
             
-            <div id="card-draft-section" class="hidden" style="margin-top: 12px;">
-              <button id="btn-confirm-draft" class="btn-pf-action" style="width: 100%; background: #10B981; font-weight: bold;">Crear Borrador</button>
+            <div id="card-draft-section" class="hidden draft-section-box">
+              <button type="button" id="btn-confirm-draft" class="btn-pf-action btn-green-solid">Crear Borrador</button>
             </div>
           </div>
 
           <!-- CONFIRMAR INVERSIÓN Y ACTIVAR -->
-          <div id="step-confirm-investment" class="hidden" style="margin-top: 15px; border-top: 1px solid #00ffcc; padding-top: 12px; text-align: center;">
+          <div id="step-confirm-investment" class="hidden confirm-invest-box">
             <p class="step-desc">Monto sugerido por backend a invertir: <strong id="backend-invest-amount" class="mint-txt">$200.00/400.00 USD</strong></p>
-            <button id="btn-activate-dashboard" class="btn-pf-action" style="margin-top: 10px; width: 100%; background: linear-gradient(135deg, #00ffcc, #d946ef); color: #000; font-weight: bold; font-size: 1.1rem;">
+            <button type="button" id="btn-activate-dashboard" class="btn-pf-action btn-activate-gradient">
               Listo / Activar
             </button>
           </div>
@@ -492,17 +492,17 @@
       </div>
 
       <!-- VISTA REEMPLAZO SI LA LISTA DE ESPERA ESTÁ ACTIVA -->
-      <div id="pf-waitlist-replacement" class="hidden text-center" style="padding: 10px;">
+      <div id="pf-waitlist-replacement" class="hidden text-center waitlist-replacement-box">
         <h3 class="section-title fuchsia-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
-        <p class="step-desc" style="margin-top: 8px; margin-bottom: 12px;">Los 2 cupos directos están ocupados.</p>
-        <button id="btn-trigger-waitlist-modal" class="btn-pf-action" style="background: #d946ef; color: #fff; width: 100%; font-weight: bold;">
+        <p class="step-desc">Los 2 cupos directos están ocupados.</p>
+        <button type="button" id="btn-trigger-waitlist-modal" class="btn-pf-action btn-fuchsia-solid">
           Unirme a la lista de espera
         </button>
       </div>
     </section>
 
     <!-- 9. CRONÓMETRO DE TIEMPO PRINCIPAL (ÚLTIMO MÓDULO AL FINAL) -->
-    <section class="glass-card-dash timer-section" style="margin-bottom: 20px;">
+    <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
       <div id="timer-display" class="timer-digits">48:00:00</div>
       <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
@@ -517,7 +517,7 @@
         <span class="brand-text fuchsia-txt">ADMIN CONTROL 🗿💅🏽</span>
       </div>
       <div class="dash-header-right">
-        <button id="btn-exit-admin" class="btn-icon">🗿</button>
+        <button type="button" id="btn-exit-admin" class="btn-icon">🗿</button>
       </div>
     </header>
 
@@ -525,49 +525,49 @@
       <h3 class="section-title fuchsia-txt">Módulos de Configuración y Control</h3>
       <div class="admin-grid">
 
-        <!-- PUNTO 3: VISTAS Y AUDITORÍA DE CLIENTES -->
-        <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; grid-column: span 2;">
-          <label class="mint-txt" style="font-weight: bold;">Llamado a Vistas de Clientes Activos</label>
-          <div style="display: flex; gap: 10px; margin-top: 8px;">
-            <button id="btn-view-client-1-dash" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000; font-weight: bold;">
+        <!-- VISTAS Y AUDITORÍA DE CLIENTES -->
+        <div class="admin-group span-2 border-mint">
+          <label class="mint-txt font-bold">Llamado a Vistas de Clientes Activos</label>
+          <div class="button-group-row">
+            <button type="button" id="btn-view-client-1-dash" class="btn-pf-action btn-mint-solid">
               👁️ Ver Dashboard Cliente #1
             </button>
-            <button id="btn-view-client-2-dash" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff; font-weight: bold;">
+            <button type="button" id="btn-view-client-2-dash" class="btn-pf-action btn-fuchsia-solid">
               👁️ Ver Dashboard Cliente #2
             </button>
           </div>
         </div>
 
-        <!-- PUNTO 10: RECEPCIÓN Y APROBACIÓN DE EVALUADOR -->
-        <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; grid-column: span 2;">
-          <label class="mint-txt" style="font-weight: bold;">Evaluador de Meta Ads Enviado por Cliente</label>
-          <div class="input-group-flow" style="margin-top: 6px; margin-bottom: 6px;">
-            <input type="text" id="admin-meta-user-display" placeholder="Esperando datos del cliente..." readonly style="color: #00ffcc; font-weight: bold; background: rgba(0,0,0,0.6);" />
-            <button id="btn-copy-client-data" class="btn-pf-action" style="background: #00ffcc; color: #000; font-weight: bold;">Copiar</button>
+        <!-- RECEPCIÓN Y APROBACIÓN DE EVALUADOR -->
+        <div class="admin-group span-2 border-mint">
+          <label class="mint-txt font-bold">Evaluador de Meta Ads Enviado por Cliente</label>
+          <div class="input-group-flow">
+            <input type="text" id="admin-meta-user-display" placeholder="Esperando datos del cliente..." readonly class="input-readonly-mint" />
+            <button type="button" id="btn-copy-client-data" class="btn-pf-action btn-mint-solid">Copiar</button>
           </div>
-          <button id="btn-admin-approve-evaluator" class="btn-pf-action" style="width: 100%; background: linear-gradient(135deg, #00ffcc, #10b981); color: #000; font-weight: bold;">
+          <button type="button" id="btn-admin-approve-evaluator" class="btn-pf-action btn-green-gradient">
             Aprobar e Iniciar Evaluador en Meta
           </button>
         </div>
 
         <!-- CONTROL DE VALIDACIÓN DE PAGOS -->
-        <div class="admin-group" style="border: 1px solid #d946ef; padding: 12px; border-radius: 8px; grid-column: span 2;">
-          <label class="fuchsia-txt" style="font-weight: bold;">Validación de Pagos Iniciales</label>
-          <div style="display: flex; gap: 10px; margin-top: 6px;">
-            <button id="btn-confirm-pay-client-1" class="btn-pf-action" style="flex: 1; background: #00ffcc; color: #000; font-weight: bold;">
+        <div class="admin-group span-2 border-fuchsia">
+          <label class="fuchsia-txt font-bold">Validación de Pagos Iniciales</label>
+          <div class="button-group-row">
+            <button type="button" id="btn-confirm-pay-client-1" class="btn-pf-action btn-mint-solid">
               ✅ Confirmar Pago Cliente #1
             </button>
-            <button id="btn-confirm-pay-client-2" class="btn-pf-action" style="flex: 1; background: #d946ef; color: #fff; font-weight: bold;">
+            <button type="button" id="btn-confirm-pay-client-2" class="btn-pf-action btn-fuchsia-solid">
               ✅ Confirmar Pago Cliente #2
             </button>
           </div>
         </div>
 
         <!-- INYECCIÓN Y CREACIÓN DE BORRADOR EN ADMIN -->
-        <div class="admin-group" style="border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; grid-column: span 2;">
-          <label class="mint-txt" style="font-weight: bold;">Inyección y Creación de Borrador</label>
-          <p class="step-desc" style="margin-top: 4px; margin-bottom: 8px;">Presiona para crear el borrador en Meta Ads tras inyectar la segmentación:</p>
-          <button id="btn-admin-create-draft" class="btn-pf-action btn-fb" style="width: 100%; font-size: 1rem; font-weight: bold;">
+        <div class="admin-group span-2 border-mint">
+          <label class="mint-txt font-bold">Inyección y Creación de Borrador</label>
+          <p class="step-desc">Presiona para crear el borrador en Meta Ads tras inyectar la segmentación:</p>
+          <button type="button" id="btn-admin-create-draft" class="btn-pf-action btn-fb">
             ⚡ Crear Borrador en Meta Ads
           </button>
         </div>
@@ -576,29 +576,29 @@
         <div class="admin-group">
           <label>Hoja de Cálculo (Excel / CSV)</label>
           <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          <button id="btn-upload-spreadsheet" class="btn-pf-action">
-            Subir Datos <span id="spreadsheet-pct" class="mint-txt" style="margin-left: 5px;">0%</span>
+          <button type="button" id="btn-upload-spreadsheet" class="btn-pf-action">
+            Subir Datos <span id="spreadsheet-pct" class="mint-txt">0%</span>
           </button>
         </div>
 
-        <!-- PUNTO 8: SUBIR VIDEO CON PORCENTAJE DE CARGA -->
+        <!-- SUBIR VIDEO CON PORCENTAJE DE CARGA -->
         <div class="admin-group">
           <label class="mint-txt">Subir Video Demostrativo a Dashboard</label>
           <div class="input-group-flow">
             <input type="file" id="admin-video-input" class="file-input-custom" accept="video/mp4, video/webm" />
-            <button id="btn-upload-admin-video" class="btn-pf-action">
-              Mostrar en Dashboard 🎬 <span id="admin-video-pct" class="mint-txt" style="margin-left: 5px;">0%</span>
+            <button type="button" id="btn-upload-admin-video" class="btn-pf-action">
+              Mostrar en Dashboard 🎬 <span id="admin-video-pct" class="mint-txt">0%</span>
             </button>
           </div>
         </div>
 
-        <!-- PUNTO 9: SUBIR CONTRATO PDF CON PORCENTAJE DE CARGA -->
+        <!-- SUBIR CONTRATO PDF CON PORCENTAJE DE CARGA -->
         <div class="admin-group">
           <label class="mint-txt">Subir Documento Contrato PDF</label>
           <div class="input-group-flow">
             <input type="file" id="admin-contract-file-input" class="file-input-custom" accept=".pdf" />
-            <button id="btn-upload-admin-contract" class="btn-pf-action">
-              Publicar PDF 📄 <span id="admin-contract-pct" class="mint-txt" style="margin-left: 5px;">0%</span>
+            <button type="button" id="btn-upload-admin-contract" class="btn-pf-action">
+              Publicar PDF 📄 <span id="admin-contract-pct" class="mint-txt">0%</span>
             </button>
           </div>
         </div>
@@ -606,23 +606,23 @@
         <!-- EXPORTAR DATA A CSV -->
         <div class="admin-group">
           <label class="mint-txt">Exportación de Base de Datos</label>
-          <button id="btn-export-data" class="btn-pf-action" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: bold;">
+          <button type="button" id="btn-export-data" class="btn-pf-action btn-emerald-gradient">
             Exportar Data (SODIE Clientes .CSV)
           </button>
         </div>
 
-        <!-- PUNTO 7: GESTIÓN DE LISTA DE ESPERA -->
+        <!-- GESTIÓN DE LISTA DE ESPERA -->
         <div class="admin-group">
-          <label class="fuchsia-txt" style="font-weight: bold;">Gestión de Lista de Espera 👺</label>
-          <button id="btn-toggle-waitlist" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #d946ef; color: #fff; font-weight: bold;">
+          <label class="fuchsia-txt font-bold">Gestión de Lista de Espera 👺</label>
+          <button type="button" id="btn-toggle-waitlist" class="btn-pf-action btn-fuchsia-solid">
             🔥 Activar Modo Lista de Espera
           </button>
         </div>
 
-        <!-- PUNTO 6: ACTIVAR SODIE V4 ($5K/MES Y PAGAR) -->
+        <!-- ACTIVAR SODIE V4 ($5K/MES Y PAGAR) -->
         <div class="admin-group">
-          <label class="mint-txt" style="font-weight: bold;">Plataforma SODIE V4</label>
-          <button id="btn-toggle-sodie-v4" class="btn-pf-action" style="margin-top: 6px; width: 100%; background: #00ffcc; color: #000; font-weight: bold;">
+          <label class="mint-txt font-bold">Plataforma SODIE V4</label>
+          <button type="button" id="btn-toggle-sodie-v4" class="btn-pf-action btn-mint-solid">
             ⚡ Activar SODIE V4
           </button>
         </div>
@@ -634,7 +634,7 @@
   <!-- BANNER COOKIES -->
   <div id="cookie-banner" class="glass-card-dash cookie-banner-box">
     <p class="step-desc">Utilizamos cookies para optimizar la experiencia en SODIE.</p>
-    <button id="btn-accept-cookies" class="btn-pf-action" style="margin-top: 8px; width: 100%;">Aceptar</button>
+    <button type="button" id="btn-accept-cookies" class="btn-pf-action btn-full-width">Aceptar</button>
   </div>
 
   <script src="app.js"></script>
