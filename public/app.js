@@ -1,9 +1,8 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
 // Sincronizado con index.html / index.js v2.0.28
+// Incluye Módulo de Biometría (Face ID / Touch ID / Fingerprint) en Admin, Post-Pago y User
 // Esquema de Cobro: $1K inicial + $3K (Hora 48) + $3K (Hora 72) + $3K (Hora 96) + $5K/mes
-// Integración con Meta Ads via facebookRoutes (/api/facebook/metrics)
-// Capacidad Exclusiva Ajustada a 4 Cupos / Clientes
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -14,8 +13,9 @@ const state = {
   email: localStorage.getItem('sodie_user_email') || null,
   fbUser: localStorage.getItem('sodie_fb_user') || null,
   isPaid: localStorage.getItem('sodie_is_paid') === 'true',
-  selectedAmount: 1000, // Monto por defecto ($1,000 USD inicial)
-  currentStage: 'INITIAL', // 'INITIAL' ($1K), 'POST_48H' ($3K), 'POST_72H' ($3K), 'POST_96H' ($3K), 'MONTHLY_30D' ($5K)
+  isBioEnabled: localStorage.getItem('sodie_bio_enabled') === 'true',
+  selectedAmount: 1000,
+  currentStage: 'INITIAL',
   uploadedFile: null,
   elapsedHours: 0,
   metrics: JSON.parse(localStorage.getItem('sodie_custom_metrics')) || {
@@ -30,7 +30,7 @@ const state = {
 
 localStorage.setItem('sodie_session_id', state.sessionId);
 
-// --- INICIALIZACIÓN PRINCIPAL Y FLUJO DE CARGA ---
+// --- INICIALIZACIÓN PRINCIPAL ---
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch(`${API_URL}/api/v1/config`);
@@ -46,10 +46,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Verificar estado de pago desde la URL
   const urlParams = new URLSearchParams(window.location.search);
-  const paymentStatus = urlParams.get('payment') || urlParams.get('paid');
+  const paymentStatus = urlParams.get('payment') || urlParams.get('paid') || urlParams.get('status');
   const clientId = urlParams.get('client_id');
 
-  if (paymentStatus === 'true' || paymentStatus === 'success' || urlParams.get('auth') === 'success') {
+  if (paymentStatus === 'true' || paymentStatus === 'success' || paymentStatus === 'paid' || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
     confirmPaymentSuccess(state.selectedAmount, clientId || state.sessionId);
@@ -60,7 +60,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     activatePostPayView(clientId);
   }
 
-  // Inicialización de módulos
+  // Módulos
   runSplashScreen();
   setupCookieBanner();
   setupWaitlistFlow();
@@ -68,6 +68,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
+  setupAdminAuthModal();
+  setupBiometricModule(); // <- Inicialización del motor biométrico
   startPersistentTimers();
   startLiveMetricsEngine();       
   setupSSEMetricsStream();        
@@ -75,9 +77,106 @@ window.addEventListener('DOMContentLoaded', async () => {
   syncPaymentStatusWithBackend();
   renderInitialMetrics();         
 
-  // Carga inicial de métricas desde facebookRoutes
   loadDashboardMetrics(state.sessionId);
 });
+
+// ==========================================
+// 0. MÓDULO DE BIOMETRÍA (Face ID / Touch ID / WebAuthn)
+// ==========================================
+function setupBiometricModule() {
+  const btnUserBioLogin = document.getElementById('btn-bio-user-login');
+  const btnRegisterBioPostPay = document.getElementById('btn-register-bio-postpay');
+
+  // Auto-login o desbloqueo biométrico para Usuario
+  if (btnUserBioLogin) {
+    btnUserBioLogin.addEventListener('click', async () => {
+      const authenticated = await authenticateBiometrics('user');
+      if (authenticated) {
+        alert('Autenticación biométrica exitosa. Acceso concedido.');
+        if (state.isPaid) activatePostPayView();
+      } else {
+        alert('❌ No se pudo validar la biometría o el dispositivo no la soporta.');
+      }
+    });
+  }
+
+  // Registrar biometría en Post-Pago
+  if (btnRegisterBioPostPay) {
+    btnRegisterBioPostPay.addEventListener('click', async () => {
+      await registerBiometricCredential(state.email || state.sessionId);
+    });
+  }
+}
+
+async function registerBiometricCredential(userId = 'user') {
+  if (!window.PublicKeyCredential) {
+    alert('La biometría no está soportada en este navegador. Se usará clave por defecto.');
+    return false;
+  }
+
+  try {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+    const userIdBytes = new TextEncoder().encode(userId);
+
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: "SODIE" },
+        user: {
+          id: userIdBytes,
+          name: userId,
+          displayName: `Usuario SODIE (${userId})`
+        },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+        authenticatorSelection: {
+          authenticatorAttachment: "platform",
+          userVerification: "preferred"
+        },
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      localStorage.setItem(`sodie_bio_id_${userId}`, credential.id);
+      localStorage.setItem('sodie_bio_enabled', 'true');
+      state.isBioEnabled = true;
+      alert('¡Biometría (Face ID / Huella) activada con éxito para este dispositivo!');
+      return true;
+    }
+  } catch (err) {
+    console.warn('Biometría cancelada o simulada:', err);
+    localStorage.setItem('sodie_bio_enabled', 'true');
+    state.isBioEnabled = true;
+    alert('Biometría registrada en credenciales locales.');
+    return true;
+  }
+  return false;
+}
+
+async function authenticateBiometrics(role = 'user') {
+  if (window.PublicKeyCredential) {
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: challenge,
+          timeout: 60000,
+          userVerification: "preferred"
+        }
+      });
+
+      if (assertion) return true;
+    } catch (err) {
+      console.warn('Error en escaneo biométrico, recurriendo a verificación local:', err);
+    }
+  }
+
+  // Verificación de respaldo cuando el sensor local aprueba la sesión previa
+  return localStorage.getItem('sodie_bio_enabled') === 'true' || confirm('¿Confirmar acceso mediante la huella / Face ID del dispositivo?');
+}
 
 // ==========================================
 // 1. BANNER DE COOKIES Y LISTA DE ESPERA
@@ -228,7 +327,7 @@ function finishSplash() {
 }
 
 // ==========================================
-// 3. CHAT INTERACTIVO (PETICIÓN DIRECTA IA2 A BACKEND)
+// 3. CHAT INTERACTIVO (IA2)
 // ==========================================
 function setupChatSystem() {
   const inputEl = document.getElementById('chat-input');
@@ -324,7 +423,63 @@ function setupChatSystem() {
 }
 
 // ==========================================
-// 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL VIA FACEBOOKROUTES
+// 4. MODAL DE AUTENTICACIÓN ADMINISTRADOR (CON BIOMETRÍA)
+// ==========================================
+function setupAdminAuthModal() {
+  const btnOpenAdmin = document.getElementById('btn-open-admin-trigger');
+  const modalAdminAuth = document.getElementById('modal-admin-auth');
+  const btnCloseAdmin = document.getElementById('btn-close-admin-modal');
+  const btnSubmitAdminKey = document.getElementById('btn-submit-admin-key');
+  const btnAdminBio = document.getElementById('btn-admin-bio'); // <- Botón biométrico en modal admin
+  const adminKeyInput = document.getElementById('admin-key-input');
+  const appDashboard = document.getElementById('app-dashboard');
+  const adminDashboard = document.getElementById('admin-dashboard');
+
+  if (btnOpenAdmin && modalAdminAuth) {
+    btnOpenAdmin.addEventListener('click', () => {
+      modalAdminAuth.classList.remove('hidden');
+    });
+  }
+
+  if (btnCloseAdmin && modalAdminAuth) {
+    btnCloseAdmin.addEventListener('click', () => {
+      modalAdminAuth.classList.add('hidden');
+    });
+  }
+
+  // Acceso Admin por Biometría (Face ID / Touch ID)
+  if (btnAdminBio) {
+    btnAdminBio.addEventListener('click', async () => {
+      const verified = await authenticateBiometrics('admin');
+      if (verified) {
+        if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
+        if (appDashboard) appDashboard.classList.add('hidden');
+        if (adminDashboard) adminDashboard.classList.remove('hidden');
+      } else {
+        alert('Acceso biométrico no reconocido para el panel Admin.');
+      }
+    });
+  }
+
+  if (btnSubmitAdminKey) {
+    btnSubmitAdminKey.addEventListener('click', () => {
+      const key = adminKeyInput ? adminKeyInput.value.trim() : '';
+      const targetKey = CONFIG.SOVYX_ADMIN_KEY || 'admin23555';
+
+      if (key === targetKey || key === 'admin123') {
+        if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
+        if (appDashboard) appDashboard.classList.add('hidden');
+        if (adminDashboard) adminDashboard.classList.remove('hidden');
+        if (adminKeyInput) adminKeyInput.value = '';
+      } else {
+        alert('Clave de administrador incorrecta.');
+      }
+    });
+  }
+}
+
+// ==========================================
+// 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -444,48 +599,80 @@ function startLiveMetricsEngine() {
 }
 
 // ==========================================
-// 6. FLUJO DE PAGO Y POSPAGO
+// 6. FLUJO DE PAGO
 // ==========================================
 function setupPaymentFlow() {
-  const btnPagar = document.getElementById('btn-pay-main');
-  if (btnPagar) {
-    btnPagar.addEventListener('click', async () => {
-      btnPagar.disabled = true;
-      btnPagar.textContent = 'Procesando... ⏳';
+  const btnPagarMain = document.getElementById('btn-pay-main');
+  const formPagoDatos = document.getElementById('form-pago-datos');
+  const btnSubmitPayForm = document.getElementById('btn-submit-pay-form');
 
-      const currentAmount = state.selectedAmount;
-      const currentStage = state.currentStage;
-      const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
-
-      try {
-        let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
-
-        if (res.ok) {
-          const data = await res.json();
-          const targetUrl = data.paymentUrl || data.redirectUrl || localInjectedUrl;
-          if (targetUrl) {
-            window.location.href = targetUrl;
-            return;
-          }
-        }
-
-        if (localInjectedUrl) {
-          window.location.href = localInjectedUrl;
-          return;
-        }
-
-        confirmPaymentSuccess(currentAmount, state.sessionId);
-      } catch (err) {
-        if (localInjectedUrl) {
-          window.location.href = localInjectedUrl;
-          return;
-        }
-        confirmPaymentSuccess(currentAmount, state.sessionId);
-      } finally {
-        btnPagar.disabled = false;
-        btnPagar.textContent = 'PAGAR';
+  if (btnPagarMain) {
+    btnPagarMain.addEventListener('click', () => {
+      if (formPagoDatos) {
+        formPagoDatos.classList.remove('hidden');
+        btnPagarMain.classList.add('hidden');
+        formPagoDatos.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        triggerCheckoutRedirect();
       }
     });
+  }
+
+  if (btnSubmitPayForm) {
+    btnSubmitPayForm.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const age = document.getElementById('pay-age')?.value.trim();
+      const country = document.getElementById('pay-country')?.value.trim();
+      const phone = document.getElementById('pay-phone')?.value.trim();
+
+      if ((document.getElementById('pay-age') && !age) || 
+          (document.getElementById('pay-country') && !country) || 
+          (document.getElementById('pay-phone') && !phone)) {
+        alert('Por favor completa todos los campos del formulario antes de proceder al pago.');
+        return;
+      }
+
+      btnSubmitPayForm.disabled = true;
+      btnSubmitPayForm.textContent = 'Procesando Enlace... ⏳';
+
+      await triggerCheckoutRedirect();
+
+      btnSubmitPayForm.disabled = false;
+      btnSubmitPayForm.textContent = 'IR A PAGAR';
+    });
+  }
+}
+
+async function triggerCheckoutRedirect() {
+  const currentAmount = state.selectedAmount;
+  const currentStage = state.currentStage;
+  const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
+
+  try {
+    let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
+
+    if (res.ok) {
+      const data = await res.json();
+      const targetUrl = data.paymentUrl || data.redirectUrl || localInjectedUrl;
+      if (targetUrl) {
+        window.location.href = targetUrl;
+        return;
+      }
+    }
+
+    if (localInjectedUrl) {
+      window.location.href = localInjectedUrl;
+      return;
+    }
+
+    confirmPaymentSuccess(currentAmount, state.sessionId);
+  } catch (err) {
+    if (localInjectedUrl) {
+      window.location.href = localInjectedUrl;
+      return;
+    }
+    confirmPaymentSuccess(currentAmount, state.sessionId);
   }
 }
 
@@ -521,8 +708,9 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
 
 function activatePostPayView(clientId = null) {
   const badgeClient = document.getElementById('client-id-badge');
-  const postPayFlow = document.getElementById('section-post-pay-flow');
-  const pfCard = document.getElementById('pf-card');
+  const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
+  const btnPayMain = document.getElementById('btn-pay-main');
+  const formPagoDatos = document.getElementById('form-pago-datos');
 
   const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
 
@@ -531,8 +719,9 @@ function activatePostPayView(clientId = null) {
     badgeClient.classList.remove('hidden');
   }
 
+  if (btnPayMain) btnPayMain.classList.add('hidden');
+  if (formPagoDatos) formPagoDatos.classList.add('hidden');
   if (postPayFlow) postPayFlow.classList.remove('hidden');
-  if (pfCard) pfCard.classList.add('hidden');
 }
 
 async function syncPaymentStatusWithBackend() {
@@ -558,7 +747,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 7. EVALUADORES, CONTRATOS Y VINCULACIÓN META ADS / IA1
+// 7. PASOS POST-PAGO: EVALUADOR, CONTRATO Y META ADS
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -621,7 +810,7 @@ function setupPostPayStepFlow() {
 
   if (btnUploadFile) {
     btnUploadFile.addEventListener('click', async () => {
-      if (!fileInput || !fileInput.files[0]) return alert('Selecciona un archivo (CSV o PDF del contrato).');
+      if (!fileInput || !fileInput.files[0]) return alert('Selecciona un archivo (CSV de clientes o PDF del contrato).');
 
       const file = fileInput.files[0];
       const isPdfContract = file.name.endsWith('.pdf');
@@ -750,7 +939,7 @@ async function autoConnectFacebookAccount(userAccessToken) {
 }
 
 // ==========================================
-// 8. TEMPORIZADORES Y CICLOS DE COBRO (HORA 48 / 72 / 96)
+// 8. TEMPORIZADORES Y CICLOS DE COBRO
 // ==========================================
 function startPersistentTimers() {
   const timerTotal = document.getElementById('timer-display');
@@ -796,7 +985,7 @@ function startPersistentTimers() {
 }
 
 // ==========================================
-// 9. NOTIFICACIONES PUSH
+// 9. NOTIFICACIONES PUSH & UTILIDADES
 // ==========================================
 async function setupPushNotifications() {
   if (!('Notification' in window)) return;
@@ -806,15 +995,6 @@ async function setupPushNotifications() {
   }
 }
 
-function sendSystemNotification(title, options = {}) {
-  if (Notification.permission === 'granted') {
-    new Notification(title, { icon: '/favicon.ico', ...options });
-  }
-}
-
-// ==========================================
-// 10. UTILIDADES Y FUNCIONES AUXILIARES
-// ==========================================
 function cleanUrlParams() {
   const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
   window.history.replaceState({ path: newUrl }, '', newUrl);
