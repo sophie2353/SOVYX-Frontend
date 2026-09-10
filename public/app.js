@@ -20,7 +20,7 @@ const state = {
   elapsedHours: 0,
   metrics: JSON.parse(localStorage.getItem('sodie_custom_metrics')) || {
     visitors: 80,
-    leads: 4,
+    leads: 2,
     conversionRate: "2%",
     reach: 2000,
     spend: "$38",
