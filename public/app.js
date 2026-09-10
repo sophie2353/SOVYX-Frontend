@@ -2,7 +2,6 @@
 // SODIE Core OS - Application Logic (app.js)
 // Sincronizado con index.html / index.js v2.0.28
 // Esquema de Cobro: $1K inicial + $3K (Hora 48) + $3K (Hora 72) + $3K (Hora 96) + $5K/mes
-// Restricción: 2 Cupos Únicos Exclusivos
 // Integración con Meta Ads via facebookRoutes (/api/facebook/metrics)
 // ==========================================
 
@@ -20,7 +19,7 @@ const state = {
   elapsedHours: 0,
   metrics: JSON.parse(localStorage.getItem('sodie_custom_metrics')) || {
     visitors: 80,
-    leads: 2,            // ⚡ 2 Cupos totales estrictos
+    leads: 2,
     conversionRate: "2%",
     reach: 2000,
     spend: "$38",
@@ -65,11 +64,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupCookieBanner();
   setupWaitlistFlow();
   setupChatSystem();
-  setupAdminFiveClicks();
-  setupAdminAmountSelection();
-  setupAdminUploadAndExport();
-  setupAdminManualCapiPayment(); 
-  setupAdminMetricsOverride();   
   setupCarouselDots();
   setupPaymentFlow();
   setupPostPayStepFlow();
@@ -265,18 +259,15 @@ function setupChatSystem() {
     const text = customText || inputEl.value.trim();
     if (!text) return;
 
-    // 1. Renderiza mensaje de usuario
     appendMsg(text, true);
     if (!customText) inputEl.value = '';
 
     inputEl.disabled = true;
     btnSend.disabled = true;
 
-    // 2. Muestra indicador "Pensando..." en UI
     const loadingDiv = appendMsg('Pensando respuesta... 🧠', false, true);
 
     try {
-      // 3. Petición POST directa al Backend
       let res = await fetch(`${API_URL}/api/ia2/conversar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -332,382 +323,6 @@ function setupChatSystem() {
 }
 
 // ==========================================
-// 4. PANEL ADMINISTRADOR Y WEBAUTHN
-// ==========================================
-function setupAdminFiveClicks() {
-  let logoClicks = 0;
-  let clickTimer;
-
-  const logoTriggers = document.querySelectorAll('.logo-wrapper, .brand-text');
-  const modalAuth = document.getElementById('modal-admin-auth');
-  const adminKeyInput = document.getElementById('admin-key-input');
-  const btnSubmitKey = document.getElementById('btn-submit-admin-key');
-  const btnCloseModal = document.getElementById('btn-close-admin-modal');
-
-  const appDashboard = document.getElementById('app-dashboard');
-  const adminDashboard = document.getElementById('admin-dashboard');
-  const btnExitAdmin = document.getElementById('btn-exit-admin');
-
-  logoTriggers.forEach(logo => {
-    logo.addEventListener('click', () => {
-      logoClicks++;
-      clearTimeout(clickTimer);
-
-      if (logoClicks >= 5) {
-        logoClicks = 0;
-        if (modalAuth) {
-          modalAuth.classList.remove('hidden');
-          injectBiometricButton(modalAuth);
-        }
-      } else {
-        clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
-      }
-    });
-  });
-
-  if (btnSubmitKey) {
-    btnSubmitKey.addEventListener('click', () => {
-      const valorIngresado = adminKeyInput ? adminKeyInput.value.trim() : '';
-      const validKey = CONFIG.SOVYX_ADMIN_KEY || '23555';
-      
-      if (valorIngresado === validKey || valorIngresado === '23555' || valorIngresado === 'admin23555') {
-        modalAuth.classList.add('hidden');
-        if (appDashboard && adminDashboard) {
-          appDashboard.classList.add('hidden');
-          adminDashboard.classList.remove('hidden');
-          loadDashboardMetrics(state.sessionId);
-        }
-      } else {
-        alert(`Clave incorrecta.`);
-      }
-    });
-  }
-
-  if (btnCloseModal) {
-    btnCloseModal.addEventListener('click', () => {
-      if (modalAuth) modalAuth.classList.add('hidden');
-    });
-  }
-
-  if (btnExitAdmin) {
-    btnExitAdmin.addEventListener('click', () => {
-      if (appDashboard && adminDashboard) {
-        adminDashboard.classList.add('hidden');
-        appDashboard.classList.remove('hidden');
-      }
-    });
-  }
-}
-
-function injectBiometricButton(modalAuth) {
-  if (document.getElementById('btn-biometric-auth')) return;
-
-  const container = modalAuth.querySelector('.modal-content, div') || modalAuth;
-  const bioBtn = document.createElement('button');
-  bioBtn.id = 'btn-biometric-auth';
-  bioBtn.type = 'button';
-  bioBtn.textContent = 'DESBLOQUEAR CON HUELLA / FACEID';
-  bioBtn.style.cssText = 'margin-top: 12px; width: 100%; padding: 12px; background: #10B981; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem;';
-  
-  bioBtn.addEventListener('click', async () => {
-    const appDashboard = document.getElementById('app-dashboard');
-    const adminDashboard = document.getElementById('admin-dashboard');
-
-    const unlockAdmin = () => {
-      modalAuth.classList.add('hidden');
-      if (appDashboard && adminDashboard) {
-        appDashboard.classList.add('hidden');
-        adminDashboard.classList.remove('hidden');
-        loadDashboardMetrics(state.sessionId);
-      }
-    };
-
-    if (!window.PublicKeyCredential) {
-      alert("Autenticación biométrica no disponible.");
-      return;
-    }
-
-    try {
-      const challenge = new Uint8Array([21, 31, 105, 78, 18, 45, 66, 32]);
-      const savedCredId = localStorage.getItem('sodie_bio_cred_id');
-      let success = false;
-
-      if (savedCredId) {
-        try {
-          const rawId = Uint8Array.from(atob(savedCredId), c => c.charCodeAt(0));
-          const assertion = await navigator.credentials.get({
-            publicKey: { challenge, timeout: 60000, userVerification: "preferred", allowCredentials: [{ id: rawId, type: 'public-key' }] }
-          });
-          if (assertion) success = true;
-        } catch (e) {}
-      }
-
-      if (!success) {
-        try {
-          const userId = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge,
-              rp: { name: "SODIE Core OS", id: window.location.hostname || "localhost" },
-              user: { id: userId, name: "admin@sodie.app", displayName: "Administrator" },
-              pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-              authenticatorSelection: { userVerification: "preferred" },
-              timeout: 60000
-            }
-          });
-
-          if (credential) {
-            const rawIdStr = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-            localStorage.setItem('sodie_bio_cred_id', rawIdStr);
-            success = true;
-          }
-        } catch (e) {}
-      }
-
-      unlockAdmin();
-    } catch (err) {
-      unlockAdmin();
-    }
-  });
-
-  container.appendChild(bioBtn);
-}
-
-// ==========================================
-// 4.B SELECCIÓN DE MONTOS ($1K, $3K, $5K)
-// ==========================================
-function setupAdminAmountSelection() {
-  const amountBtns = document.querySelectorAll('.btn-select-amount');
-  const linkContainer = document.getElementById('link-input-container');
-  const labelAmount = document.getElementById('selected-amount-label');
-  const btnSendLink = document.getElementById('btn-send-payment-link');
-  const inputLink = document.getElementById('payment-link-input');
-
-  amountBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const amt = Number(e.target.getAttribute('data-amount')) || 1000;
-      state.selectedAmount = amt;
-      
-      if (amt === 3000) {
-        state.currentStage = state.elapsedHours >= 72 ? 'POST_96H' : (state.elapsedHours >= 48 ? 'POST_72H' : 'POST_48H');
-      } else if (amt === 5000) {
-        state.currentStage = 'MONTHLY_30D';
-      } else {
-        state.currentStage = 'INITIAL';
-      }
-
-      if (labelAmount) labelAmount.innerText = `Link de cobro para $${amt.toLocaleString()} USD (${state.currentStage}):`;
-      if (linkContainer) linkContainer.classList.remove('hidden');
-    });
-  });
-
-  if (btnSendLink) {
-    btnSendLink.addEventListener('click', async () => {
-      const url = inputLink ? inputLink.value.trim() : '';
-      if (!url) return alert('Ingresa una URL válida.');
-
-      const targetAmount = state.selectedAmount;
-      const targetStage = state.currentStage;
-
-      localStorage.setItem(`sodie_pay_link_${targetAmount}`, url);
-      localStorage.setItem(`sodie_pay_link_stage_${targetStage}`, url);
-
-      try {
-        await fetch(`${API_URL}/api/pasarela/admin/set-link`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            amount: targetAmount, paymentUrl: url, stage: targetStage, 
-            adminKey: CONFIG.SOVYX_ADMIN_KEY, sessionId: state.sessionId, userEmail: state.email 
-          })
-        });
-
-        alert(`✅ Link asignado para $${targetAmount.toLocaleString()} USD en la etapa ${targetStage}.`);
-        if (inputLink) inputLink.value = '';
-        if (linkContainer) linkContainer.classList.add('hidden');
-      } catch (err) {
-        alert(`✅ Link guardado localmente.`);
-        if (inputLink) inputLink.value = '';
-        if (linkContainer) linkContainer.classList.add('hidden');
-      }
-    });
-  }
-}
-
-// ==========================================
-// 4.C ARCHIVOS Y EXPORTACIÓN ADMIN
-// ==========================================
-function setupAdminUploadAndExport() {
-  const btnUploadAdminFile = document.getElementById('btn-admin-upload-file');
-  const adminFileInput = document.getElementById('admin-file-input');
-  const adminUploadStatus = document.getElementById('admin-upload-status');
-  const btnExportCsv = document.getElementById('btn-export-hora48-csv');
-
-  if (btnUploadAdminFile && adminFileInput) {
-    btnUploadAdminFile.addEventListener('click', async () => {
-      if (!adminFileInput.files || !adminFileInput.files[0]) return alert('Selecciona un archivo.');
-
-      const file = adminFileInput.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('uploadedBy', 'admin');
-
-      if (adminUploadStatus) {
-        adminUploadStatus.textContent = 'Subiendo archivo... ⏳';
-        adminUploadStatus.classList.remove('hidden');
-      }
-
-      try {
-        let res = await fetch(`${API_URL}/api/admin/uploads`, { method: 'POST', body: formData });
-        if (!res.ok) res = await fetch(`${API_URL}/api/v1/admin/uploads`, { method: 'POST', body: formData });
-
-        if (res.ok) {
-          if (adminUploadStatus) adminUploadStatus.textContent = '✅ Archivo publicado exitosamente.';
-          alert('¡Archivo publicado!');
-          adminFileInput.value = '';
-        }
-      } catch (err) {
-        alert('Error al subir el archivo.');
-      }
-    });
-  }
-
-  if (btnExportCsv) {
-    btnExportCsv.addEventListener('click', () => {
-      window.open(`${API_URL}/api/admin/export/export-clientes-hora48`, '_blank');
-    });
-  }
-}
-
-// ==========================================
-// 4.D APROBACIÓN MANUAL Y META CAPI (2 CUPOS MAX)
-// ==========================================
-function setupAdminManualCapiPayment() {
-  const btnApproveSlot1 = document.getElementById('btn-approve-slot-1');
-  const btnApproveSlot2 = document.getElementById('btn-approve-slot-2');
-  const inputManualEmail = document.getElementById('admin-manual-client-email');
-  const inputManualAmount = document.getElementById('admin-manual-payment-amount');
-
-  const executeCapiApproval = async (slotNumber) => {
-    if (slotNumber > 2) {
-      alert("⚠️ SODIE OS sólo administra un máximo de 2 cupos exclusivos.");
-      return;
-    }
-
-    const clientEmail = (inputManualEmail ? inputManualEmail.value.trim() : '') || state.email || 'cliente@sovyx.com';
-    const amount = (inputManualAmount ? Number(inputManualAmount.value) : null) || state.selectedAmount || 1000;
-    const adminKey = CONFIG.SOVYX_ADMIN_KEY || 'admin23555';
-
-    if (!confirm(`¿Aprobar manualmente el Slot #${slotNumber} de 2 por $${amount.toLocaleString()} USD e inyectar evento Purchase en Meta CAPI?`)) {
-      return;
-    }
-
-    try {
-      let res = await fetch(`${API_URL}/api/admin/uploads/confirmar-pago-manual`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminKey, slotNumber, emailCliente: clientEmail, monto: amount, stage: state.currentStage })
-      });
-
-      if (!res.ok) {
-        res = await fetch(`${API_URL}/api/v1/admin/confirmar-pago-manual`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ adminKey, slotNumber, emailCliente: clientEmail, monto: amount, stage: state.currentStage })
-        });
-      }
-
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok || data.success) {
-        alert(`🟢 ¡Aprobación del Slot #${slotNumber}/2 completada exitosamente!`);
-        
-        if (state.metrics.leads > 0) {
-          state.metrics.leads -= 1;
-        }
-        updateMetricsUI(state.metrics);
-
-        sendSystemNotification('🎉 Conversión Registrada', {
-          body: `Pago manual de $${amount.toLocaleString()} USD confirmado para el Slot #${slotNumber}.`
-        });
-      }
-    } catch (err) {
-      alert('Error de conexión al procesar el pago manual.');
-    }
-  };
-
-  if (btnApproveSlot1) btnApproveSlot1.addEventListener('click', () => executeCapiApproval(1));
-  if (btnApproveSlot2) btnApproveSlot2.addEventListener('click', () => executeCapiApproval(2));
-}
-
-// ==========================================
-// 4.E CONTROL DIRECTO DE MÉTRICAS ADMIN
-// ==========================================
-function setupAdminMetricsOverride() {
-  const adminDashboard = document.getElementById('admin-dashboard');
-  if (!adminDashboard) return;
-
-  let metricsFormContainer = document.getElementById('admin-metrics-control-panel');
-
-  if (!metricsFormContainer) {
-    metricsFormContainer = document.createElement('div');
-    metricsFormContainer.id = 'admin-metrics-control-panel';
-    metricsFormContainer.className = 'admin-card-section';
-    metricsFormContainer.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0, 0, 0, 0.4); border: 1px solid #10B981; border-radius: 10px; color: #fff;';
-    
-    metricsFormContainer.innerHTML = `
-      <h3 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase;">📊 Control Directo de Métricas (facebookRoutes)</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
-        <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Visitas / Clics</label>
-          <input type="number" id="admin-input-visitors" value="${state.metrics.visitors}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
-        </div>
-        <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Cupos (Max 2)</label>
-          <input type="number" id="admin-input-leads" max="2" value="${state.metrics.leads}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
-        </div>
-        <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Alcance Meta</label>
-          <input type="number" id="admin-input-reach" value="${state.metrics.reach}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
-        </div>
-        <div>
-          <label style="font-size: 0.8rem; display:block; color: #aaa;">Inversión Meta</label>
-          <input type="text" id="admin-input-spend" value="${state.metrics.spend}" style="width: 100%; padding: 8px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444;">
-        </div>
-      </div>
-      <button id="btn-admin-save-metrics" style="margin-top: 15px; width: 100%; padding: 10px; background: #10B981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;">
-        ⚡ Actualizar Dashboard
-      </button>
-    `;
-
-    adminDashboard.appendChild(metricsFormContainer);
-  }
-
-  const btnSaveMetrics = document.getElementById('btn-admin-save-metrics');
-  if (btnSaveMetrics) {
-    btnSaveMetrics.addEventListener('click', async () => {
-      state.metrics.visitors = Number(document.getElementById('admin-input-visitors').value) || 0;
-      state.metrics.leads = Math.min(2, Number(document.getElementById('admin-input-leads').value) || 0);
-      state.metrics.reach = Number(document.getElementById('admin-input-reach').value) || 0;
-      state.metrics.spend = document.getElementById('admin-input-spend').value || "$0";
-
-      localStorage.setItem('sodie_custom_metrics', JSON.stringify(state.metrics));
-      updateMetricsUI(state.metrics);
-
-      try {
-        await fetch(`${API_URL}/api/facebook/metrics/override`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: state.sessionId, adminKey: CONFIG.SOVYX_ADMIN_KEY, metrics: state.metrics })
-        });
-      } catch (err) {}
-
-      alert("✅ Métricas actualizadas vía facebookRoutes.");
-    });
-  }
-}
-
-// ==========================================
 // 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL VIA FACEBOOKROUTES
 // ==========================================
 function setupCarouselDots() {
@@ -758,7 +373,6 @@ function updateMetricsUI(metricsData) {
   if (liveLeads) liveLeads.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
 }
 
-// Petición a facebookRoutes para obtener métricas reales o de campaña
 async function loadDashboardMetrics(targetUserId = state.sessionId) {
   try {
     const res = await fetch(`${API_URL}/api/facebook/metrics/${targetUserId}`);
@@ -939,7 +553,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B EVALUADORES, CONTRATOS Y IA1 / CONEXIÓN FACEBOOK
+// 7. EVALUADORES, CONTRATOS Y VINCULACIÓN META ADS / IA1
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -1103,7 +717,6 @@ function setupPostPayStepFlow() {
   }
 }
 
-// Conexión con facebookRoutes (/api/facebook/connect)
 async function autoConnectFacebookAccount(userAccessToken) {
   try {
     const userId = state.sessionId || state.email || 'cliente_temp_1';
@@ -1132,7 +745,7 @@ async function autoConnectFacebookAccount(userAccessToken) {
 }
 
 // ==========================================
-// 7. TEMPORIZADORES Y CICLOS DE HORA 48 / 72 / 96
+// 8. TEMPORIZADORES Y CICLOS DE COBRO (HORA 48 / 72 / 96)
 // ==========================================
 function startPersistentTimers() {
   const timerTotal = document.getElementById('timer-display');
@@ -1178,7 +791,7 @@ function startPersistentTimers() {
 }
 
 // ==========================================
-// 8. NOTIFICACIONES PUSH Y UTILIDADES
+// 9. NOTIFICACIONES PUSH
 // ==========================================
 async function setupPushNotifications() {
   if (!('Notification' in window)) return;
@@ -1194,6 +807,9 @@ function sendSystemNotification(title, options = {}) {
   }
 }
 
+// ==========================================
+// 10. UTILIDADES Y FUNCIONES AUXILIARES
+// ==========================================
 function cleanUrlParams() {
   const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
   window.history.replaceState({ path: newUrl }, '', newUrl);
