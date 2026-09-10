@@ -3,6 +3,7 @@
 // Sincronizado con index.html / index.js v2.0.28
 // Esquema de Cobro: $1K inicial + $3K (Hora 48) + $3K (Hora 72) + $3K (Hora 96) + $5K/mes
 // Restricción: 2 Cupos Únicos Exclusivos
+// Integración con Meta Ads via facebookRoutes (/api/facebook/metrics)
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -22,7 +23,7 @@ const state = {
     leads: 2,            // ⚡ 2 Cupos totales estrictos
     conversionRate: "2%",
     reach: 2000,
-    spend: "$40",
+    spend: "$38",
     liveViewers: 21
   }
 };
@@ -79,6 +80,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   syncPaymentStatusWithBackend();
   renderInitialMetrics();         
 
+  // Carga inicial de métricas desde facebookRoutes
   loadDashboardMetrics(state.sessionId);
 });
 
@@ -143,7 +145,7 @@ function setupWaitlistFlow() {
           statusMsg.textContent = '✅ Registrado en la lista de espera correctamente.';
           statusMsg.classList.remove('hidden');
         }
-        alert('🎉 ¡Te has registrado exitosamente en la lista de espera!');
+        alert('¡Te has registrado exitosamente en la lista de espera!');
         if (inputEmail) inputEmail.value = '';
         if (inputPhone) inputPhone.value = '';
       } else {
@@ -654,7 +656,7 @@ function setupAdminMetricsOverride() {
     metricsFormContainer.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0, 0, 0, 0.4); border: 1px solid #10B981; border-radius: 10px; color: #fff;';
     
     metricsFormContainer.innerHTML = `
-      <h3 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase;">📊 Control Directo de Métricas (2 Cupos)</h3>
+      <h3 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase;">📊 Control Directo de Métricas (facebookRoutes)</h3>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
         <div>
           <label style="font-size: 0.8rem; display:block; color: #aaa;">Visitas / Clics</label>
@@ -700,13 +702,13 @@ function setupAdminMetricsOverride() {
         });
       } catch (err) {}
 
-      alert("✅ Métricas actualizadas.");
+      alert("✅ Métricas actualizadas vía facebookRoutes.");
     });
   }
 }
 
 // ==========================================
-// 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL
+// 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL VIA FACEBOOKROUTES
 // ==========================================
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
@@ -756,6 +758,7 @@ function updateMetricsUI(metricsData) {
   if (liveLeads) liveLeads.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
 }
 
+// Petición a facebookRoutes para obtener métricas reales o de campaña
 async function loadDashboardMetrics(targetUserId = state.sessionId) {
   try {
     const res = await fetch(`${API_URL}/api/facebook/metrics/${targetUserId}`);
@@ -764,13 +767,17 @@ async function loadDashboardMetrics(targetUserId = state.sessionId) {
     const data = await res.json();
     if (data.success && data.metrics) {
       const m = data.metrics;
-      state.metrics.visitors = m.clicks !== undefined ? m.clicks : state.metrics.visitors;
-      state.metrics.reach = m.reach ? parseInt(m.reach) : state.metrics.reach;
-      state.metrics.spend = m.spend ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
+      state.metrics.visitors = m.clicks !== undefined ? m.clicks : (m.visitors !== undefined ? m.visitors : state.metrics.visitors);
+      state.metrics.reach = m.reach !== undefined ? parseInt(m.reach) : state.metrics.reach;
+      state.metrics.spend = m.spend !== undefined ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
+      if (m.leads !== undefined) state.metrics.leads = Math.min(2, m.leads);
 
+      localStorage.setItem('sodie_custom_metrics', JSON.stringify(state.metrics));
       updateMetricsUI(state.metrics);
     }
-  } catch (err) {}
+  } catch (err) {
+    console.warn('Error consultando facebookRoutes:', err);
+  }
 }
 
 function setupSSEMetricsStream() {
@@ -932,7 +939,7 @@ function updatePriceDisplay(postPriceText) {
 }
 
 // ==========================================
-// 6.B EVALUADORES, CONTRATOS Y IA1
+// 6.B EVALUADORES, CONTRATOS Y IA1 / CONEXIÓN FACEBOOK
 // ==========================================
 function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
@@ -1096,6 +1103,7 @@ function setupPostPayStepFlow() {
   }
 }
 
+// Conexión con facebookRoutes (/api/facebook/connect)
 async function autoConnectFacebookAccount(userAccessToken) {
   try {
     const userId = state.sessionId || state.email || 'cliente_temp_1';
@@ -1109,16 +1117,18 @@ async function autoConnectFacebookAccount(userAccessToken) {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      if (data.data.act_id) localStorage.setItem('sodie_ad_account', data.data.act_id);
-      if (data.data.pixel_id) localStorage.setItem('sodie_pixel_id', data.data.pixel_id);
+      if (data.data && data.data.act_id) localStorage.setItem('sodie_ad_account', data.data.act_id);
+      if (data.data && data.data.pixel_id) localStorage.setItem('sodie_pixel_id', data.data.pixel_id);
 
-      alert(`✅ Cuenta vinculada exitosamente.`);
+      alert(`✅ Cuenta vinculada exitosamente vía facebookRoutes.`);
       await loadDashboardMetrics(userId);
 
       const stepDraft = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
       if (stepDraft) stepDraft.classList.remove('hidden');
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('Error vinculando cuenta de Facebook:', err);
+  }
 }
 
 // ==========================================
