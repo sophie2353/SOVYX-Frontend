@@ -3,6 +3,7 @@
 // Sincronizado con index.html / index.js v2.0.28
 // Esquema de Cobro: $1K inicial + $3K (Hora 48) + $3K (Hora 72) + $3K (Hora 96) + $5K/mes
 // Integración con Meta Ads via facebookRoutes (/api/facebook/metrics)
+// Capacidad Exclusiva Ajustada a 4 Cupos / Clientes
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -19,7 +20,7 @@ const state = {
   elapsedHours: 0,
   metrics: JSON.parse(localStorage.getItem('sodie_custom_metrics')) || {
     visitors: 80,
-    leads: 2,
+    leads: 4,
     conversionRate: "2%",
     reach: 2000,
     spend: "$38",
@@ -384,7 +385,7 @@ async function loadDashboardMetrics(targetUserId = state.sessionId) {
       state.metrics.visitors = m.clicks !== undefined ? m.clicks : (m.visitors !== undefined ? m.visitors : state.metrics.visitors);
       state.metrics.reach = m.reach !== undefined ? parseInt(m.reach) : state.metrics.reach;
       state.metrics.spend = m.spend !== undefined ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
-      if (m.leads !== undefined) state.metrics.leads = Math.min(2, m.leads);
+      if (m.leads !== undefined) state.metrics.leads = Math.min(4, m.leads);
 
       localStorage.setItem('sodie_custom_metrics', JSON.stringify(state.metrics));
       updateMetricsUI(state.metrics);
@@ -415,10 +416,14 @@ function setupSSEMetricsStream() {
       }
 
       if (data.remainingSlots !== undefined) {
-        state.metrics.leads = Math.min(2, data.remainingSlots);
+        state.metrics.leads = Math.min(4, data.remainingSlots);
         updateMetricsUI(state.metrics);
       }
     } catch (e) {}
+  };
+
+  eventSource.onerror = (err) => {
+    console.warn('Conexión SSE reconectando...', err);
   };
 }
 
@@ -429,7 +434,7 @@ function startLiveMetricsEngine() {
       if (res.ok) {
         const data = await res.json();
         if (data.slots !== undefined) {
-          state.metrics.leads = Math.min(2, data.slots);
+          state.metrics.leads = Math.min(4, data.slots);
           updateMetricsUI(state.metrics);
         }
       }
@@ -507,7 +512,7 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
     if (slotRes.ok) {
       const slotData = await slotRes.json();
       if (slotData.remainingSlots !== undefined) {
-        state.metrics.leads = Math.min(2, slotData.remainingSlots);
+        state.metrics.leads = Math.min(4, slotData.remainingSlots);
         updateMetricsUI(state.metrics);
       }
     }
