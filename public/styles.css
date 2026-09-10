@@ -45,13 +45,17 @@ body {
 .text-sub { color: var(--text-sub); }
 .hidden { display: none !important; }
 .text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+.link-wrapper { text-align: center; margin-top: 12px; }
+.link-underline { text-decoration: underline; font-size: 0.85rem; cursor: pointer; }
 
-/* INPUTS GENERALES Y BOTONES DESHABILITADOS */
+/* INPUTS GENERALES Y CAMPOS DE FORMULARIO */
 input[type="text"],
 input[type="email"],
 input[type="tel"],
 input[type="number"],
 input[type="password"],
+input[type="file"],
 select,
 textarea {
   width: 100%;
@@ -71,6 +75,12 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 12px rgba(0, 255, 204, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.input-readonly-mint {
+  background: rgba(0, 255, 204, 0.08) !important;
+  color: var(--neon-mint) !important;
+  border-color: var(--neon-mint) !important;
+}
+
 button:disabled,
 .btn-disabled {
   opacity: 0.5 !important;
@@ -78,6 +88,49 @@ button:disabled,
   filter: grayscale(0.6) !important;
   box-shadow: none !important;
   transform: none !important;
+}
+
+/* ========================================================= */
+/* TOAST NOTIFICACIÓN FLOATING                               */
+/* ========================================================= */
+
+.toast-bubble {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10001;
+  background: linear-gradient(135deg, rgba(10, 3, 22, 0.95) 0%, rgba(0, 255, 204, 0.2) 100%);
+  border: 1.5px solid var(--neon-mint);
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toast-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--neon-mint);
+  box-shadow: 0 0 10px var(--neon-mint);
+}
+
+.toast-text strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.toast-text p {
+  font-size: 0.75rem;
+  color: var(--text-sub);
 }
 
 /* ========================================================= */
@@ -329,6 +382,7 @@ button:disabled,
 }
 
 .dash-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.dash-header-left { display: flex; align-items: center; gap: 8px; }
 .dash-header-right { display: flex; align-items: center; gap: 8px; }
 .brand-text { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 800; cursor: pointer; }
 
@@ -363,6 +417,8 @@ button:disabled,
   width: 100%;
 }
 
+.border-mint { border-color: var(--neon-mint) !important; }
+.border-fuchsia { border-color: var(--neon-fuchsia) !important; }
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
 /* ========================================================= */
@@ -370,80 +426,25 @@ button:disabled,
 /* ========================================================= */
 
 .admin-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-.admin-group label { font-size: 0.8rem; color: var(--text-sub); display: block; margin-bottom: 4px; }
+.admin-grid.two-cols,
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid-2cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
-.admin-btns {
+.admin-group label { font-size: 0.8rem; color: var(--text-sub); display: block; margin-bottom: 4px; }
+.button-group-row { display: flex; gap: 10px; }
+
+.biometrics-container {
   display: flex;
-  gap: 8px;
-  margin-top: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
 }
 
-.btn-select-amount {
-  flex: 1 1 65px;
-  padding: 10px 8px;
-  background: rgba(255, 0, 122, 0.1);
-  border: 1px solid var(--neon-fuchsia);
-  border-radius: 10px;
-  color: #fff;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
+.status-tag {
+  font-size: 0.78rem;
   text-align: center;
 }
 
-.btn-select-amount:hover,
-.btn-select-amount:active {
-  background: var(--neon-fuchsia);
-  box-shadow: 0 0 14px rgba(255, 0, 122, 0.7);
-  transform: translateY(-1px);
-}
-
-/* BOTÓN DE ACCESO BIOMÉTRICO (ADMIN / WEBAUTHN v4) */
-#btn-biometric-auth,
-.btn-admin-biometric {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
-  background: rgba(0, 255, 204, 0.12);
-  border: 1.5px solid var(--neon-mint);
-  border-radius: 12px;
-  color: var(--neon-mint);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 0 14px rgba(0, 255, 204, 0.25);
-  transition: all 0.25s ease;
-  margin-top: 10px;
-}
-
-#btn-biometric-auth:hover,
-.btn-admin-biometric:hover {
-  background: var(--neon-mint);
-  color: var(--bg-dark);
-  box-shadow: 0 0 22px var(--neon-mint);
-  transform: translateY(-1px);
-}
-
-.link-input-wrapper {
-  animation: fadeInDown 0.3s ease;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* MODAL DE AUTENTICACIÓN ADMIN */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -466,15 +467,20 @@ button:disabled,
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 0 25px rgba(255, 0, 122, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-footer-action {
+  margin-top: 6px;
 }
 
 /* ========================================================= */
-/* 4. MÉTRICAS, CARRUSEL & IA3 (REAL-TIME SSE)               */
+/* 4. MÉTRICAS, CARRUSEL & VIDEO                             */
 /* ========================================================= */
 
-.metrics-section {
-  width: 100%;
-}
+.metrics-section { width: 100%; }
 
 .metrics-slider { 
   display: flex; 
@@ -501,31 +507,6 @@ button:disabled,
   border: 1px solid rgba(0, 255, 204, 0.3);
 }
 
-/* TARJETAS DE MÉTRICAS PARA CLIENTES */
-.metrics-slider .metric-square.client-metric-card {
-  background: linear-gradient(135deg, rgba(210, 48, 255, 0.08) 0%, rgba(10, 3, 22, 0.7) 100%);
-  border: 1.5px solid rgba(210, 48, 255, 0.4);
-  border-top: 2px solid rgba(210, 48, 255, 0.85);
-  box-shadow: 
-    inset 0 1px 2px rgba(210, 48, 255, 0.3),
-    0 8px 22px rgba(0, 0, 0, 0.6);
-}
-
-.client-metric-card .gauge-val,
-.client-metric-card .metric-number {
-  color: #fff;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.1rem;
-}
-
-.metric-label {
-  font-size: 0.75rem;
-  color: var(--text-sub);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* PUNTOS INDICADORES DEL CARRUSEL */
 .slider-dots-indicator {
   display: flex;
   justify-content: center;
@@ -550,35 +531,60 @@ button:disabled,
   box-shadow: 0 0 8px var(--neon-mint);
 }
 
+.video-container-glass {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  margin-top: 10px;
+}
+
+.demo-video-player {
+  width: 100%;
+  display: block;
+  border-radius: 12px;
+}
+
 /* ========================================================= */
-/* 5. PASOS Y FLUJOS DE ENTRADA (EVALUADOR & CSV / IA1)     */
+/* 5. COMPARATIVAS & SLIDES SODIE V4                         */
 /* ========================================================= */
 
-.step-desc { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4; }
-.input-group-flow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-.file-input-custom { margin-bottom: 12px; color: var(--text-sub); width: 100%; font-size: 0.82rem; }
-.style-wait-msg { font-size: 0.85rem; margin-top: 8px; text-align: center; }
+.comparison-box { margin-top: 12px; }
+.border-top-mint { border-top: 1px solid var(--neon-mint); padding-top: 12px; margin-top: 12px; }
+.col-divider-right { border-right: 1px solid rgba(255, 255, 255, 0.15); padding-right: 10px; }
 
-/* BOTÓN OFICIAL DE FACEBOOK / META */
-.btn-fb { 
-  background: rgba(24, 119, 242, 0.18) !important; 
-  border: 1.5px solid #1877f2 !important; 
-  color: #ffffff !important; 
+.v4-horizontal-slider {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.v4-horizontal-slider::-webkit-scrollbar { display: none; }
+
+.v4-slide-card {
+  flex: 0 0 220px;
+  background: rgba(10, 3, 22, 0.6);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.btn-fb:hover {
-  background: #1877f2 !important;
-  box-shadow: 0 0 16px rgba(24, 119, 242, 0.7) !important;
+.img-responsive {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
 }
 
-.row-btns-renew { display: flex; gap: 10px; margin-top: 10px; }
+.metric-live-box {
+  padding: 12px;
+}
 
 /* ========================================================= */
-/* 6. CHAT WEB INTERACTIVO & MOTOR DE CIERRE (IA2)           */
+/* 6. CHAT WEB INTERACTIVO & MOTOR DE CIERRE                  */
 /* ========================================================= */
 
 .chat-header {
@@ -689,12 +695,97 @@ button:disabled,
 }
 
 /* ========================================================= */
-/* 7. ACCIONES DE PAGO Y BOTONES NATIVOS                     */
+/* 7. ALINEACIÓN PRECISA DE PRECIOS ($1.000 Y $9.000)        */
 /* ========================================================= */
 
-.pf-summary-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.9rem; }
-.pf-row { display: flex; justify-content: space-between; color: var(--text-sub); }
-.pf-row.pf-total { border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; font-size: 1.1rem; color: #fff; font-weight: bold; }
+.pf-summary-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+  margin: 16px 0; 
+  font-size: 0.9rem; 
+}
+
+.pf-row { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-start; 
+  gap: 12px;
+  color: var(--text-sub); 
+}
+
+.pf-row span {
+  flex: 1;
+  line-height: 1.3;
+}
+
+/* ALINEACIÓN PERFECTA EN LA MISMA COLUMNA DERECHA */
+.price-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  color: #ffffff;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.price-subtext {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  font-weight: 500;
+  font-family: 'Rajdhani', sans-serif;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.pf-row.pf-total { 
+  border-top: 1px solid rgba(255, 255, 255, 0.15); 
+  padding-top: 10px; 
+  font-size: 1.1rem; 
+  color: #fff; 
+  font-weight: bold; 
+  align-items: center;
+}
+
+.form-billing-box,
+.contract-flow-box,
+.evaluator-box,
+.upload-excel-box,
+.draft-section-box,
+.confirm-invest-box,
+.waitlist-replacement-box {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-stack-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group-flow { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+  margin-bottom: 6px; 
+}
+
+.step-desc { 
+  font-size: 0.85rem; 
+  color: var(--text-sub); 
+  line-height: 1.4; 
+}
+
+/* ========================================================= */
+/* 8. SISTEMA UNIVERSAL DE BOTONES Y VARIANTES               */
+/* ========================================================= */
 
 .btn-pf-action { 
   width: 100%; 
@@ -712,6 +803,7 @@ button:disabled,
   align-items: center;
   justify-content: center;
   gap: 8px;
+  text-decoration: none;
 }
 
 .btn-pf-action:hover { 
@@ -719,6 +811,94 @@ button:disabled,
   transform: translateY(-1px); 
 }
 
+/* GRADIENTE PRINCIPAL DE PAGO */
+.btn-pay-gradient {
+  background: linear-gradient(135deg, #00ffcc 0%, #00a884 100%) !important;
+  color: #05010a !important;
+  border: none !important;
+  font-weight: 800 !important;
+  font-size: 1.05rem !important;
+  letter-spacing: 1px;
+}
+
+.btn-pay-gradient:hover {
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.8) !important;
+}
+
+/* SÓLIDOS DE COLOR */
+.btn-mint-solid {
+  background: var(--neon-mint) !important;
+  color: #05010a !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+.btn-fuchsia-solid {
+  background: var(--neon-fuchsia) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+.btn-blue-solid {
+  background: #0088ff !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+.btn-green-solid {
+  background: #00cc66 !important;
+  color: #05010a !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+/* GRADIENTES ESPECIALES DE ACCIÓN */
+.btn-green-gradient {
+  background: linear-gradient(135deg, #00ffcc 0%, #009955 100%) !important;
+  color: #05010a !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+.btn-activate-gradient {
+  background: linear-gradient(135deg, #00ffcc 0%, #d230ff 100%) !important;
+  color: #05010a !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+.btn-emerald-gradient {
+  background: linear-gradient(135deg, #00b894 0%, #00cec9 100%) !important;
+  color: #05010a !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+.btn-waitlist-submit {
+  background: linear-gradient(135deg, var(--neon-fuchsia) 0%, var(--neon-purple) 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+/* BOTÓN DE BIOMETRÍA */
+.btn-biometric, 
+.btn-biometric-auth {
+  background: rgba(0, 255, 204, 0.1) !important;
+  border: 1.5px solid var(--neon-mint) !important;
+  color: var(--neon-mint) !important;
+}
+
+.btn-biometric:hover,
+.btn-biometric-auth:hover {
+  background: var(--neon-mint) !important;
+  color: var(--bg-dark) !important;
+  box-shadow: 0 0 16px var(--neon-mint) !important;
+}
+
+/* BOTÓN PELIGRO / CANCELAR */
 .btn-danger { 
   border-color: var(--neon-fuchsia) !important; 
   color: var(--neon-fuchsia) !important; 
@@ -729,141 +909,33 @@ button:disabled,
   box-shadow: 0 0 18px rgba(255, 0, 122, 0.6) !important;
 }
 
-/* BOTONES ESPECÍFICOS DE PAGO HORA 48 ($9,000 / $5,000) */
-#card-pago-hora48 .input-group-flow {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
+/* BOTÓN META / FACEBOOK */
+.btn-fb { 
+  background: rgba(24, 119, 242, 0.18) !important; 
+  border: 1.5px solid #1877f2 !important; 
+  color: #ffffff !important; 
 }
 
-#btn-pay-hora48-9000 {
-  background: var(--neon-mint) !important;
-  color: var(--bg-dark) !important;
-  border-color: var(--neon-mint) !important;
-  box-shadow: 0 0 14px rgba(0, 255, 204, 0.4);
-  font-weight: 800;
+.btn-fb:hover {
+  background: #1877f2 !important;
+  box-shadow: 0 0 16px rgba(24, 119, 242, 0.7) !important;
 }
 
-#btn-pay-hora48-9000:hover {
-  box-shadow: 0 0 22px rgba(0, 255, 204, 0.8);
+.btn-full-width {
+  width: 100%;
 }
 
-#btn-pay-hora48-5000 {
-  background: var(--neon-fuchsia) !important;
-  color: #ffffff !important;
-  border-color: var(--neon-fuchsia) !important;
-  box-shadow: 0 0 14px rgba(255, 0, 122, 0.4);
-  font-weight: 800;
-}
+/* ========================================================= */
+/* 9. TEMPORIZADORES & RELOJES                               */
+/* ========================================================= */
 
-#btn-pay-hora48-5000:hover {
-  box-shadow: 0 0 22px rgba(255, 0, 122, 0.8);
-}
-
-/* TEMPORIZADORES Y RECTAS FINALES */
 .timer-section { text-align: center; }
 .timer-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
 .timer-digits { font-size: clamp(2.2rem, 7vw, 3rem); font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 16px var(--neon-mint); margin: 4px 0; font-family: 'Orbitron', sans-serif; }
 .timer-sub { font-size: 0.65rem; color: var(--text-sub); letter-spacing: 1px; }
 
 /* ========================================================= */
-/* 8. CONFIRMACIÓN DE PAGO (HTML CONFIRMACIÓN DE PAGO 💅🏽👺) */
-/* ========================================================= */
-
-.card-confirmacion-pago {
-  border-color: var(--neon-mint);
-  background: linear-gradient(135deg, rgba(0, 255, 204, 0.12) 0%, rgba(10, 3, 22, 0.85) 100%);
-  position: relative;
-  overflow: hidden;
-  animation: confirmGlow 3s infinite alternate;
-}
-
-@keyframes confirmGlow {
-  0% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.2), inset 0 0 10px rgba(0, 255, 204, 0.1); }
-  100% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.5), inset 0 0 20px rgba(0, 255, 204, 0.25); }
-}
-
-.confirm-status-icon {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 12px auto;
-  border-radius: 50%;
-  background: rgba(0, 255, 204, 0.15);
-  border: 2px solid var(--neon-mint);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  color: var(--neon-mint);
-  box-shadow: 0 0 20px var(--neon-mint);
-}
-
-.confirm-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: #fff;
-  text-align: center;
-  letter-spacing: 1px;
-}
-
-.receipt-box {
-  background: rgba(5, 1, 10, 0.7);
-  border: 1px solid rgba(0, 255, 204, 0.3);
-  border-radius: 12px;
-  padding: 14px;
-  margin: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.receipt-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.88rem;
-}
-
-.receipt-row .label {
-  color: var(--text-sub);
-}
-
-.receipt-row .value {
-  color: #fff;
-  font-weight: 600;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.82rem;
-}
-
-.receipt-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.12);
-  margin: 2px 0;
-}
-
-.success-badge-tag {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(0, 255, 204, 0.2);
-  border: 1px solid var(--neon-mint);
-  color: var(--neon-mint);
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.confirm-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-/* ========================================================= */
-/* 9. BANNER DE COOKIES & FLOTANTES                          */
+/* 10. BANNER COOKIES                                        */
 /* ========================================================= */
 
 .cookie-banner-box {
@@ -882,6 +954,9 @@ button:disabled,
   background: rgba(10, 3, 22, 0.92);
   border-radius: 16px;
   animation: slideUpCookie 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 @keyframes slideUpCookie {
@@ -896,18 +971,8 @@ button:disabled,
 }
 
 /* ========================================================= */
-/* 10. ADAPTACIÓN RESPONSIVE DESKTOP Y TABLET                */
+/* 11. ADAPTACIÓN RESPONSIVE                                 */
 /* ========================================================= */
-
-@media (min-width: 600px) {
-  #card-pago-hora48 .input-group-flow {
-    flex-direction: row;
-  }
-  
-  .confirm-actions {
-    flex-direction: row;
-  }
-}
 
 @media (min-width: 900px) {
   .dashboard-container {
@@ -919,11 +984,9 @@ button:disabled,
     padding: 30px;
   }
 
-  .dash-header {
-    grid-column: 1 / -1;
-  }
-
-  .metrics-section {
+  .dash-header,
+  .metrics-section,
+  .timer-section {
     grid-column: 1 / -1;
   }
 
@@ -933,20 +996,6 @@ button:disabled,
 
   .metrics-slider .metric-square {
     flex: 1 1 0px;
-  }
-
-  .timer-section {
-    grid-column: 1 / -1;
-  }
-
-  .card-confirmacion-pago {
-    grid-column: 1 / -1;
-    max-width: 650px;
-    margin: 0 auto;
-  }
-
-  .splash-gauges {
-    max-width: 340px;
   }
 }
 
@@ -959,11 +1008,7 @@ button:disabled,
     padding: 14px;
   }
   
-  .gauge-card {
-    width: 75px;
-    height: 75px;
-  }
-  
+  .gauge-card,
   .gauge-ring {
     width: 75px;
     height: 75px;
