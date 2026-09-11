@@ -808,34 +808,51 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   } catch (err) {}
 }
 
-function activatePostPayView(clientId = null) {
-  const badgeClient = document.getElementById('client-id-badge');
-  const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
-  const btnPayMain = document.getElementById('btn-pay-main');
-  const formPagoDatos = document.getElementById('form-pago-datos');
-  const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
+// ==========================================
+// FIX DE VISTAS: CLIENTE & ADMIN DASHBOARD
+// ==========================================
 
+function activatePostPayView(clientId = null) {
+  const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
+  
+  // 1. Ocultar secciones públicas / landing
+  const landingSections = ['section-hero', 'section-pricing', 'form-pago-datos', 'btn-pay-main'];
+  landingSections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+
+  // 2. Activar Badge de Cliente y Flujo Post-Pago
+  const badgeClient = document.getElementById('client-id-badge');
   if (badgeClient) {
     badgeClient.textContent = `Cliente #${activeId}`;
     badgeClient.classList.remove('hidden');
   }
-  if (btnPayMain) btnPayMain.classList.add('hidden');
-  if (formPagoDatos) formPagoDatos.classList.add('hidden');
+
+  const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
   if (postPayFlow) postPayFlow.classList.remove('hidden');
+
+  // 3. Mostrar el Dashboard Principal de Cliente
+  const appDashboard = document.getElementById('app-dashboard');
+  if (appDashboard) {
+    appDashboard.classList.remove('hidden');
+    appDashboard.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
-async function syncPaymentStatusWithBackend() {
-  try {
-    const res = await fetch(`${API_URL}/api/pasarela/status?sessionId=${state.sessionId}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.isPaid || state.isPaid) {
-        state.isPaid = true;
-        activatePostPayView(localStorage.getItem('sodie_client_id'));
-      }
-    }
-  } catch (e) {}
+function sodieAdminVerVistaCliente() {
+  const adminDashboard = document.getElementById('admin-dashboard');
+  const appDashboard = document.getElementById('app-dashboard');
+
+  if (adminDashboard) adminDashboard.classList.add('hidden');
+  if (appDashboard) appDashboard.classList.remove('hidden');
+
+  // Fuerza la renderización completa de la interfaz cliente
+  activatePostPayView();
+  console.log('👁️ Modo Admin: Cambiado a vista de cliente activada.');
 }
+
+window.sodieAdminVerVistaCliente = sodieAdminVerVistaCliente;
 
 function updatePriceDisplay(postPriceText) {
   const pricePost = document.getElementById('price-post');
@@ -890,19 +907,3 @@ function cleanUrlParams() {
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
-
-// ==========================================
-// MÓDULO ADMIN: CAMBIAR A VISTA CLIENTE
-// ==========================================
-function sodieAdminVerVistaCliente() {
-  const appDashboard = document.getElementById('app-dashboard');
-  const adminDashboard = document.getElementById('admin-dashboard');
-
-  if (adminDashboard) adminDashboard.classList.add('hidden');
-  if (appDashboard) appDashboard.classList.remove('hidden');
-
-  activatePostPayView();
-  console.log('👁️ Modo Admin: Cambiado a vista de cliente.');
-}
-
-window.sodieAdminVerVistaCliente = sodieAdminVerVistaCliente;
