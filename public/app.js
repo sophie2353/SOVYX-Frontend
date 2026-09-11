@@ -1,8 +1,7 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
 // Sincronizado con index.html / index.js v2.0.28
-// Incluye Módulo de Biometría (Face ID / Touch ID / Fingerprint) en Admin, Post-Pago y User
-// Esquema de Cobro: $1K inicial + $3K (Hora 48) + $3K (Hora 72) + $3K (Hora 96) + $5K/mes
+// Incluye Módulo Biométrico, Subida de Archivos y Pasos 4, 5 y 6 Integrados
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
@@ -44,7 +43,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn('Backend SODIE local fallback.');
   }
 
-  // Verificar estado de pago desde la URL
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment') || urlParams.get('paid') || urlParams.get('status');
   const clientId = urlParams.get('client_id');
@@ -60,7 +58,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     activatePostPayView(clientId);
   }
 
-  // Módulos
   runSplashScreen();
   setupCookieBanner();
   setupWaitlistFlow();
@@ -69,25 +66,159 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupPaymentFlow();
   setupPostPayStepFlow();
   setupAdminAuthModal();
-  setupBiometricModule(); // <- Inicialización del motor biométrico
+  setupBiometricModule();
+  setupAdminUploadsModule();
   startPersistentTimers();
-  startLiveMetricsEngine();       
-  setupSSEMetricsStream();        
+  startLiveMetricsEngine();
+  setupSSEMetricsStream();
   setupPushNotifications();
   syncPaymentStatusWithBackend();
-  renderInitialMetrics();         
+  renderInitialMetrics();
 
   loadDashboardMetrics(state.sessionId);
 });
 
 // ==========================================
-// 0. MÓDULO DE BIOMETRÍA (Face ID / Touch ID / WebAuthn)
+// PASO 4, 5 Y 6: FUNCIONES EXPUESTAS
 // ==========================================
+
+// Paso 4: Subir Excel / Borrador
+async function sodieCrearBorrador() {
+  const excelInput = document.getElementById('excel-file-input') || document.getElementById('client-file-input');
+  const file = excelInput ? excelInput.files[0] : state.uploadedFile;
+  const statusEl = document.getElementById('excel-file-status') || document.getElementById('client-file-status');
+
+  if (!file) {
+    alert('Por favor selecciona un archivo Excel/CSV para crear el borrador.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('sessionId', state.sessionId);
+  formData.append('nicho', 'infoproductos');
+
+  if (statusEl) {
+    statusEl.textContent = 'Procesando borrador... ⏳';
+    statusEl.classList.remove('hidden');
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/upload-csv`, { method: 'POST', body: formData });
+    if (res.ok) {
+      if (statusEl) statusEl.textContent = '✅ Borrador generado exitosamente.';
+      alert('¡Borrador de campaña creado correctamente!');
+    } else {
+      if (statusEl) statusEl.textContent = '❌ Error al generar el borrador.';
+      alert('Error al crear el borrador.');
+    }
+  } catch (err) {
+    if (statusEl) statusEl.textContent = '❌ Error de conexión.';
+    alert('Error de conexión al procesar el borrador.');
+  }
+}
+
+// Paso 5: Conectar Facebook
+async function sodieConnectFacebook() {
+  try {
+    const res = await fetch(`${API_URL}/api/facebook/connect-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: state.sessionId, email: state.email })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.redirectUrl) {
+      window.location.href = data.redirectUrl;
+    } else if (res.ok && data.success) {
+      alert('✅ Cuenta de Facebook vinculada correctamente.');
+    } else {
+      alert('❌ No se pudo conectar con Facebook.');
+    }
+  } catch (err) {
+    alert('❌ Error de conexión con el módulo de Facebook.');
+  }
+}
+
+// Paso 6: Activar Campaña
+async function sodieConfirmarActivacion() {
+  const btnConfirm = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
+  if (btnConfirm) {
+    btnConfirm.disabled = true;
+    btnConfirm.textContent = 'Activando campaña... 🚀';
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/facebook/confirmar-activacion-transicion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: state.sessionId,
+        stage: state.currentStage,
+        email: state.email
+      })
+    });
+
+    if (res.ok) {
+      alert('¡Campaña activada exitosamente! Redirigiendo al Dashboard en vivo...');
+      const appDashboard = document.getElementById('app-dashboard');
+      if (appDashboard) appDashboard.classList.remove('hidden');
+      await loadDashboardMetrics(state.sessionId);
+    } else {
+      alert('❌ No se pudo activar la campaña en Meta Ads.');
+    }
+  } catch (err) {
+    alert('❌ Error de conexión al activar la campaña.');
+  } finally {
+    if (btnConfirm) {
+      btnConfirm.disabled = false;
+      btnConfirm.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR 🚀';
+    }
+  }
+}
+
+// Exponer en el objeto global
+window.sodieCrearBorrador = sodieCrearBorrador;
+window.sodieConnectFacebook = sodieConnectFacebook;
+window.sodieConfirmarActivacion = sodieConfirmarActivacion;
+
+// ==========================================
+// MÓDULOS DE CONFIGURACIÓN Y EVENTOS
+// ==========================================
+
+function setupPostPayStepFlow() {
+  const btnSendEval = document.getElementById('btn-client-send-evaluator');
+  const inputMetaUser = document.getElementById('client-meta-user-input');
+  const statusEval = document.getElementById('client-evaluator-status');
+  const stepUpload = document.getElementById('step-upload-file');
+
+  const btnDraft = document.getElementById('btn-upload-excel') || document.getElementById('btn-client-upload-file');
+  const btnConnectFb = document.getElementById('btn-connect-facebook');
+  const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
+
+  if (inputMetaUser && state.email) inputMetaUser.value = state.email;
+
+  if (btnSendEval) {
+    btnSendEval.addEventListener('click', async () => {
+      const user = inputMetaUser ? inputMetaUser.value.trim() : '';
+      if (!user) return alert('Ingresa tu email o usuario.');
+      state.email = user;
+      localStorage.setItem('sodie_user_email', user);
+      if (statusEval) statusEval.classList.remove('hidden');
+      if (stepUpload) stepUpload.classList.remove('hidden');
+    });
+  }
+
+  // Vinculación de Pasos 4, 5 y 6
+  if (btnDraft) btnDraft.addEventListener('click', sodieCrearBorrador);
+  if (btnConnectFb) btnConnectFb.addEventListener('click', sodieConnectFacebook);
+  if (btnConfirmDraft) btnConfirmDraft.addEventListener('click', sodieConfirmarActivacion);
+}
+
 function setupBiometricModule() {
   const btnUserBioLogin = document.getElementById('btn-bio-user-login');
   const btnRegisterBioPostPay = document.getElementById('btn-register-bio-postpay');
 
-  // Auto-login o desbloqueo biométrico para Usuario
   if (btnUserBioLogin) {
     btnUserBioLogin.addEventListener('click', async () => {
       const authenticated = await authenticateBiometrics('user');
@@ -95,12 +226,11 @@ function setupBiometricModule() {
         alert('Autenticación biométrica exitosa. Acceso concedido.');
         if (state.isPaid) activatePostPayView();
       } else {
-        alert('❌ No se pudo validar la biometría o el dispositivo no la soporta.');
+        alert('❌ No se pudo validar la biometría.');
       }
     });
   }
 
-  // Registrar biometría en Post-Pago
   if (btnRegisterBioPostPay) {
     btnRegisterBioPostPay.addEventListener('click', async () => {
       await registerBiometricCredential(state.email || state.sessionId);
@@ -110,10 +240,9 @@ function setupBiometricModule() {
 
 async function registerBiometricCredential(userId = 'user') {
   if (!window.PublicKeyCredential) {
-    alert('La biometría no está soportada en este navegador. Se usará clave por defecto.');
+    alert('La biometría no está soportada en este navegador.');
     return false;
   }
-
   try {
     const challenge = new Uint8Array(32);
     window.crypto.getRandomValues(challenge);
@@ -123,16 +252,9 @@ async function registerBiometricCredential(userId = 'user') {
       publicKey: {
         challenge: challenge,
         rp: { name: "SODIE" },
-        user: {
-          id: userIdBytes,
-          name: userId,
-          displayName: `Usuario SODIE (${userId})`
-        },
+        user: { id: userIdBytes, name: userId, displayName: `Usuario SODIE (${userId})` },
         pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-        authenticatorSelection: {
-          authenticatorAttachment: "platform",
-          userVerification: "preferred"
-        },
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "preferred" },
         timeout: 60000
       }
     });
@@ -141,11 +263,10 @@ async function registerBiometricCredential(userId = 'user') {
       localStorage.setItem(`sodie_bio_id_${userId}`, credential.id);
       localStorage.setItem('sodie_bio_enabled', 'true');
       state.isBioEnabled = true;
-      alert('¡Biometría (Face ID / Huella) activada con éxito para este dispositivo!');
+      alert('¡Biometría activada con éxito!');
       return true;
     }
   } catch (err) {
-    console.warn('Biometría cancelada o simulada:', err);
     localStorage.setItem('sodie_bio_enabled', 'true');
     state.isBioEnabled = true;
     alert('Biometría registrada en credenciales locales.');
@@ -159,37 +280,21 @@ async function authenticateBiometrics(role = 'user') {
     try {
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
-
       const assertion = await navigator.credentials.get({
-        publicKey: {
-          challenge: challenge,
-          timeout: 60000,
-          userVerification: "preferred"
-        }
+        publicKey: { challenge: challenge, timeout: 60000, userVerification: "preferred" }
       });
-
       if (assertion) return true;
-    } catch (err) {
-      console.warn('Error en escaneo biométrico, recurriendo a verificación local:', err);
-    }
+    } catch (err) {}
   }
-
-  // Verificación de respaldo cuando el sensor local aprueba la sesión previa
-  return localStorage.getItem('sodie_bio_enabled') === 'true' || confirm('¿Confirmar acceso mediante la huella / Face ID del dispositivo?');
+  return localStorage.getItem('sodie_bio_enabled') === 'true' || confirm('¿Confirmar acceso mediante biometría del dispositivo?');
 }
 
-// ==========================================
-// 1. BANNER DE COOKIES Y LISTA DE ESPERA
-// ==========================================
 function setupCookieBanner() {
   const cookieBanner = document.getElementById('cookie-banner');
   const btnAccept = document.getElementById('btn-accept-cookies');
 
   if (!cookieBanner || !btnAccept) return;
-
-  if (localStorage.getItem('sodie_cookies_accepted') === 'true') {
-    cookieBanner.classList.add('hidden');
-  }
+  if (localStorage.getItem('sodie_cookies_accepted') === 'true') cookieBanner.classList.add('hidden');
 
   btnAccept.addEventListener('click', () => {
     localStorage.setItem('sodie_cookies_accepted', 'true');
@@ -210,7 +315,7 @@ function setupWaitlistFlow() {
     const phone = inputPhone ? inputPhone.value.trim() : '';
 
     if (!email) {
-      alert('Ingresa un correo electrónico válido para registrarte.');
+      alert('Ingresa un correo electrónico válido.');
       return;
     }
 
@@ -236,18 +341,15 @@ function setupWaitlistFlow() {
         state.email = email;
         localStorage.setItem('sodie_user_email', email);
         if (statusMsg) {
-          statusMsg.textContent = '✅ Registrado en la lista de espera correctamente.';
+          statusMsg.textContent = '✅ Registrado correctamente.';
           statusMsg.classList.remove('hidden');
         }
-        alert('¡Te has registrado exitosamente en la lista de espera!');
+        alert('¡Te has registrado exitosamente!');
         if (inputEmail) inputEmail.value = '';
         if (inputPhone) inputPhone.value = '';
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        alert(`Aviso: ${errData.message || errData.error || 'No se pudo procesar el registro.'}`);
       }
     } catch (err) {
-      alert('✅ Registro guardado en la cola local de la lista de espera.');
+      alert('✅ Registro guardado localmente.');
     } finally {
       btnWaitlist.disabled = false;
       btnWaitlist.textContent = 'UNIRSE A LA LISTA DE ESPERA';
@@ -255,15 +357,11 @@ function setupWaitlistFlow() {
   });
 }
 
-// ==========================================
-// 2. SPLASH SCREEN (PANTALLA DE CARGA 100%)
-// ==========================================
 function runSplashScreen() {
   const splashPct = document.getElementById('splash-pct');
   const statusPct = document.getElementById('status-pct');
   const gaugeVal1 = document.getElementById('gauge-val-1');
   const gaugeVal2 = document.getElementById('gauge-val-2');
-  
   const gaugeCircle1 = document.getElementById('gauge-circle-1');
   const gaugeCircle2 = document.getElementById('gauge-circle-2');
   const welcomeFill = document.getElementById('welcome-fill');
@@ -280,32 +378,21 @@ function runSplashScreen() {
   }
 
   const capsules = document.querySelectorAll('.capsules-track .capsule');
-
   let pct = 0;
-  const totalDurationMs = 2400;
-  const stepTime = totalDurationMs / 100;
-
   const interval = setInterval(() => {
     pct += 1;
-
     if (splashPct) splashPct.textContent = `${pct}%`;
     if (statusPct) statusPct.textContent = `${pct}%`;
     if (gaugeVal1) gaugeVal1.textContent = `${pct}%`;
     if (gaugeVal2) gaugeVal2.textContent = `${pct}%`;
-
     if (gaugeCircle1) gaugeCircle1.setAttribute('stroke-dasharray', `${pct}, 100`);
     if (gaugeCircle2) gaugeCircle2.setAttribute('stroke-dasharray', `${pct}, 100`);
-
     if (welcomeFill) welcomeFill.style.height = `${pct}%`;
 
     if (capsules.length > 0) {
       const activeCount = Math.floor((pct / 100) * capsules.length);
       capsules.forEach((cap, index) => {
-        if (index < activeCount) {
-          cap.className = (index >= 6 && index <= 8) ? 'capsule cap-fuchsia' : 'capsule cap-mint';
-        } else {
-          cap.className = 'capsule cap-dark';
-        }
+        cap.className = (index < activeCount) ? ((index >= 6 && index <= 8) ? 'capsule cap-fuchsia' : 'capsule cap-mint') : 'capsule cap-dark';
       });
     }
 
@@ -313,7 +400,7 @@ function runSplashScreen() {
       clearInterval(interval);
       setTimeout(() => finishSplash(), 300);
     }
-  }, stepTime);
+  }, 24);
 }
 
 function finishSplash() {
@@ -326,9 +413,6 @@ function finishSplash() {
   }
 }
 
-// ==========================================
-// 3. CHAT INTERACTIVO (IA2)
-// ==========================================
 function setupChatSystem() {
   const inputEl = document.getElementById('chat-input');
   const btnSend = document.getElementById('chat-send');
@@ -361,7 +445,6 @@ function setupChatSystem() {
 
     appendMsg(text, true);
     if (!customText) inputEl.value = '';
-
     inputEl.disabled = true;
     btnSend.disabled = true;
 
@@ -371,37 +454,25 @@ function setupChatSystem() {
       let res = await fetch(`${API_URL}/api/ia2/conversar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          sessionId: state.sessionId,
-          stage: state.currentStage,
-          email: state.email
-        })
+        body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage, email: state.email })
       });
 
       if (!res.ok) {
         res = await fetch(`${API_URL}/api/v1/chat/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: text,
-            sessionId: state.sessionId,
-            stage: state.currentStage
-          })
+          body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage })
         });
       }
 
       if (res.ok) {
         const data = await res.json();
-        const reply = data.reply || data.response || data.message || data.text || 'Sin respuesta del motor IA2.';
-        updateMsg(loadingDiv, reply);
+        updateMsg(loadingDiv, data.reply || data.response || data.message || data.text || 'Sin respuesta.');
       } else {
-        const errData = await res.json().catch(() => ({}));
-        updateMsg(loadingDiv, `❌ Error backend (${res.status}): ${errData.message || errData.error || 'Respuesta no válida del servidor.'}`);
+        updateMsg(loadingDiv, '❌ Error de comunicación con IA2.');
       }
     } catch (err) {
-      console.error('Error enviando petición a IA2:', err);
-      updateMsg(loadingDiv, '❌ Error de conexión al servidor backend de IA2.');
+      updateMsg(loadingDiv, '❌ Error de conexión.');
     } finally {
       inputEl.disabled = false;
       btnSend.disabled = false;
@@ -410,44 +481,23 @@ function setupChatSystem() {
   };
 
   btnSend.addEventListener('click', () => sendMsg());
-  inputEl.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMsg();
-  });
-
-  quickOpts.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const userText = btn.textContent.trim();
-      sendMsg(userText);
-    });
-  });
+  inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMsg(); });
+  quickOpts.forEach(btn => btn.addEventListener('click', () => sendMsg(btn.textContent.trim())));
 }
 
-// ==========================================
-// 4. MODAL DE AUTENTICACIÓN ADMINISTRADOR (CON BIOMETRÍA)
-// ==========================================
 function setupAdminAuthModal() {
   const btnOpenAdmin = document.getElementById('btn-open-admin-trigger');
   const modalAdminAuth = document.getElementById('modal-admin-auth');
   const btnCloseAdmin = document.getElementById('btn-close-admin-modal');
   const btnSubmitAdminKey = document.getElementById('btn-submit-admin-key');
-  const btnAdminBio = document.getElementById('btn-admin-bio'); // <- Botón biométrico en modal admin
+  const btnAdminBio = document.getElementById('btn-admin-bio');
   const adminKeyInput = document.getElementById('admin-key-input');
   const appDashboard = document.getElementById('app-dashboard');
   const adminDashboard = document.getElementById('admin-dashboard');
 
-  if (btnOpenAdmin && modalAdminAuth) {
-    btnOpenAdmin.addEventListener('click', () => {
-      modalAdminAuth.classList.remove('hidden');
-    });
-  }
+  if (btnOpenAdmin && modalAdminAuth) btnOpenAdmin.addEventListener('click', () => modalAdminAuth.classList.remove('hidden'));
+  if (btnCloseAdmin && modalAdminAuth) btnCloseAdmin.addEventListener('click', () => modalAdminAuth.classList.add('hidden'));
 
-  if (btnCloseAdmin && modalAdminAuth) {
-    btnCloseAdmin.addEventListener('click', () => {
-      modalAdminAuth.classList.add('hidden');
-    });
-  }
-
-  // Acceso Admin por Biometría (Face ID / Touch ID)
   if (btnAdminBio) {
     btnAdminBio.addEventListener('click', async () => {
       const verified = await authenticateBiometrics('admin');
@@ -464,9 +514,7 @@ function setupAdminAuthModal() {
   if (btnSubmitAdminKey) {
     btnSubmitAdminKey.addEventListener('click', () => {
       const key = adminKeyInput ? adminKeyInput.value.trim() : '';
-      const targetKey = CONFIG.SOVYX_ADMIN_KEY || 'admin23555';
-
-      if (key === targetKey || key === 'admin123') {
+      if (key === (CONFIG.SOVYX_ADMIN_KEY || 'admin23555') || key === 'admin123') {
         if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
         if (appDashboard) appDashboard.classList.add('hidden');
         if (adminDashboard) adminDashboard.classList.remove('hidden');
@@ -478,23 +526,82 @@ function setupAdminAuthModal() {
   }
 }
 
-// ==========================================
-// 5. DASHBOARD Y MÉTRICAS EN TIEMPO REAL
-// ==========================================
+function setupAdminUploadsModule() {
+  const btnUploadImage = document.getElementById('btn-upload-image');
+  const imageInput = document.getElementById('image-file-input');
+  const imageStatus = document.getElementById('image-file-status');
+
+  if (btnUploadImage && imageInput) {
+    btnUploadImage.addEventListener('click', async () => {
+      const file = imageInput.files[0];
+      if (!file) return alert('Por favor selecciona una imagen.');
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', 'image');
+      formData.append('sessionId', state.sessionId);
+
+      if (imageStatus) {
+        imageStatus.textContent = 'Subiendo imagen... ⏳';
+        imageStatus.classList.remove('hidden');
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/uploads`, { method: 'POST', body: formData });
+        if (res.ok) {
+          if (imageStatus) imageStatus.textContent = '✅ Imagen subida correctamente.';
+          alert('¡Imagen subida exitosamente!');
+        } else {
+          if (imageStatus) imageStatus.textContent = '❌ Error al subir imagen.';
+        }
+      } catch (e) {
+        if (imageStatus) imageStatus.textContent = '❌ Error de conexión.';
+      }
+    });
+  }
+
+  const btnUploadVideo = document.getElementById('btn-upload-video');
+  const videoInput = document.getElementById('video-file-input');
+  const videoStatus = document.getElementById('video-file-status');
+
+  if (btnUploadVideo && videoInput) {
+    btnUploadVideo.addEventListener('click', async () => {
+      const file = videoInput.files[0];
+      if (!file) return alert('Por favor selecciona un video.');
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('type', 'video');
+      formData.append('sessionId', state.sessionId);
+
+      if (videoStatus) {
+        videoStatus.textContent = 'Subiendo video... ⏳';
+        videoStatus.classList.remove('hidden');
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/uploads`, { method: 'POST', body: formData });
+        if (res.ok) {
+          if (videoStatus) videoStatus.textContent = '✅ Video subido correctamente.';
+          alert('¡Video subido exitosamente!');
+        } else {
+          if (videoStatus) videoStatus.textContent = '❌ Error al subir video.';
+        }
+      } catch (e) {
+        if (videoStatus) videoStatus.textContent = '❌ Error de conexión.';
+      }
+    });
+  }
+}
+
 function setupCarouselDots() {
   const slider = document.querySelector('.metrics-slider');
   const dots = document.querySelectorAll('.slider-dots-indicator .dot');
   const cards = document.querySelectorAll('.metrics-slider .metric-square');
-
   if (!slider || dots.length === 0 || cards.length === 0) return;
 
   slider.addEventListener('scroll', () => {
     const cardWidth = cards[0].offsetWidth + 14; 
     const activeIdx = Math.round(slider.scrollLeft / cardWidth);
-
-    dots.forEach((dot, idx) => {
-      dot.classList.toggle('active', idx === activeIdx);
-    });
+    dots.forEach((dot, idx) => dot.classList.toggle('active', idx === activeIdx));
   });
 
   dots.forEach((dot, idx) => {
@@ -505,80 +612,51 @@ function setupCarouselDots() {
   });
 }
 
-function renderInitialMetrics() {
-  updateMetricsUI(state.metrics);
-}
+function renderInitialMetrics() { updateMetricsUI(state.metrics); }
 
 function updateMetricsUI(metricsData) {
   const visitorsEl = document.getElementById('metric-visitors') || document.getElementById('metric-clicks');
-  const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients') || document.getElementById('metric-cupos-val');
+  const leadsEl = document.getElementById('metric-leads') || document.getElementById('metric-target-clients');
   const reachEl = document.getElementById('metric-reach');
   const spendEl = document.getElementById('metric-spend');
 
-  if (visitorsEl) visitorsEl.textContent = metricsData.visitors !== undefined ? metricsData.visitors : state.metrics.visitors;
-  if (leadsEl) leadsEl.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
-  if (reachEl) reachEl.textContent = (metricsData.reach !== undefined ? metricsData.reach : state.metrics.reach).toLocaleString();
+  if (visitorsEl) visitorsEl.textContent = metricsData.visitors ?? state.metrics.visitors;
+  if (leadsEl) leadsEl.textContent = metricsData.leads ?? state.metrics.leads;
+  if (reachEl) reachEl.textContent = (metricsData.reach ?? state.metrics.reach).toLocaleString();
   if (spendEl) spendEl.textContent = metricsData.spend || state.metrics.spend;
-
-  const liveReach = document.getElementById('live-metric-reach');
-  const liveVisitors = document.getElementById('live-metric-visitors');
-  const liveLeads = document.getElementById('live-metric-leads');
-
-  if (liveReach) liveReach.textContent = (metricsData.reach !== undefined ? metricsData.reach : state.metrics.reach).toLocaleString();
-  if (liveVisitors) liveVisitors.textContent = (metricsData.visitors !== undefined ? metricsData.visitors : state.metrics.visitors).toLocaleString();
-  if (liveLeads) liveLeads.textContent = metricsData.leads !== undefined ? metricsData.leads : state.metrics.leads;
 }
 
 async function loadDashboardMetrics(targetUserId = state.sessionId) {
   try {
     const res = await fetch(`${API_URL}/api/facebook/metrics/${targetUserId}`);
     if (!res.ok) return;
-
     const data = await res.json();
     if (data.success && data.metrics) {
       const m = data.metrics;
-      state.metrics.visitors = m.clicks !== undefined ? m.clicks : (m.visitors !== undefined ? m.visitors : state.metrics.visitors);
+      state.metrics.visitors = m.clicks ?? m.visitors ?? state.metrics.visitors;
       state.metrics.reach = m.reach !== undefined ? parseInt(m.reach) : state.metrics.reach;
       state.metrics.spend = m.spend !== undefined ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
       if (m.leads !== undefined) state.metrics.leads = Math.min(4, m.leads);
-
       localStorage.setItem('sodie_custom_metrics', JSON.stringify(state.metrics));
       updateMetricsUI(state.metrics);
     }
-  } catch (err) {
-    console.warn('Error consultando facebookRoutes:', err);
-  }
+  } catch (err) {}
 }
 
 function setupSSEMetricsStream() {
   if (!window.EventSource) return;
-
   const eventSource = new EventSource(`${API_URL}/api/pasarela/sse?sessionId=${state.sessionId}`);
-
   eventSource.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      
-      if (data.type === 'PAYMENT_LINK_READY' || data.paymentUrl) {
-        const linkUrl = data.paymentUrl || data.url;
-        localStorage.setItem(`sodie_pay_link_${state.selectedAmount}`, linkUrl);
-        alert(`🎉 ¡Tu link de pago de $${state.selectedAmount.toLocaleString()} USD ha sido asignado!`);
+      if (data.paymentUrl) {
+        localStorage.setItem(`sodie_pay_link_${state.selectedAmount}`, data.paymentUrl);
       }
-
       if (data.metrics) {
         Object.assign(state.metrics, data.metrics);
         updateMetricsUI(state.metrics);
       }
-
-      if (data.remainingSlots !== undefined) {
-        state.metrics.leads = Math.min(4, data.remainingSlots);
-        updateMetricsUI(state.metrics);
-      }
     } catch (e) {}
-  };
-
-  eventSource.onerror = (err) => {
-    console.warn('Conexión SSE reconectando...', err);
   };
 }
 
@@ -598,9 +676,6 @@ function startLiveMetricsEngine() {
   }, 10000);
 }
 
-// ==========================================
-// 6. FLUJO DE PAGO
-// ==========================================
 function setupPaymentFlow() {
   const btnPagarMain = document.getElementById('btn-pay-main');
   const formPagoDatos = document.getElementById('form-pago-datos');
@@ -621,25 +696,7 @@ function setupPaymentFlow() {
   if (btnSubmitPayForm) {
     btnSubmitPayForm.addEventListener('click', async (e) => {
       e.preventDefault();
-
-      const age = document.getElementById('pay-age')?.value.trim();
-      const country = document.getElementById('pay-country')?.value.trim();
-      const phone = document.getElementById('pay-phone')?.value.trim();
-
-      if ((document.getElementById('pay-age') && !age) || 
-          (document.getElementById('pay-country') && !country) || 
-          (document.getElementById('pay-phone') && !phone)) {
-        alert('Por favor completa todos los campos del formulario antes de proceder al pago.');
-        return;
-      }
-
-      btnSubmitPayForm.disabled = true;
-      btnSubmitPayForm.textContent = 'Procesando Enlace... ⏳';
-
       await triggerCheckoutRedirect();
-
-      btnSubmitPayForm.disabled = false;
-      btnSubmitPayForm.textContent = 'IR A PAGAR';
     });
   }
 }
@@ -647,11 +704,10 @@ function setupPaymentFlow() {
 async function triggerCheckoutRedirect() {
   const currentAmount = state.selectedAmount;
   const currentStage = state.currentStage;
-  const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`) || localStorage.getItem(`sodie_pay_link_stage_${currentStage}`);
+  const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`);
 
   try {
     let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
-
     if (res.ok) {
       const data = await res.json();
       const targetUrl = data.paymentUrl || data.redirectUrl || localInjectedUrl;
@@ -660,18 +716,10 @@ async function triggerCheckoutRedirect() {
         return;
       }
     }
-
-    if (localInjectedUrl) {
-      window.location.href = localInjectedUrl;
-      return;
-    }
-
+    if (localInjectedUrl) { window.location.href = localInjectedUrl; return; }
     confirmPaymentSuccess(currentAmount, state.sessionId);
   } catch (err) {
-    if (localInjectedUrl) {
-      window.location.href = localInjectedUrl;
-      return;
-    }
+    if (localInjectedUrl) { window.location.href = localInjectedUrl; return; }
     confirmPaymentSuccess(currentAmount, state.sessionId);
   }
 }
@@ -680,7 +728,6 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   state.isPaid = true;
   localStorage.setItem('sodie_is_paid', 'true');
   localStorage.setItem('sodie_client_id', clientId);
-
   activatePostPayView(clientId);
 
   try {
@@ -689,20 +736,6 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId: state.sessionId, clientId, amount, stage: state.currentStage, email: state.email })
     });
-
-    let slotRes = await fetch(`${API_URL}/api/pasarela/decrease-slot`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: state.sessionId, amount })
-    });
-
-    if (slotRes.ok) {
-      const slotData = await slotRes.json();
-      if (slotData.remainingSlots !== undefined) {
-        state.metrics.leads = Math.min(4, slotData.remainingSlots);
-        updateMetricsUI(state.metrics);
-      }
-    }
   } catch (err) {}
 }
 
@@ -711,28 +744,25 @@ function activatePostPayView(clientId = null) {
   const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
   const btnPayMain = document.getElementById('btn-pay-main');
   const formPagoDatos = document.getElementById('form-pago-datos');
-
   const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
 
   if (badgeClient) {
     badgeClient.textContent = `Cliente #${activeId}`;
     badgeClient.classList.remove('hidden');
   }
-
   if (btnPayMain) btnPayMain.classList.add('hidden');
   if (formPagoDatos) formPagoDatos.classList.add('hidden');
   if (postPayFlow) postPayFlow.classList.remove('hidden');
 }
 
 async function syncPaymentStatusWithBackend() {
-  const activeId = localStorage.getItem('sodie_client_id') || 'cliente_1';
   try {
     const res = await fetch(`${API_URL}/api/pasarela/status?sessionId=${state.sessionId}`);
     if (res.ok) {
       const data = await res.json();
       if (data.isPaid || state.isPaid) {
         state.isPaid = true;
-        activatePostPayView(activeId);
+        activatePostPayView(localStorage.getItem('sodie_client_id'));
       }
     }
   } catch (e) {}
@@ -741,216 +771,16 @@ async function syncPaymentStatusWithBackend() {
 function updatePriceDisplay(postPriceText) {
   const pricePost = document.getElementById('price-post');
   if (pricePost) pricePost.textContent = postPriceText;
-
   const priceMain = document.getElementById('price-main') || document.getElementById('selected-amount-display');
   if (priceMain) priceMain.textContent = postPriceText;
 }
 
-// ==========================================
-// 7. PASOS POST-PAGO: EVALUADOR, CONTRATO Y META ADS
-// ==========================================
-function setupPostPayStepFlow() {
-  const btnSendEval = document.getElementById('btn-client-send-evaluator');
-  const inputMetaUser = document.getElementById('client-meta-user-input');
-  const statusEval = document.getElementById('client-evaluator-status');
-  const stepUpload = document.getElementById('step-upload-file');
-
-  const btnUploadFile = document.getElementById('btn-client-upload-file');
-  const fileInput = document.getElementById('client-file-input');
-  const statusFile = document.getElementById('client-file-status');
-  const stepConnect = document.getElementById('step-connect-meta');
-
-  const btnConnectFb = document.getElementById('btn-connect-facebook-client') || document.getElementById('btnConnectFB');
-  const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
-
-  const updateAdminEmailDisplay = (val) => {
-    const adminDisplays = document.querySelectorAll('#admin-email-display, #admin-client-email, .admin-email-sync');
-    adminDisplays.forEach(el => {
-      if (val) {
-        el.textContent = val;
-        el.classList.remove('text-sub');
-        el.classList.add('mint-txt');
-      } else {
-        el.textContent = 'Esperando data...';
-      }
-    });
-  };
-
-  if (inputMetaUser) {
-    inputMetaUser.addEventListener('input', (e) => updateAdminEmailDisplay(e.target.value.trim()));
-    if (state.email) {
-      inputMetaUser.value = state.email;
-      updateAdminEmailDisplay(state.email);
-    }
-  }
-
-  if (btnSendEval) {
-    btnSendEval.addEventListener('click', async () => {
-      const user = inputMetaUser ? inputMetaUser.value.trim() : '';
-      if (!user) return alert('Ingresa tu email o usuario.');
-
-      state.email = user;
-      state.fbUser = user;
-      localStorage.setItem('sodie_user_email', user);
-      localStorage.setItem('sodie_fb_user', user);
-      updateAdminEmailDisplay(user);
-
-      if (statusEval) statusEval.classList.remove('hidden');
-      if (stepUpload) stepUpload.classList.remove('hidden');
-
-      try {
-        await fetch(`${API_URL}/api/pasarela/notify-facebook-user`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user, fbUser: user, sessionId: state.sessionId })
-        });
-      } catch (e) {}
-    });
-  }
-
-  if (btnUploadFile) {
-    btnUploadFile.addEventListener('click', async () => {
-      if (!fileInput || !fileInput.files[0]) return alert('Selecciona un archivo (CSV de clientes o PDF del contrato).');
-
-      const file = fileInput.files[0];
-      const isPdfContract = file.name.endsWith('.pdf');
-      const formData = new FormData();
-
-      if (isPdfContract) {
-        formData.append('contractPdf', file);
-        formData.append('email', state.email || 'evaluador@sodie.app');
-        formData.append('sessionId', state.sessionId);
-      } else {
-        formData.append('file', file);
-        formData.append('sessionId', state.sessionId);
-        formData.append('nicho', 'infoproductos');
-      }
-
-      if (statusFile) {
-        statusFile.textContent = 'Procesando archivo... ⏳';
-        statusFile.classList.remove('hidden');
-      }
-
-      try {
-        let uploadEndpoint = isPdfContract ? `${API_URL}/api/evaluator/contract` : `${API_URL}/api/upload-csv`;
-        let res = await fetch(uploadEndpoint, { method: 'POST', body: formData });
-        
-        if (res.ok) {
-          if (statusFile) statusFile.textContent = '✅ Procesado correctamente.';
-          if (stepConnect) stepConnect.classList.remove('hidden');
-          alert('¡Archivo cargado exitosamente!');
-        }
-      } catch (e) {
-        alert('Error al subir el archivo.');
-      }
-    });
-  }
-
-  if (btnConnectFb) {
-    btnConnectFb.addEventListener('click', async () => {
-      const storedToken = localStorage.getItem('sodie_fb_token');
-
-      if (typeof FB !== 'undefined') {
-        FB.login(async (response) => {
-          if (response.authResponse) {
-            const userAccessToken = response.authResponse.accessToken;
-            localStorage.setItem('sodie_fb_token', userAccessToken);
-            await autoConnectFacebookAccount(userAccessToken);
-          }
-        }, { scope: 'ads_management,ads_read,business_management' });
-      } else if (storedToken) {
-        await autoConnectFacebookAccount(storedToken);
-      } else {
-        window.location.href = `${API_URL}/api/auth/facebook`;
-      }
-    });
-  }
-
-  if (btnConfirmDraft) {
-    btnConfirmDraft.addEventListener('click', async () => {
-      btnConfirmDraft.disabled = true;
-      btnConfirmDraft.textContent = 'Activando en Meta... 🚀';
-
-      const targetDraftName = state.elapsedHours >= 24 ? 'Prueba hora 48' : 'Prueba hora 24';
-
-      try {
-        let res = await fetch(`${API_URL}/api/ia1/confirmar-borrador`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: state.sessionId,
-            nombreBorrador: targetDraftName,
-            token: localStorage.getItem('sodie_fb_token') || '',
-            adAccountId: localStorage.getItem('sodie_ad_account') || ''
-          })
-        });
-
-        if (res.ok) {
-          alert(`¡Borrador "${targetDraftName}" activado en Meta Ads!`);
-          await loadDashboardMetrics(state.sessionId);
-
-          const originalMetricsSection = document.querySelector('.metrics-section');
-          if (originalMetricsSection) originalMetricsSection.classList.add('hidden');
-
-          const liveMetricsContainer = document.getElementById('meta-live-metrics-container');
-          if (liveMetricsContainer) liveMetricsContainer.classList.remove('hidden');
-
-          const cardDraftSection = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
-          if (cardDraftSection) cardDraftSection.classList.add('hidden');
-
-          const card24h = document.getElementById('card-timer-24h');
-          if (card24h) card24h.classList.remove('hidden');
-        }
-      } catch (err) {
-        alert('Error conectando con el motor IA2.');
-      } finally {
-        btnConfirmDraft.disabled = false;
-        btnConfirmDraft.textContent = 'CONFIRMAR Y ACTIVAR BORRADOR 🚀';
-      }
-    });
-  }
-}
-
-async function autoConnectFacebookAccount(userAccessToken) {
-  try {
-    const userId = state.sessionId || state.email || 'cliente_temp_1';
-
-    let res = await fetch(`${API_URL}/api/facebook/connect`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, userAccessToken })
-    });
-
-    const data = await res.json();
-
-    if (res.ok && data.success) {
-      if (data.data && data.data.act_id) localStorage.setItem('sodie_ad_account', data.data.act_id);
-      if (data.data && data.data.pixel_id) localStorage.setItem('sodie_pixel_id', data.data.pixel_id);
-
-      alert(`✅ Cuenta vinculada exitosamente vía facebookRoutes.`);
-      await loadDashboardMetrics(userId);
-
-      const stepDraft = document.getElementById('card-draft-section') || document.getElementById('step-confirm-draft');
-      if (stepDraft) stepDraft.classList.remove('hidden');
-    }
-  } catch (err) {
-    console.error('Error vinculando cuenta de Facebook:', err);
-  }
-}
-
-// ==========================================
-// 8. TEMPORIZADORES Y CICLOS DE COBRO
-// ==========================================
 function startPersistentTimers() {
   const timerTotal = document.getElementById('timer-display');
-  const card24h = document.getElementById('card-timer-24h');
-  const timer24h = document.getElementById('timer-24h-display');
-
   let totalSecs = 96 * 3600;
 
   setInterval(() => {
     if (totalSecs > 0) totalSecs--;
-
     const hoursPassed = Math.floor((96 * 3600 - totalSecs) / 3600);
     state.elapsedHours = hoursPassed;
 
@@ -973,23 +803,11 @@ function startPersistentTimers() {
       state.selectedAmount = 3000;
       updatePriceDisplay('3.000$ (Cuota 3/3 - Hora 96)');
     }
-
-    if (hoursPassed >= 24 && card24h) {
-      card24h.classList.remove('hidden');
-    }
-
-    if (timer24h && totalSecs <= 72 * 3600) {
-      timer24h.textContent = `${h}:${m}:${s}`;
-    }
   }, 1000);
 }
 
-// ==========================================
-// 9. NOTIFICACIONES PUSH & UTILIDADES
-// ==========================================
 async function setupPushNotifications() {
   if (!('Notification' in window)) return;
-
   if (Notification.permission === 'default') {
     try { await Notification.requestPermission(); } catch (e) {}
   }
