@@ -163,14 +163,14 @@
         </div>
       </div>
 
-      <!-- PANEL DE ACCIONES DIRECTAS DEL ADMIN (SOLO VISIBLE TRAS LOGUEARSE) -->
+      <!-- PANEL DE ACCIONES DIRECTAS DEL ADMIN -->
       <div id="admin-control-panel" class="hidden admin-panel-box">
         <h4 class="mint-txt">Panel de Supervisión y Control ⚙️</h4>
         
-        <!-- VER VISTAS DIRECTAS CLIENTE 1 & 2 -->
+        <!-- VER VISTA CLIENTE DIRECTA -->
         <div class="admin-grid two-cols margin-v-sm">
           <button type="button" class="btn-admin-switch" onclick="sodieAdminVerVistaCliente()">
-       👁️ Ver Vista de Cliente
+            👁️ Ver Vista de Cliente
           </button>
         </div>
 
@@ -191,8 +191,19 @@
         </div>
       </div>
 
-      <button type="button" id="btn-close-admin-modal" class="btn-pf-action btn-danger">Cerrar Modal</button>
+      <button type="button" id="btn-close-admin-modal" class="btn-pf-action btn-danger" onclick="document.getElementById('modal-admin-auth').classList.add('hidden')">Cerrar Modal</button>
     </div>
+  </div>
+
+  <!-- PANEL DASHBOARD ADMIN COMPLETO (FUERA DE MODAL SI SE ACTIVA MODO PANORÁMICO) -->
+  <div id="admin-dashboard" class="glass-card-dash hidden margin-v-md" style="margin: 20px; padding: 20px;">
+    <div class="chat-header">
+      <h3 class="section-title fuchsia-txt">Panel Administrador SODIE</h3>
+      <button type="button" class="btn-pf-action btn-mint-solid" onclick="sodieAdminVerVistaCliente()">
+        👁️ Volver a Vista Cliente
+      </button>
+    </div>
+    <p class="step-desc">Modo administrador activo. Puedes revisar métricas o cambiar la visualización.</p>
   </div>
 
   <!-- MODAL SODIE V4 AUTH -->
@@ -457,18 +468,18 @@
             <span>Total</span>
             <strong id="price-total" class="mint-txt">10.000$</strong>
           </div>
-        </div>
-        
-        <!-- PASO 1: BOTÓN PAGAR INICIAL -->
-        <div id="step-1-pay-trigger">
-          <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient">
-            PAGAR ($1,000 USD)
-          </button>
+
+          <!-- BOTÓN PAGAR REUBICADO DIRECTAMENTE DEBAJO DEL TOTAL -->
+          <div id="step-1-pay-trigger" style="margin-top: 18px;">
+            <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient" style="width: 100%; display: block;">
+              PAGAR
+            </button>
+          </div>
         </div>
 
         <!-- PASO 2: FORMULARIO DE FACTURACIÓN -->
-        <div id="form-pago-datos" class="hidden form-billing-box">
-          <h4 class="fuchsia-txt">Paso 2: Datos de Facturación</h4>
+        <div id="form-pago-datos" class="hidden form-billing-box" style="margin-top: 15px;">
+          <h4 class="fuchsia-txt">Paso 2: Datos para Facturación</h4>
           <div class="form-stack-compact">
             <div class="form-row-2">
               <input type="number" id="pay-age" placeholder="Edad *" required />
@@ -516,7 +527,7 @@
           </div>
         </div>
 
-        <!-- PASO 5: CONECTAR CON FACEBOOK (LLAMADA A APP.JS) -->
+        <!-- PASO 5: CONECTAR CON FACEBOOK -->
         <div id="step-facebook-connect-flow" class="hidden fb-connect-box">
           <h4 class="fuchsia-txt">Paso 5: Conectar Cuenta de Facebook Ads</h4>
           <p class="step-desc">Vincular tu cuenta publicitaria con Meta para inyección directa:</p>
@@ -554,7 +565,7 @@
       </div>
     </section>
 
-    <!-- 9. CRONÓMETRO DE TIEMPO PRINCIPAL (ÚLTIMO MÓDULO AL FINAL) -->
+    <!-- 9. CRONÓMETRO DE TIEMPO PRINCIPAL -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
       <div id="timer-main-display" class="timer-digits mint-txt">48:00:00</div>
