@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE</title>
+  <title>SODIE - Software Optimization & Direct Injection Engine</title>
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- SheetJS para lectura/procesamiento de Excel en cliente -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -30,8 +34,8 @@
     <div class="toast-content">
       <span class="toast-icon"></span>
       <div class="toast-text">
-        <strong id="toast-title">Acceso Cliente #1 Concedido</strong>
-        <p id="toast-body">2 Cupos Disponibles</p>
+        <strong id="toast-title">Acceso Cliente Concedido</strong>
+        <p id="toast-body">Cupos Disponibles</p>
       </div>
     </div>
   </div>
@@ -103,7 +107,7 @@
       <div id="waitlist-card-box" class="glass-card-dash waitlist-box">
         <h3 class="section-title mint-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
         <p class="step-desc">
-          Registra tus datos para asegurar tu cupo en SODIE V4:
+          Registra tus datos para asegurar tu cupo prioritario en SODIE V4:
         </p>
         
         <form id="form-v4-waitlist" onsubmit="event.preventDefault();">
@@ -139,16 +143,58 @@
     </div>
   </div>
 
-  <!-- MODAL ADMIN AUTH -->
+  <!-- MODAL ADMIN AUTH + PANEL DE CONTROL ADMIN -->
   <div id="modal-admin-auth" class="modal-overlay hidden">
-    <div class="glass-card-dash modal-auth-box">
+    <div class="glass-card-dash modal-auth-box wide-admin-modal">
       <h3 class="section-title fuchsia-txt">Acceso Administrador 👺</h3>
-      <p class="step-desc">Ingresar clave para acceder al panel:</p>
-      <div class="input-group-flow">
-        <input type="password" id="admin-key-input" placeholder="Clave de acceso..." />
-        <button type="button" id="btn-submit-admin-key" class="btn-pf-action">Entrar</button>
+      
+      <!-- FORMULARIO ACCESO ADMIN -->
+      <div id="admin-login-step">
+        <p class="step-desc">Ingresar clave maestro o autenticar por Biometría:</p>
+        <div class="input-group-flow">
+          <input type="password" id="admin-key-input" placeholder="Clave de acceso..." />
+          <button type="button" id="btn-submit-admin-key" class="btn-pf-action">Entrar</button>
+        </div>
+
+        <div class="biometrics-admin-box margin-v-sm">
+          <button type="button" id="btn-admin-biometrics-login" class="btn-pf-action btn-biometric">
+            🔐 Autenticar Admin con Biometría (Face ID / Huella)
+          </button>
+        </div>
       </div>
-      <button type="button" id="btn-close-admin-modal" class="btn-pf-action btn-danger">Cancelar</button>
+
+      <!-- PANEL DE ACCIONES DIRECTAS DEL ADMIN (SOLO VISIBLE TRAS LOGUEARSE) -->
+      <div id="admin-control-panel" class="hidden admin-panel-box">
+        <h4 class="mint-txt">Panel de Supervisión y Control ⚙️</h4>
+        
+        <!-- VER VISTAS DIRECTAS CLIENTE 1 & 2 -->
+        <div class="admin-grid two-cols margin-v-sm">
+          <button type="button" id="btn-admin-view-client1" class="btn-pf-action btn-mint-solid">
+            👁️ Ver Vista Cliente 1
+          </button>
+          <button type="button" id="btn-admin-view-client2" class="btn-pf-action btn-mint-solid">
+            👁️ Ver Vista Cliente 2
+          </button>
+        </div>
+
+        <!-- ACTIVAR CAMPAÑA Y SUBIR EXCEL DESDE ADMIN -->
+        <div class="admin-actions-stack margin-v-sm">
+          <h5 class="fuchsia-txt">Acciones de Control de Campaña:</h5>
+          
+          <button type="button" id="btn-admin-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
+            🚀 Activar Campaña Directa (Forzar Lanzamiento)
+          </button>
+
+          <div class="input-group-flow margin-v-sm">
+            <input type="file" id="admin-excel-upload-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+            <button type="button" id="btn-admin-upload-excel" class="btn-pf-action btn-fuchsia-solid" onclick="sodieActivarAdminDirecto()">
+              📤 Subir Excel Compradores (Admin)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" id="btn-close-admin-modal" class="btn-pf-action btn-danger">Cerrar Modal</button>
     </div>
   </div>
 
@@ -178,7 +224,7 @@
     <header class="dash-header">
       <div class="dash-header-left">
         <span id="header-brand-title" class="brand-text">SODIE</span>
-        <span id="client-id-badge" class="badge-client hidden"></span>
+        <span id="client-id-badge" class="badge-client hidden">Cliente 1</span>
       </div>
       <div class="dash-header-right">
         <!-- BOTÓN ACCESO ADMIN RÁPIDO -->
@@ -198,7 +244,7 @@
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Inversión</span><span class="dots"></span></div>
           <div class="card-value" id="metric-spend">40$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
@@ -207,7 +253,7 @@
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Alcance</span><span class="dots"></span></div>
           <div class="card-value" id="metric-reach">2.000</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
@@ -396,10 +442,10 @@
       <span class="timer-sub">Cuenta regresiva activa para inyección programada V4</span>
     </section>
 
-    <!-- 8. SECCIÓN PAGO FINAL (PENÚLTIMO MÓDULO) -->
+    <!-- 8. SECCIÓN FLUJO CLIENTE COMPLETO (PAGO > FORMULARIO > CONTRATO > EXCEL > META > ACTIVACIÓN) -->
     <section id="pf-card" class="glass-card-dash pf-section">
       <div id="pf-standard-content">
-        <h3 id="pf-main-title" class="section-title mint-txt">Pago Final</h3>
+        <h3 id="pf-main-title" class="section-title mint-txt">Pago e Inscripción</h3>
         
         <div class="pf-summary-list">
           <div class="pf-row">
@@ -416,78 +462,88 @@
           </div>
         </div>
         
-        <!-- BOTÓN PRINCIPAL ÚNICO DE PAGO -->
-        <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient">
-          PAGAR
-        </button>
+        <!-- PASO 1: BOTÓN PAGAR INICIAL -->
+        <div id="step-1-pay-trigger">
+          <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient">
+            PAGAR ($1,000 USD)
+          </button>
+        </div>
 
-        <!-- FORMULARIO DE FACTURACIÓN (OCULTO POR DEFECTO) -->
+        <!-- PASO 2: FORMULARIO DE FACTURACIÓN -->
         <div id="form-pago-datos" class="hidden form-billing-box">
-          <h4 class="fuchsia-txt">Llenar Formulario de Facturación</h4>
+          <h4 class="fuchsia-txt">Paso 2: Datos de Facturación</h4>
           <div class="form-stack-compact">
             <div class="form-row-2">
-              <input type="number" id="pay-age" placeholder="Edad *" />
-              <input type="text" id="pay-country" placeholder="País *" />
+              <input type="number" id="pay-age" placeholder="Edad *" required />
+              <input type="text" id="pay-country" placeholder="País *" required />
             </div>
             <div class="form-row-2">
-              <input type="text" id="pay-city" placeholder="Ciudad *" />
-              <input type="text" id="pay-zip" placeholder="Código Postal *" />
+              <input type="text" id="pay-city" placeholder="Ciudad *" required />
+              <input type="text" id="pay-zip" placeholder="Código Postal *" required />
             </div>
-            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" />
+            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" required />
             
             <button type="button" id="btn-submit-pay-form" class="btn-pf-action btn-fuchsia-solid">
-              Ir a Pagar
+              Confirmar Pago y Datos
             </button>
           </div>
         </div>
 
-        <!-- FLUJO DE CONTRATO Y EVALUADOR (OCULTO POR DEFECTO) -->
-        <div id="post-pago-contract-flow" class="hidden contract-flow-box">
-          <h4 class="mint-txt">Contrato de Servicio Firmado</h4>
-          <p class="step-desc">Descarga el PDF, fírmalo y súbelo para confirmar tu activación:</p>
+        <!-- PASO 3: CONTRATO DE SERVICIO -->
+        <div id="step-contract-flow" class="hidden contract-flow-box">
+          <h4 class="mint-txt">Paso 3: Contrato de Servicio Firmado</h4>
+          <p class="step-desc">Descarga el PDF, fírmalo digitalmente o a mano y súbelo para continuar:</p>
           
-          <a id="btn-download-contract" href="#" class="btn-pf-action btn-blue-solid">📥 Descargar PDF Contrato</a>
+          <a id="btn-download-contract" href="#" class="btn-pf-action btn-blue-solid margin-v-sm">
+            Descargar PDF Contrato SODIE
+          </a>
           
           <div class="input-group-flow">
             <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
             <button type="button" id="btn-client-send-contract" class="btn-pf-action">
-              Subir Firmado <span id="client-contract-pct" class="fuchsia-txt">0%</span>
+              Subir Contrato Firmado <span id="client-contract-pct" class="fuchsia-txt">0%</span>
             </button>
           </div>
-          <p id="client-contract-status" class="mint-txt hidden">Esperando confirmación...</p>
+          <p id="client-contract-status" class="mint-txt hidden">Contrato subido correctamente.</p>
+        </div>
 
-          <!-- SECCIÓN EVALUADOR EN CLIENTE -->
-          <div id="step-evaluator-client" class="hidden evaluator-box">
-            <p class="step-desc">Ingresa tu nombre/correo en Facebook (donde tienes las campañas):</p>
-            <div class="input-group-flow">
-              <input type="text" id="client-meta-user-input" placeholder="Nombre / Correo en Facebook *" required />
-              <button type="button" id="btn-client-send-evaluator" class="btn-pf-action">Ser Evaluador</button>
-            </div>
-            <p id="client-evaluator-status" class="mint-txt hidden">Enviado a Admin. Esperando aprobación...</p>
-          </div>
-
-          <!-- SECCIÓN SUBIR EXCEL Y CREAR BORRADOR -->
-          <div id="step-upload-file" class="hidden upload-excel-box">
-            <p class="step-desc"><strong>Subir Excel/CSV de Compradores (Obligatorio)</strong></p>
-            <div class="input-group-flow">
-              <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-              <button type="button" id="btn-client-upload-file" class="btn-pf-action">
-                Subir Excel <span id="client-file-pct" class="mint-txt">0%</span>
-              </button>
-            </div>
-            
-            <div id="card-draft-section" class="hidden draft-section-box">
-              <button type="button" id="btn-confirm-draft" class="btn-pf-action btn-green-solid">Crear Borrador</button>
-            </div>
-          </div>
-
-          <!-- CONFIRMAR INVERSIÓN Y ACTIVAR -->
-          <div id="step-confirm-investment" class="hidden confirm-invest-box">
-            <p class="step-desc">Monto sugerido por backend a invertir: <strong id="backend-invest-amount" class="mint-txt">$200.00/400.00 USD</strong></p>
-            <button type="button" id="btn-activate-dashboard" class="btn-pf-action btn-activate-gradient">
-              Listo / Activar
+        <!-- PASO 4: SUBIR EXCEL DE COMPRADORES -->
+        <div id="step-upload-excel-flow" class="hidden upload-excel-box">
+          <h4 class="mint-txt">Paso 4: Subir Excel / CSV de Compradores</h4>
+          <p class="step-desc">Sube tu base de datos de compradores para generar el borrador automático:</p>
+          <div class="input-group-flow">
+            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+            <button type="button" id="btn-client-upload-file" class="btn-pf-action" onclick="sodieCrearBorrador()">
+              Subir Excel / Generar Borrador <span id="client-file-pct" class="mint-txt">0%</span>
             </button>
           </div>
+        </div>
+
+        <!-- PASO 5: CONECTAR CON FACEBOOK (LLAMADA A APP.JS) -->
+        <div id="step-facebook-connect-flow" class="hidden fb-connect-box">
+          <h4 class="fuchsia-txt">Paso 5: Conectar Cuenta de Facebook Ads</h4>
+          <p class="step-desc">Vincular tu cuenta publicitaria con Meta para inyección directa:</p>
+
+          <div class="fb-connect-wrapper margin-v-sm">
+            <button type="button" id="btn-facebook-auth" class="btn-pf-action btn-fb-solid" onclick="sodieConnectFacebook()">
+              <svg class="fb-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              Conectar con Facebook Ads
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 6: ACTIVAR CAMPAÑA / ACCESO A DASHBOARD -->
+        <div id="step-activate-campaign-flow" class="hidden confirm-invest-box">
+          <h4 class="mint-txt">Paso 6: Inyección Lista</h4>
+          <p class="step-desc">ID Campaña: <strong id="lbl-campaign-id" class="mint-txt" data-id="">-</strong></p>
+          <p class="step-desc">Monto sugerido por backend a invertir: <strong id="backend-invest-amount" class="mint-txt">$200.00 - $400.00 USD</strong></p>
+          
+          <!-- BOTÓN PRINCIPAL ACTIVAR CAMPAÑA -->
+          <button type="button" id="btn-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
+            ACTIVAR CAMPAÑA Y MOSTRAR DASHBOARD
+          </button>
         </div>
       </div>
 
@@ -504,139 +560,12 @@
     <!-- 9. CRONÓMETRO DE TIEMPO PRINCIPAL (ÚLTIMO MÓDULO AL FINAL) -->
     <section class="glass-card-dash timer-section">
       <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
-      <div id="timer-display" class="timer-digits">48:00:00</div>
-      <span id="timer-status-phase" class="timer-sub">CICLO SODIE EN EJECUCIÓN</span>
-    </section>
-
-  </main>
-
-  <!-- 3. DASHBOARD ADMIN CONTROL -->
-  <main id="admin-dashboard" class="dashboard-container hidden">
-    <header class="dash-header">
-      <div class="dash-header-left">
-        <span class="brand-text fuchsia-txt">ADMIN CONTROL 🗿💅🏽</span>
-      </div>
-      <div class="dash-header-right">
-        <button type="button" id="btn-exit-admin" class="btn-icon">🗿</button>
-      </div>
-    </header>
-
-    <section class="glass-card-dash">
-      <h3 class="section-title fuchsia-txt">Módulos de Configuración y Control</h3>
-      <div class="admin-grid">
-
-        <!-- VISTAS Y AUDITORÍA DE CLIENTES -->
-        <div class="admin-group span-2 border-mint">
-          <label class="mint-txt font-bold">Llamado a Vistas de Clientes Activos</label>
-          <div class="button-group-row">
-            <button type="button" id="btn-view-client-1-dash" class="btn-pf-action btn-mint-solid">
-              👁️ Ver Dashboard Cliente #1
-            </button>
-            <button type="button" id="btn-view-client-2-dash" class="btn-pf-action btn-fuchsia-solid">
-              👁️ Ver Dashboard Cliente #2
-            </button>
-          </div>
-        </div>
-
-        <!-- RECEPCIÓN Y APROBACIÓN DE EVALUADOR -->
-        <div class="admin-group span-2 border-mint">
-          <label class="mint-txt font-bold">Evaluador de Meta Ads Enviado por Cliente</label>
-          <div class="input-group-flow">
-            <input type="text" id="admin-meta-user-display" placeholder="Esperando datos del cliente..." readonly class="input-readonly-mint" />
-            <button type="button" id="btn-copy-client-data" class="btn-pf-action btn-mint-solid">Copiar</button>
-          </div>
-          <button type="button" id="btn-admin-approve-evaluator" class="btn-pf-action btn-green-gradient">
-            Aprobar e Iniciar Evaluador en Meta
-          </button>
-        </div>
-
-        <!-- CONTROL DE VALIDACIÓN DE PAGOS -->
-        <div class="admin-group span-2 border-fuchsia">
-          <label class="fuchsia-txt font-bold">Validación de Pagos Iniciales</label>
-          <div class="button-group-row">
-            <button type="button" id="btn-confirm-pay-client-1" class="btn-pf-action btn-mint-solid">
-              ✅ Confirmar Pago Cliente #1
-            </button>
-            <button type="button" id="btn-confirm-pay-client-2" class="btn-pf-action btn-fuchsia-solid">
-              ✅ Confirmar Pago Cliente #2
-            </button>
-          </div>
-        </div>
-
-        <!-- INYECCIÓN Y CREACIÓN DE BORRADOR EN ADMIN -->
-        <div class="admin-group span-2 border-mint">
-          <label class="mint-txt font-bold">Inyección y Creación de Borrador</label>
-          <p class="step-desc">Presiona para crear el borrador en Meta Ads tras inyectar la segmentación:</p>
-          <button type="button" id="btn-admin-create-draft" class="btn-pf-action btn-fb">
-            ⚡ Crear Borrador en Meta Ads
-          </button>
-        </div>
-
-        <!-- CARGAR HOJA DE CÁLCULO -->
-        <div class="admin-group">
-          <label>Hoja de Cálculo (Excel / CSV)</label>
-          <input type="file" id="spreadsheet-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          <button type="button" id="btn-upload-spreadsheet" class="btn-pf-action">
-            Subir Datos <span id="spreadsheet-pct" class="mint-txt">0%</span>
-          </button>
-        </div>
-
-        <!-- SUBIR VIDEO CON PORCENTAJE DE CARGA -->
-        <div class="admin-group">
-          <label class="mint-txt">Subir Video Demostrativo a Dashboard</label>
-          <div class="input-group-flow">
-            <input type="file" id="admin-video-input" class="file-input-custom" accept="video/mp4, video/webm" />
-            <button type="button" id="btn-upload-admin-video" class="btn-pf-action">
-              Mostrar en Dashboard 🎬 <span id="admin-video-pct" class="mint-txt">0%</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- SUBIR CONTRATO PDF CON PORCENTAJE DE CARGA -->
-        <div class="admin-group">
-          <label class="mint-txt">Subir Documento Contrato PDF</label>
-          <div class="input-group-flow">
-            <input type="file" id="admin-contract-file-input" class="file-input-custom" accept=".pdf" />
-            <button type="button" id="btn-upload-admin-contract" class="btn-pf-action">
-              Publicar PDF 📄 <span id="admin-contract-pct" class="mint-txt">0%</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- EXPORTAR DATA A CSV -->
-        <div class="admin-group">
-          <label class="mint-txt">Exportación de Base de Datos</label>
-          <button type="button" id="btn-export-data" class="btn-pf-action btn-emerald-gradient">
-            Exportar Data (SODIE Clientes .CSV)
-          </button>
-        </div>
-
-        <!-- GESTIÓN DE LISTA DE ESPERA -->
-        <div class="admin-group">
-          <label class="fuchsia-txt font-bold">Gestión de Lista de Espera 👺</label>
-          <button type="button" id="btn-toggle-waitlist" class="btn-pf-action btn-fuchsia-solid">
-            🔥 Activar Modo Lista de Espera
-          </button>
-        </div>
-
-        <!-- ACTIVAR SODIE V4 ($5K/MES Y PAGAR) -->
-        <div class="admin-group">
-          <label class="mint-txt font-bold">Plataforma SODIE V4</label>
-          <button type="button" id="btn-toggle-sodie-v4" class="btn-pf-action btn-mint-solid">
-            ⚡ Activar SODIE V4
-          </button>
-        </div>
-
-      </div>
+      <div id="timer-main-display" class="timer-digits mint-txt">48:00:00</div>
+      <span class="timer-sub">Estado del Sistema: Conectado a Meta API</span>
     </section>
   </main>
 
-  <!-- BANNER COOKIES -->
-  <div id="cookie-banner" class="glass-card-dash cookie-banner-box">
-    <p class="step-desc">Utilizamos cookies para optimizar la experiencia en SODIE.</p>
-    <button type="button" id="btn-accept-cookies" class="btn-pf-action btn-full-width">Aceptar</button>
-  </div>
-
+  <!-- LÓGICA DE CONTROL Y RUTAS -->
   <script src="app.js"></script>
 </body>
 </html>
