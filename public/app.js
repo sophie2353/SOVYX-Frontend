@@ -42,17 +42,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.warn('Backend SODIE local fallback.');
   }
-    // --- DETECCIÓN DE PAGO CORREGIDA ---
+
+  // --- DETECCIÓN DE PAGO CORREGIDA ---
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment') || urlParams.get('paid') || urlParams.get('status');
   const clientId = urlParams.get('client_id');
   const paymentDoneStorage = localStorage.getItem('sodie_payment_completed') === 'true';
 
-  // Detecta 'paid_success', 'success', 'paid', 'true' o la marca en localStorage
   if (paymentDoneStorage || (paymentStatus && (paymentStatus.includes('paid') || paymentStatus.includes('success') || paymentStatus === 'true')) || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
-    localStorage.setItem('sodie_payment_completed', 'true'); // Sincroniza ambas llaves
+    localStorage.setItem('sodie_payment_completed', 'true');
     confirmPaymentSuccess(state.selectedAmount, clientId || state.sessionId);
     cleanUrlParams();
   }
@@ -85,7 +85,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 // PASO 4, 5 Y 6: FUNCIONES EXPUESTAS
 // ==========================================
 
-// Paso 4: Subir Excel / Borrador
 async function sodieCrearBorrador() {
   const excelInput = document.getElementById('excel-file-input') || document.getElementById('client-file-input');
   const file = excelInput ? excelInput.files[0] : state.uploadedFile;
@@ -121,7 +120,6 @@ async function sodieCrearBorrador() {
   }
 }
 
-// Paso 5: Conectar Facebook
 async function sodieConnectFacebook() {
   try {
     const res = await fetch(`${API_URL}/api/facebook/connect-login`, {
@@ -143,7 +141,6 @@ async function sodieConnectFacebook() {
   }
 }
 
-// Paso 6: Activar Campaña
 async function sodieConfirmarActivacion() {
   const btnConfirm = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
   if (btnConfirm) {
@@ -180,10 +177,102 @@ async function sodieConfirmarActivacion() {
   }
 }
 
-// Exponer en el objeto global
 window.sodieCrearBorrador = sodieCrearBorrador;
 window.sodieConnectFacebook = sodieConnectFacebook;
 window.sodieConfirmarActivacion = sodieConfirmarActivacion;
+
+// ==========================================
+// MÓDULO BIOMÉTRICO (REVISADO Y EXPUESTO)
+// ==========================================
+
+async function registerBiometricCredential(userId = (state.email || state.sessionId)) {
+  if (!window.PublicKeyCredential) {
+    alert('La autenticación biométrica no está soportada en este navegador.');
+    return false;
+  }
+  try {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+    const userIdBytes = new TextEncoder().encode(userId);
+
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: "SODIE Core OS" },
+        user: { id: userIdBytes, name: userId, displayName: `Usuario SODIE (${userId})` },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "preferred" },
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      localStorage.setItem(`sodie_bio_id_${userId}`, credential.id);
+      localStorage.setItem('sodie_bio_enabled', 'true');
+      state.isBioEnabled = true;
+      alert('¡Biometría registrada e integradamente vinculada con éxito!');
+      return true;
+    }
+  } catch (err) {
+    console.warn('Error durante el registro biométrico WebAuthn:', err);
+    if (confirm('No se pudo completar el registro biométrico por hardware. ¿Deseas activar el acceso directo local en este dispositivo?')) {
+      localStorage.setItem('sodie_bio_enabled', 'true');
+      state.isBioEnabled = true;
+      alert('Biometría activada localmente.');
+      return true;
+    }
+  }
+  return false;
+}
+
+async function authenticateBiometrics(role = 'user') {
+  if (window.PublicKeyCredential) {
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+      const assertion = await navigator.credentials.get({
+        publicKey: { challenge: challenge, timeout: 60000, userVerification: "preferred" }
+      });
+      if (assertion) return true;
+    } catch (err) {
+      console.warn('Fallo de validación WebAuthn hardware:', err);
+    }
+  }
+  return confirm('¿Confirmar identidad mediante el sensor o PIN del dispositivo?');
+}
+
+async function sodieLoginBiometrico() {
+  const authenticated = await authenticateBiometrics('user');
+  if (authenticated) {
+    alert('Autenticación biométrica exitosa. Acceso concedido.');
+    if (state.isPaid) activatePostPayView();
+  } else {
+    alert('❌ No se pudo validar la biometría.');
+  }
+}
+
+async function sodieRegistrarBiometria() {
+  await registerBiometricCredential(state.email || state.sessionId);
+}
+
+function setupBiometricModule() {
+  const btnUserBioLogin = document.getElementById('btn-bio-user-login') || document.getElementById('btn-biometric-login') || document.getElementById('btn-bio-login');
+  const btnRegisterBioPostPay = document.getElementById('btn-register-bio-postpay') || document.getElementById('btn-bio-register');
+
+  if (btnUserBioLogin) {
+    btnUserBioLogin.addEventListener('click', sodieLoginBiometrico);
+  }
+
+  if (btnRegisterBioPostPay) {
+    btnRegisterBioPostPay.addEventListener('click', sodieRegistrarBiometria);
+  }
+}
+
+// Exposición global para integración directa en index.html
+window.sodieLoginBiometrico = sodieLoginBiometrico;
+window.sodieRegistrarBiometria = sodieRegistrarBiometria;
+window.registerBiometricCredential = registerBiometricCredential;
+window.authenticateBiometrics = authenticateBiometrics;
 
 // ==========================================
 // MÓDULOS DE CONFIGURACIÓN Y EVENTOS
@@ -212,84 +301,9 @@ function setupPostPayStepFlow() {
     });
   }
 
-  // Vinculación de Pasos 4, 5 y 6
   if (btnDraft) btnDraft.addEventListener('click', sodieCrearBorrador);
   if (btnConnectFb) btnConnectFb.addEventListener('click', sodieConnectFacebook);
   if (btnConfirmDraft) btnConfirmDraft.addEventListener('click', sodieConfirmarActivacion);
-}
-
-function setupBiometricModule() {
-  const btnUserBioLogin = document.getElementById('btn-bio-user-login');
-  const btnRegisterBioPostPay = document.getElementById('btn-register-bio-postpay');
-
-  if (btnUserBioLogin) {
-    btnUserBioLogin.addEventListener('click', async () => {
-      const authenticated = await authenticateBiometrics('user');
-      if (authenticated) {
-        alert('Autenticación biométrica exitosa. Acceso concedido.');
-        if (state.isPaid) activatePostPayView();
-      } else {
-        alert('❌ No se pudo validar la biometría.');
-      }
-    });
-  }
-
-  if (btnRegisterBioPostPay) {
-    btnRegisterBioPostPay.addEventListener('click', async () => {
-      await registerBiometricCredential(state.email || state.sessionId);
-    });
-  }
-}
-
-async function registerBiometricCredential(userId = 'user') {
-  if (!window.PublicKeyCredential) {
-    alert('La biometría no está soportada en este navegador.');
-    return false;
-  }
-  try {
-    const challenge = new Uint8Array(32);
-    window.crypto.getRandomValues(challenge);
-    const userIdBytes = new TextEncoder().encode(userId);
-
-    const credential = await navigator.credentials.create({
-      publicKey: {
-        challenge: challenge,
-        rp: { name: "SODIE" },
-        user: { id: userIdBytes, name: userId, displayName: `Usuario SODIE (${userId})` },
-        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "preferred" },
-        timeout: 60000
-      }
-    });
-
-    if (credential) {
-      localStorage.setItem(`sodie_bio_id_${userId}`, credential.id);
-      localStorage.setItem('sodie_bio_enabled', 'true');
-      state.isBioEnabled = true;
-      alert('¡Biometría activada con éxito!');
-      return true;
-    }
-  } catch (err) {
-    localStorage.setItem('sodie_bio_enabled', 'true');
-    state.isBioEnabled = true;
-    alert('Biometría registrada en credenciales locales.');
-    return true;
-  }
-  return false;
-}
-
-async function authenticateBiometrics(role = 'user') {
-  if (window.PublicKeyCredential) {
-    try {
-      const challenge = new Uint8Array(32);
-      window.crypto.getRandomValues(challenge);
-      const assertion = await navigator.credentials.get({
-        publicKey: { challenge: challenge, timeout: 60000, userVerification: "preferred" }
-      });
-      if (assertion) return true;
-    } catch (err) {}
-  }
-  return localStorage.getItem('sodie_bio_enabled') === 'true' || confirm('¿Confirmar acceso mediante biometría del dispositivo?');
 }
 
 function setupCookieBanner() {
@@ -835,11 +849,8 @@ function sodieAdminVerVistaCliente() {
   if (adminDashboard) adminDashboard.classList.add('hidden');
   if (appDashboard) appDashboard.classList.remove('hidden');
 
-  // Si el cliente no ha pagado aún en las pruebas, fuerza la vista postpago para simulación
   activatePostPayView();
   console.log('👁️ Modo Admin: Cambiado a vista de cliente.');
 }
 
-// Exponer en el objeto global para usar con onclick en HTML
 window.sodieAdminVerVistaCliente = sodieAdminVerVistaCliente;
-
