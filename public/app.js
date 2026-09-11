@@ -43,12 +43,32 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn('Backend SODIE local fallback.');
   }
 
-  // --- DETECCIÓN DE PAGO CORREGIDA ---
+  // --- DETECCIÓN DE PAGO Y REDIRECCIONES DE META / FACEBOOK ---
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment') || urlParams.get('paid') || urlParams.get('status');
   const clientId = urlParams.get('client_id');
   const paymentDoneStorage = localStorage.getItem('sodie_payment_completed') === 'true';
 
+  // Parámetros de flujo Facebook / Meta Ads desde el backend
+  const stepParam = urlParams.get('step');
+  const viewParam = urlParams.get('view');
+  const sessionIdParam = urlParams.get('sessionId');
+  const campaignIdParam = urlParams.get('campaignId');
+  const errorParam = urlParams.get('error');
+
+  // 1. Sincronizar Session ID retornado por OAuth
+  if (sessionIdParam) {
+    state.sessionId = sessionIdParam;
+    localStorage.setItem('sodie_session_id', sessionIdParam);
+  }
+
+  // 2. Notificar errores de la API de Meta si aplican
+  if (errorParam) {
+    alert(`❌ Ocurrió un problema en la integración con Meta: ${errorParam}`);
+    cleanUrlParams();
+  }
+
+  // 3. Confirmación de Pago
   if (paymentDoneStorage || (paymentStatus && (paymentStatus.includes('paid') || paymentStatus.includes('success') || paymentStatus === 'true')) || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
@@ -59,6 +79,38 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   if (state.isPaid) {
     activatePostPayView(clientId);
+  }
+
+  // 4. Procesar flujo de pasos según Query Params recibidos
+  if (stepParam === 'procesar_excel') {
+    activatePostPayView();
+    const stepUpload = document.getElementById('step-upload-file') || document.getElementById('section-post-pay-flow');
+    if (stepUpload) {
+      stepUpload.classList.remove('hidden');
+      stepUpload.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  if (stepParam === 'activar_campana') {
+    activatePostPayView();
+    if (campaignIdParam) localStorage.setItem('sodie_last_campaign_id', campaignIdParam);
+    
+    const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
+    if (btnConfirmDraft) {
+      btnConfirmDraft.classList.remove('hidden');
+      btnConfirmDraft.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  if (viewParam === 'dashboard') {
+    activatePostPayView();
+    if (campaignIdParam) localStorage.setItem('sodie_last_campaign_id', campaignIdParam);
+    
+    const appDashboard = document.getElementById('app-dashboard');
+    if (appDashboard) {
+      appDashboard.classList.remove('hidden');
+      appDashboard.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   runSplashScreen();
