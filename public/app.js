@@ -42,14 +42,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.warn('Backend SODIE local fallback.');
   }
-
+    // --- DETECCIÓN DE PAGO CORREGIDA ---
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment') || urlParams.get('paid') || urlParams.get('status');
   const clientId = urlParams.get('client_id');
+  const paymentDoneStorage = localStorage.getItem('sodie_payment_completed') === 'true';
 
-  if (paymentStatus === 'true' || paymentStatus === 'success' || paymentStatus === 'paid' || urlParams.get('auth') === 'success') {
+  // Detecta 'paid_success', 'success', 'paid', 'true' o la marca en localStorage
+  if (paymentDoneStorage || (paymentStatus && (paymentStatus.includes('paid') || paymentStatus.includes('success') || paymentStatus === 'true')) || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
+    localStorage.setItem('sodie_payment_completed', 'true'); // Sincroniza ambas llaves
     confirmPaymentSuccess(state.selectedAmount, clientId || state.sessionId);
     cleanUrlParams();
   }
@@ -821,3 +824,22 @@ function cleanUrlParams() {
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
+
+// ==========================================
+// MÓDULO ADMIN: CAMBIAR A VISTA CLIENTE
+// ==========================================
+function sodieAdminVerVistaCliente() {
+  const appDashboard = document.getElementById('app-dashboard');
+  const adminDashboard = document.getElementById('admin-dashboard');
+
+  if (adminDashboard) adminDashboard.classList.add('hidden');
+  if (appDashboard) appDashboard.classList.remove('hidden');
+
+  // Si el cliente no ha pagado aún en las pruebas, fuerza la vista postpago para simulación
+  activatePostPayView();
+  console.log('👁️ Modo Admin: Cambiado a vista de cliente.');
+}
+
+// Exponer en el objeto global para usar con onclick en HTML
+window.sodieAdminVerVistaCliente = sodieAdminVerVistaCliente;
+
