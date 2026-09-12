@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE (Yo)</title>
+  <title>SODIE - Panel Administrador</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -12,63 +12,101 @@
   <main class="dashboard-container" style="padding: 20px;">
     
     <div id="admin-dashboard" class="glass-card-dash margin-v-md">
+      
+      <!-- HEADER -->
       <div class="chat-header">
         <h3 class="section-title fuchsia-txt">Panel Administrador (Yo) 👺</h3>
-        <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/client.html'">
-          👁️ Ver Vista Cliente
-        </button>
       </div>
-      <p class="step-desc">Control total de archivos, campañas y estado del Dashboard Principal.</p>
+      <p class="step-desc">Control total de archivos, campañas y estados del Dashboard Principal.</p>
 
-      <!-- AUTENTICACIÓN BIOMÉTRICA DE ADMIN -->
+      <!-- SECCIÓN 1: VISTAS -->
       <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.3);">
-        <h4 class="mint-txt">Seguridad Admin</h4>
-        <div class="biometrics-admin-box margin-v-sm">
-          <button type="button" id="btn-admin-biometrics-login" class="btn-pf-action btn-biometric">
-            🔐 Autenticar con Biometría (Face ID / Huella)
+        <h4 class="mint-txt">Vistas</h4>
+        <div class="admin-grid two-cols margin-v-sm">
+          <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/'">
+            🏠 Vista Principal
+          </button>
+          <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/client.html'">
+            👁️ Vista Cliente
           </button>
         </div>
       </div>
 
-      <!-- CARGA DE ARCHIVOS -->
+      <!-- SECCIÓN 2: SUBIDA DE VIDEO -->
       <div class="glass-card-dash margin-v-sm">
-        <h4 class="mint-txt">Gestión de Archivos</h4>
-        <div class="admin-grid two-cols margin-v-sm">
-          <div>
-            <label class="step-desc">Subir Excel Compradores:</label>
-            <input type="file" id="admin-excel-upload-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          </div>
-          <div>
-            <label class="step-desc">Subir PDF Contrato/Documento:</label>
-            <input type="file" id="admin-pdf-upload-input" class="file-input-custom" accept=".pdf" />
-          </div>
+        <h4 class="mint-txt">Subida de Video</h4>
+        <div class="margin-v-sm">
+          <input type="file" id="admin-video-file" class="file-input-custom" accept="video/*" />
+          <button type="button" id="btn-upload-video" class="btn-pf-action btn-mint-solid margin-top-10">
+            🎬 Subir Video
+          </button>
         </div>
       </div>
 
-      <!-- ACCIONES DE CAMPAÑA -->
+      <!-- SECCIÓN 3: SUBIR CONTRATO -->
       <div class="glass-card-dash margin-v-sm">
-        <h4 class="fuchsia-txt">Acciones de Control</h4>
+        <h4 class="mint-txt">Subir Contrato</h4>
+        <div class="margin-v-sm">
+          <input type="file" id="admin-contract-file" class="file-input-custom" accept=".pdf" />
+          <button type="button" id="btn-upload-contract" class="btn-pf-action btn-mint-solid margin-top-10">
+            📄 Subir Contrato
+          </button>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4: SUBIR EXCEL -->
+      <div class="glass-card-dash margin-v-sm">
+        <h4 class="mint-txt">Subir Excel</h4>
+        <div class="margin-v-sm">
+          <input type="file" id="admin-excel-file" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+          <button type="button" id="btn-upload-excel" class="btn-pf-action btn-mint-solid margin-top-10">
+            📊 Subir Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 5: ACTIVAR CAMPAÑA -->
+      <div class="glass-card-dash margin-v-sm">
+        <h4 class="fuchsia-txt">Activar Campaña</h4>
         <button type="button" id="btn-admin-activate-campaign" class="btn-pf-action btn-activate-gradient margin-v-sm" onclick="sodieConfirmarActivacion()">
           🚀 Activar Campaña Directa
         </button>
-
-        <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-
-        <!-- CONTROL DE ESTADO DEL DASHBOARD PRINCIPAL -->
-        <h4 class="mint-txt">Control de Estado del Dashboard Principal</h4>
-        <div class="admin-grid two-cols margin-v-sm">
-          <button type="button" class="btn-pf-action btn-fuchsia-solid" onclick="sodieToggleWaitlistMode(true)">
-            🔒 Cerrar Dashboard (Activar Lista de Espera 5K$)
-          </button>
-          <button type="button" class="btn-pf-action btn-mint-solid" onclick="sodieToggleWaitlistMode(false)">
-            🔓 Desactivar Lista de Espera (Restablecer Flow Pago 1K)
-          </button>
-        </div>
       </div>
+
+      <!-- SECCIÓN 6: CERRAR DASHBOARD PRINCIPAL -->
+      <div class="glass-card-dash margin-v-sm">
+        <h4 class="fuchsia-txt">Cerrar Dashboard Principal</h4>
+        <p class="step-desc">Activar la lista de espera para nuevos registros.</p>
+        <button type="button" class="btn-pf-action btn-fuchsia-solid margin-top-10" onclick="sodieToggleWaitlistMode(true)">
+          🔒 Activar Lista de Espera
+        </button>
+      </div>
+
+      <!-- SECCIÓN 7: CERRAR LISTA DE ESPERA -->
+      <div class="glass-card-dash margin-v-sm">
+        <h4 class="fuchsia-txt">Cerrar Lista de Espera</h4>
+        <p class="step-desc">Cierra la lista de espera y dispara el temporizador de 14 días para la V4 en el Dashboard Principal.</p>
+        <button type="button" id="btn-close-waitlist" class="btn-pf-action btn-fuchsia-solid margin-top-10" onclick="sodieCerrarListaEspera()">
+          ⏳ Activar Temporizador para la V4
+        </button>
+      </div>
+
+      <!-- SECCIÓN 8: TIMMER ADMIN (120 HORAS PARA CERRAR LISTA DE ESPERA) -->
+      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
+        <h4 class="mint-txt">Timmer (Límite para Cerrar Lista de Espera)</h4>
+        
+        <div id="admin-120h-timer" class="timer-digits margin-v-sm" style="font-family: monospace; font-size: 2rem; letter-spacing: 2px; color: #00ffcc;">
+          120:00:00
+        </div>
+        
+        <span class="step-desc">Cuenta regresiva de 120 horas en curso</span>
+      </div>
+
     </div>
 
   </main>
 
-  <script src="app.js"></script>
+  <!-- Script exclusivo del panel Admin -->
+  <script src="admin.js"></script>
 </body>
 </html>
