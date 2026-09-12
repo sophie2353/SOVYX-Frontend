@@ -1022,3 +1022,32 @@ async function solicitarPermisoNotificaciones() {
     }
   }
 }
+// Configuración de la cuenta regresiva de 96 horas
+let totalSeconds96H = 96 * 3600; // 96 horas en segundos
+
+function updateGlobalTimer() {
+  const timerDisplay = document.getElementById('global-timer-display');
+  if (!timerDisplay) return;
+
+  if (totalSeconds96H <= 0) {
+    timerDisplay.innerText = "00:00:00";
+    return;
+  }
+
+  const hours = Math.floor(totalSeconds96H / 3600);
+  const minutes = Math.floor((totalSeconds96H % 3600) / 60);
+  const seconds = totalSeconds96H % 60;
+
+  // Formato HH:MM:SS con ceros a la izquierda
+  const formattedHours = String(hours).padStart(2, '0');
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(seconds).padStart(2, '0');
+
+  timerDisplay.innerText = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  totalSeconds96H--;
+}
+
+// Iniciar intervalo de 1 segundo
+setInterval(updateGlobalTimer, 1000);
+updateGlobalTimer(); // Ejecución inicial
+
