@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SODIE</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICACIÓN CLIENTE -->
+  <div id="toast-notification" class="toast-bubble hidden">
+    <div class="toast-content">
+      <span class="toast-icon"></span>
+      <div class="toast-text">
+        <strong id="toast-title">Estatus Cliente</strong>
+        <p id="toast-body">Actualizado</p>
+      </div>
+    </div>
+  </div>
+
+  <main id="app-dashboard" class="dashboard-container">
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <span id="header-brand-title" class="brand-text">SODIE</span>
+        <span id="client-id-badge" class="badge-client">Cliente Activo</span>
+      </div>
+      <div class="dash-header-right">
+        <button type="button" class="btn-icon" onclick="window.location.href='/admin.html'" title="Acceso Admin">🔐</button>
+      </div>
+    </header>
+
+    <!-- 1. MÉTRICAS CLIENTE -->
+    <section class="metrics-section">
+      <h3 class="section-title">Métricas de Rendimiento</h3>
+      <div class="metrics-slider" id="metrics-slider">
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Inversión</span><span class="dots"></span></div>
+          <div class="card-value" id="metric-spend">40$</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
+          </div>
+          <div class="card-foot"><span>Presupuesto Pruebas</span><span class="fuchsia-txt">$40.00</span></div>
+        </article>
+
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Alcance</span><span class="dots"></span></div>
+          <div class="card-value" id="metric-reach">2.000</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
+          </div>
+          <div class="card-foot"><span>Audiencia Objetivos</span><span class="mint-txt">2K personas</span></div>
+        </article>
+
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-visitors">82</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
+          </div>
+          <div class="card-foot"><span>Tráfico Activo</span><span class="mint-txt">En vivo</span></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 2. BLOQUE DE INYECCIÓN (TIMER 0 A 24 HORAS) -->
+    <section id="card-injection-flow" class="glass-card-dash margin-v-sm">
+      <h3 class="section-title mint-txt">Inyección de Audiencia</h3>
+      <div id="timer-24h-display" class="timer-digits mint-txt">00:00:00</div>
+      
+      <div class="input-group-flow margin-v-sm">
+        <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+        <button type="button" id="btn-client-upload-excel" class="btn-pf-action btn-mint-solid" onclick="sodieFlujoInyeccionCliente()">
+          Subir Excel
+        </button>
+      </div>
+
+      <button type="button" id="btn-client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm" onclick="sodieConfirmarActivacionCliente()">
+        Activar Campaña
+      </button>
+    </section>
+
+    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (TIMER 0 A 96 HORAS) -->
+    <section class="glass-card-dash margin-v-sm">
+      <h3 class="section-title fuchsia-txt">Cronograma de Pagos Post-Resultados</h3>
+      <div id="timer-post-display" class="timer-digits fuchsia-txt">00:00:00</div>
+
+      <div class="pay-steps-stack margin-v-sm">
+        <!-- PASO 1: HORA 48 -->
+        <button type="button" id="btn-pay-part-1" class="btn-pf-action btn-pay-gradient disabled" disabled onclick="sodieProcesarPago(1)">
+          Pagar Primera Parte ($3.000)
+        </button>
+
+        <!-- PASO 2: HORA 72 -->
+        <button type="button" id="btn-pay-part-2" class="btn-pf-action btn-pay-gradient hidden" onclick="sodieProcesarPago(2)">
+          Pagar Segunda Parte ($3.000)
+        </button>
+
+        <!-- PASO 3: HORA 96 -->
+        <button type="button" id="btn-pay-part-3" class="btn-pf-action btn-pay-gradient hidden" onclick="sodieProcesarPago(3)">
+          Pagar Tercera Parte ($3.000)
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. COMPARATIVA SECUENCIAL (SE ACTIVA EN LA HORA 72) -->
+    <section id="section-sodie-comparison" class="glass-card-dash hidden border-fuchsia margin-v-sm">
+      <h3 class="section-title fuchsia-txt">Métricas Comparativas (Hora 72)</h3>
+      
+      <!-- HORA 24 -->
+      <div class="comparison-block margin-v-sm">
+        <h4 class="mint-txt">Métricas Hora 24 con SODIE</h4>
+        <p class="step-desc">ROAS: <strong>3.8x</strong> | CPA: <strong>$9.10 USD</strong> | Conversiones: <strong>32</strong></p>
+        
+        <h4 class="fuchsia-txt">Métricas Hora 24 sin SODIE</h4>
+        <p class="step-desc">ROAS: <strong>1.2x</strong> | CPA: <strong>$28.50 USD</strong> | Conversiones: <strong>8</strong></p>
+      </div>
+
+      <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+
+      <!-- HORA 48 -->
+      <div class="comparison-block margin-v-sm">
+        <h4 class="mint-txt">Métricas Hora 48 con SODIE</h4>
+        <p class="step-desc">ROAS: <strong>5.2x</strong> | CPA: <strong>$6.40 USD</strong> | Conversiones: <strong>68</strong></p>
+        
+        <h4 class="fuchsia-txt">Métricas Hora 48 sin SODIE</h4>
+        <p class="step-desc">ROAS: <strong>1.4x</strong> | CPA: <strong>$24.10 USD</strong> | Conversiones: <strong>12</strong></p>
+      </div>
+    </section>
+
+    <!-- 5. CIERRE DE CICLO HORA 96 -->
+    <section id="section-hour-96-complete" class="glass-card-dash hidden text-center margin-v-sm">
+      <h3 class="section-title mint-txt">¡Ciclo Completado!</h3>
+      <p class="step-desc">Has completado las 96 horas de ejecución y el total de pagos después de obtener resultados.</p>
+      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" onclick="window.location.href='/index.html'">
+        Unirse a Lista de Espera (2 cupos disponibles)
+      </button>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
