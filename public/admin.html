@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SODIE (Yo)</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body class="admin-body">
+
+  <main class="dashboard-container" style="padding: 20px;">
+    
+    <div id="admin-dashboard" class="glass-card-dash margin-v-md">
+      <div class="chat-header">
+        <h3 class="section-title fuchsia-txt">Panel Administrador (Yo) 👺</h3>
+        <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/client.html'">
+          👁️ Ver Vista Cliente
+        </button>
+      </div>
+      <p class="step-desc">Control total de archivos, campañas y estado del Dashboard Principal.</p>
+
+      <!-- AUTENTICACIÓN BIOMÉTRICA DE ADMIN -->
+      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.3);">
+        <h4 class="mint-txt">Seguridad Admin</h4>
+        <div class="biometrics-admin-box margin-v-sm">
+          <button type="button" id="btn-admin-biometrics-login" class="btn-pf-action btn-biometric">
+            🔐 Autenticar con Biometría (Face ID / Huella)
+          </button>
+        </div>
+      </div>
+
+      <!-- CARGA DE ARCHIVOS -->
+      <div class="glass-card-dash margin-v-sm">
+        <h4 class="mint-txt">Gestión de Archivos</h4>
+        <div class="admin-grid two-cols margin-v-sm">
+          <div>
+            <label class="step-desc">Subir Excel Compradores:</label>
+            <input type="file" id="admin-excel-upload-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+          </div>
+          <div>
+            <label class="step-desc">Subir PDF Contrato/Documento:</label>
+            <input type="file" id="admin-pdf-upload-input" class="file-input-custom" accept=".pdf" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES DE CAMPAÑA -->
+      <div class="glass-card-dash margin-v-sm">
+        <h4 class="fuchsia-txt">Acciones de Control</h4>
+        <button type="button" id="btn-admin-activate-campaign" class="btn-pf-action btn-activate-gradient margin-v-sm" onclick="sodieConfirmarActivacion()">
+          🚀 Activar Campaña Directa
+        </button>
+
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+
+        <!-- CONTROL DE ESTADO DEL DASHBOARD PRINCIPAL -->
+        <h4 class="mint-txt">Control de Estado del Dashboard Principal</h4>
+        <div class="admin-grid two-cols margin-v-sm">
+          <button type="button" class="btn-pf-action btn-fuchsia-solid" onclick="sodieToggleWaitlistMode(true)">
+            🔒 Cerrar Dashboard (Activar Lista de Espera 5K$)
+          </button>
+          <button type="button" class="btn-pf-action btn-mint-solid" onclick="sodieToggleWaitlistMode(false)">
+            🔓 Desactivar Lista de Espera (Restablecer Flow Pago 1K)
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
