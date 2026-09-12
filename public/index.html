@@ -236,7 +236,7 @@
 
         <!-- PASO 2: FORMULARIO FACTURACIÓN -->
         <div id="form-pago-datos" class="form-billing-box margin-v-sm">
-          <h4 class="fuchsia-txt">Paso 2: Datos para Facturación</h4>
+          <h4 class="fuchsia-txt">Paso 1: Datos para Facturación</h4>
           <div class="form-stack-compact">
             <div class="form-row-2">
               <input type="number" id="pay-age" placeholder="Edad *" required />
@@ -259,7 +259,7 @@
 
         <!-- PASO 3: PAGAR -->
         <div id="step-3-pay-trigger" class="margin-v-sm">
-          <h4 class="mint-txt">Paso 3: Realizar Pago</h4>
+          <h4 class="mint-txt">Paso 2: Realizar Pago</h4>
           <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient" style="width: 100%; display: block;" onclick="sodieProcesarPasoPago()">
             PAGAR RESERVA ($1,000)
           </button>
@@ -267,7 +267,7 @@
 
         <!-- PASO 4: CONTRATO -->
         <div id="step-4-contract-flow" class="hidden contract-flow-box margin-v-sm">
-          <h4 class="mint-txt">Paso 4: Contrato de Servicio Firmado</h4>
+          <h4 class="mint-txt">Paso 3: Contrato de Servicio Firmado</h4>
           <p class="step-desc">Descarga el PDF, fírmalo digitalmente o a mano y súbelo para continuar:</p>
           
           <a id="btn-download-contract" href="#" class="btn-pf-action btn-blue-solid margin-v-sm">
@@ -284,7 +284,7 @@
 
         <!-- PASO 5: SUBIR EXCEL -->
         <div id="step-5-excel-flow" class="hidden upload-excel-box margin-v-sm">
-          <h4 class="mint-txt">Paso 5: Subir Excel de Compradores</h4>
+          <h4 class="mint-txt">Paso 4: Subir Excel de Compradores</h4>
           <p class="step-desc">Sube tu base de datos de compradores para generar el borrador automático:</p>
           <div class="input-group-flow">
             <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
@@ -296,7 +296,7 @@
 
         <!-- PASO 6: CONECTAR CON FACEBOOK -->
         <div id="step-6-fb-flow" class="hidden fb-connect-box margin-v-sm">
-          <h4 class="fuchsia-txt">Paso 6: Conectar Cuenta de Facebook Ads</h4>
+          <h4 class="fuchsia-txt">Paso 5: Conectar Cuenta de Facebook Ads</h4>
           <p class="step-desc">Vincular tu cuenta publicitaria con Meta para inyección directa:</p>
           <button type="button" id="btn-facebook-auth" class="btn-pf-action btn-fb-solid" onclick="sodieConnectFacebook()">
             Conectar con Facebook Ads
@@ -305,7 +305,7 @@
 
         <!-- PASO 7: ACTIVAR CAMPAÑA -->
         <div id="step-7-activate-flow" class="hidden confirm-invest-box margin-v-sm">
-          <h4 class="mint-txt">Paso 7: Activar Campaña</h4>
+          <h4 class="mint-txt">Paso 6: Activar Campaña</h4>
           <p class="step-desc">ID Campaña: <strong id="lbl-campaign-id" class="mint-txt">-</strong></p>
           <button type="button" id="btn-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
             ACTIVAR CAMPAÑA
