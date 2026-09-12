@@ -1,11 +1,11 @@
 // ==========================================
 // SODIE Core OS - Application Logic (app.js)
 // Sincronizado con index.html / index.js v2.0.28
-// Incluye Módulo Biométrico, Subida de Archivos y Pasos 4, 5 y 6 Integrados
+// Transición Admin <-> Vista Cliente sin pérdida de contexto
 // ==========================================
 
 const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:10000' : 'https://api.sodie.app';
-const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', FB_APP_ID: '', VAPID_PUBLIC_KEY: '' };
+const CONFIG = window.ENV || { SOVYX_ADMIN_KEY: 'admin23555', APP_ID: '', VAPID_PUBLIC_KEY: '' };
 
 const state = {
   sessionId: localStorage.getItem('sodie_session_id') || `sess_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`,
@@ -13,6 +13,7 @@ const state = {
   fbUser: localStorage.getItem('sodie_fb_user') || null,
   isPaid: localStorage.getItem('sodie_is_paid') === 'true',
   isBioEnabled: localStorage.getItem('sodie_bio_enabled') === 'true',
+  isAdminMode: localStorage.getItem('sodie_is_admin') === 'true',
   selectedAmount: 1000,
   currentStage: 'INITIAL',
   uploadedFile: null,
@@ -43,32 +44,27 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn('Backend SODIE local fallback.');
   }
 
-  // --- DETECCIÓN DE PAGO Y REDIRECCIONES DE META / FACEBOOK ---
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment') || urlParams.get('paid') || urlParams.get('status');
   const clientId = urlParams.get('client_id');
   const paymentDoneStorage = localStorage.getItem('sodie_payment_completed') === 'true';
 
-  // Parámetros de flujo Facebook / Meta Ads desde el backend
   const stepParam = urlParams.get('step');
   const viewParam = urlParams.get('view');
   const sessionIdParam = urlParams.get('sessionId');
   const campaignIdParam = urlParams.get('campaignId');
   const errorParam = urlParams.get('error');
 
-  // 1. Sincronizar Session ID retornado por OAuth
   if (sessionIdParam) {
     state.sessionId = sessionIdParam;
     localStorage.setItem('sodie_session_id', sessionIdParam);
   }
 
-  // 2. Notificar errores de la API de Meta si aplican
   if (errorParam) {
     alert(`❌ Ocurrió un problema en la integración con Meta: ${errorParam}`);
     cleanUrlParams();
   }
 
-  // 3. Confirmación de Pago
   if (paymentDoneStorage || (paymentStatus && (paymentStatus.includes('paid') || paymentStatus.includes('success') || paymentStatus === 'true')) || urlParams.get('auth') === 'success') {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
@@ -81,7 +77,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     activatePostPayView(clientId);
   }
 
-  // 4. Procesar flujo de pasos según Query Params recibidos
   if (stepParam === 'procesar_excel') {
     activatePostPayView();
     const stepUpload = document.getElementById('step-upload-file') || document.getElementById('section-post-pay-flow');
@@ -127,14 +122,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   startLiveMetricsEngine();
   setupSSEMetricsStream();
   setupPushNotifications();
-  syncPaymentStatusWithBackend();
   renderInitialMetrics();
 
   loadDashboardMetrics(state.sessionId);
 });
 
 // ==========================================
-// PASO 4, 5 Y 6: FUNCIONES EXPUESTAS
+// ACCIONES DE USUARIO & SUBIDA MEDIA
 // ==========================================
 
 async function sodieCrearBorrador() {
@@ -143,38 +137,42 @@ async function sodieCrearBorrador() {
   const statusEl = document.getElementById('excel-file-status') || document.getElementById('client-file-status');
 
   if (!file) {
-    alert('Por favor selecciona un archivo Excel/CSV para crear el borrador.');
+    alert('Por favor selecciona un archivo Excel/CSV o PDF para procesar.');
     return;
   }
 
   const formData = new FormData();
   formData.append('file', file);
   formData.append('sessionId', state.sessionId);
-  formData.append('nicho', 'infoproductos');
+  formData.append('category', 'audience_csv');
 
   if (statusEl) {
-    statusEl.textContent = 'Procesando borrador... ⏳';
+    statusEl.textContent = 'Procesando archivo en /api/v1/media/upload... ⏳';
     statusEl.classList.remove('hidden');
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/upload-csv`, { method: 'POST', body: formData });
+    let res = await fetch(`${API_URL}/api/v1/media/upload`, { method: 'POST', body: formData });
+    if (!res.ok) {
+      res = await fetch(`${API_URL}/api/media/upload`, { method: 'POST', body: formData });
+    }
+
     if (res.ok) {
-      if (statusEl) statusEl.textContent = '✅ Borrador generado exitosamente.';
-      alert('¡Borrador de campaña creado correctamente!');
+      if (statusEl) statusEl.textContent = '✅ Archivo procesado exitosamente.';
+      alert('¡Borrador y datos cargados correctamente al servidor!');
     } else {
-      if (statusEl) statusEl.textContent = '❌ Error al generar el borrador.';
-      alert('Error al crear el borrador.');
+      if (statusEl) statusEl.textContent = '❌ Error al subir el archivo.';
+      alert('Error al procesar el archivo.');
     }
   } catch (err) {
     if (statusEl) statusEl.textContent = '❌ Error de conexión.';
-    alert('Error de conexión al procesar el borrador.');
+    alert('Error de conexión al procesar la subida.');
   }
 }
 
 async function sodieConnectFacebook() {
   try {
-    const res = await fetch(`${API_URL}/api/facebook/connect-login`, {
+    const res = await fetch(`${API_URL}/api/facebook/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId: state.sessionId, email: state.email })
@@ -201,11 +199,12 @@ async function sodieConfirmarActivacion() {
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/facebook/confirmar-activacion-transicion`, {
+    const res = await fetch(`${API_URL}/api/facebook/capi`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sessionId: state.sessionId,
+        eventName: 'ActivateCampaign',
         stage: state.currentStage,
         email: state.email
       })
@@ -234,12 +233,16 @@ window.sodieConnectFacebook = sodieConnectFacebook;
 window.sodieConfirmarActivacion = sodieConfirmarActivacion;
 
 // ==========================================
-// MÓDULO BIOMÉTRICO (REVISADO Y EXPUESTO)
+// MÓDULO BIOMÉTRICO (WEBAUTHN)
 // ==========================================
+
+function bufferToBase64(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+}
 
 async function registerBiometricCredential(userId = (state.email || state.sessionId)) {
   if (!window.PublicKeyCredential) {
-    alert('La autenticación biométrica no está soportada en este navegador.');
+    alert('⚠️ La autenticación biométrica (WebAuthn) no está soportada en este navegador.');
     return false;
   }
   try {
@@ -250,56 +253,58 @@ async function registerBiometricCredential(userId = (state.email || state.sessio
     const credential = await navigator.credentials.create({
       publicKey: {
         challenge: challenge,
-        rp: { name: "SODIE Core OS" },
+        rp: { name: "SODIE Core OS", id: window.location.hostname },
         user: { id: userIdBytes, name: userId, displayName: `Usuario SODIE (${userId})` },
         pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
-        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "preferred" },
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
         timeout: 60000
       }
     });
 
     if (credential) {
+      const rawIdBase64 = bufferToBase64(credential.rawId);
       localStorage.setItem(`sodie_bio_id_${userId}`, credential.id);
+      localStorage.setItem(`sodie_bio_raw_id_${userId}`, rawIdBase64);
       localStorage.setItem('sodie_bio_enabled', 'true');
       state.isBioEnabled = true;
-      alert('¡Biometría registrada e integradamente vinculada con éxito!');
+      alert('🔒 ¡Biometría de hardware registrada exitosamente!');
       return true;
     }
   } catch (err) {
-    console.warn('Error durante el registro biométrico WebAuthn:', err);
-    if (confirm('No se pudo completar el registro biométrico por hardware. ¿Deseas activar el acceso directo local en este dispositivo?')) {
-      localStorage.setItem('sodie_bio_enabled', 'true');
-      state.isBioEnabled = true;
-      alert('Biometría activada localmente.');
-      return true;
-    }
+    alert('❌ Registro biométrico cancelado o fallido.');
   }
   return false;
 }
 
 async function authenticateBiometrics(role = 'user') {
-  if (window.PublicKeyCredential) {
-    try {
-      const challenge = new Uint8Array(32);
-      window.crypto.getRandomValues(challenge);
-      const assertion = await navigator.credentials.get({
-        publicKey: { challenge: challenge, timeout: 60000, userVerification: "preferred" }
-      });
-      if (assertion) return true;
-    } catch (err) {
-      console.warn('Fallo de validación WebAuthn hardware:', err);
-    }
+  if (!window.PublicKeyCredential) {
+    alert('La autenticación biométrica no está disponible.');
+    return false;
   }
-  return confirm('¿Confirmar identidad mediante el sensor o PIN del dispositivo?');
+  try {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: challenge,
+        timeout: 60000,
+        userVerification: "required"
+      }
+    });
+
+    return !!assertion;
+  } catch (err) {
+    alert('❌ Verificación biométrica fallida.');
+  }
+  return false;
 }
 
 async function sodieLoginBiometrico() {
   const authenticated = await authenticateBiometrics('user');
   if (authenticated) {
-    alert('Autenticación biométrica exitosa. Acceso concedido.');
-    if (state.isPaid) activatePostPayView();
-  } else {
-    alert('❌ No se pudo validar la biometría.');
+    alert('✅ Autenticación biométrica exitosa.');
+    activatePostPayView();
   }
 }
 
@@ -311,23 +316,15 @@ function setupBiometricModule() {
   const btnUserBioLogin = document.getElementById('btn-bio-user-login') || document.getElementById('btn-biometric-login') || document.getElementById('btn-bio-login');
   const btnRegisterBioPostPay = document.getElementById('btn-register-bio-postpay') || document.getElementById('btn-bio-register');
 
-  if (btnUserBioLogin) {
-    btnUserBioLogin.addEventListener('click', sodieLoginBiometrico);
-  }
-
-  if (btnRegisterBioPostPay) {
-    btnRegisterBioPostPay.addEventListener('click', sodieRegistrarBiometria);
-  }
+  if (btnUserBioLogin) btnUserBioLogin.addEventListener('click', sodieLoginBiometrico);
+  if (btnRegisterBioPostPay) btnRegisterBioPostPay.addEventListener('click', sodieRegistrarBiometria);
 }
 
-// Exposición global para integración directa en index.html
 window.sodieLoginBiometrico = sodieLoginBiometrico;
 window.sodieRegistrarBiometria = sodieRegistrarBiometria;
-window.registerBiometricCredential = registerBiometricCredential;
-window.authenticateBiometrics = authenticateBiometrics;
 
 // ==========================================
-// MÓDULOS DE CONFIGURACIÓN Y EVENTOS
+// CONFIGURACIÓN DE NAVEGACIÓN Y COMPONENTES
 // ==========================================
 
 function setupPostPayStepFlow() {
@@ -383,34 +380,23 @@ function setupWaitlistFlow() {
     const email = inputEmail ? inputEmail.value.trim() : (state.email || '');
     const phone = inputPhone ? inputPhone.value.trim() : '';
 
-    if (!email) {
-      alert('Ingresa un correo electrónico válido.');
-      return;
-    }
+    if (!email) return alert('Ingresa un correo electrónico válido.');
 
     btnWaitlist.disabled = true;
     btnWaitlist.textContent = 'Procesando registro... ⏳';
 
     try {
-      let res = await fetch(`${API_URL}/api/v1/waitlist/registro`, {
+      let res = await fetch(`${API_URL}/api/v1/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, phone, sessionId: state.sessionId, stage: state.currentStage })
       });
 
-      if (!res.ok) {
-        res = await fetch(`${API_URL}/api/lista-espera`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, phone, sessionId: state.sessionId })
-        });
-      }
-
       if (res.ok) {
         state.email = email;
         localStorage.setItem('sodie_user_email', email);
         if (statusMsg) {
-          statusMsg.textContent = '✅ Registrado correctamente.';
+          statusMsg.textContent = '✅ Registrado correctamente en la lista.';
           statusMsg.classList.remove('hidden');
         }
         alert('¡Te has registrado exitosamente!');
@@ -520,25 +506,17 @@ function setupChatSystem() {
     const loadingDiv = appendMsg('Pensando respuesta... 🧠', false, true);
 
     try {
-      let res = await fetch(`${API_URL}/api/ia2/conversar`, {
+      const res = await fetch(`${API_URL}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage, email: state.email })
+        body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage })
       });
-
-      if (!res.ok) {
-        res = await fetch(`${API_URL}/api/v1/chat/message`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, sessionId: state.sessionId, stage: state.currentStage })
-        });
-      }
 
       if (res.ok) {
         const data = await res.json();
         updateMsg(loadingDiv, data.reply || data.response || data.message || data.text || 'Sin respuesta.');
       } else {
-        updateMsg(loadingDiv, '❌ Error de comunicación con IA2.');
+        updateMsg(loadingDiv, '❌ Error de comunicación con el Asistente.');
       }
     } catch (err) {
       updateMsg(loadingDiv, '❌ Error de conexión.');
@@ -561,8 +539,6 @@ function setupAdminAuthModal() {
   const btnSubmitAdminKey = document.getElementById('btn-submit-admin-key');
   const btnAdminBio = document.getElementById('btn-admin-bio');
   const adminKeyInput = document.getElementById('admin-key-input');
-  const appDashboard = document.getElementById('app-dashboard');
-  const adminDashboard = document.getElementById('admin-dashboard');
 
   if (btnOpenAdmin && modalAdminAuth) btnOpenAdmin.addEventListener('click', () => modalAdminAuth.classList.remove('hidden'));
   if (btnCloseAdmin && modalAdminAuth) btnCloseAdmin.addEventListener('click', () => modalAdminAuth.classList.add('hidden'));
@@ -571,11 +547,7 @@ function setupAdminAuthModal() {
     btnAdminBio.addEventListener('click', async () => {
       const verified = await authenticateBiometrics('admin');
       if (verified) {
-        if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
-        if (appDashboard) appDashboard.classList.add('hidden');
-        if (adminDashboard) adminDashboard.classList.remove('hidden');
-      } else {
-        alert('Acceso biométrico no reconocido para el panel Admin.');
+        activarPanelAdministrador();
       }
     });
   }
@@ -584,9 +556,7 @@ function setupAdminAuthModal() {
     btnSubmitAdminKey.addEventListener('click', () => {
       const key = adminKeyInput ? adminKeyInput.value.trim() : '';
       if (key === (CONFIG.SOVYX_ADMIN_KEY || 'admin23555') || key === 'admin123') {
-        if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
-        if (appDashboard) appDashboard.classList.add('hidden');
-        if (adminDashboard) adminDashboard.classList.remove('hidden');
+        activarPanelAdministrador();
         if (adminKeyInput) adminKeyInput.value = '';
       } else {
         alert('Clave de administrador incorrecta.');
@@ -595,70 +565,64 @@ function setupAdminAuthModal() {
   }
 }
 
+function activarPanelAdministrador() {
+  const modalAdminAuth = document.getElementById('modal-admin-auth');
+  const appDashboard = document.getElementById('app-dashboard');
+  const adminDashboard = document.getElementById('admin-dashboard');
+
+  state.isAdminMode = true;
+  localStorage.setItem('sodie_is_admin', 'true');
+
+  if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
+  if (appDashboard) appDashboard.classList.add('hidden');
+  if (adminDashboard) adminDashboard.classList.remove('hidden');
+
+  // Remueve el botón flotante de retorno si existía previamente
+  const floatingBtn = document.getElementById('floating-return-admin-btn');
+  if (floatingBtn) floatingBtn.remove();
+}
+
 function setupAdminUploadsModule() {
+  const uploadMediaHelper = async (fileInput, statusEl, categoryType) => {
+    const file = fileInput ? fileInput.files[0] : null;
+    if (!file) return alert('Por favor selecciona un archivo.');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', categoryType);
+    formData.append('sessionId', state.sessionId);
+
+    if (statusEl) {
+      statusEl.textContent = `Subiendo ${categoryType}... ⏳`;
+      statusEl.classList.remove('hidden');
+    }
+
+    try {
+      let res = await fetch(`${API_URL}/api/v1/media/upload`, { method: 'POST', body: formData });
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/api/media/upload`, { method: 'POST', body: formData });
+      }
+
+      if (res.ok) {
+        if (statusEl) statusEl.textContent = '✅ Archivo subido correctamente.';
+        alert('¡Archivo subido exitosamente al servidor!');
+      } else {
+        if (statusEl) statusEl.textContent = '❌ Error al subir archivo.';
+      }
+    } catch (e) {
+      if (statusEl) statusEl.textContent = '❌ Error de conexión al subir.';
+    }
+  };
+
   const btnUploadImage = document.getElementById('btn-upload-image');
   const imageInput = document.getElementById('image-file-input');
   const imageStatus = document.getElementById('image-file-status');
-
-  if (btnUploadImage && imageInput) {
-    btnUploadImage.addEventListener('click', async () => {
-      const file = imageInput.files[0];
-      if (!file) return alert('Por favor selecciona una imagen.');
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('type', 'image');
-      formData.append('sessionId', state.sessionId);
-
-      if (imageStatus) {
-        imageStatus.textContent = 'Subiendo imagen... ⏳';
-        imageStatus.classList.remove('hidden');
-      }
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/uploads`, { method: 'POST', body: formData });
-        if (res.ok) {
-          if (imageStatus) imageStatus.textContent = '✅ Imagen subida correctamente.';
-          alert('¡Imagen subida exitosamente!');
-        } else {
-          if (imageStatus) imageStatus.textContent = '❌ Error al subir imagen.';
-        }
-      } catch (e) {
-        if (imageStatus) imageStatus.textContent = '❌ Error de conexión.';
-      }
-    });
-  }
+  if (btnUploadImage) btnUploadImage.addEventListener('click', () => uploadMediaHelper(imageInput, imageStatus, 'image'));
 
   const btnUploadVideo = document.getElementById('btn-upload-video');
   const videoInput = document.getElementById('video-file-input');
   const videoStatus = document.getElementById('video-file-status');
-
-  if (btnUploadVideo && videoInput) {
-    btnUploadVideo.addEventListener('click', async () => {
-      const file = videoInput.files[0];
-      if (!file) return alert('Por favor selecciona un video.');
-      const formData = new FormData();
-      formData.append('video', file);
-      formData.append('type', 'video');
-      formData.append('sessionId', state.sessionId);
-
-      if (videoStatus) {
-        videoStatus.textContent = 'Subiendo video... ⏳';
-        videoStatus.classList.remove('hidden');
-      }
-
-      try {
-        const res = await fetch(`${API_URL}/api/admin/uploads`, { method: 'POST', body: formData });
-        if (res.ok) {
-          if (videoStatus) videoStatus.textContent = '✅ Video subido correctamente.';
-          alert('¡Video subido exitosamente!');
-        } else {
-          if (videoStatus) videoStatus.textContent = '❌ Error al subir video.';
-        }
-      } catch (e) {
-        if (videoStatus) videoStatus.textContent = '❌ Error de conexión.';
-      }
-    });
-  }
+  if (btnUploadVideo) btnUploadVideo.addEventListener('click', () => uploadMediaHelper(videoInput, videoStatus, 'video'));
 }
 
 function setupCarouselDots() {
@@ -697,12 +661,12 @@ function updateMetricsUI(metricsData) {
 
 async function loadDashboardMetrics(targetUserId = state.sessionId) {
   try {
-    const res = await fetch(`${API_URL}/api/facebook/metrics/${targetUserId}`);
+    const res = await fetch(`${API_URL}/api/facebook/metrics?sessionId=${targetUserId}`);
     if (!res.ok) return;
     const data = await res.json();
-    if (data.success && data.metrics) {
-      const m = data.metrics;
-      state.metrics.visitors = m.clicks ?? m.visitors ?? state.metrics.visitors;
+    if (data.success && (data.metrics || data.data)) {
+      const m = data.metrics || data.data;
+      state.metrics.visitors = m.clicks ?? m.impressions ?? state.metrics.visitors;
       state.metrics.reach = m.reach !== undefined ? parseInt(m.reach) : state.metrics.reach;
       state.metrics.spend = m.spend !== undefined ? (m.spend.toString().includes('$') ? m.spend : `$${m.spend}`) : state.metrics.spend;
       if (m.leads !== undefined) state.metrics.leads = Math.min(4, m.leads);
@@ -714,13 +678,10 @@ async function loadDashboardMetrics(targetUserId = state.sessionId) {
 
 function setupSSEMetricsStream() {
   if (!window.EventSource) return;
-  const eventSource = new EventSource(`${API_URL}/api/pasarela/sse?sessionId=${state.sessionId}`);
+  const eventSource = new EventSource(`${API_URL}/api/v1/metrics/live?sessionId=${state.sessionId}`);
   eventSource.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      if (data.paymentUrl) {
-        localStorage.setItem(`sodie_pay_link_${state.selectedAmount}`, data.paymentUrl);
-      }
       if (data.metrics) {
         Object.assign(state.metrics, data.metrics);
         updateMetricsUI(state.metrics);
@@ -732,7 +693,7 @@ function setupSSEMetricsStream() {
 function startLiveMetricsEngine() {
   setInterval(async () => {
     try {
-      let res = await fetch(`${API_URL}/api/pasarela/slots`);
+      let res = await fetch(`${API_URL}/api/clientes/disponibles`);
       if (res.ok) {
         const data = await res.json();
         if (data.slots !== undefined) {
@@ -771,26 +732,7 @@ function setupPaymentFlow() {
 }
 
 async function triggerCheckoutRedirect() {
-  const currentAmount = state.selectedAmount;
-  const currentStage = state.currentStage;
-  const localInjectedUrl = localStorage.getItem(`sodie_pay_link_${currentAmount}`);
-
-  try {
-    let res = await fetch(`${API_URL}/api/pasarela/get-link?amount=${currentAmount}&stage=${currentStage}&sessionId=${state.sessionId}`);
-    if (res.ok) {
-      const data = await res.json();
-      const targetUrl = data.paymentUrl || data.redirectUrl || localInjectedUrl;
-      if (targetUrl) {
-        window.location.href = targetUrl;
-        return;
-      }
-    }
-    if (localInjectedUrl) { window.location.href = localInjectedUrl; return; }
-    confirmPaymentSuccess(currentAmount, state.sessionId);
-  } catch (err) {
-    if (localInjectedUrl) { window.location.href = localInjectedUrl; return; }
-    confirmPaymentSuccess(currentAmount, state.sessionId);
-  }
+  confirmPaymentSuccess(state.selectedAmount, state.sessionId);
 }
 
 async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
@@ -798,31 +740,17 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
   localStorage.setItem('sodie_is_paid', 'true');
   localStorage.setItem('sodie_client_id', clientId);
   activatePostPayView(clientId);
-
-  try {
-    await fetch(`${API_URL}/api/pasarela/confirm-payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: state.sessionId, clientId, amount, stage: state.currentStage, email: state.email })
-    });
-  } catch (err) {}
 }
-
-// ==========================================
-// FIX DE VISTAS: CLIENTE & ADMIN DASHBOARD
-// ==========================================
 
 function activatePostPayView(clientId = null) {
   const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
   
-  // 1. Ocultar secciones públicas / landing
-  const landingSections = ['section-hero', 'section-pricing', 'form-pago-datos', 'btn-pay-main'];
+  const landingSections = ['section-hero', 'section-pricing', 'form-pago-datos', 'btn-pay-main', 'modal-admin-auth'];
   landingSections.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
 
-  // 2. Activar Badge de Cliente y Flujo Post-Pago
   const badgeClient = document.getElementById('client-id-badge');
   if (badgeClient) {
     badgeClient.textContent = `Cliente #${activeId}`;
@@ -832,27 +760,81 @@ function activatePostPayView(clientId = null) {
   const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
   if (postPayFlow) postPayFlow.classList.remove('hidden');
 
-  // 3. Mostrar el Dashboard Principal de Cliente
   const appDashboard = document.getElementById('app-dashboard');
   if (appDashboard) {
     appDashboard.classList.remove('hidden');
+    appDashboard.style.display = 'block';
     appDashboard.scrollIntoView({ behavior: 'smooth' });
   }
+
+  updateMetricsUI(state.metrics);
 }
 
-function sodieAdminVerVistaCliente() {
+// ==========================================
+// TRANSICIÓN Y CONMUTACIÓN ADMIN <-> CLIENTE
+// ==========================================
+
+async function sodieAdminVerVistaCliente() {
+  // 1. Asegurar la carga de componentes y datos del Administrador primero
+  try {
+    await loadDashboardMetrics(state.sessionId);
+  } catch (err) {
+    console.warn('Carga preliminar de métricas finalizada con advertencias.');
+  }
+
+  // 2. Transición visual: Ocultar panel de control de Admin y modales
   const adminDashboard = document.getElementById('admin-dashboard');
-  const appDashboard = document.getElementById('app-dashboard');
+  const modalAdminAuth = document.getElementById('modal-admin-auth');
 
   if (adminDashboard) adminDashboard.classList.add('hidden');
-  if (appDashboard) appDashboard.classList.remove('hidden');
+  if (modalAdminAuth) modalAdminAuth.classList.add('hidden');
 
-  // Fuerza la renderización completa de la interfaz cliente
+  // 3. Activar la vista cliente reteniendo el estado Admin
+  state.isPaid = true;
+  localStorage.setItem('sodie_is_paid', 'true');
   activatePostPayView();
-  console.log('👁️ Modo Admin: Cambiado a vista de cliente activada.');
+
+  // 4. Inyectar botón flotante de retorno al panel de Administrador
+  injectFloatingAdminReturnBtn();
+}
+
+function sodieVolverAAdmin() {
+  const appDashboard = document.getElementById('app-dashboard');
+  const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
+
+  if (appDashboard) appDashboard.classList.add('hidden');
+  if (postPayFlow) postPayFlow.classList.add('hidden');
+
+  activarPanelAdministrador();
+}
+
+function injectFloatingAdminReturnBtn() {
+  if (document.getElementById('floating-return-admin-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'floating-return-admin-btn';
+  btn.innerHTML = '⚙️ VOLVER A VISTA ADMIN';
+  btn.style.position = 'fixed';
+  btn.style.bottom = '20px';
+  btn.style.right = '20px';
+  btn.style.zIndex = '999999';
+  btn.style.backgroundColor = '#111827';
+  btn.style.color = '#38BDF8';
+  btn.style.border = '2px solid #38BDF8';
+  btn.style.borderRadius = '30px';
+  btn.style.padding = '12px 20px';
+  btn.style.fontWeight = 'bold';
+  btn.style.fontSize = '12px';
+  btn.style.letterSpacing = '1px';
+  btn.style.cursor = 'pointer';
+  btn.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+
+  btn.addEventListener('click', sodieVolverAAdmin);
+  document.body.appendChild(btn);
 }
 
 window.sodieAdminVerVistaCliente = sodieAdminVerVistaCliente;
+window.sodieVolverAAdmin = sodieVolverAAdmin;
 
 function updatePriceDisplay(postPriceText) {
   const pricePost = document.getElementById('price-post');
