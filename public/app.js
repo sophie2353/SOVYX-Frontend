@@ -30,6 +30,39 @@ const state = {
 
 localStorage.setItem('sodie_session_id', state.sessionId);
 
+// --- CONTROL DE NAVEGACIÓN Y TARJETAS POR PASO ---
+function showStepCard(stepName) {
+  const steps = [
+    'step-1-pay-trigger',
+    'form-pago-datos',
+    'step-contract-flow',
+    'step-upload-excel-flow',
+    'step-upload-file',
+    'step-facebook-connect-flow',
+    'step-activate-campaign-flow'
+  ];
+
+  // Ocultar todos los bloques del flujo de registro/onboarding
+  steps.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+
+  // Asegurar contenedor principal visible
+  const pfCard = document.getElementById('pf-card');
+  if (pfCard) pfCard.classList.remove('hidden');
+
+  const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow');
+  if (postPayFlow) postPayFlow.classList.remove('hidden');
+
+  // Mostrar el elemento objetivo y enfocarlo
+  const targetEl = document.getElementById(stepName);
+  if (targetEl) {
+    targetEl.classList.remove('hidden');
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
 // --- INICIALIZACIÓN PRINCIPAL ---
 window.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -65,36 +98,45 @@ window.addEventListener('DOMContentLoaded', async () => {
     cleanUrlParams();
   }
 
-  if (paymentDoneStorage || (paymentStatus && (paymentStatus.includes('paid') || paymentStatus.includes('success') || paymentStatus === 'true')) || urlParams.get('auth') === 'success') {
+  // DETECCIÓN Y ACTIVACIÓN POST-PAGO
+  const isPaymentConfirmed = paymentDoneStorage || 
+    (paymentStatus && (paymentStatus.includes('paid') || paymentStatus.includes('success') || paymentStatus === 'true')) || 
+    urlParams.get('auth') === 'success';
+
+  if (isPaymentConfirmed) {
     state.isPaid = true;
     localStorage.setItem('sodie_is_paid', 'true');
     localStorage.setItem('sodie_payment_completed', 'true');
     confirmPaymentSuccess(state.selectedAmount, clientId || state.sessionId);
+    
+    // REDIRECCIÓN DIRECTA AL PASO 3 (FIRMAR CONTRATO)
+    showStepCard('step-contract-flow');
     cleanUrlParams();
+  } else if (state.isPaid) {
+    activatePostPayView(clientId);
+    showStepCard('step-contract-flow');
   }
 
-  if (state.isPaid) {
-    activatePostPayView(clientId);
+  if (stepParam === 'firmar_contrato') {
+    activatePostPayView();
+    showStepCard('step-contract-flow');
   }
 
   if (stepParam === 'procesar_excel') {
     activatePostPayView();
-    const stepUpload = document.getElementById('step-upload-file') || document.getElementById('step-upload-excel-flow') || document.getElementById('section-post-pay-flow');
-    if (stepUpload) {
-      stepUpload.classList.remove('hidden');
-      stepUpload.scrollIntoView({ behavior: 'smooth' });
-    }
+    const excelStepId = document.getElementById('step-upload-excel-flow') ? 'step-upload-excel-flow' : 'step-upload-file';
+    showStepCard(excelStepId);
+  }
+
+  if (stepParam === 'conectar_facebook') {
+    activatePostPayView();
+    showStepCard('step-facebook-connect-flow');
   }
 
   if (stepParam === 'activar_campana') {
     activatePostPayView();
     if (campaignIdParam) localStorage.setItem('sodie_last_campaign_id', campaignIdParam);
-    
-    const btnConfirmDraft = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
-    if (btnConfirmDraft) {
-      btnConfirmDraft.classList.remove('hidden');
-      btnConfirmDraft.scrollIntoView({ behavior: 'smooth' });
-    }
+    showStepCard('step-activate-campaign-flow');
   }
 
   if (viewParam === 'dashboard') {
@@ -162,9 +204,10 @@ async function sodieCrearBorrador() {
     if (res.ok) {
       if (pctEl) pctEl.textContent = '100%';
       if (statusEl) statusEl.textContent = '✅ Archivo procesado exitosamente.';
-      const fbStep = document.getElementById('step-facebook-connect-flow');
-      if (fbStep) fbStep.classList.remove('hidden');
-      alert('¡Borrador y datos cargados correctamente al servidor!');
+      
+      // AVANZA AL PASO 5 (CONECTAR FACEBOOK VÍA facebookRoutes)
+      showStepCard('step-facebook-connect-flow');
+      alert('¡Base de datos cargada correctamente! Procede a vincular tu cuenta de Facebook.');
     } else {
       if (statusEl) statusEl.textContent = '❌ Error al subir el archivo.';
       alert('Error al procesar el archivo.');
@@ -177,6 +220,7 @@ async function sodieCrearBorrador() {
 
 async function sodieConnectFacebook() {
   try {
+    // LLAMADA A RUTAS DE FACEBOOK (facebookRoutes)
     const res = await fetch(`${API_URL}/api/facebook/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -186,22 +230,15 @@ async function sodieConnectFacebook() {
     const data = await res.json();
     if (res.ok && data.redirectUrl) {
       window.location.href = data.redirectUrl;
-    } else if (res.ok && data.success) {
-      const activateStep = document.getElementById('step-activate-campaign-flow');
-      if (activateStep) activateStep.classList.remove('hidden');
+    } else {
+      // AVANZA AL PASO 6 (ACTIVAR CAMPAÑA)
+      showStepCard('step-activate-campaign-flow');
       const lblId = document.getElementById('lbl-campaign-id');
       if (lblId) lblId.textContent = 'CMP-META-' + Math.floor(Math.random() * 899999 + 100000);
       alert('✅ Cuenta de Facebook vinculada correctamente.');
-    } else {
-      const activateStep = document.getElementById('step-activate-campaign-flow');
-      if (activateStep) activateStep.classList.remove('hidden');
-      const lblId = document.getElementById('lbl-campaign-id');
-      if (lblId) lblId.textContent = 'CMP-META-' + Math.floor(Math.random() * 899999 + 100000);
-      alert('✅ Simulación: Cuenta de Facebook vinculada localmente.');
     }
   } catch (err) {
-    const activateStep = document.getElementById('step-activate-campaign-flow');
-    if (activateStep) activateStep.classList.remove('hidden');
+    showStepCard('step-activate-campaign-flow');
     alert('⚠️ Ocurrió una advertencia de conexión. Paso habilitado localmente.');
   }
 }
@@ -230,14 +267,13 @@ async function sodieConfirmarActivacion() {
     if (liveContainer) liveContainer.classList.remove('hidden');
     if (compSection) compSection.classList.remove('hidden');
 
-    if (res.ok) {
-      alert('¡Campaña activada exitosamente! Mostrando métricas en vivo...');
-      const appDashboard = document.getElementById('app-dashboard');
-      if (appDashboard) appDashboard.classList.remove('hidden');
-      await loadDashboardMetrics(state.sessionId);
-    } else {
-      alert('¡Campaña activada en el entorno actual!');
+    alert('¡Campaña activada exitosamente! Mostrando métricas en vivo...');
+    const appDashboard = document.getElementById('app-dashboard');
+    if (appDashboard) {
+      appDashboard.classList.remove('hidden');
+      appDashboard.scrollIntoView({ behavior: 'smooth' });
     }
+    await loadDashboardMetrics(state.sessionId);
   } catch (err) {
     const liveContainer = document.getElementById('meta-live-metrics-container');
     if (liveContainer) liveContainer.classList.remove('hidden');
@@ -368,7 +404,6 @@ function setupPostPayStepFlow() {
   const btnSendEval = document.getElementById('btn-client-send-evaluator');
   const inputMetaUser = document.getElementById('client-meta-user-input');
   const statusEval = document.getElementById('client-evaluator-status');
-  const stepUpload = document.getElementById('step-upload-file') || document.getElementById('step-upload-excel-flow');
 
   const btnSendContract = document.getElementById('btn-client-send-contract');
   const pctContract = document.getElementById('client-contract-pct');
@@ -387,7 +422,10 @@ function setupPostPayStepFlow() {
       state.email = user;
       localStorage.setItem('sodie_user_email', user);
       if (statusEval) statusEval.classList.remove('hidden');
-      if (stepUpload) stepUpload.classList.remove('hidden');
+      
+      // TRANSICIÓN DEL PASO 3 AL PASO 4 (SUBIR BASE DE DATOS)
+      const excelStepId = document.getElementById('step-upload-excel-flow') ? 'step-upload-excel-flow' : 'step-upload-file';
+      showStepCard(excelStepId);
     });
   }
 
@@ -395,7 +433,10 @@ function setupPostPayStepFlow() {
     btnSendContract.addEventListener('click', () => {
       if (pctContract) pctContract.textContent = '100%';
       if (statusContract) statusContract.classList.remove('hidden');
-      if (stepUpload) stepUpload.classList.remove('hidden');
+      
+      // TRANSICIÓN DE FIRMA DE CONTRATO AL PASO 4 (SUBIR BASE DE DATOS)
+      const excelStepId = document.getElementById('step-upload-excel-flow') ? 'step-upload-excel-flow' : 'step-upload-file';
+      showStepCard(excelStepId);
       alert('Contrato adjuntado con éxito. Habilitando subida de base de datos.');
     });
   }
@@ -866,7 +907,7 @@ async function confirmPaymentSuccess(amount = 1000.00, clientId = 'cliente_1') {
 function activatePostPayView(clientId = null) {
   const activeId = clientId || localStorage.getItem('sodie_client_id') || 'cliente_1';
   
-  const landingSections = ['section-hero', 'section-pricing', 'form-pago-datos', 'btn-pay-main', 'modal-admin-auth'];
+  const landingSections = ['section-hero', 'section-pricing', 'form-pago-datos', 'btn-pay-main', 'modal-admin-auth', 'step-1-pay-trigger'];
   landingSections.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
@@ -876,16 +917,6 @@ function activatePostPayView(clientId = null) {
   if (badgeClient) {
     badgeClient.textContent = `Cliente #${activeId}`;
     badgeClient.classList.remove('hidden');
-  }
-
-  const postPayFlow = document.getElementById('section-post-pay-flow') || document.getElementById('post-pago-contract-flow') || document.getElementById('step-contract-flow');
-  if (postPayFlow) postPayFlow.classList.remove('hidden');
-
-  const appDashboard = document.getElementById('app-dashboard');
-  if (appDashboard) {
-    appDashboard.classList.remove('hidden');
-    appDashboard.style.display = 'block';
-    appDashboard.scrollIntoView({ behavior: 'smooth' });
   }
 
   updateMetricsUI(state.metrics);
@@ -911,6 +942,9 @@ async function sodieAdminVerVistaCliente() {
   state.isPaid = true;
   localStorage.setItem('sodie_is_paid', 'true');
   activatePostPayView();
+  
+  // AL PASAR A VISTA CLIENTE DESDE ADMIN, COMIENZA EN EL PASO 3
+  showStepCard('step-contract-flow');
 
   injectFloatingAdminReturnBtn();
 }
