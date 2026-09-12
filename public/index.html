@@ -34,13 +34,13 @@
     <div class="toast-content">
       <span class="toast-icon"></span>
       <div class="toast-text">
-        <strong id="toast-title">Acceso Cliente Concedido</strong>
+        <strong id="toast-title">Notificación SODIE</strong>
         <p id="toast-body">Cupos Disponibles</p>
       </div>
     </div>
   </div>
 
-  <!-- 1. SPLASH SCREEN -->
+  <!-- SPLASH SCREEN -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       <div class="logo-wrapper">
@@ -98,158 +98,19 @@
     </div>
   </div>
 
-  <!-- VISTA CUPOS AGOTADOS / LISTA DE ESPERA -->
-  <div id="view-sold-out" class="full-screen hidden">
-    <div class="glass-card-dash text-center sold-out-wrapper">
-      <h2 class="fuchsia-txt">CUPOS AGOTADOS</h2>
-      <p class="step-desc">El acceso directo al software SODIE está cerrado por límite de capacidad (2/2 cupos ocupados).</p>
-      
-      <div id="waitlist-card-box" class="glass-card-dash waitlist-box">
-        <h3 class="section-title mint-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
-        <p class="step-desc">
-          Registra tus datos para asegurar tu cupo prioritario en SODIE V4:
-        </p>
-        
-        <form id="form-v4-waitlist" onsubmit="event.preventDefault();">
-          <div class="admin-grid two-cols">
-            <input type="text" id="v4-user-name" placeholder="Nombre completo *" required />
-            <input type="text" id="v4-user-company" placeholder="Compañía / Marca *" required />
-          </div>
-          
-          <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico *" required />
-          <input type="password" id="v4-user-password" placeholder="Contraseña de acceso *" required />
-
-          <!-- REGISTRO CON BIOMETRÍA -->
-          <div class="biometrics-container">
-            <button type="button" id="btn-register-biometrics" class="btn-pf-action btn-biometric">
-              Registrar Biometría (Huella / Face ID)
-            </button>
-            <span id="biometric-status-tag" class="step-desc status-tag">Estatus biometría: Pendiente</span>
-          </div>
-          
-          <button id="btn-enable-notifications" type="submit" class="btn-pf-action btn-waitlist-submit">
-            Unirme a la lista de espera
-          </button>
-        </form>
-
-        <div class="link-wrapper">
-          <a href="#" id="btn-open-v4-login" class="mint-txt link-underline">¿Ya tienes cuenta? Iniciar Sesión en SODIE V4</a>
-        </div>
-
-        <p id="waitlist-status-msg" class="mint-txt hidden text-center">
-          ✅ ¡Estás en la lista de espera de SODIE V4!
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL ADMIN AUTH + PANEL DE CONTROL ADMIN -->
-  <div id="modal-admin-auth" class="modal-overlay hidden">
-    <div class="glass-card-dash modal-auth-box wide-admin-modal">
-      <h3 class="section-title fuchsia-txt">Acceso Administrador 👺</h3>
-      
-      <!-- FORMULARIO ACCESO ADMIN -->
-      <div id="admin-login-step">
-        <p class="step-desc">Ingresar clave maestro o autenticar por Biometría:</p>
-        <div class="input-group-flow">
-          <input type="password" id="admin-key-input" placeholder="Clave de acceso..." />
-          <button type="button" id="btn-submit-admin-key" class="btn-pf-action">Entrar</button>
-        </div>
-
-        <div class="biometrics-admin-box margin-v-sm">
-          <button type="button" id="btn-admin-biometrics-login" class="btn-pf-action btn-biometric">
-            🔐 Autenticar Admin con Biometría (Face ID / Huella)
-          </button>
-        </div>
-      </div>
-
-      <!-- PANEL DE ACCIONES DIRECTAS DEL ADMIN -->
-      <div id="admin-control-panel" class="hidden admin-panel-box">
-        <h4 class="mint-txt">Panel de Supervisión y Control ⚙️</h4>
-        
-        <!-- VER VISTA CLIENTE DIRECTA -->
-        <div class="admin-grid two-cols margin-v-sm">
-          <button type="button" class="btn-admin-switch" onclick="sodieAdminVerVistaCliente()">
-            👁️ Ver Vista de Cliente
-          </button>
-        </div>
-
-        <!-- ACTIVAR CAMPAÑA Y SUBIR EXCEL DESDE ADMIN -->
-        <div class="admin-actions-stack margin-v-sm">
-          <h5 class="fuchsia-txt">Acciones de Control de Campaña:</h5>
-          
-          <button type="button" id="btn-admin-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
-            🚀 Activar Campaña Directa (Forzar Lanzamiento)
-          </button>
-
-          <div class="input-group-flow margin-v-sm">
-            <input type="file" id="admin-excel-upload-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-            <button type="button" id="btn-admin-upload-excel" class="btn-pf-action btn-fuchsia-solid" onclick="sodieActivarAdminDirecto()">
-              📤 Subir Excel Compradores (Admin)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <button type="button" id="btn-close-admin-modal" class="btn-pf-action btn-danger" onclick="document.getElementById('modal-admin-auth').classList.add('hidden')">Cerrar Modal</button>
-    </div>
-  </div>
-
-  <!-- PANEL DASHBOARD ADMIN COMPLETO (FUERA DE MODAL SI SE ACTIVA MODO PANORÁMICO) -->
-  <div id="admin-dashboard" class="glass-card-dash hidden margin-v-md" style="margin: 20px; padding: 20px;">
-    <div class="chat-header">
-      <h3 class="section-title fuchsia-txt">Panel Administrador SODIE</h3>
-      <button type="button" class="btn-pf-action btn-mint-solid" onclick="sodieAdminVerVistaCliente()">
-        👁️ Volver a Vista Cliente
-      </button>
-    </div>
-    <p class="step-desc">Modo administrador activo. Puedes revisar métricas o cambiar la visualización.</p>
-  </div>
-
-  <!-- MODAL SODIE V4 AUTH -->
-  <div id="modal-v4-auth" class="modal-overlay hidden">
-    <div class="glass-card-dash modal-auth-box">
-      <h3 class="section-title mint-txt">Iniciar Sesión SODIE V4</h3>
-      <p class="step-desc">Ingresa con tus credenciales registradas:</p>
-      
-      <div class="form-stack">
-        <input type="password" id="v4-login-key-input" placeholder="Contraseña..." />
-        <button type="button" id="btn-submit-v4-key" class="btn-pf-action btn-mint-solid">Entrar con Clave</button>
-      </div>
-
-      <div class="modal-footer-action">
-        <button type="button" id="btn-login-biometrics-v4" class="btn-pf-action btn-biometric-auth">
-          Ingresar con Biometría (Huella / Face ID)
-        </button>
-      </div>
-
-      <button type="button" id="btn-close-v4-modal" class="btn-pf-action btn-danger">Cancelar</button>
-    </div>
-  </div>
-
-  <!-- DASHBOARD MAIN CLIENTE -->
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
         <span id="header-brand-title" class="brand-text">SODIE</span>
-        <span id="client-id-badge" class="badge-client hidden">Cliente 1</span>
       </div>
       <div class="dash-header-right">
-        <!-- BOTÓN ACCESO ADMIN RÁPIDO -->
-        <button type="button" id="btn-open-admin-trigger" class="btn-icon" title="Acceso Admin">🔐</button>
-        <button type="button" id="btn-menu" class="btn-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+        <button type="button" class="btn-icon" onclick="window.location.href='/admin.html'" title="Acceso Admin">🦁</button>
       </div>
     </header>
 
-    <!-- 1. MÉTRICAS EN TIEMPO REAL -->
+    <!-- 1. MÉTRICAS -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas de Rendimiento</h3>
+      <h3 class="section-title">Métricas</h3>
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots"></span></div>
@@ -257,7 +118,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span>Presupuesto Pruebas</span><span class="fuchsia-txt">$40.00</span></div>
+          <div class="card-foot"><span>Presupuesto Prueba 1</span><span class="fuchsia-txt"></span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -266,25 +127,23 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span>Audiencia Objetivos</span><span class="mint-txt">2K personas</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Visitas</span><span class="dots"></span></div>
           <div class="card-value" id="metric-visitors">82</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span>Tráfico Activo</span><span class="mint-txt">En vivo</span></div>
+          <div class="card-foot"><span></span><span class="mint-txt">En vivo</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Activos</span><span class="dots"></span></div>
           <div class="card-value" id="metric-activos">3</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,40 Q50,20 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span>Estado Sistema</span><span class="mint-txt">Online</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -293,7 +152,6 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,35 Q50,15 100,25 T200,8" fill="none" stroke="#d946ef" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span>Intención Alta</span><span class="fuchsia-txt">+28%</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -304,15 +162,6 @@
           </div>
           <div class="card-foot"><span id="metric-cupos-label">Exclusividad</span><span id="metric-cupos-sub" class="fuchsia-txt">Solo 2</span></div>
         </article>
-      </div>
-
-      <div class="slider-dots-indicator" id="slider-dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
       </div>
     </section>
 
@@ -354,6 +203,7 @@
         <button type="button" class="opt-btn" data-payload="ecommerce">Ecommerce</button>
         <button type="button" class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
         <button type="button" class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
+        <button type="button" class="opt-btn" data-playload="SODIE_vs_Agencias">SODIEVSAGENCIAS</button>
       </div>
 
       <div class="chat-input-bar">
@@ -362,98 +212,12 @@
       </div>
     </section>
 
-    <!-- 4. TARJETAS DE MÉTRICAS META EN VIVO -->
-    <section id="meta-live-metrics-container" class="glass-card-dash hidden">
-      <h3 class="section-title mint-txt">Métricas Meta Ads en Tiempo Real</h3>
-      <div class="admin-grid grid-2cols">
-        <div class="metric-live-box glass-card-dash text-center">
-          <span class="gauge-label">Alcance Meta</span>
-          <div id="live-metric-reach" class="timer-digits mint-txt">2,000</div>
-        </div>
-        <div class="metric-live-box glass-card-dash text-center">
-          <span class="gauge-label">Visitas</span>
-          <div id="live-metric-visitors" class="timer-digits mint-txt">1,504</div>
-        </div>
-        <div class="metric-live-box glass-card-dash text-center">
-          <span class="gauge-label">Clientes / Leads</span>
-          <div id="live-metric-leads" class="timer-digits fuchsia-txt">2</div>
-        </div>
-        <div class="metric-live-box glass-card-dash text-center">
-          <span class="gauge-label">Conversión</span>
-          <div id="live-metric-conversion" class="timer-digits mint-txt">4.8%</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. COMPARATIVA SECUENCIAL SODIE VS SIN SODIE -->
-    <section id="section-sodie-comparison" class="glass-card-dash hidden border-fuchsia">
-      <h3 class="section-title fuchsia-txt">Resultados Comparativos con SODIE vs Sin SODIE</h3>
-      
-      <div id="comp-hora-24" class="comparison-box hidden">
-        <h4 class="mint-txt">Finalizado: Hora 24</h4>
-        <div class="admin-grid two-cols">
-          <div class="col-divider-right">
-            <strong class="txt-danger">Sin SODIE</strong>
-            <p class="step-desc">ROAS: <strong>1.2x</strong></p>
-            <p class="step-desc">CPA: <strong>$28.50 USD</strong></p>
-          </div>
-          <div>
-            <strong class="mint-txt">Con SODIE</strong>
-            <p class="step-desc">ROAS: <strong class="mint-txt">3.8x</strong></p>
-            <p class="step-desc">CPA: <strong class="mint-txt">$9.10 USD</strong></p>
-          </div>
-        </div>
-      </div>
-
-      <div id="comp-hora-48" class="comparison-box hidden border-top-mint">
-        <h4 class="fuchsia-txt">Finalizado: Hora 48</h4>
-        <div class="admin-grid two-cols">
-          <div class="col-divider-right">
-            <strong class="txt-danger">Sin SODIE</strong>
-            <p class="step-desc">ROAS: <strong>1.4x</strong></p>
-            <p class="step-desc">Ventas totales: <strong>12</strong></p>
-          </div>
-          <div>
-            <strong class="mint-txt">Con SODIE</strong>
-            <p class="step-desc">ROAS: <strong class="mint-txt">5.2x</strong></p>
-            <p class="step-desc">Ventas totales: <strong class="mint-txt">68</strong></p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. SODIE V4 SLIDES HORIZONTALES -->
-    <section id="section-v4-slides" class="glass-card-dash hidden border-fuchsia">
-      <h3 class="section-title fuchsia-txt">SODIE V4 - Vistas y Módulos</h3>
-      <div class="v4-horizontal-slider">
-        <div class="v4-slide-card border-fuchsia">
-          <img src="slide-v4-1.png" alt="Slide V4 1" class="img-responsive" />
-          <span class="step-desc font-bold">Módulo V4 #1</span>
-        </div>
-        <div class="v4-slide-card border-mint">
-          <img src="slide-v4-2.png" alt="Slide V4 2" class="img-responsive" />
-          <span class="step-desc font-bold">Módulo V4 #2</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. CRONÓMETROS SECUNDARIOS -->
-    <section id="card-timer-24h" class="glass-card-dash text-center hidden">
-      <h3 class="section-title mint-txt">Tiempo Hora 24</h3>
-      <div id="timer-24h-display" class="timer-digits">24:00:00</div>
-      <span class="timer-sub">Subir archivo nuevamente en Hora 24</span>
-    </section>
-
-    <section id="card-timer-v4-72h" class="glass-card-dash text-center hidden border-fuchsia">
-      <h3 class="section-title fuchsia-txt">Lanzamiento Próximo Borrador V4</h3>
-      <div id="timer-v4-display" class="timer-digits fuchsia-txt">72:00:00</div>
-      <span class="timer-sub">Cuenta regresiva activa para inyección programada V4</span>
-    </section>
-
-    <!-- 8. SECCIÓN FLUJO CLIENTE COMPLETO (PAGO > FORMULARIO > CONTRATO > EXCEL > META > ACTIVACIÓN) -->
+    <!-- 4. PAGO FINAL O LISTA DE ESPERA (REEMPLAZABLE DINÁMICAMENTE) -->
     <section id="pf-card" class="glass-card-dash pf-section">
+      
+      <!-- ESTADO NORMAL: PAGO FINAL (FLUJO PASO A PASO) -->
       <div id="pf-standard-content">
-        <h3 id="pf-main-title" class="section-title mint-txt">Pago e Inscripción</h3>
+        <h3 id="pf-main-title" class="section-title mint-txt">Pago Final</h3>
         
         <div class="pf-summary-list">
           <div class="pf-row">
@@ -461,24 +225,17 @@
             <strong id="price-initial" class="price-value">1.000$</strong>
           </div>
           <div id="pf-row-post" class="pf-row">
-            <span>Post Resultados (Hora 48-72-96 con Binance Pay)</span>
+            <span>Resultados (Hora 48-72-96 con Binance Pay)</span>
             <strong id="price-post" class="price-value">9.000$ <small class="price-subtext">(3 cuotas de $3.000)</small></strong>
           </div>
           <div class="pf-row pf-total">
             <span>Total</span>
             <strong id="price-total" class="mint-txt">10.000$</strong>
           </div>
-
-          <!-- BOTÓN PAGAR REUBICADO DIRECTAMENTE DEBAJO DEL TOTAL -->
-          <div id="step-1-pay-trigger" style="margin-top: 18px;">
-            <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient" style="width: 100%; display: block;">
-              PAGAR
-            </button>
-          </div>
         </div>
 
-        <!-- PASO 2: FORMULARIO DE FACTURACIÓN -->
-        <div id="form-pago-datos" class="hidden form-billing-box" style="margin-top: 15px;">
+        <!-- PASO 2: FORMULARIO FACTURACIÓN -->
+        <div id="form-pago-datos" class="form-billing-box margin-v-sm">
           <h4 class="fuchsia-txt">Paso 2: Datos para Facturación</h4>
           <div class="form-stack-compact">
             <div class="form-row-2">
@@ -490,16 +247,27 @@
               <input type="text" id="pay-zip" placeholder="Código Postal *" required />
             </div>
             <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" required />
-            
-            <button type="button" id="btn-submit-pay-form" class="btn-pf-action btn-fuchsia-solid">
-              Confirmar Pago y Datos
-            </button>
+
+            <!-- LINK A PRIVACIDAD Y DATOS -->
+            <div class="privacy-link-wrapper margin-v-sm text-center">
+              <a href="/privacidad y datos" class="mint-txt link-underline" style="font-size: 0.85rem;" target="_blank">
+                Términos de Privacidad y Datos requeridos
+              </a>
+            </div>
           </div>
         </div>
 
-        <!-- PASO 3: CONTRATO DE SERVICIO -->
-        <div id="step-contract-flow" class="hidden contract-flow-box">
-          <h4 class="mint-txt">Paso 3: Contrato de Servicio Firmado</h4>
+        <!-- PASO 3: PAGAR -->
+        <div id="step-3-pay-trigger" class="margin-v-sm">
+          <h4 class="mint-txt">Paso 3: Realizar Pago</h4>
+          <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient" style="width: 100%; display: block;" onclick="sodieProcesarPasoPago()">
+            PAGAR RESERVA ($1,000)
+          </button>
+        </div>
+
+        <!-- PASO 4: CONTRATO -->
+        <div id="step-4-contract-flow" class="hidden contract-flow-box margin-v-sm">
+          <h4 class="mint-txt">Paso 4: Contrato de Servicio Firmado</h4>
           <p class="step-desc">Descarga el PDF, fírmalo digitalmente o a mano y súbelo para continuar:</p>
           
           <a id="btn-download-contract" href="#" class="btn-pf-action btn-blue-solid margin-v-sm">
@@ -508,16 +276,15 @@
           
           <div class="input-group-flow">
             <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
-            <button type="button" id="btn-client-send-contract" class="btn-pf-action">
+            <button type="button" id="btn-client-send-contract" class="btn-pf-action" onclick="sodieSubirContrato()">
               Subir Contrato Firmado <span id="client-contract-pct" class="fuchsia-txt">0%</span>
             </button>
           </div>
-          <p id="client-contract-status" class="mint-txt hidden">Contrato subido correctamente.</p>
         </div>
 
-        <!-- PASO 4: SUBIR EXCEL DE COMPRADORES -->
-        <div id="step-upload-excel-flow" class="hidden upload-excel-box">
-          <h4 class="mint-txt">Paso 4: Subir Excel / CSV de Compradores</h4>
+        <!-- PASO 5: SUBIR EXCEL -->
+        <div id="step-5-excel-flow" class="hidden upload-excel-box margin-v-sm">
+          <h4 class="mint-txt">Paso 5: Subir Excel de Compradores</h4>
           <p class="step-desc">Sube tu base de datos de compradores para generar el borrador automático:</p>
           <div class="input-group-flow">
             <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
@@ -527,53 +294,68 @@
           </div>
         </div>
 
-        <!-- PASO 5: CONECTAR CON FACEBOOK -->
-        <div id="step-facebook-connect-flow" class="hidden fb-connect-box">
-          <h4 class="fuchsia-txt">Paso 5: Conectar Cuenta de Facebook Ads</h4>
+        <!-- PASO 6: CONECTAR CON FACEBOOK -->
+        <div id="step-6-fb-flow" class="hidden fb-connect-box margin-v-sm">
+          <h4 class="fuchsia-txt">Paso 6: Conectar Cuenta de Facebook Ads</h4>
           <p class="step-desc">Vincular tu cuenta publicitaria con Meta para inyección directa:</p>
-
-          <div class="fb-connect-wrapper margin-v-sm">
-            <button type="button" id="btn-facebook-auth" class="btn-pf-action btn-fb-solid" onclick="sodieConnectFacebook()">
-              <svg class="fb-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              Conectar con Facebook Ads
-            </button>
-          </div>
-        </div>
-
-        <!-- PASO 6: ACTIVAR CAMPAÑA / ACCESO A DASHBOARD -->
-        <div id="step-activate-campaign-flow" class="hidden confirm-invest-box">
-          <h4 class="mint-txt">Paso 6: Inyección Lista</h4>
-          <p class="step-desc">ID Campaña: <strong id="lbl-campaign-id" class="mint-txt" data-id="">-</strong></p>
-          <p class="step-desc">Monto sugerido por backend a invertir: <strong id="backend-invest-amount" class="mint-txt">$200.00 - $400.00 USD</strong></p>
-          
-          <!-- BOTÓN PRINCIPAL ACTIVAR CAMPAÑA -->
-          <button type="button" id="btn-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
-            ACTIVAR CAMPAÑA Y MOSTRAR DASHBOARD
+          <button type="button" id="btn-facebook-auth" class="btn-pf-action btn-fb-solid" onclick="sodieConnectFacebook()">
+            Conectar con Facebook Ads
           </button>
         </div>
+
+        <!-- PASO 7: ACTIVAR CAMPAÑA -->
+        <div id="step-7-activate-flow" class="hidden confirm-invest-box margin-v-sm">
+          <h4 class="mint-txt">Paso 7: Activar Campaña</h4>
+          <p class="step-desc">ID Campaña: <strong id="lbl-campaign-id" class="mint-txt">-</strong></p>
+          <button type="button" id="btn-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
+            ACTIVAR CAMPAÑA
+          </button>
+        </div>
+
       </div>
 
-      <!-- VISTA REEMPLAZO SI LA LISTA DE ESPERA ESTÁ ACTIVA -->
-      <div id="pf-waitlist-replacement" class="hidden text-center waitlist-replacement-box">
-        <h3 class="section-title fuchsia-txt">Unirse a Lista de Espera (18 Cupos Disponibles - Fase 1)</h3>
-        <p class="step-desc">Los 2 cupos directos están ocupados.</p>
-        <button type="button" id="btn-trigger-waitlist-modal" class="btn-pf-action btn-fuchsia-solid">
-          Unirme a la lista de espera
+      <!-- ESTADO ALTERNATIVO: LISTA DE ESPERA ACTIVADA ($5K/MES) -->
+      <div id="pf-waitlist-replacement" class="hidden waitlist-replacement-box">
+        <h3 class="section-title fuchsia-txt">Pago Final: 5K$/mes</h3>
+        <p class="step-desc">El acceso directo está cerrado. Únete a la lista de espera prioritaria:</p>
+        
+        <button type="button" id="btn-trigger-waitlist-form" class="btn-pf-action btn-fuchsia-solid" onclick="document.getElementById('waitlist-form-container').classList.remove('hidden')">
+          Unirme a la lista de Espera
         </button>
+
+        <div id="waitlist-form-container" class="hidden margin-v-sm">
+          <form id="form-v4-waitlist" onsubmit="event.preventDefault(); sodieEnviarListaEspera();">
+            <div class="admin-grid two-cols">
+              <input type="text" id="v4-user-name" placeholder="Nombre completo *" required />
+              <input type="text" id="v4-user-company" placeholder="Compañía / Marca *" required />
+            </div>
+            <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico *" required />
+            <input type="password" id="v4-user-password" placeholder="Contraseña de acceso *" required />
+
+            <div class="biometrics-container margin-v-sm">
+              <button type="button" id="btn-register-biometrics" class="btn-pf-action btn-biometric">
+                Registrar Biometría (Huella / Face ID)
+              </button>
+            </div>
+            
+            <button id="btn-submit-waitlist" type="submit" class="btn-pf-action btn-activate-gradient">
+              Acceder
+            </button>
+          </form>
+          <p id="waitlist-success-msg" class="mint-txt hidden margin-v-sm">Te has unido a la lista de espera</p>
+        </div>
       </div>
+
     </section>
 
-    <!-- 9. CRONÓMETRO DE TIEMPO PRINCIPAL -->
-    <section class="glass-card-dash timer-section">
-      <span class="timer-label">TIEMPO TOTAL ACTIVO</span>
-      <div id="timer-main-display" class="timer-digits mint-txt">48:00:00</div>
+    <!-- 5. CRONÓMETRO DE TIEMPO REGRESIVO DE 24 HORAS EN PRINCIPAL -->
+    <section class="glass-card-dash timer-section text-center">
+      <span class="timer-label">TIEMPO REGRESIVO CUENTA REGRESIVA</span>
+      <div id="timer-main-display" class="timer-digits mint-txt">24:00:00</div>
       <span class="timer-sub">Estado del Sistema: Conectado a Meta API</span>
     </section>
   </main>
 
-  <!-- LÓGICA DE CONTROL Y RUTAS -->
   <script src="app.js"></script>
 </body>
 </html>
