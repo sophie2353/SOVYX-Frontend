@@ -1009,3 +1009,16 @@ if (metricsSlider && dots.length > 0) {
     });
   });
 }
+
+// Solicitar permisos en el cliente
+async function solicitarPermisoNotificaciones() {
+  if ('Notification' in window) {
+    const permiso = await Notification.requestPermission();
+    if (permiso === 'granted') {
+      new Notification("SODIE Activo", {
+        body: "Las notificaciones push están configuradas correctamente.",
+        icon: "/assets/icon.png"
+      });
+    }
+  }
+}
