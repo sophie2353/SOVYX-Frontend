@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmación de Pago | SODIE</title>
+  <title>Confirmación | SODIE</title>
+
+  <!-- Hoja de estilos principal del proyecto -->
+  <link rel="stylesheet" href="/styles.css">
 
   <!-- Meta Pixel Code -->
   <script>
@@ -18,73 +21,120 @@
     
     fbq('init', '1754371812277932');
     fbq('track', 'PageView');
-    
-    // Disparo oficial del evento de Pago para atribución en Meta
-    fbq('track', 'Purchase', {
-      value: 1000.00,
-      currency: 'USD',
-      content_name: 'Reserva Slot SODIE'
-    });
   </script>
   <noscript>
     <img height="1" width="1" style="display:none"
          src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"/>
   </noscript>
   <!-- End Meta Pixel Code -->
-
-  <style>
-    body {
-      background-color: #050505;
-      color: #00ffcc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-      padding: 20px;
-    }
-    .card {
-      background: rgba(20, 20, 20, 0.8);
-      border: 1px solid #00ffcc;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
-      max-width: 400px;
-      width: 100%;
-    }
-    h2 { margin-bottom: 10px; font-size: 1.5rem; }
-    p { color: #ccc; font-size: 0.95rem; line-height: 1.4; }
-    .loader {
-      margin: 20px auto 0;
-      border: 3px solid rgba(0, 255, 204, 0.1);
-      border-top: 3px solid #00ffcc;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
 </head>
-<body>
+<body class="confirmation-body">
 
-  <div class="card">
-    <h2>¡Pago Confirmado!</h2>
-    <p>Registrando evento en Meta Pixel y preparando tu panel de integración pospago...</p>
-    <div class="loader"></div>
+  <div class="card confirmation-card">
+    <h2 id="conf-title">Procesando...</h2>
+    <p id="conf-body">Cargando estado de la operación...</p>
+    
+    <div id="loader-box" class="loader"></div>
+    
+    <button id="conf-action-btn" class="btn" style="display: none;"></button>
+    <button id="conf-verify-btn" class="btn btn-secondary" style="display: none;">Verificar Estado en Meta</button>
   </div>
 
   <script>
-    // 1. Guardar la confirmación del pago en el navegador
-    localStorage.setItem('sodie_payment_completed', 'true');
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const step = urlParams.get('step');
+      const campaignId = urlParams.get('campaignId');
+      const actId = urlParams.get('actId');
+      const sessionId = urlParams.get('sessionId');
 
-    // 2. Redirigir automáticamente de regreso al index.html en 2.5 segundos
-    setTimeout(() => {
-      window.location.href = 'index.html?status=paid_success';
-    }, 2500);
+      const titleEl = document.getElementById('conf-title');
+      const bodyEl = document.getElementById('conf-body');
+      const loaderEl = document.getElementById('loader-box');
+      const actionBtn = document.getElementById('conf-action-btn');
+      const verifyBtn = document.getElementById('conf-verify-btn');
+
+      // CASO 1: POST AUTH (Viene del OAuth callback de Meta)
+      if (step === 'procesar_excel') {
+        loaderEl.style.display = 'none';
+        titleEl.textContent = ' Conexión Exitosa con Meta';
+        bodyEl.textContent = 'Tu cuenta ha sido vinculada correctamente. Procede a cargar la audiencia para generar el borrador.';
+        actionBtn.style.display = 'block';
+        actionBtn.textContent = 'Ir a Carga de Archivo';
+        actionBtn.onclick = () => {
+          window.location.href = `/index.html?step=procesar_excel&sessionId=${sessionId || ''}`;
+        };
+      }
+
+      // CASO 2: POST CREAR BORRADOR (Borrador en PAUSED listo en Meta)
+      else if (step === 'activar_campana') {
+        loaderEl.style.display = 'none';
+        titleEl.textContent = 'Borrador Generado en Meta';
+        bodyEl.textContent = 'Abre Meta Ads Manager para publicar creativos y presupuesto, luego confirma la activación aquí.';
+        
+        actionBtn.style.display = 'block';
+        actionBtn.textContent = 'Abrir Meta Ads Manager';
+        actionBtn.onclick = () => {
+          const webUrl = `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${actId}&selected_campaign_ids=${campaignId}`;
+          const appUrl = `fb://adsmanager/campaign?act=${actId}&campaign_id=${campaignId}`;
+
+          if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            const start = Date.now();
+            window.location.href = appUrl;
+            setTimeout(() => {
+              if (Date.now() - start < 3000) window.location.href = webUrl;
+            }, 2500);
+          } else {
+            window.open(webUrl, '_blank');
+          }
+        };
+
+        verifyBtn.style.display = 'block';
+        verifyBtn.onclick = async () => {
+          verifyBtn.textContent = 'Verificando en Meta...';
+          try {
+            const res = await fetch(`/api/facebook/verificar-estado?campaignId=${campaignId}&actId=${actId}`);
+            const data = await res.json();
+            if (data.isActive) {
+              window.location.href = `/index.html?view=dashboard&status=active&campaignId=${campaignId}`;
+            } else {
+              alert("Meta aún reporta la campaña como PAUSED. Publica los cambios en Ads Manager e intenta de nuevo.");
+              verifyBtn.textContent = 'Verificar Estado en Meta';
+            }
+          } catch (err) {
+            alert("Error al verificar estado con la API.");
+            verifyBtn.textContent = 'Verificar Estado en Meta';
+          }
+        };
+      }
+
+      // CASO 3: POST PAGO / CAPI (Confirmación de Pago/Pixel)
+      else if (step === 'confirmar_pago') {
+        localStorage.setItem('sodie_payment_completed', 'true');
+
+        // Disparar evento de Purchase en Pixel solo si viene de flujo de pago
+        if (typeof fbq === 'function') {
+          fbq('track', 'Purchase', { value: 1000.00, currency: 'USD', content_name: 'Reserva Slot SODIE' });
+        }
+
+        titleEl.textContent = ' ¡Pago Confirmado!';
+        bodyEl.textContent = 'Registrando evento CAPI/Pixel y preparando tu panel...';
+        
+        setTimeout(() => {
+          window.location.href = '/index.html?status=paid_success';
+        }, 2500);
+      }
+
+      // FALLBACK POR DEFECTO
+      else {
+        loaderEl.style.display = 'none';
+        titleEl.textContent = 'Confirmación SODIE';
+        bodyEl.textContent = 'Redirigiendo al panel principal...';
+        actionBtn.style.display = 'block';
+        actionBtn.textContent = 'Ir al Inicio';
+        actionBtn.onclick = () => window.location.href = '/index.html';
+      }
+    });
   </script>
 
 </body>
