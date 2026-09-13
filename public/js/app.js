@@ -247,7 +247,7 @@ async function sodieConfirmarActivacion() {
   const btnConfirm = document.getElementById('btn-confirm-draft') || document.getElementById('btn-client-confirm-draft');
   if (btnConfirm) {
     btnConfirm.disabled = true;
-    btnConfirm.textContent = 'Activando campaña... 🚀';
+    btnConfirm.textContent = 'Activando campaña...';
   }
 
   try {
@@ -336,7 +336,6 @@ document.getElementById("btn-biometria")?.addEventListener("click", async () => 
     // Lógica para desbloquear panel admin
   }
 });
-S
 // ==========================================
 // CONFIGURACIÓN DE NAVEGACIÓN Y COMPONENTES
 // ==========================================
@@ -1051,3 +1050,38 @@ function updateGlobalTimer() {
 setInterval(updateGlobalTimer, 1000);
 updateGlobalTimer(); // Ejecución inicial
 
+// esto va en la parte de chat web que no la encontré pero es para actualizarlo
+// Ejemplo de función en tu JS frontend:
+async function enviarMensajeServidor(payload, texto) {
+  mostrarIndicadorEscribiendo(true);
+
+  try {
+    const response = await fetch('/api/ia2/conversar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: texto, payload: payload, sessionId: 'user_123' })
+    });
+
+    const data = await response.json();
+    mostrarIndicadorEscribiendo(false);
+
+    if (data.success) {
+      // 1. Detectar si vienen varios mensajes o uno solo
+      const listaMensajes = data.messages || [data.reply || data.mensaje];
+
+      // 2. Imprimir secuencialmente con retardo natural
+      for (let i = 0; i < listaMensajes.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, i === 0 ? 0 : 800)); // 800ms entre bocadillos
+        agregarBocadilloChat(listaMensajes[i], 'bot');
+      }
+
+      // 3. Actualizar botones de opción rápida si vienen en la respuesta
+      if (data.quickReplies) {
+        renderizarQuickReplies(data.quickReplies);
+      }
+    }
+  } catch (error) {
+    mostrarIndicadorEscribiendo(false);
+    console.error("Error al recibir respuesta:", error);
+  }
+}
