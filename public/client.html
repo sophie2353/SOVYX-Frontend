@@ -81,25 +81,47 @@
       </button>
     </section>
 
-    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (TIMER 0 A 96 HORAS) -->
+    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (MODALIDADES DE LIQUIDACIÓN) -->
     <section class="glass-card-dash margin-v-sm">
       <h3 class="section-title fuchsia-txt">Cronograma de Pagos Post-Resultados</h3>
       <div id="timer-post-display" class="timer-digits fuchsia-txt">00:00:00</div>
 
-      <div class="pay-steps-stack margin-v-sm">
-        <!-- PASO 1: HORA 48 -->
-        <button type="button" id="btn-pay-part-1" class="btn-pf-action btn-pay-gradient disabled" disabled onclick="sodieProcesarPago(1)">
-          Pagar Primera Parte ($3.000)
-        </button>
+      <!-- OPCIÓN 1: PAGAR EN 3 CUOTAS -->
+      <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+        <h4 class="mint-txt" style="margin-bottom: 8px;">Pagar en 3 cuotas ($3.000 c/u)</h4>
+        <div class="pay-steps-stack">
+          <!-- HORA 48: CUOTA 1 -->
+          <button type="button" id="btn-pay-part-1" class="btn-pf-action btn-pay-gradient disabled" disabled onclick="sodieProcesarPago(1)">
+            Cuota 1: $3.000 (Hora 48)
+          </button>
 
-        <!-- PASO 2: HORA 72 -->
-        <button type="button" id="btn-pay-part-2" class="btn-pf-action btn-pay-gradient hidden" onclick="sodieProcesarPago(2)">
-          Pagar Segunda Parte ($3.000)
-        </button>
+          <!-- HORA 72: CUOTA 2 -->
+          <button type="button" id="btn-pay-part-2" class="btn-pf-action btn-pay-gradient hidden" onclick="sodieProcesarPago(2)">
+            Cuota 2: $3.000 (Hora 72)
+          </button>
 
-        <!-- PASO 3: HORA 96 -->
-        <button type="button" id="btn-pay-part-3" class="btn-pf-action btn-pay-gradient hidden" onclick="sodieProcesarPago(3)">
-          Pagar Tercera Parte ($3.000)
+          <!-- HORA 96: CUOTA 3 -->
+          <button type="button" id="btn-pay-part-3" class="btn-pf-action btn-pay-gradient hidden" onclick="sodieProcesarPago(3)">
+            Cuota 3: $3.000 (Hora 96)
+          </button>
+        </div>
+      </div>
+
+      <!-- OPCIÓN 2: PAGAR EN 2 CUOTAS -->
+      <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+        <h4 class="mint-txt" style="margin-bottom: 8px;">Pagar a 2 cuotas</h4>
+        <p class="step-desc" style="margin-bottom: 10px;">Cuota 1: $6.000 (Hora 48) &gt; Cuota 2: $3.000 (Hora 72)</p>
+        <button type="button" id="btn-pay-2-installments" class="btn-pf-action btn-pay-gradient disabled" disabled onclick="sodieProcesarPagoModalidad(2)">
+          Pagar Cuota 1: $6.000 (Hora 48)
+        </button>
+      </div>
+
+      <!-- OPCIÓN 3: PAGAR EN 1 CUOTA -->
+      <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+        <h4 class="mint-txt" style="margin-bottom: 8px;">Pagar a 1 cuota</h4>
+        <p class="step-desc" style="margin-bottom: 10px;">Liquidación total post-resultados en un único pago.</p>
+        <button type="button" id="btn-pay-1-installment" class="btn-pf-action btn-pay-gradient disabled" disabled onclick="sodieProcesarPagoModalidad(1)">
+          Pagar a 1 cuota: $9.000 (Hora 48)
         </button>
       </div>
     </section>
@@ -138,45 +160,54 @@
       </button>
     </section>
 
-    <!-- En client.html -->
-<div class="glass-card-dash">
-  <h3 class="section-title">Cronograma Global de Proyecto (0h - 96h)</h3>
-  <div class="timeline-container" style="display: flex; justify-content: space-between; margin-top: 15px;">
-    <div class="time-step active">
-      <span class="step-hours">Hora 0</span>
-      <span class="step-desc">Reserva ($1K)</span>
-    </div>
-    <div class="time-step">
-      <span class="step-hours">Hora 48</span>
-      <span class="step-desc">Cuota 1 ($3K)</span>
-    </div>
-    <div class="time-step">
-      <span class="step-hours">Hora 72</span>
-      <span class="step-desc">Cuota 2 ($3K)</span>
-    </div>
-    <div class="time-step">
-      <span class="step-hours">Hora 96</span>
-      <span class="step-desc">Cuota 3 ($3K)</span>
-    </div>
-  </div>
-</div>
+    <!-- CRONOGRAMA GLOBAL DETALLADO DE RESERVA Y MODALIDADES -->
+    <section class="glass-card-dash margin-v-sm" style="padding: 24px; border: 1px solid rgba(0, 255, 204, 0.2);">
+      <h3 class="section-title mint-txt" style="font-size: 1.2rem; margin-bottom: 12px;">Estructura de Reserva y Modalidades de Pago (0h - 96h)</h3>
+      <p class="step-desc" style="margin-bottom: 18px; line-height: 1.5;">
+        El despliegue inicia con la <strong>Reserva Inicial ($1.000 USD)</strong> en la Hora 0 para activar el servidor y la inyección de datos. La liquidación restante de <strong>$9.000 USD</strong> se ejecuta post-resultados según la modalidad elegida:
+      </p>
 
-    <!-- ========================================== -->
-<!-- SECCIÓN FINAL: TEMPORIZADOR GLOBAL 0 - 96H -->
-<!-- ========================================== -->
-<section class="glass-card-dash timer-section" style="margin-top: 20px;">
-  <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO</span>
-  
-  <!-- Reloj de cuenta regresiva regresivo de 96 horas -->
-  <div id="global-timer-display" class="timer-digits">96:00:00</div>
-  
-  <span class="timer-sub" style="margin-top: 8px; display: block; font-weight: bold; letter-spacing: 1px;">
-    TIEMPO TOTAL
-  </span>
-</section>
+      <div class="timeline-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+        <div class="time-step active" style="flex: 1; min-width: 130px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
+          <span class="step-hours mint-txt" style="font-weight: bold; display: block; margin-bottom: 4px;">Hora 0</span>
+          <span class="step-desc" style="font-size: 0.9rem;">Reserva Activa ($1.000)</span>
+        </div>
+        <div class="time-step" style="flex: 1; min-width: 130px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
+          <span class="step-hours fuchsia-txt" style="font-weight: bold; display: block; margin-bottom: 4px;">Hora 48</span>
+          <span class="step-desc" style="font-size: 0.85rem; line-height: 1.3;">
+            • 3 Cuotas: $3.000<br>
+            • 2 Cuotas: $6.000<br>
+            • 1 Cuota: $9.000
+          </span>
+        </div>
+        <div class="time-step" style="flex: 1; min-width: 130px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
+          <span class="step-hours fuchsia-txt" style="font-weight: bold; display: block; margin-bottom: 4px;">Hora 72</span>
+          <span class="step-desc" style="font-size: 0.85rem; line-height: 1.3;">
+            • 3 Cuotas: $3.000 (Cuota 2)<br>
+            • 2 Cuotas: $3.000 (Cuota 2)
+          </span>
+        </div>
+        <div class="time-step" style="flex: 1; min-width: 130px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
+          <span class="step-hours fuchsia-txt" style="font-weight: bold; display: block; margin-bottom: 4px;">Hora 96</span>
+          <span class="step-desc" style="font-size: 0.85rem; line-height: 1.3;">
+            • 3 Cuotas: $3.000 (Cuota 3)<br>
+            • Cierre de Ciclo
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEMPORIZADOR GLOBAL 0 - 96H -->
+    <section class="glass-card-dash timer-section" style="margin-top: 20px;">
+      <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO</span>
+      <div id="global-timer-display" class="timer-digits">96:00:00</div>
+      <span class="timer-sub" style="margin-top: 8px; display: block; font-weight: bold; letter-spacing: 1px;">
+        TIEMPO TOTAL
+      </span>
+    </section>
     
   </main>
 
-  <script src="app.js"></script>
+  <script src="client.js"></script>
 </body>
 </html>
