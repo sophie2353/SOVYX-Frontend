@@ -37,6 +37,18 @@
         <h4 class="mint-txt">Subida de Video</h4>
         <div class="margin-v-sm">
           <input type="file" id="admin-video-file" class="file-input-custom" accept="video/*" />
+          
+          <!-- Progress Bar Video -->
+          <div id="progress-video-container" class="margin-v-sm hidden" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span class="mint-txt">Cargando Video...</span>
+              <span id="progress-video-text" class="mint-txt" style="font-weight: bold;">0%</span>
+            </div>
+            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; height: 10px; overflow: hidden;">
+              <div id="progress-video-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff007f); transition: width 0.2s ease;"></div>
+            </div>
+          </div>
+
           <button type="button" id="btn-upload-video" class="btn-pf-action btn-mint-solid margin-top-10">
             🎬 Subir Video
           </button>
@@ -48,6 +60,18 @@
         <h4 class="mint-txt">Subir Contrato</h4>
         <div class="margin-v-sm">
           <input type="file" id="admin-contract-file" class="file-input-custom" accept=".pdf" />
+          
+          <!-- Progress Bar Contrato -->
+          <div id="progress-contract-container" class="margin-v-sm hidden" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span class="mint-txt">Cargando PDF...</span>
+              <span id="progress-contract-text" class="mint-txt" style="font-weight: bold;">0%</span>
+            </div>
+            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; height: 10px; overflow: hidden;">
+              <div id="progress-contract-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff007f); transition: width 0.2s ease;"></div>
+            </div>
+          </div>
+
           <button type="button" id="btn-upload-contract" class="btn-pf-action btn-mint-solid margin-top-10">
             📄 Subir Contrato
           </button>
@@ -59,6 +83,18 @@
         <h4 class="mint-txt">Subir Excel</h4>
         <div class="margin-v-sm">
           <input type="file" id="admin-excel-file" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+          
+          <!-- Progress Bar Excel -->
+          <div id="progress-excel-container" class="margin-v-sm hidden" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span class="mint-txt">Inyectando Audiencia...</span>
+              <span id="progress-excel-text" class="mint-txt" style="font-weight: bold;">0%</span>
+            </div>
+            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; height: 10px; overflow: hidden;">
+              <div id="progress-excel-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff007f); transition: width 0.2s ease;"></div>
+            </div>
+          </div>
+
           <button type="button" id="btn-upload-excel" class="btn-pf-action btn-mint-solid margin-top-10">
             📊 Subir Excel
           </button>
@@ -106,7 +142,6 @@
 
   </main>
 
-  <!-- Script exclusivo del panel Admin -->
   <script src="admin.js"></script>
 </body>
 </html>
