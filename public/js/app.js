@@ -1,6 +1,7 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Final Sincronizada con Backend y confirmacion.html
+ * Versión Final Sincronizada con Backend, confirmacion.html
+ * y Temporizador V4 Gigante (14 días con Microsegundos).
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWebAuthnBiometrics();
   handleUrlRedirects();
   initTimer24h();
+  checkWaitlistClosedStatus(); // Sincronización automática de V4
 });
 
 /* ==========================================================================
@@ -198,10 +200,6 @@ function initChatEngine() {
   });
 }
 
-/**
- * Divide textos largos en fragmentos de máximo ~180 caracteres
- * respetando pausas naturales para facilitar la lectura.
- */
 function splitTextIntoChunks(text, maxLength = 180) {
   if (text.length <= maxLength) return [text];
 
@@ -226,7 +224,6 @@ async function sendChatMessage(messageText, payload = null) {
   const chatBody = document.getElementById('chat-body');
   if (!chatBody) return;
 
-  // Burbuja del Usuario
   const userBubble = document.createElement('div');
   userBubble.className = 'outgoing-simple';
   userBubble.style.cssText = 'text-align: right; margin: 8px 0;';
@@ -234,7 +231,6 @@ async function sendChatMessage(messageText, payload = null) {
   chatBody.appendChild(userBubble);
   chatBody.scrollTop = chatBody.scrollHeight;
 
-  // Indicador "Escribiendo..."
   const loadingBubble = document.createElement('div');
   loadingBubble.className = 'incoming-simple';
   loadingBubble.innerHTML = `<p class="mint-txt"><i>IA2 escribiendo...</i></p>`;
@@ -255,7 +251,6 @@ async function sendChatMessage(messageText, payload = null) {
     const rawReply = data.reply || data.respuesta || 'Mensaje procesado correctamente.';
     const messageChunks = splitTextIntoChunks(rawReply);
 
-    // Renderizado secuencial paso a paso
     messageChunks.forEach((chunk, index) => {
       setTimeout(() => {
         const ia2Bubble = document.createElement('div');
@@ -264,9 +259,8 @@ async function sendChatMessage(messageText, payload = null) {
         ia2Bubble.innerHTML = `<p style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-left: 3px solid #00ffcc; color: #e0e0e0; font-size: 0.9em; line-height: 1.4;">${chunk}</p>`;
         
         chatBody.appendChild(ia2Bubble);
-        // Hacemos scroll progresivo para ver el inicio de la respuesta
         ia2Bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, index * 800); // 800ms de retraso entre burbujas
+      }, index * 800);
     });
 
   } catch (error) {
@@ -283,7 +277,6 @@ async function sendChatMessage(messageText, payload = null) {
    6. FLUJO PASO A PASO & BACKEND CONECTADO
    ========================================================================== */
 
-// PASO 1 & 2: Procesar Formulario de Pago -> Backend
 async function sodieProcesarPasoPago() {
   const age = document.getElementById('pay-age')?.value;
   const country = document.getElementById('pay-country')?.value;
@@ -306,11 +299,10 @@ async function sodieProcesarPasoPago() {
     });
 
     if (!res.ok) throw new Error('Fallo en la pasarela de pago');
-    const data = await res.json();
+    await res.json();
 
     showToast('Pago Aprobado', 'Desbloqueando pasos de contrato y audiencia.');
     
-    // Se desbloquea en el index para subir los archivos antes de ir a Meta
     document.getElementById('step-4-contract-flow')?.classList.remove('hidden');
     document.getElementById('step-4-contract-flow')?.scrollIntoView({ behavior: 'smooth' });
 
@@ -320,7 +312,6 @@ async function sodieProcesarPasoPago() {
   }
 }
 
-// PASO 3: Subir Contrato PDF -> /api/evaluator/contract
 async function sodieSubirContrato() {
   const fileInput = document.getElementById('client-contract-file-input');
   const pctLabel = document.getElementById('client-contract-pct');
@@ -355,7 +346,6 @@ async function sodieSubirContrato() {
   }
 }
 
-// PASO 4: Subir Excel de Compradores -> /api/v1/media/upload
 async function sodieCrearBorrador() {
   const fileInput = document.getElementById('client-file-input');
   const pctLabel = document.getElementById('client-file-pct');
@@ -390,7 +380,6 @@ async function sodieCrearBorrador() {
   }
 }
 
-// PASO 5: Conectar Facebook -> Llama al backend y transfiere el flujo 100% a confirmacion.html
 async function sodieConnectFacebook() {
   showToast('Meta Ads', 'Conectando cuenta publicitaria...');
 
@@ -406,7 +395,6 @@ async function sodieConnectFacebook() {
     if (!res.ok) throw new Error('Fallo al conectar con Facebook');
     const data = await res.json();
 
-    // Redirección completa a confirmacion.html donde ocurre la verificación y activación
     if (data.redirectUrl) {
       window.location.href = data.redirectUrl;
     } else {
@@ -417,20 +405,18 @@ async function sodieConnectFacebook() {
 
   } catch (error) {
     console.error('Error conectando Facebook:', error);
-    // Fallback de salida limpia directamente a confirmacion.html
     window.location.href = '/confirmacion.html?step=activar_campana&campaignId=CAMP-SODIE-9982&actId=act_12345';
   }
 }
 
 /* ==========================================================================
-   7. LISTA DE ESPERA & BIOMETRÍA REAL (WebAuthn / Face ID / Touch ID)
+   7. LISTA DE ESPERA, BIOMETRÍA Y TEMPORIZADOR V4 (14 DÍAS)
    ========================================================================== */
 function initWebAuthnBiometrics() {
   const bioBtn = document.getElementById('btn-register-biometrics');
   if (!bioBtn) return;
 
   bioBtn.addEventListener('click', async () => {
-    // Verificación de compatibilidad con Hardware Biométrico
     if (!window.PublicKeyCredential) {
       showToast('Biometría No Disponible', 'Este dispositivo no soporta Face ID / Touch ID.', true);
       return;
@@ -440,13 +426,11 @@ function initWebAuthnBiometrics() {
       bioBtn.style.borderColor = '#00ffcc';
       bioBtn.textContent = '⚡ Solicitando Face ID / Huella...';
 
-      // 1. Obtener Challenge del servidor
       const challengeRes = await fetch('/api/v1/auth/biometrics/challenge', { method: 'POST' });
       const challengeData = await challengeRes.json();
       
       const challengeBuffer = new Uint8Array(challengeData.challenge || [1, 2, 3, 4, 5, 6, 7, 8]);
 
-      // 2. Disparar Prompt nativo del sistema operativo (Face ID / Touch ID / Windows Hello)
       const credential = await navigator.credentials.create({
         publicKey: {
           challenge: challengeBuffer,
@@ -462,7 +446,6 @@ function initWebAuthnBiometrics() {
         }
       });
 
-      // 3. Registrar la credencial devuelta en el backend
       await fetch('/api/v1/auth/biometrics/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -475,7 +458,6 @@ function initWebAuthnBiometrics() {
 
     } catch (err) {
       console.warn('Biometría simulada / Cancelada:', err);
-      // Fallback seguro si cancela el prompt o está en entornos de pruebas
       bioBtn.textContent = '✓ Biometría Verificada';
       bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
       showToast('Biometría Lista', 'Identidad confirmada en el sistema.');
@@ -512,6 +494,71 @@ async function sodieEnviarListaEspera() {
   }
 }
 
+/**
+ * Consulta el estado del backend al cargar la página para saber si la lista de
+ * espera fue cerrada desde admin.html y activar el temporizador gigante V4.
+ */
+async function checkWaitlistClosedStatus() {
+  try {
+    const res = await fetch('/api/v1/waitlist/status');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    if (data.closed || data.triggerV4Timer) {
+      const targetTime = data.targetTimestamp || (Date.now() + 14 * 24 * 3600 * 1000);
+      activarTemporizadorGiganteV4(targetTime);
+    }
+  } catch (err) {
+    console.warn('Endpoint de lista de espera no disponible, listo para evento.');
+  }
+}
+
+/**
+ * Temporizador Gigante V4 (14 Días)
+ * Formato: Días : Horas : Minutos : Segundos : Microsegundos
+ */
+function activarTemporizadorGiganteV4(targetTimestamp) {
+  const v4Container = document.getElementById('v4-giant-timer-container');
+  const v4TimerDisplay = document.getElementById('v4-giant-timer-digits');
+  const pfWaitlist = document.getElementById('pf-waitlist-replacement');
+  const pfStandard = document.getElementById('pf-standard-content');
+
+  // Oculta formularios estándar y muestra la vista del temporizador V4
+  if (pfStandard) pfStandard.classList.add('hidden');
+  if (pfWaitlist) pfWaitlist.classList.add('hidden');
+  if (v4Container) v4Container.classList.remove('hidden');
+
+  const updateTimer = () => {
+    const now = performance.timeOrigin + performance.now();
+    const remainingMs = targetTimestamp - now;
+
+    if (remainingMs <= 0) {
+      if (v4TimerDisplay) v4TimerDisplay.textContent = '00d : 00h : 00m : 00s : 000000us';
+      return;
+    }
+
+    const days = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+    const microseconds = Math.floor((remainingMs % 1000) * 1000);
+
+    const dStr = days.toString().padStart(2, '0');
+    const hStr = hours.toString().padStart(2, '0');
+    const mStr = minutes.toString().padStart(2, '0');
+    const sStr = seconds.toString().padStart(2, '0');
+    const usStr = microseconds.toString().padStart(6, '0');
+
+    if (v4TimerDisplay) {
+      v4TimerDisplay.textContent = `${dStr}d : ${hStr}h : ${mStr}m : ${sStr}s : ${usStr}us`;
+    }
+
+    requestAnimationFrame(updateTimer);
+  };
+
+  requestAnimationFrame(updateTimer);
+}
+
 /* ==========================================================================
    8. MANEJO DE ESTADOS DE REGRESO DIRECTOS AL INDEX
    ========================================================================== */
@@ -519,7 +566,6 @@ function handleUrlRedirects() {
   const urlParams = new URLSearchParams(window.location.search);
   const status = urlParams.get('status');
 
-  // Si regresa de algún flujo directo con campaña activa o acceso total
   if (status === 'active' || urlParams.get('view') === 'dashboard') {
     showToast('Acceso Confirmado', 'Redirigiendo a tu Dashboard de Cliente...');
     setTimeout(() => {
