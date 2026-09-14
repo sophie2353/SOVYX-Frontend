@@ -3,6 +3,28 @@
  * Versión Final Sincronizada con Backend, confirmacion.html
  * y Temporizador V4 Gigante (14 días con Microsegundos).
  */
+
+// ==========================================
+// TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO
+// ==========================================
+(function initGlobalAdminTrigger() {
+  let count = 0, last = 0;
+  window.addEventListener('click', function(e) {
+    // Detecta clics en el encabezado, título, logo o barra superior
+    if (e.target.closest('header, .chat-header, .brand-title, #app-title, .admin-logo, h1, h2, nav')) {
+      const now = Date.now();
+      if (now - last > 2000) count = 0;
+      count++;
+      last = now;
+      if (count >= 5) {
+        count = 0;
+        localStorage.setItem('sodie_show_admin_banner', 'true');
+        window.location.href = 'admin.html';
+      }
+    }
+  }, true); // Modador "true" (capture) para ejecutar ANTES que cualquier otro script
+})();
+
 // ==========================================
 // CONFIGURACIÓN INICIAL & CONSTANTES SODIE
 // ==========================================
@@ -20,53 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
   checkWaitlistClosedStatus(); // Sincronización automática de V4
 });
 
-// Listener directo en la ventana para garantizar que NADA lo bloquee
-(function() {
-  let count = 0, last = 0;
-  window.addEventListener('click', function(e) {
-    // Si toca cualquier parte del header o logo
-    if (e.target.closest('header, .chat-header, .brand-title, #app-title, h1, h2, nav')) {
-      const now = Date.now();
-      if (now - last > 2000) count = 0;
-      count++;
-      last = now;
-      if (count >= 5) {
-        count = 0;
-        window.location.href = 'admin.html';
-      }
-    }
-  }, true); // Use capture para interceptar antes que cualquier otro script
-})();
-
-// ==========================================
-// TRIGGER DE 5 CLICS GLOBAL Y DIRECTO
-// ==========================================
-(function initGlobalAdminTrigger() {
-  let clickCount = 0;
-  let lastClickTime = 0;
-
-  document.addEventListener('click', (e) => {
-    // Detecta clics en el encabezado, título, logo o barra superior
-    const headerElement = e.target.closest('header, .chat-header, .brand-title, #app-title, .admin-logo, h1, h2, nav');
-    
-    if (headerElement) {
-      const currentTime = Date.now();
-      
-      // Si el tiempo entre clics es mayor a 2.5 segundos, reiniciar contador
-      if (currentTime - lastClickTime > 2500) {
-        clickCount = 0;
-      }
-      
-      clickCount++;
-      lastClickTime = currentTime;
-
-      if (clickCount >= 5) {
-        clickCount = 0;
-        localStorage.setItem('sodie_show_admin_banner', 'true');
-        window.location.href = 'admin.html';
-      }
-    }
-  });
 /* ==========================================================================
    1. TOAST & NOTIFICACIONES
    ========================================================================== */
@@ -509,7 +484,7 @@ function initWebAuthnBiometrics() {
 
     } catch (err) {
       console.warn('Biometría simulada / Cancelada:', err);
-      bioBtn.textContent = '✓ Biometría Verificada';
+      bioBtn.textContent = '✓ Biometría Lista';
       bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
       showToast('Biometría Lista', 'Identidad confirmada en el sistema.');
     }
