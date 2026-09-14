@@ -20,99 +20,80 @@ const ADMIN_STATE = {
   elapsedSeconds: 0
 };
 
-/* ==========================================================================
-   2. AUTENTICACIÓN Y CONTROL DE SESIÓN (Contraseña -> Biometría -> Acceso)
-   ========================================================================== */
+const ADMIN_KEY = "sodie_202623555";
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Verificar sesión previa activa
+  // 1. Mantener sesión abierta si la pestaña sigue activa
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
   }
 
-  // Verificar si ya existe un registro previo de biometría en localStorage
-  verificarEstadoRegistroBiometrico();
-
-  // 2. Formulario de Contraseña -> Valida Pass y pasa obligatoriamente a Biometría
+  // 2. Controlar la recarga del formulario (EVITA QUE SE REGRESE AL LOGIN)
   const loginForm = document.getElementById("admin-login-form");
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      sodieFlujoPasswordBiometria();
+      e.preventDefault(); // Previene la recarga del navegador
+      e.stopPropagation();
+      validarPasswordAdmin();
+      return false;
     });
   }
 
-  // 3. Botón directo de Biometría -> Intenta autenticar biometría registrada
+  // 3. Botón Login Biométrico
   const btnBiometria = document.getElementById("btn-admin-biometric");
   if (btnBiometria) {
     btnBiometria.addEventListener("click", (e) => {
       e.preventDefault();
-      sodieAutenticarBiometriaAdmin(false); // Acceso directo sin paso de pass previo
+      sodieEjecutarBiometria();
     });
   }
 
-  // 4. Botón de Registro de Nueva Huella / Biometría (cuando no exista registro previo)
+  // 4. Botón Registrar Huella
   const btnRegisterBio = document.getElementById("btn-admin-register-bio");
   if (btnRegisterBio) {
     btnRegisterBio.addEventListener("click", (e) => {
       e.preventDefault();
-      sodieRegistrarHuellaBiometrica();
+      sodieRegistrarHuella();
     });
+  }
+
+  // Mostrar el banner de huella si se activó por los 5 clics
+  if (localStorage.getItem('sodie_show_admin_banner') === 'true') {
+    const banner = document.getElementById("admin-bio-register-banner");
+    if (banner) banner.style.display = "block";
   }
 });
 
-/**
- * Muestra el banner de registro biométrico si el navegador aún no ha creado la Passkey
- */
-function verificarEstadoRegistroBiometrico() {
-  const isRegistered = localStorage.getItem("sodie_bio_registered") === "true";
-  const registerBanner = document.getElementById("admin-bio-register-banner");
-
-  if (!isRegistered && registerBanner) {
-    registerBanner.classList.remove("hidden");
-    registerBanner.style.display = "block";
-  }
-}
-
-/**
- * FLUJO 1: Contraseña > Biometría > Acceso
- */
-async function sodieFlujoPasswordBiometria() {
+function validarPasswordAdmin() {
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
+  const pass = inputPass ? inputPass.value.trim() : "";
 
-  const valorIngresado = inputPass ? inputPass.value.trim() : "";
-
-  // PASO 1: Validar Contraseña
-  if (valorIngresado !== ADMIN_KEY) {
+  if (pass !== ADMIN_KEY) {
     if (errorElem) {
       errorElem.innerText = "❌ Contraseña incorrecta";
+      errorElem.style.color = "#ff4d4d";
       errorElem.style.display = "block";
-      errorElem.className = "text-red-500 text-sm mt-2 font-medium";
     }
     return;
   }
 
+  // Contraseña correcta -> Guardar sesión y dar acceso
+  sessionStorage.setItem("sodie_admin_session", "active");
+  mostrarDashboard();
+}
+
+async function sodieEjecutarBiometria() {
+  const errorElem = document.getElementById("admin-auth-error");
+  
   if (errorElem) {
-    errorElem.innerText = "✅ Contraseña correcta. Escaneando biometría...";
-    errorElem.className = "text-yellow-400 text-sm mt-2 font-medium";
+    errorElem.innerText = "👆 Escaneando huella / rostro...";
+    errorElem.style.color = "#00ffcc";
     errorElem.style.display = "block";
   }
 
-  // PASO 2: Contraseña OK -> Disparar la biometría
-  await sodieAutenticarBiometriaAdmin(true);
-}
-
-/**
- * FLUJO 2: Validar Huella / Rostro registrado nativamente
- * @param {boolean} vieneDePassword Indica si la biometría fue precedida por contraseña válida
- */
-async function sodieAutenticarBiometriaAdmin(vieneDePassword = false) {
-  const errorElem = document.getElementById("admin-auth-error");
-
-  if (!window.PublicKeyCredential || !navigator.credentials) {
-    mostrarBannerRegistroBiometrico("Tu dispositivo no soporta biometría nativa WebAuthn.");
-    if (vieneDePassword) concederAccesoSession();
+  if (!window.PublicKeyCredential) {
+    alert("Biometría no soportada en este navegador. Ingresa con contraseña.");
     return;
   }
 
@@ -122,133 +103,63 @@ async function sodieAutenticarBiometriaAdmin(vieneDePassword = false) {
 
     // Intenta leer la credencial guardada
     const credential = await navigator.credentials.get({
-      publicKey: {
-        challenge: challenge,
-        timeout: 60000,
-        userVerification: "required"
-      }
+      publicKey: { challenge: challenge, timeout: 60000, userVerification: "required" }
     });
 
     if (credential) {
-      if (errorElem) {
-        errorElem.innerText = "✅ Autenticación biométrica exitosa.";
-        errorElem.className = "text-green-400 text-sm mt-2 font-medium";
-      }
-      setTimeout(() => concederAccesoSession(), 400);
-      return;
+      sessionStorage.setItem("sodie_admin_session", "active");
+      mostrarDashboard();
     }
   } catch (err) {
-    console.warn("Error o ausencia de registro biométrico:", err);
-
-    // Si la contraseña ya fue validada pero el dispositivo NO tiene huella guardada,
-    // se le da la opción directa de REGISTRAR la huella o continuar.
-    if (vieneDePassword) {
-      mostrarBannerRegistroBiometrico("Contraseña OK, pero no hay huella registrada. Registra tu huella a continuación:");
-      // Permitimos el registro automático en este paso
-      await sodieRegistrarHuellaBiometrica();
-    } else {
-      mostrarBannerRegistroBiometrico("No se encontró una llave de acceso previa. Registra tu huella primero:");
+    console.warn("Error en biometría:", err);
+    // Si la huella no existe en el sistema, muestra el banner para que la pueda registrar
+    const banner = document.getElementById("admin-bio-register-banner");
+    if (banner) banner.style.display = "block";
+    
+    if (errorElem) {
+      errorElem.innerText = "⚠️ No hay huella guardada en este equipo. Regístrala abajo:";
+      errorElem.style.color = "#ffb84d";
     }
   }
 }
 
-/**
- * REGISTRO DE NUEVA HUELLA / BIOMETRÍA EN EL DISPOSITIVO (WebAuthn create)
- */
-async function sodieRegistrarHuellaBiometrica() {
-  const errorElem = document.getElementById("admin-auth-error");
-
-  if (!window.PublicKeyCredential || !navigator.credentials) {
-    alert("Tu navegador o sistema operativo no soporta el registro de credenciales biométricas.");
-    return;
-  }
-
+async function sodieRegistrarHuella() {
   try {
-    if (errorElem) {
-      errorElem.innerText = "👆 Coloca tu huella o escanea tu rostro para vincular...";
-      errorElem.className = "text-cyan-400 text-sm mt-2 font-medium";
-      errorElem.style.display = "block";
-    }
-
     const challenge = new Uint8Array(32);
     window.crypto.getRandomValues(challenge);
 
-    const createOptions = {
-      challenge: challenge,
-      rp: { name: "SODIE Admin Engine", id: window.location.hostname },
-      user: {
-        id: Uint8Array.from("sodie_admin_master_user", c => c.charCodeAt(0)),
-        name: "admin@sodie.app",
-        displayName: "SODIE Master Admin"
-      },
-      pubKeyCredParams: [
-        { alg: -7, type: "public-key" },  // ES256
-        { alg: -257, type: "public-key" } // RS256
-      ],
-      authenticatorSelection: {
-        authenticatorAttachment: "platform", // Fuerza el sensor de huella/rostro nativo del teléfono/laptop
-        userVerification: "required"
-      },
-      timeout: 60000
-    };
-
-    const newCredential = await navigator.credentials.create({ publicKey: createOptions });
-
-    if (newCredential) {
-      localStorage.setItem("sodie_bio_registered", "true");
-      
-      const registerBanner = document.getElementById("admin-bio-register-banner");
-      if (registerBanner) registerBanner.style.display = "none";
-
-      if (errorElem) {
-        errorElem.innerText = "✅ Huella/Rostro registrado con éxito en este dispositivo.";
-        errorElem.className = "text-green-400 text-sm mt-2 font-medium";
+    const newCred = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: "SODIE Admin", id: window.location.hostname },
+        user: { id: Uint8Array.from("admin", c => c.charCodeAt(0)), name: "admin@sodie.app", displayName: "Admin" },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+        timeout: 60000
       }
-      
-      setTimeout(() => concederAccesoSession(), 600);
+    });
+
+    if (newCred) {
+      localStorage.removeItem('sodie_show_admin_banner');
+      sessionStorage.setItem("sodie_admin_session", "active");
+      mostrarDashboard();
     }
   } catch (err) {
-    console.error("Error al registrar la biometría:", err);
-    if (errorElem) {
-      errorElem.innerText = "❌ No se pudo completar el registro biométrico. Intenta de nuevo.";
-      errorElem.className = "text-red-400 text-sm mt-2 font-medium";
-    }
+    alert("No se pudo registrar la huella en este dispositivo.");
   }
 }
 
-function mostrarBannerRegistroBiometrico(mensaje) {
-  const errorElem = document.getElementById("admin-auth-error");
-  const registerBanner = document.getElementById("admin-bio-register-banner");
-
-  if (errorElem) {
-    errorElem.innerText = mensaje;
-    errorElem.className = "text-amber-400 text-sm mt-2 font-medium";
-    errorElem.style.display = "block";
-  }
-
-  if (registerBanner) {
-    registerBanner.classList.remove("hidden");
-    registerBanner.style.display = "block";
-  }
-}
-
-function concederAccesoSession() {
-  sessionStorage.setItem("sodie_admin_session", "active");
-  mostrarDashboard();
-}
-
-// Transición visual al Dashboard
 function mostrarDashboard() {
   const loginView = document.getElementById("admin-login-view");
   const dashView = document.getElementById("admin-dashboard-view");
 
   if (loginView) loginView.style.display = "none";
   if (dashView) dashView.style.display = "block";
-  
-  initListeners();
+}
+
+initListeners();
   actualizarDisplayCronometro();
   actualizarDisplay120h();
-
   sodieIniciarCronometro();
   sodieIniciarTimer120h();
 }
