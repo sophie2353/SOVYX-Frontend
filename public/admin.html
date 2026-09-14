@@ -9,37 +9,37 @@
 </head>
 <body class="admin-body">
 
-  <!-- SECCIÓN 1: VISTA DE AUTENTICACIÓN / LOGIN (INICIAL) -->
-  <main id="admin-login-view" class="admin-auth-container" style="padding: 20px;">
-    <div class="glass-card-dash admin-auth-card margin-v-md" style="max-width: 450px; margin: 40px auto; text-align: center;">
-      <div class="admin-logo" style="font-size: 3rem; margin-bottom: 10px;">🦁</div>
-      <h2 class="fuchsia-txt">Acceso Administrativo SODIE</h2>
-      <p class="step-desc">Introduce tus credenciales o usa autenticación biométrica para ingresar.</p>
-      
-<form id="admin-login-form" class="margin-v-sm" onsubmit="return false;">
-  <div class="form-group margin-v-sm" style="text-align: left;">
-    <label for="admin-pass" class="mint-txt">Contraseña Admin</label>
-    <input type="password" id="admin-pass" class="file-input-custom" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; margin-top: 6px;">
-  </div>
-
-  <div class="admin-grid two-cols margin-v-sm">
-    <button type="button" onclick="validarPasswordAdmin()" class="btn-pf-action btn-mint-solid">
-      Iniciar Sesión
-    </button>
-    <button type="button" id="btn-admin-biometric" class="btn-pf-action btn-mint-solid">
-       Login Biométrico
-    </button>
-  </div>
+<!-- REEMPLAZAR EL FORMULARIO EN admin.html -->
+<div class="glass-card-dash admin-auth-card margin-v-md" style="max-width: 450px; margin: 40px auto; text-align: center;">
+  <div class="admin-logo" style="font-size: 3rem; margin-bottom: 10px; cursor: pointer;">🦁</div>
+  <h2 class="fuchsia-txt">Acceso Administrativo SODIE</h2>
+  <p class="step-desc">Introduce tu clave o usa la autenticación biométrica.</p>
   
-  <p id="admin-auth-error" style="display: none; margin-top: 10px; font-weight: bold; text-align: center;"></p>
+  <div class="margin-v-sm">
+    <div class="form-group margin-v-sm" style="text-align: left;">
+      <label for="admin-pass" class="mint-txt">Contraseña Admin</label>
+      <input type="password" id="admin-pass" class="file-input-custom" placeholder="••••••••" style="width: 100%; box-sizing: border-box; margin-top: 6px;">
+    </div>
 
-  <div id="admin-bio-register-banner" style="display: none; margin-top: 15px; padding: 12px; background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 8px;">
-    <p class="mint-txt" style="font-size: 0.85rem; margin-bottom: 8px;">¿Es tu primera vez en este dispositivo?</p>
-    <button type="button" id="btn-admin-register-bio" class="btn-pf-action btn-mint-solid" style="width: 100%; font-size: 0.9rem;">
-      🔑 Registrar mi Huella / Rostro aquí
-    </button>
+    <div class="admin-grid two-cols margin-v-sm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <button type="button" id="btn-admin-login-pass" class="btn-pf-action btn-mint-solid">
+        Iniciar Sesión
+      </button>
+      <button type="button" id="btn-admin-biometric" class="btn-pf-action btn-mint-solid">
+        Login Biométrico
+      </button>
+    </div>
+    
+    <p id="admin-auth-error" style="display: none; margin-top: 10px; font-weight: bold; text-align: center;"></p>
+
+    <!-- BANNER DE REGISTRO BIOMÉTRICO FORZADO -->
+    <div id="admin-bio-register-banner" style="display: none; margin-top: 15px; padding: 12px; background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 8px;">
+      <p class="mint-txt" style="font-size: 0.85rem; margin-bottom: 8px;">Vincula la huella de este equipo para accesos directos futuros:</p>
+      <button type="button" id="btn-admin-register-bio" class="btn-pf-action btn-mint-solid" style="width: 100%; font-size: 0.9rem;">
+        🔑 Registrar mi Huella / Rostro aquí
+      </button>
+    </div>
   </div>
-</form>
     </div>
   </main>
 
