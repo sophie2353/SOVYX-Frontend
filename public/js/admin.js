@@ -1,143 +1,203 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
  * Control total de cargas de archivos (Video, Contrato, Excel) con progreso en %,
- * activación directa de campaña, lista de espera y temporizador de 120h activo.
+ * autenticación biométrica/passwords, activación directa de campaña, lista de espera y temporizadores activos.
  */
-
-document.addEventListener('DOMContentLoaded', () => {
-  initAdminDashboard();
-});
 
 /* ==========================================================================
    1. ESTADO GLOBAL Y CONFIGURACIÓN INICIAL
    ========================================================================== */
-// Clave de sesión y estado del cronómetro
-const ADMIN_KEY = "sodie_admin_pass_2026"; // Cambiar por tu hash/clave real
-let timerInterval = null;
-let totalSeconds = 86400; // 24 horas de ejemplo
+const ADMIN_KEY = "sodie_admin_pass_2026"; // Clave de acceso
 
-    // Verificar si ya existe una sesión activa
-    if (sessionStorage.getItem("sodie_admin_session") === "active") {
-        mostrarDashboard();
-    }
+// Estado del Cronómetro de Lanzamiento (24h)
+let timerInterval = null;
+let totalSeconds = 86400; // 24 horas por defecto
+
+// Estado del Temporizador de 120 Horas
+const ADMIN_STATE = {
+  timer120Seconds: 120 * 3600, // 120 horas en segundos
+  timer120Interval: null,
+  elapsedSeconds: 0            // Segundos transcurridos en sesión
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Verificar si ya existe una sesión activa
+  if (sessionStorage.getItem("sodie_admin_session") === "active") {
+    mostrarDashboard();
+  }
 });
 
-// 1. Validar inicio de sesión por Contraseña
+/* ==========================================================================
+   2. AUTENTICACIÓN Y CONTROL DE SESIÓN
+   ========================================================================== */
+
+// Validar inicio de sesión por Contraseña
 function sodieValidarLoginAdmin(e) {
-    e.preventDefault();
-    const inputPass = document.getElementById("admin-pass").value;
-    const errorElem = document.getElementById("admin-auth-error");
+  if (e) e.preventDefault();
+  const inputPass = document.getElementById("admin-pass").value;
+  const errorElem = document.getElementById("admin-auth-error");
 
-    if (inputPass === ADMIN_KEY) {
-        sessionStorage.setItem("sodie_admin_session", "active");
-        mostrarDashboard();
-    } else {
-        errorElem.innerText = "Contraseña incorrecta";
-        errorElem.style.display = "block";
+  if (inputPass === ADMIN_KEY) {
+    sessionStorage.setItem("sodie_admin_session", "active");
+    if (errorElem) errorElem.style.display = "none";
+    mostrarDashboard();
+  } else {
+    if (errorElem) {
+      errorElem.innerText = "Contraseña incorrecta";
+      errorElem.style.display = "block";
     }
+  }
 }
 
-// 2. Validar por Biometría (WebAuthn / Passkeys)
+// Validar por Biometría (WebAuthn / Passkeys)
 async function sodieAutenticarBiometriaAdmin() {
-    const errorElem = document.getElementById("admin-auth-error");
-    try {
-        if (!window.PublicKeyCredential) {
-            alert("Tu navegador no soporta autenticación biométrica.");
-            return;
-        }
-        
-        // Simulación de respuesta biométrica o llamada WebAuthn
-        // En producción se usa navigator.credentials.get()
-        const biometricSuccess = true; 
-
-        if (biometricSuccess) {
-            sessionStorage.setItem("sodie_admin_session", "active");
-            mostrarDashboard();
-        }
-    } catch (err) {
-        errorElem.innerText = "Error en la verificación biométrica";
-        errorElem.style.display = "block";
+  const errorElem = document.getElementById("admin-auth-error");
+  try {
+    if (!window.PublicKeyCredential) {
+      alert("Tu navegador no soporta autenticación biométrica.");
+      return;
     }
+    
+    // Simulación exitosa de autenticación biométrica
+    const biometricSuccess = true; 
+
+    if (biometricSuccess) {
+      sessionStorage.setItem("sodie_admin_session", "active");
+      if (errorElem) errorElem.style.display = "none";
+      mostrarDashboard();
+    }
+  } catch (err) {
+    if (errorElem) {
+      errorElem.innerText = "Error en la verificación biométrica";
+      errorElem.style.display = "block";
+    }
+  }
 }
 
-// 3. Transición visual al Dashboard e Inicio de Funciones
+// Transición visual al Dashboard e Inicio de Funciones
 function mostrarDashboard() {
-    document.getElementById("admin-login-view").style.display = "none";
-    document.getElementById("admin-dashboard-view").style.display = "block";
-    
-    // Iniciar cronómetro automáticamente al entrar
-    sodieIniciarCronometro();
-}
+  const loginView = document.getElementById("admin-login-view");
+  const dashView = document.getElementById("admin-dashboard-view");
 
-// 4. Lógica del Cronómetro Administrativo
-function sodieIniciarCronometro() {
-    if (timerInterval) return;
-    
-    timerInterval = setInterval(() => {
-        if (totalSeconds <= 0) {
-            clearInterval(timerInterval);
-            return;
-        }
-        totalSeconds--;
-        actualizarDisplayCronometro();
-    }, 1000);
-}
+  if (loginView) loginView.style.display = "none";
+  if (dashView) dashView.style.display = "block";
+  
+  // Inicializar Event Listeners y Timers
+  initListeners();
+  actualizarDisplayCronometro();
+  actualizarDisplay120h();
 
-function sodiePausarCronometro() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-}
-
-function sodieReiniciarCronometro() {
-    sodiePausarCronometro();
-    totalSeconds = 86400;
-    actualizarDisplayCronometro();
-}
-
-function actualizarDisplayCronometro() {
-    const dias = Math.floor(totalSeconds / (3600 * 24));
-    const horas = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-    const minutos = Math.floor((totalSeconds % 3600) / 60);
-    const segundos = totalSeconds % 60;
-
-    const display = `${String(dias).padStart(2, '0')}:${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-    
-    const elem = document.getElementById("admin-timer-display");
-    if (elem) elem.innerText = display;
+  // Iniciar cronómetro automáticamente al entrar
+  sodieIniciarCronometro();
+  sodieIniciarTimer120h();
 }
 
 function sodieCerrarSesionAdmin() {
-    sessionStorage.removeItem("sodie_admin_session");
-    window.location.reload();
-}
-
-const ADMIN_STATE = {
-  timer120Seconds: 120 * 3600, // 120 horas en segundos
-  elapsedSeconds: 0            // Segundos transcurridos en panel
-};
-
-function initAdminDashboard() {
-  initListeners();
-  init120hTimer();
+  sessionStorage.removeItem("sodie_admin_session");
+  window.location.reload();
 }
 
 /* ==========================================================================
-   2. NOTIFICACIONES ALERTA ADMIN
+   3. CRONÓMETRO DE LANZAMIENTO (24 HORAS)
+   ========================================================================== */
+function sodieIniciarCronometro() {
+  if (timerInterval) return;
+  
+  timerInterval = setInterval(() => {
+    if (totalSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      return;
+    }
+    totalSeconds--;
+    actualizarDisplayCronometro();
+  }, 1000);
+}
+
+function sodiePausarCronometro() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function sodieReiniciarCronometro() {
+  sodiePausarCronometro();
+  totalSeconds = 86400;
+  actualizarDisplayCronometro();
+}
+
+function actualizarDisplayCronometro() {
+  const dias = Math.floor(totalSeconds / (3600 * 24));
+  const horas = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+  const minutos = Math.floor((totalSeconds % 3600) / 60);
+  const segundos = totalSeconds % 60;
+
+  const display = `${String(dias).padStart(2, '0')}:${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+  
+  const elem = document.getElementById("admin-timer-display");
+  if (elem) elem.innerText = display;
+}
+
+/* ==========================================================================
+   4. TEMPORIZADOR DE 120 HORAS (LISTA DE ESPERA)
+   ========================================================================== */
+function sodieIniciarTimer120h() {
+  if (ADMIN_STATE.timer120Interval) return;
+
+  ADMIN_STATE.timer120Interval = setInterval(() => {
+    if (ADMIN_STATE.timer120Seconds > 0) {
+      ADMIN_STATE.timer120Seconds--;
+      actualizarDisplay120h();
+    } else {
+      sodiePausarTimer120h();
+      const timerDisplay = document.getElementById('admin-120h-timer');
+      if (timerDisplay) timerDisplay.textContent = "000:00:00 (Agotado)";
+    }
+  }, 1000);
+}
+
+function sodiePausarTimer120h() {
+  clearInterval(ADMIN_STATE.timer120Interval);
+  ADMIN_STATE.timer120Interval = null;
+}
+
+function sodieReiniciarTimer120h() {
+  sodiePausarTimer120h();
+  ADMIN_STATE.timer120Seconds = 120 * 3600;
+  actualizarDisplay120h();
+}
+
+function actualizarDisplay120h() {
+  const timerDisplay = document.getElementById('admin-120h-timer');
+  if (!timerDisplay) return;
+
+  const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600);
+  const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60);
+  const seconds = ADMIN_STATE.timer120Seconds % 60;
+
+  const hStr = hours.toString().padStart(3, '0');
+  const mStr = minutes.toString().padStart(2, '0');
+  const sStr = seconds.toString().padStart(2, '0');
+
+  timerDisplay.textContent = `${hStr}:${mStr}:${sStr}`;
+}
+
+/* ==========================================================================
+   5. HELPER Y NOTIFICACIONES DE PROGRESO DE ARCHIVOS (%)
    ========================================================================== */
 function showAdminAlert(message, isError = false) {
   console.log(`[ADMIN ALERT]: ${message}`);
   alert(message);
 }
 
-/* ==========================================================================
-   3. HELPER PARA ANIMAR O MOSTRAR PROGRESO EN %
-   ========================================================================== */
 function updateProgressUI(type, percent) {
   const container = document.getElementById(`progress-${type}-container`);
   const text = document.getElementById(`progress-${type}-text`);
   const bar = document.getElementById(`progress-${type}-bar`);
 
-  if (container) container.classList.remove('hidden');
+  if (container) {
+    container.classList.remove('hidden');
+    container.style.display = 'block'; // Asegura la visibilidad en pantalla
+  }
 
   const clampedPercent = Math.min(100, Math.max(0, Math.floor(percent)));
 
@@ -163,31 +223,29 @@ function animateUploadProgress(type, callback) {
 }
 
 /* ==========================================================================
-   4. MANEJO DE EVENTOS DE CARGA DE ARCHIVOS CON PROGRESO REAL (%)
+   6. EVENTOS Y SUBIDA DE ARCHIVOS CON PROGRESO REAL (%)
    ========================================================================== */
 function initListeners() {
-  // Subir Video
+  // Prevenir duplicidad de listeners comprobando botón activo
   const btnVideo = document.getElementById('btn-upload-video');
-  if (btnVideo) {
+  if (btnVideo && !btnVideo.dataset.bound) {
     btnVideo.addEventListener('click', sodieSubirVideoAdmin);
+    btnVideo.dataset.bound = "true";
   }
 
-  // Subir Contrato PDF
   const btnContract = document.getElementById('btn-upload-contract');
-  if (btnContract) {
+  if (btnContract && !btnContract.dataset.bound) {
     btnContract.addEventListener('click', sodieSubirContratoAdmin);
+    btnContract.dataset.bound = "true";
   }
 
-  // Subir Excel Audiencia
   const btnExcel = document.getElementById('btn-upload-excel');
-  if (btnExcel) {
+  if (btnExcel && !btnExcel.dataset.bound) {
     btnExcel.addEventListener('click', sodieSubirExcelAdmin);
+    btnExcel.dataset.bound = "true";
   }
 }
 
-/**
- * Función genérica de subida AJAX con monitoreo de porcentaje real (%)
- */
 function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
   const xhr = new XMLHttpRequest();
   const formData = new FormData();
@@ -220,7 +278,7 @@ function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
   xhr.send(formData);
 }
 
-// 1. Subida de Video -> /api/v1/media/upload
+// 1. Subida de Video
 function sodieSubirVideoAdmin() {
   const fileInput = document.getElementById('admin-video-file');
   const btn = document.getElementById('btn-upload-video');
@@ -245,7 +303,6 @@ function sodieSubirVideoAdmin() {
     },
     (err) => {
       console.warn('Carga directa falló, ejecutando animación de respaldo:', err);
-      // Animación de respaldo si el backend no responde
       animateUploadProgress('video', () => {
         showAdminAlert('🎬 Video cargado correctamente.');
         if (btn) {
@@ -257,7 +314,7 @@ function sodieSubirVideoAdmin() {
   );
 }
 
-// 2. Subida de Contrato PDF -> /api/evaluator/contract
+// 2. Subida de Contrato PDF
 function sodieSubirContratoAdmin() {
   const fileInput = document.getElementById('admin-contract-file');
   const btn = document.getElementById('btn-upload-contract');
@@ -293,7 +350,7 @@ function sodieSubirContratoAdmin() {
   );
 }
 
-// 3. Subida de Excel -> /api/v1/media/upload
+// 3. Subida de Excel Audiencia
 function sodieSubirExcelAdmin() {
   const fileInput = document.getElementById('admin-excel-file');
   const btn = document.getElementById('btn-upload-excel');
@@ -330,7 +387,7 @@ function sodieSubirExcelAdmin() {
 }
 
 /* ==========================================================================
-   5. ACTIVACIÓN DIRECTA DE CAMPAÑA
+   7. ACTIVACIÓN DE CAMPAÑA Y LISTA DE ESPERA
    ========================================================================== */
 async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-admin-activate-campaign');
@@ -358,11 +415,6 @@ async function sodieConfirmarActivacion() {
   }
 }
 
-/* ==========================================================================
-   6. CONTROL DE LISTA DE ESPERA & EVENTO CERRAR LISTA DE ESPERA
-   ========================================================================== */
-
-// Activar/Desactivar Lista de Espera manualmente
 async function sodieToggleWaitlistMode(enableWaitlist) {
   try {
     const res = await fetch('/api/clientes/disponibles/toggle', {
@@ -380,7 +432,6 @@ async function sodieToggleWaitlistMode(enableWaitlist) {
   }
 }
 
-// Cerrar Lista de Espera y disparar temporizador de 14 días para V4 en app.js
 async function sodieCerrarListaEspera() {
   const btn = document.getElementById('btn-close-waitlist');
   if (btn) btn.textContent = 'Procesando Cierre...';
@@ -407,41 +458,4 @@ async function sodieCerrarListaEspera() {
     showAdminAlert('Servidor notificado. Se ha iniciado el cierre de lista de espera.');
     if (btn) btn.textContent = '✓ Temporizador V4 Activado';
   }
-}
-
-/* ==========================================================================
-   7. TEMPORIZADOR REGRESIVO DE 120 HORAS Y RELOJ DE SESIÓN
-   ========================================================================== */
-function init120hTimer() {
-  const timerDisplay = document.getElementById('admin-120h-timer') || document.getElementById('timer-120h-display');
-  const sessionTimerDisplay = document.getElementById('admin-session-timer');
-
-  setInterval(() => {
-    // 1. Conteo Regresivo 120 Horas
-    if (ADMIN_STATE.timer120Seconds > 0) {
-      ADMIN_STATE.timer120Seconds--;
-
-      const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600);
-      const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60);
-      const seconds = ADMIN_STATE.timer120Seconds % 60;
-
-      const hStr = hours.toString().padStart(3, '0');
-      const mStr = minutes.toString().padStart(2, '0');
-      const sStr = seconds.toString().padStart(2, '0');
-
-      if (timerDisplay) timerDisplay.textContent = `${hStr}:${mStr}:${sStr}`;
-    } else {
-      if (timerDisplay) timerDisplay.textContent = "000:00:00 (Agotado)";
-    }
-
-    // 2. Conteo Progresivo de Sesión Activa Admin
-    ADMIN_STATE.elapsedSeconds++;
-    if (sessionTimerDisplay) {
-      const sHours = Math.floor(ADMIN_STATE.elapsedSeconds / 3600).toString().padStart(2, '0');
-      const sMins = Math.floor((ADMIN_STATE.elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
-      const sSecs = (ADMIN_STATE.elapsedSeconds % 60).toString().padStart(2, '0');
-      sessionTimerDisplay.textContent = `${sHours}:${sMins}:${sSecs}`;
-    }
-
-  }, 1000);
 }
