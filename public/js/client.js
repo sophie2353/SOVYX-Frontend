@@ -1,6 +1,6 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Manejo de métricas, temporizadores (0-96h), subida de archivos,
+ * Manejo de métricas, temporizadores activos (0-96h), subida de archivos,
  * activación de campaña y pasarelas de pago con redirección a confirmación.
  */
 
@@ -16,7 +16,8 @@ const CLIENT_STATE = {
   paidInstallments: [],
   campaignActivated: false,
   startTime: Date.now(),
-  totalSeconds: 96 * 3600 // 96 Horas en segundos
+  totalSeconds: 96 * 3600, // 96 Horas totales en segundos
+  elapsedSeconds: 0        // Segundos transcurridos
 };
 
 function initClientDashboard() {
@@ -166,7 +167,6 @@ async function sodieProcesarPago(installmentNumber) {
     });
 
     if (!res.ok) throw new Error('Pago rechazado por la pasarela');
-    const data = await res.json();
 
     showToast('Pago Aprobado', 'Redirigiendo a confirmación...');
 
@@ -210,7 +210,6 @@ async function sodieProcesarPagoModalidad(modalidadType) {
     });
 
     if (!res.ok) throw new Error('Pago rechazado por la pasarela');
-    const data = await res.json();
 
     showToast('Pago Aprobado', 'Redirigiendo a confirmación...');
 
@@ -270,56 +269,62 @@ function checkCallbackStatus() {
 }
 
 /* ==========================================================================
-   8. TEMPORIZADOR GLOBAL 0 - 96 HORAS & ACTIVACIÓN PROGRESIVA DE HITOS
+   8. TEMPORIZADOR GLOBAL EN TIEMPO REAL & HITOS
    ========================================================================== */
 function initGlobalTimer() {
-  const globalTimerDisplay = document.getElementById('global-timer-display');
-  const timer24hDisplay = document.getElementById('timer-24h-display');
-  const timerPostDisplay = document.getElementById('timer-post-display');
+  const formatHHMMSS = (sec) => {
+    if (sec <= 0) return "00:00:00";
+    const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+    const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  };
 
+  // Función ejecutada cada segundo (1000ms)
   setInterval(() => {
     if (CLIENT_STATE.totalSeconds <= 0) {
       triggerHour96Events();
       return;
     }
 
+    // Decrementar total y elevar tiempo transcurrido
     CLIENT_STATE.totalSeconds--;
+    CLIENT_STATE.elapsedSeconds++;
 
-    const hours = Math.floor(CLIENT_STATE.totalSeconds / 3600);
-    const minutes = Math.floor((CLIENT_STATE.totalSeconds % 3600) / 60);
-    const seconds = CLIENT_STATE.totalSeconds % 60;
+    const formattedGlobal = formatHHMMSS(CLIENT_STATE.totalSeconds);
 
-    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    // 1. Actualizar Pantalla Principal Dashboard
+    const mainTimer = document.getElementById('timer-main-display');
+    if (mainTimer) mainTimer.textContent = formattedGlobal;
 
-    if (globalTimerDisplay) globalTimerDisplay.textContent = formattedTime;
+    const globalTimerDisplay = document.getElementById('global-timer-display');
+    if (globalTimerDisplay) globalTimerDisplay.textContent = formattedGlobal;
 
-    const hoursElapsed = 96 - hours;
-    updateStageTimers(hoursElapsed, minutes, seconds, timer24hDisplay, timerPostDisplay);
+    // 2. Cronómetro Etapa 1: Primeras 24 horas (Configuración e Inyección)
+    const timer24hDisplay = document.getElementById('timer-24h-display');
+    const secondsIn24h = 24 * 3600;
+    if (CLIENT_STATE.elapsedSeconds < secondsIn24h) {
+      const remaining24 = secondsIn24h - CLIENT_STATE.elapsedSeconds;
+      if (timer24hDisplay) timer24hDisplay.textContent = formatHHMMSS(remaining24);
+    } else {
+      if (timer24hDisplay) timer24hDisplay.textContent = "00:00:00 (Completado)";
+    }
+
+    // 3. Cronómetro Etapa 2: Post-Resultados (Horas 24 a 96)
+    const timerPostDisplay = document.getElementById('timer-post-display');
+    if (CLIENT_STATE.elapsedSeconds >= secondsIn24h && CLIENT_STATE.totalSeconds > 0) {
+      if (timerPostDisplay) timerPostDisplay.textContent = formattedGlobal;
+    } else if (CLIENT_STATE.elapsedSeconds < secondsIn24h) {
+      if (timerPostDisplay) timerPostDisplay.textContent = "72:00:00 (En Espera)";
+    } else {
+      if (timerPostDisplay) timerPostDisplay.textContent = "00:00:00 (Completado)";
+    }
+
+    // Evaluar desborde de eventos por hora (Horas transcurridas = transcurridos / 3600)
+    const hoursElapsed = CLIENT_STATE.elapsedSeconds / 3600;
     evaluateTimelineTriggers(hoursElapsed);
 
   }, 1000);
-}
-
-function updateStageTimers(elapsedHours, mins, secs, timer24, timerPost) {
-  if (elapsedHours < 24) {
-    const remaining24 = (23 - elapsedHours) * 3600 + (59 - mins) * 60 + (60 - secs);
-    const h = Math.floor(remaining24 / 3600).toString().padStart(2, '0');
-    const m = Math.floor((remaining24 % 3600) / 60).toString().padStart(2, '0');
-    const s = (remaining24 % 60).toString().padStart(2, '0');
-    if (timer24) timer24.textContent = `${h}:${m}:${s}`;
-  } else {
-    if (timer24) timer24.textContent = "00:00:00 (Completado)";
-  }
-
-  if (elapsedHours >= 24 && elapsedHours < 96) {
-    const remainingPost = (95 - elapsedHours) * 3600 + (59 - mins) * 60 + (60 - secs);
-    const h = Math.floor(remainingPost / 3600).toString().padStart(2, '0');
-    const m = Math.floor((remainingPost % 3600) / 60).toString().padStart(2, '0');
-    const s = (remainingPost % 60).toString().padStart(2, '0');
-    if (timerPost) timerPost.textContent = `${h}:${m}:${s}`;
-  } else if (elapsedHours >= 96) {
-    if (timerPost) timerPost.textContent = "00:00:00 (Completado)";
-  }
 }
 
 /* ==========================================================================
