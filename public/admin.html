@@ -9,37 +9,97 @@
 </head>
 <body class="admin-body">
 
-  <main class="dashboard-container" style="padding: 20px;">
+  <!-- SECCIÓN 1: VISTA DE AUTENTICACIÓN / LOGIN (INICIAL) -->
+  <main id="admin-login-view" class="admin-auth-container" style="padding: 20px;">
+    <div class="glass-card-dash admin-auth-card margin-v-md" style="max-width: 450px; margin: 40px auto; text-align: center;">
+      <div class="admin-logo" style="font-size: 3rem; margin-bottom: 10px;">🦁</div>
+      <h2 class="fuchsia-txt">Acceso Administrativo SODIE</h2>
+      <p class="step-desc">Introduce tus credenciales o usa autenticación biométrica para ingresar.</p>
+
+      <form id="admin-login-form" onsubmit="sodieValidarLoginAdmin(event)" class="margin-v-sm">
+        <div class="form-group margin-v-sm" style="text-align: left;">
+          <label for="admin-pass" class="mint-txt">Contraseña Admin</label>
+          <input type="password" id="admin-pass" class="file-input-custom" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; margin-top: 6px;">
+        </div>
+
+        <div class="admin-grid two-cols margin-v-sm">
+          <button type="submit" class="btn-pf-action btn-mint-solid">
+            Iniciar Sesión
+          </button>
+          <button type="button" class="btn-pf-action btn-mint-solid" onclick="sodieAutenticarBiometriaAdmin()">
+             Login Biométrico
+          </button>
+        </div>
+        
+        <p id="admin-auth-error" class="error-msg fuchsia-txt margin-v-sm" style="display:none; font-weight: bold;"></p>
+      </form>
+    </div>
+  </main>
+
+  <!-- SECCIÓN 2: PANEL ADMINISTRATIVO COMPLETO (PROTEGIDO) -->
+  <main id="admin-dashboard-view" class="dashboard-container" style="display: none; padding: 20px;">
     
     <div id="admin-dashboard" class="glass-card-dash margin-v-md">
       
       <!-- HEADER -->
-      <div class="chat-header">
-        <h3 class="section-title fuchsia-txt">Panel Administrador (Yo) 👺</h3>
+      <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="section-title fuchsia-txt" style="margin: 0;">Panel Administrador (Yo) 👺</h3>
+        <button type="button" class="btn-pf-action btn-fuchsia-solid" onclick="sodieCerrarSesionAdmin()" style="width: auto; padding: 6px 16px;">
+          Cerrar Sesión
+        </button>
       </div>
       <p class="step-desc">Control total de archivos, campañas y estados del Dashboard Principal.</p>
 
-      <!-- SECCIÓN 1: VISTAS -->
+      <!-- VISTAS DE NAVEGACIÓN -->
       <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.3);">
         <h4 class="mint-txt">Vistas</h4>
         <div class="admin-grid two-cols margin-v-sm">
           <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/'">
-            🏠 Vista Principal
+            Vista Principal
           </button>
           <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/client.html'">
-            👁️ Vista Cliente
+            Vista Cliente
           </button>
         </div>
       </div>
 
-      <!-- SECCIÓN 2: SUBIDA DE VIDEO -->
+      <!-- CRONÓMETRO DE CONTROL DE LANZAMIENTO -->
+      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
+        <h3 class="mint-txt">Control del Cronómetro de Lanzamiento</h3>
+        <div class="timer-digits margin-v-sm" id="admin-timer-display" style="font-family: monospace; font-size: 2.2rem; letter-spacing: 2px; color: #00ffcc;">
+          --:--:--:--
+        </div>
+        <div class="admin-grid margin-v-sm" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <button type="button" onclick="sodieIniciarCronometro()" class="btn-pf-action btn-mint-solid">▶️ Iniciar</button>
+          <button type="button" onclick="sodiePausarCronometro()" class="btn-pf-action btn-fuchsia-solid">⏸️ Pausar</button>
+          <button type="button" onclick="sodieReiniciarCronometro()" class="btn-pf-action btn-fuchsia-solid">🔄 Reiniciar</button>
+        </div>
+      </div>
+
+      <!-- TIMMER ADMIN (120 HORAS PARA CERRAR LISTA DE ESPERA) -->
+      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
+        <h4 class="mint-txt">Timmer (Límite para Cerrar Lista de Espera)</h4>
+        
+        <div id="admin-120h-timer" class="timer-digits margin-v-sm" style="font-family: monospace; font-size: 2rem; letter-spacing: 2px; color: #00ffcc;">
+          120:00:00
+        </div>
+        
+        <p class="step-desc" style="margin-bottom: 10px;">Cuenta regresiva de 120 horas en curso</p>
+        
+        <div class="admin-grid margin-v-sm" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <button type="button" onclick="sodieIniciarTimer120h()" class="btn-pf-action btn-mint-solid">▶️ Iniciar</button>
+          <button type="button" onclick="sodiePausarTimer120h()" class="btn-pf-action btn-fuchsia-solid">⏸️ Pausar</button>
+          <button type="button" onclick="sodieReiniciarTimer120h()" class="btn-pf-action btn-fuchsia-solid">🔄 Reiniciar</button>
+        </div>
+      </div>
+
+      <!-- SUBIDA DE VIDEO -->
       <div class="glass-card-dash margin-v-sm">
         <h4 class="mint-txt">Subida de Video</h4>
         <div class="margin-v-sm">
           <input type="file" id="admin-video-file" class="file-input-custom" accept="video/*" />
           
-          <!-- Progress Bar Video -->
-          <div id="progress-video-container" class="margin-v-sm hidden" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
+          <div id="progress-video-container" class="margin-v-sm hidden" style="display: none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
               <span class="mint-txt">Cargando Video...</span>
               <span id="progress-video-text" class="mint-txt" style="font-weight: bold;">0%</span>
@@ -50,19 +110,18 @@
           </div>
 
           <button type="button" id="btn-upload-video" class="btn-pf-action btn-mint-solid margin-top-10">
-            🎬 Subir Video
+             Subir Video
           </button>
         </div>
       </div>
 
-      <!-- SECCIÓN 3: SUBIR CONTRATO -->
+      <!-- SUBIR CONTRATO -->
       <div class="glass-card-dash margin-v-sm">
         <h4 class="mint-txt">Subir Contrato</h4>
         <div class="margin-v-sm">
           <input type="file" id="admin-contract-file" class="file-input-custom" accept=".pdf" />
           
-          <!-- Progress Bar Contrato -->
-          <div id="progress-contract-container" class="margin-v-sm hidden" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
+          <div id="progress-contract-container" class="margin-v-sm hidden" style="display: none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
               <span class="mint-txt">Cargando PDF...</span>
               <span id="progress-contract-text" class="mint-txt" style="font-weight: bold;">0%</span>
@@ -73,19 +132,18 @@
           </div>
 
           <button type="button" id="btn-upload-contract" class="btn-pf-action btn-mint-solid margin-top-10">
-            📄 Subir Contrato
+            Subir Contrato
           </button>
         </div>
       </div>
 
-      <!-- SECCIÓN 4: SUBIR EXCEL -->
+      <!-- SUBIR EXCEL -->
       <div class="glass-card-dash margin-v-sm">
         <h4 class="mint-txt">Subir Excel</h4>
         <div class="margin-v-sm">
           <input type="file" id="admin-excel-file" class="file-input-custom" accept=".csv, .xlsx, .xls" />
           
-          <!-- Progress Bar Excel -->
-          <div id="progress-excel-container" class="margin-v-sm hidden" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
+          <div id="progress-excel-container" class="margin-v-sm hidden" style="display: none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
               <span class="mint-txt">Inyectando Audiencia...</span>
               <span id="progress-excel-text" class="mint-txt" style="font-weight: bold;">0%</span>
@@ -96,46 +154,35 @@
           </div>
 
           <button type="button" id="btn-upload-excel" class="btn-pf-action btn-mint-solid margin-top-10">
-            📊 Subir Excel
+             Subir Excel
           </button>
         </div>
       </div>
 
-      <!-- SECCIÓN 5: ACTIVAR CAMPAÑA -->
+      <!-- ACTIVAR CAMPAÑA -->
       <div class="glass-card-dash margin-v-sm">
         <h4 class="fuchsia-txt">Activar Campaña</h4>
         <button type="button" id="btn-admin-activate-campaign" class="btn-pf-action btn-activate-gradient margin-v-sm" onclick="sodieConfirmarActivacion()">
-          🚀 Activar Campaña Directa
+           Activar Campaña Directa
         </button>
       </div>
 
-      <!-- SECCIÓN 6: CERRAR DASHBOARD PRINCIPAL -->
+      <!-- CERRAR DASHBOARD PRINCIPAL -->
       <div class="glass-card-dash margin-v-sm">
         <h4 class="fuchsia-txt">Cerrar Dashboard Principal</h4>
         <p class="step-desc">Activar la lista de espera para nuevos registros.</p>
         <button type="button" class="btn-pf-action btn-fuchsia-solid margin-top-10" onclick="sodieToggleWaitlistMode(true)">
-          🔒 Activar Lista de Espera
+          Activar Lista de Espera
         </button>
       </div>
 
-      <!-- SECCIÓN 7: CERRAR LISTA DE ESPERA -->
+      <!-- CERRAR LISTA DE ESPERA -->
       <div class="glass-card-dash margin-v-sm">
         <h4 class="fuchsia-txt">Cerrar Lista de Espera</h4>
         <p class="step-desc">Cierra la lista de espera y dispara el temporizador de 14 días para la V4 en el Dashboard Principal.</p>
         <button type="button" id="btn-close-waitlist" class="btn-pf-action btn-fuchsia-solid margin-top-10" onclick="sodieCerrarListaEspera()">
-          ⏳ Activar Temporizador para la V4
+          Activar Temporizador para la V4
         </button>
-      </div>
-
-      <!-- SECCIÓN 8: TIMMER ADMIN (120 HORAS PARA CERRAR LISTA DE ESPERA) -->
-      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
-        <h4 class="mint-txt">Timmer (Límite para Cerrar Lista de Espera)</h4>
-        
-        <div id="admin-120h-timer" class="timer-digits margin-v-sm" style="font-family: monospace; font-size: 2rem; letter-spacing: 2px; color: #00ffcc;">
-          120:00:00
-        </div>
-        
-        <span class="step-desc">Cuenta regresiva de 120 horas en curso</span>
       </div>
 
     </div>
