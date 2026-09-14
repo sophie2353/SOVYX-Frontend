@@ -16,23 +16,31 @@
       <h2 class="fuchsia-txt">Acceso Administrativo SODIE</h2>
       <p class="step-desc">Introduce tus credenciales o usa autenticación biométrica para ingresar.</p>
       
-        <form id="admin-login-form" class="margin-v-sm">
-  <div class="form-group margin-v-sm" style="text-align: left;">
-    <label for="admin-pass" class="mint-txt">Contraseña Admin</label>
-    <input type="password" id="admin-pass" class="file-input-custom" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; margin-top: 6px;">
-  </div>
+      <form id="admin-login-form" class="margin-v-sm">
+        <div class="form-group margin-v-sm" style="text-align: left;">
+          <label for="admin-pass" class="mint-txt">Contraseña Admin</label>
+          <input type="password" id="admin-pass" class="file-input-custom" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; margin-top: 6px;">
+        </div>
 
-  <div class="admin-grid two-cols margin-v-sm">
-    <button type="submit" id="btn-admin-login" class="btn-pf-action btn-mint-solid">
-      Iniciar Sesión
-    </button>
-    <button type="button" id="btn-admin-biometric" class="btn-pf-action btn-mint-solid">
-       Login Biométrico
-    </button>
-  </div>
-  
-  <p id="admin-auth-error" style="color: #ff4d4d; display: none; margin-top: 10px; font-weight: bold; text-align: center;"></p>
-</form>
+        <div class="admin-grid two-cols margin-v-sm">
+          <button type="submit" id="btn-admin-login" class="btn-pf-action btn-mint-solid">
+            Iniciar Sesión
+          </button>
+          <button type="button" id="btn-admin-biometric" class="btn-pf-action btn-mint-solid">
+             Login Biométrico
+          </button>
+        </div>
+        
+        <p id="admin-auth-error" style="display: none; margin-top: 10px; font-weight: bold; text-align: center;"></p>
+
+        <!-- CONTENEDOR DE REGISTRO BIOMÉTRICO (Aparece dinámicamente si no hay huella registrada) -->
+        <div id="admin-bio-register-banner" style="display: none; margin-top: 15px; padding: 12px; background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 8px;">
+          <p class="mint-txt" style="font-size: 0.85rem; margin-bottom: 8px;">¿Es tu primera vez en este dispositivo?</p>
+          <button type="button" id="btn-admin-register-bio" class="btn-pf-action btn-mint-solid" style="width: 100%; font-size: 0.9rem;">
+            🔑 Registrar mi Huella / Rostro aquí
+          </button>
+        </div>
+      </form>
     </div>
   </main>
 
@@ -76,9 +84,9 @@
         </div>
       </div>
 
-      <!-- TIMMER ADMIN (120 HORAS PARA CERRAR LISTA DE ESPERA) -->
+      <!-- TIMER ADMIN (120 HORAS PARA CERRAR LISTA DE ESPERA) -->
       <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
-        <h4 class="mint-txt">Timmer (Límite para Cerrar Lista de Espera)</h4>
+        <h4 class="mint-txt">Timer (Límite para Cerrar Lista de Espera)</h4>
         
         <div id="admin-120h-timer" class="timer-digits margin-v-sm" style="font-family: monospace; font-size: 2rem; letter-spacing: 2px; color: #00ffcc;">
           120:00:00
@@ -189,6 +197,7 @@
 
   </main>
 
+  <!-- CARGA DEL ENGINE JS DE ADMINISTRACIÓN -->
   <script src="admin.js"></script>
 </body>
 </html>
