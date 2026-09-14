@@ -107,6 +107,25 @@ function initSSEMetrics() {
   }
 }
 
+// Contador de clics para acceso oculto
+let adminClickCount = 0;
+let adminClickTimer = null;
+
+function sodieAbrirModalAdmin() {
+    adminClickCount++;
+    
+    clearTimeout(adminClickTimer);
+    adminClickTimer = setTimeout(() => {
+        adminClickCount = 0;
+    }, 2000); // Resetea si no completa los 5 clics en 2 segundos
+
+    if (adminClickCount >= 5) {
+        adminClickCount = 0;
+        // Redirección directa al panel/login de admin
+        window.location.href = 'admin.html';
+    }
+}
+
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
    ========================================================================== */
