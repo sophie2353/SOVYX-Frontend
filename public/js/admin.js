@@ -6,6 +6,7 @@
 /* ==========================================================================
    1. ESTADO GLOBAL Y CONFIGURACIÓN INICIAL
    ========================================================================== */
+const API_URL = "https://api.sodie.app";
 const ADMIN_KEY = "sodie_202623555"; // Clave de acceso directa
 
 // Estado del Cronómetro de Lanzamiento (24h)
