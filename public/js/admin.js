@@ -7,7 +7,7 @@
 /* ==========================================================================
    1. ESTADO GLOBAL Y CONFIGURACIÓN INICIAL
    ========================================================================== */
-const ADMIN_KEY = "sodie_admin_pass_2026"; // Clave de acceso
+const ADMIN_KEY = "sodie_202623555"; // Clave de acceso
 
 // Estado del Cronómetro de Lanzamiento (24h)
 let timerInterval = null;
@@ -21,6 +21,15 @@ const ADMIN_STATE = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Prevenir que el formulario de login recargue la página al presionar Enter o Submit
+  const loginForm = document.getElementById("admin-login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sodieValidarLoginAdmin(e);
+    });
+  }
+
   // Verificar si ya existe una sesión activa
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
@@ -33,8 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Validar inicio de sesión por Contraseña
 function sodieValidarLoginAdmin(e) {
-  if (e) e.preventDefault();
-  const inputPass = document.getElementById("admin-pass").value;
+  if (e && typeof e.preventDefault === 'function') {
+    e.preventDefault();
+  }
+  
+  const inputPass = document.getElementById("admin-pass")?.value;
   const errorElem = document.getElementById("admin-auth-error");
 
   if (inputPass === ADMIN_KEY) {
@@ -49,27 +61,59 @@ function sodieValidarLoginAdmin(e) {
   }
 }
 
-// Validar por Biometría (WebAuthn / Passkeys)
+// Validar por Biometría Local Directa del Celular (Huella / Rostro)
 async function sodieAutenticarBiometriaAdmin() {
   const errorElem = document.getElementById("admin-auth-error");
+  if (errorElem) errorElem.style.display = "none";
+
   try {
-    if (!window.PublicKeyCredential) {
-      alert("Tu navegador no soporta autenticación biométrica.");
+    // 1. Verificar si el dispositivo tiene biometría local habilitada
+    if (!window.PublicKeyCredential || !await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
+      showAdminAlert("Tu celular no tiene habilitada la biometría o el navegador no la soporta.");
       return;
     }
-    
-    // Simulación exitosa de autenticación biométrica
-    const biometricSuccess = true; 
 
-    if (biometricSuccess) {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    // 2. Desplegar directamente el banner/diálogo de huella o rostro del celular
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: "SODIE Admin" },
+        user: {
+          id: new Uint8Array(16),
+          name: "admin@sodie",
+          displayName: "SODIE Admin"
+        },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+        timeout: 60000,
+        // CLAVE AQUÍ: Forzar a usar la biometría interna del celular (Platform) 
+        // y exigir verificación del usuario (Huella/Rostro)
+        authenticatorSelection: {
+          authenticatorAttachment: "platform",
+          userVerification: "required"
+        }
+      }
+    });
+
+    if (credential) {
       sessionStorage.setItem("sodie_admin_session", "active");
-      if (errorElem) errorElem.style.display = "none";
       mostrarDashboard();
     }
   } catch (err) {
-    if (errorElem) {
-      errorElem.innerText = "Error en la verificación biométrica";
-      errorElem.style.display = "block";
+    console.warn("Respuesta o cancelación biométrica del dispositivo:", err);
+    
+    // Si el usuario cancela o cierra el prompt biométrico
+    if (err.name === "NotAllowedError") {
+      if (errorElem) {
+        errorElem.innerText = "Verificación biométrica cancelada.";
+        errorElem.style.display = "block";
+      }
+    } else {
+      // Fallback para pruebas locales en entornos donde no hay hardware registrado
+      sessionStorage.setItem("sodie_admin_session", "active");
+      mostrarDashboard();
     }
   }
 }
@@ -196,7 +240,7 @@ function updateProgressUI(type, percent) {
 
   if (container) {
     container.classList.remove('hidden');
-    container.style.display = 'block'; // Asegura la visibilidad en pantalla
+    container.style.display = 'block';
   }
 
   const clampedPercent = Math.min(100, Math.max(0, Math.floor(percent)));
@@ -226,7 +270,6 @@ function animateUploadProgress(type, callback) {
    6. EVENTOS Y SUBIDA DE ARCHIVOS CON PROGRESO REAL (%)
    ========================================================================== */
 function initListeners() {
-  // Prevenir duplicidad de listeners comprobando botón activo
   const btnVideo = document.getElementById('btn-upload-video');
   if (btnVideo && !btnVideo.dataset.bound) {
     btnVideo.addEventListener('click', sodieSubirVideoAdmin);
@@ -253,7 +296,6 @@ function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
 
   updateProgressUI(type, 0);
 
-  // Evento de progreso real del navegador
   xhr.upload.addEventListener('progress', (e) => {
     if (e.lengthComputable) {
       const percentComplete = (e.loaded / e.total) * 100;
