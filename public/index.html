@@ -40,6 +40,35 @@
     </div>
   </div>
 
+  <!-- MODAL DE ACCESO ADMIN (SE GATILLA CON 5 CLICS EN EL TÍTULO "SODIE") -->
+  <div id="admin-auth-modal" class="full-screen hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 99999; display: flex; align-items: center; justify-content: center;">
+    <div class="glass-card-dash" style="max-width: 380px; width: 90%; text-align: center; padding: 25px; border: 1px solid #00ffcc; box-shadow: 0 0 20px rgba(0,255,204,0.2);">
+      <h3 class="mint-txt" style="margin-bottom: 15px; font-size: 1.4rem;">🦁 Acceso Administrador</h3>
+      <p class="step-desc" style="font-size: 0.85rem; margin-bottom: 20px;">Autentícate para ingresar al panel de control SODIE.</p>
+      
+      <form id="admin-auth-form" onsubmit="event.preventDefault(); sodieValidarPasswordAdmin();">
+        <div style="margin-bottom: 15px;">
+          <input type="password" id="admin-pass-input" placeholder="Contraseña Admin *" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; box-sizing: border-box;" required />
+        </div>
+        
+        <button type="submit" class="btn-pf-action btn-pay-gradient" style="width: 100%; margin-bottom: 10px;">
+          Acceder por Contraseña
+        </button>
+      </form>
+
+      <!-- Dentro del Modal Admin en index.html -->
+<button type="button" id="btn-admin-biometric" class="btn-pf-action btn-biometric" style="width: 100%; margin-bottom: 10px;" onclick="sodieAutenticarBiometriaAdmin()">
+  🔑 Acceder por Biometría (Huella / Face ID)
+</button>
+
+      <button type="button" class="btn-pf-action btn-blue-solid" style="width: 100%; background: transparent; border: 1px solid #ff0055; color: #ff0055;" onclick="sodieCerrarModalAdmin()">
+        Cancelar
+      </button>
+
+      <p id="admin-auth-error" class="fuchsia-txt hidden" style="margin-top: 15px; font-size: 0.85rem;"></p>
+    </div>
+  </div>
+
   <!-- SPLASH SCREEN -->
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
@@ -101,10 +130,11 @@
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
-        <span id="header-brand-title" class="brand-text">SODIE</span>
+        <!-- 5 Clics en este título abren la autenticación Admin -->
+        <span id="header-brand-title" class="brand-text" style="cursor: pointer; user-select: none;" title="Haz 5 clics para el acceso secreto Admin">SODIE</span>
       </div>
       <div class="dash-header-right">
-        <button type="button" class="btn-icon" onclick="window.location.href='/admin.html'" title="Acceso Admin">🦁</button>
+        <button type="button" class="btn-icon" onclick="sodieAbrirModalAdmin()" title="Acceso Admin">🦁</button>
       </div>
     </header>
 
@@ -197,17 +227,17 @@
         </div>
       </div>
 
-     <div id="quick-replies" class="chat-quick-options">
-  <button type="button" class="opt-btn" data-payload="crear_binance">¿Cómo crear cuenta en Binance?</button>
-  <button type="button" class="opt-btn" data-payload="recargar_binance">¿Cómo recargar en Binance?</button>
-  <button type="button" class="opt-btn" data-payload="tres_cuotas">¿3 Cuotas?</button>
-  <button type="button" class="opt-btn" data-payload="cupo_3">¿Qué ocurre al cupo 3?</button>
-  <button type="button" class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
-  <button type="button" class="opt-btn" data-payload="ecommerce">Ecommerce</button>
-  <button type="button" class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
-  <button type="button" class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
-  <button type="button" class="opt-btn" data-payload="comparacion">SODIEVSAGENCIAS</button>
-</div>
+      <div id="quick-replies" class="chat-quick-options">
+        <button type="button" class="opt-btn" data-payload="crear_binance">¿Cómo crear cuenta en Binance?</button>
+        <button type="button" class="opt-btn" data-payload="recargar_binance">¿Cómo recargar en Binance?</button>
+        <button type="button" class="opt-btn" data-payload="tres_cuotas">¿3 Cuotas?</button>
+        <button type="button" class="opt-btn" data-payload="cupo_3">¿Qué ocurre al cupo 3?</button>
+        <button type="button" class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
+        <button type="button" class="opt-btn" data-payload="ecommerce">Ecommerce</button>
+        <button type="button" class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
+        <button type="button" class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
+        <button type="button" class="opt-btn" data-payload="comparacion">SODIEVSAGENCIAS</button>
+      </div>
 
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
@@ -366,15 +396,16 @@
     </section>
       
     <div id="v4-giant-timer-container" class="glass-card-dash margin-v-md hidden" style="text-align: center; padding: 30px; border: 2px solid #00ffcc;">
-  <h2 class="fuchsia-txt" style="font-size: 2rem; margin-bottom: 10px;">Lanzamiento V4 En Curso 🚀</h2>
-  <p class="step-desc">Lista de espera cerrada. El sistema está preparando la infraestructura de la Versión 4.</p>
-  <div id="v4-giant-timer-digits" class="mint-txt" style="font-family: monospace; font-size: 2.2rem; font-weight: bold; margin: 20px 0; letter-spacing: 2px;">
-    14d : 00h : 00m : 00s : 000000us
-  </div>
- <span class="step-desc" style="color: #00ffcc;">Días : Horas : Minutos : Segundos : Microsegundos</span>
-</div>
+      <h2 class="fuchsia-txt" style="font-size: 2rem; margin-bottom: 10px;">Lanzamiento V4 En Curso 🚀</h2>
+      <p class="step-desc">Lista de espera cerrada. El sistema está preparando la infraestructura de la Versión 4.</p>
+      <div id="v4-giant-timer-digits" class="mint-txt" style="font-family: monospace; font-size: 2.2rem; font-weight: bold; margin: 20px 0; letter-spacing: 2px;">
+        14d : 00h : 00m : 00s : 000000us
+      </div>
+      <span class="step-desc" style="color: #00ffcc;">Días : Horas : Minutos : Segundos : Microsegundos</span>
+    </div>
   </main>
 
-<script src="app.js"></script>
+  <script src="app.js"></script>
+
 </body>
 </html>
