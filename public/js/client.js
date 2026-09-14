@@ -3,6 +3,7 @@
  * Manejo de métricas, temporizadores activos (0-96h), subida de archivos,
  * activación de campaña y pasarelas de pago con redirección a confirmación.
  */
+const API_URL = "https://api.sodie.app";
 
 document.addEventListener('DOMContentLoaded', () => {
   initClientDashboard();
