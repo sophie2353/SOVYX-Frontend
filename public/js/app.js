@@ -3,6 +3,126 @@
  * Versión Final Sincronizada con Backend, confirmacion.html
  * y Temporizador V4 Gigante (14 días con Microsegundos).
  */
+// ==========================================
+// CONFIGURACIÓN INICIAL & CONSTANTES SODIE
+// ==========================================
+const API_URL = "https://api.sodie.app";
+
+// ==========================================
+// AUTENTICACIÓN ADMIN Y BIOMETRÍA
+// ==========================================
+
+/**
+ * Validar contraseña de administrador (admin23555)
+ * Tras ser correcta, exige la validación biométrica obligatoriamente.
+ */
+async function sodieValidarPasswordAdmin() {
+  const passInput = document.getElementById('admin-pass-input');
+  const errEl = document.getElementById('admin-auth-error');
+
+  if (errEl) {
+    errEl.classList.add('hidden');
+    errEl.textContent = '';
+  }
+
+  // Clave autorizada: admin23555
+  if (passInput && passInput.value.trim() === 'admin23555') {
+    // Si la clave es correcta, pasa al control biométrico de inmediato
+    await sodieAutenticarBiometriaAdmin();
+  } else {
+    if (errEl) {
+      errEl.textContent = '❌ Contraseña incorrecta.';
+      errEl.classList.remove('hidden');
+    }
+  }
+}
+
+/**
+ * Autenticación por Biometría (Huella / Face ID) para Administrador SODIE
+ * Despliega el banner nativo del sensor biométrico del dispositivo.
+ */
+async function sodieAutenticarBiometriaAdmin() {
+  const errEl = document.getElementById('admin-auth-error');
+
+  if (errEl) {
+    errEl.classList.add('hidden');
+    errEl.textContent = '';
+  }
+
+  // Comprobar soporte de biometría de plataforma en el dispositivo
+  if (window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      const userId = new Uint8Array(16);
+      window.crypto.getRandomValues(userId);
+
+      // Invocación directa al sensor nativo (Lector de huella / Face ID)
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge: challenge,
+          rp: { name: "SODIE Admin" },
+          user: {
+            id: userId,
+            name: "admin@sodie.com",
+            displayName: "Administrador SODIE"
+          },
+          pubKeyCredParams: [
+            { type: "public-key", alg: -7 },  // ES256
+            { type: "public-key", alg: -257 } // RS256
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform", // Utiliza el sensor físico del dispositivo
+            userVerification: "required"         // Fuerza lectura de huella o rostro
+          },
+          timeout: 60000
+        }
+      });
+
+      // Si pasa la huella/rostro con éxito, redirige al panel admin
+      if (credential) {
+        window.location.href = '/admin.html';
+        return;
+      }
+    } catch (err) {
+      console.warn("Validación biométrica cancelada o fallida:", err);
+      
+      if (errEl) {
+        errEl.textContent = '❌ Lectura de huella no completada o cancelada.';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+  } else {
+    // Si la biometría nativa no está activa o soportada, muestra el aviso
+    if (errEl) {
+      errEl.textContent = '⚠️ Biometría no disponible en este dispositivo.';
+      errEl.classList.remove('hidden');
+    }
+  }
+}
+
+/**
+ * Controles de visibilidad del modal de administración
+ */
+function sodieAbrirModalAdmin() {
+  const modal = document.getElementById('admin-auth-modal');
+  const errEl = document.getElementById('admin-auth-error');
+  if (errEl) errEl.classList.add('hidden');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
+}
+
+function sodieCerrarModalAdmin() {
+  const modal = document.getElementById('admin-auth-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initSplashGauges();
