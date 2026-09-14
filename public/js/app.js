@@ -20,6 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
   checkWaitlistClosedStatus(); // Sincronización automática de V4
 });
 
+// Listener directo en la ventana para garantizar que NADA lo bloquee
+(function() {
+  let count = 0, last = 0;
+  window.addEventListener('click', function(e) {
+    // Si toca cualquier parte del header o logo
+    if (e.target.closest('header, .chat-header, .brand-title, #app-title, h1, h2, nav')) {
+      const now = Date.now();
+      if (now - last > 2000) count = 0;
+      count++;
+      last = now;
+      if (count >= 5) {
+        count = 0;
+        window.location.href = 'admin.html';
+      }
+    }
+  }, true); // Use capture para interceptar antes que cualquier otro script
+})();
+
 // ==========================================
 // TRIGGER DE 5 CLICS GLOBAL Y DIRECTO
 // ==========================================
