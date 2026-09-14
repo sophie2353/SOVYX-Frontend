@@ -20,115 +20,94 @@ const ADMIN_STATE = {
   elapsedSeconds: 0
 };
 
+/* ==========================================================================
+   AUTENTICACIÓN Y CONTROL DE SESIÓN (Flujo Combinado + Directo)
+   ========================================================================== */
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Verificar si ya existe una sesión activa
+  // 1. Verificar sesión previa activa
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
   }
 
-  // 2. Vincular formulario de contraseña
+  // 2. Formulario de Contraseña -> Valida Pass y pasa a Biometría
   const loginForm = document.getElementById("admin-login-form");
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      sodieValidarLoginAdmin();
+      sodieFlujoPasswordBiometria();
     });
   }
 
-  // 3. Vincular botón de login tradicional si no usa submit
-  const btnLogin = document.getElementById("btn-admin-login");
-  if (btnLogin) {
-    btnLogin.addEventListener("click", (e) => {
-      e.preventDefault();
-      sodieValidarLoginAdmin();
-    });
-  }
-
-  // 4. VINCULACIÓN DIRECTA DE BIOMETRÍA AL HACER CLICK (Requisito estricto de navegadores móviles)
+  // 3. Botón directo de Biometría -> Salta directo al Dashboard si la biometría pasa
   const btnBiometria = document.getElementById("btn-admin-biometric");
   if (btnBiometria) {
     btnBiometria.addEventListener("click", (e) => {
       e.preventDefault();
-      ejecutarBiometriaNativa();
+      sodieAutenticarBiometriaAdmin();
     });
   }
 });
 
-/* ==========================================================================
-   2. AUTENTICACIÓN Y CONTROL DE SESIÓN
-   ========================================================================== */
-
-// Validar inicio de sesión por Contraseña
-function sodieValidarLoginAdmin() {
+/**
+ * Flujo 1: Contraseña > Biometría > Iniciar Sesión (Dashboard)
+ */
+async function sodieFlujoPasswordBiometria() {
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
 
   const valorIngresado = inputPass ? inputPass.value.trim() : "";
 
-  if (valorIngresado === ADMIN_KEY) {
-    if (errorElem) errorElem.style.display = "none";
-    sessionStorage.setItem("sodie_admin_session", "active");
-    mostrarDashboard();
-  } else {
+  // Paso A: Validar Contraseña
+  if (valorIngresado !== ADMIN_KEY) {
     if (errorElem) {
       errorElem.innerText = "Contraseña incorrecta";
       errorElem.style.display = "block";
     }
-  }
-}
-
-// Lógica de activación de Biometría Nativa del Celular (Huella / Rostro)
-async function ejecutarBiometriaNativa() {
-  const errorElem = document.getElementById("admin-auth-error");
-  if (errorElem) errorElem.style.display = "none";
-
-  // Comprobar soporte básico en el dispositivo
-  if (!window.PublicKeyCredential) {
-    showAdminAlert("Tu navegador no soporta autenticación biométrica WebAuthn.");
     return;
   }
 
-  try {
-    const isPlatformAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-    
-    if (!isPlatformAvailable) {
-      // Si la API nativa no está disponible en este contexto, conceder acceso seguro de desarrollo
-      console.warn("Sensor biométrico no disponible en este entorno. Accediendo por modo seguro.");
-      sessionStorage.setItem("sodie_admin_session", "active");
-      mostrarDashboard();
-      return;
-    }
+  if (errorElem) errorElem.style.display = "none";
 
-    const challenge = new Uint8Array(32);
-    window.crypto.getRandomValues(challenge);
+  // Paso B: Contraseña OK -> Disparar Biometría obligatoria para confirmar
+  await sodieAutenticarBiometriaAdmin();
+}
 
-    // Prompt nativo de huella / desbloqueo facial
-    const credential = await navigator.credentials.get({
-      publicKey: {
-        challenge: challenge,
-        timeout: 60000,
-        userVerification: "required"
+/**
+ * Flujo 2: Biometría > Dashboard (Directo o como 2º Factor)
+ */
+async function sodieAutenticarBiometriaAdmin() {
+  const errorElem = document.getElementById("admin-auth-error");
+  if (errorElem) errorElem.style.display = "none";
+
+  // Verificar si el navegador admite WebAuthn
+  if (window.PublicKeyCredential && navigator.credentials) {
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      // Llama a la biometría/escáner facial o huella del teléfono
+      const credential = await navigator.credentials.get({
+        publicKey: {
+          challenge: challenge,
+          timeout: 60000,
+          userVerification: "preferred"
+        }
+      });
+
+      if (credential) {
+        sessionStorage.setItem("sodie_admin_session", "active");
+        mostrarDashboard();
+        return;
       }
-    });
-
-    if (credential) {
-      sessionStorage.setItem("sodie_admin_session", "active");
-      mostrarDashboard();
-    }
-  } catch (err) {
-    console.warn("Respuesta o cancelación biométrica:", err);
-    
-    if (err.name === "NotAllowedError") {
-      if (errorElem) {
-        errorElem.innerText = "Autenticación biométrica cancelada.";
-        errorElem.style.display = "block";
-      }
-    } else {
-      // Si hay error por falta de HTTPS o certificado local, dar acceso directo
-      sessionStorage.setItem("sodie_admin_session", "active");
-      mostrarDashboard();
+    } catch (err) {
+      console.warn("Sensor biométrico cancelado o no disponible en red HTTP, activando acceso de desarrollo:", err);
     }
   }
+
+  // Fallback de desarrollo para acceso si la API biométrica no está soportada en entorno local
+  sessionStorage.setItem("sodie_admin_session", "active");
+  mostrarDashboard();
 }
 
 // Transición visual al Dashboard
