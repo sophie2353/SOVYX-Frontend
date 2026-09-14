@@ -11,6 +11,106 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ==========================================================================
    1. ESTADO GLOBAL Y CONFIGURACIÓN INICIAL
    ========================================================================== */
+// Clave de sesión y estado del cronómetro
+const ADMIN_KEY = "sodie_admin_pass_2026"; // Cambiar por tu hash/clave real
+let timerInterval = null;
+let totalSeconds = 86400; // 24 horas de ejemplo
+
+    // Verificar si ya existe una sesión activa
+    if (sessionStorage.getItem("sodie_admin_session") === "active") {
+        mostrarDashboard();
+    }
+});
+
+// 1. Validar inicio de sesión por Contraseña
+function sodieValidarLoginAdmin(e) {
+    e.preventDefault();
+    const inputPass = document.getElementById("admin-pass").value;
+    const errorElem = document.getElementById("admin-auth-error");
+
+    if (inputPass === ADMIN_KEY) {
+        sessionStorage.setItem("sodie_admin_session", "active");
+        mostrarDashboard();
+    } else {
+        errorElem.innerText = "Contraseña incorrecta";
+        errorElem.style.display = "block";
+    }
+}
+
+// 2. Validar por Biometría (WebAuthn / Passkeys)
+async function sodieAutenticarBiometriaAdmin() {
+    const errorElem = document.getElementById("admin-auth-error");
+    try {
+        if (!window.PublicKeyCredential) {
+            alert("Tu navegador no soporta autenticación biométrica.");
+            return;
+        }
+        
+        // Simulación de respuesta biométrica o llamada WebAuthn
+        // En producción se usa navigator.credentials.get()
+        const biometricSuccess = true; 
+
+        if (biometricSuccess) {
+            sessionStorage.setItem("sodie_admin_session", "active");
+            mostrarDashboard();
+        }
+    } catch (err) {
+        errorElem.innerText = "Error en la verificación biométrica";
+        errorElem.style.display = "block";
+    }
+}
+
+// 3. Transición visual al Dashboard e Inicio de Funciones
+function mostrarDashboard() {
+    document.getElementById("admin-login-view").style.display = "none";
+    document.getElementById("admin-dashboard-view").style.display = "block";
+    
+    // Iniciar cronómetro automáticamente al entrar
+    sodieIniciarCronometro();
+}
+
+// 4. Lógica del Cronómetro Administrativo
+function sodieIniciarCronometro() {
+    if (timerInterval) return;
+    
+    timerInterval = setInterval(() => {
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            return;
+        }
+        totalSeconds--;
+        actualizarDisplayCronometro();
+    }, 1000);
+}
+
+function sodiePausarCronometro() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+}
+
+function sodieReiniciarCronometro() {
+    sodiePausarCronometro();
+    totalSeconds = 86400;
+    actualizarDisplayCronometro();
+}
+
+function actualizarDisplayCronometro() {
+    const dias = Math.floor(totalSeconds / (3600 * 24));
+    const horas = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+    const minutos = Math.floor((totalSeconds % 3600) / 60);
+    const segundos = totalSeconds % 60;
+
+    const display = `${String(dias).padStart(2, '0')}:${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+    
+    const elem = document.getElementById("admin-timer-display");
+    if (elem) elem.innerText = display;
+}
+
+function sodieCerrarSesionAdmin() {
+    sessionStorage.removeItem("sodie_admin_session");
+    window.location.reload();
+}
+
 const ADMIN_STATE = {
   timer120Seconds: 120 * 3600, // 120 horas en segundos
   elapsedSeconds: 0            // Segundos transcurridos en panel
