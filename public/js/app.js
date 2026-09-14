@@ -20,6 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
   checkWaitlistClosedStatus(); // Sincronización automática de V4
 });
 
+// ==========================================
+// TRIGGER DE 5 CLICS GLOBAL Y DIRECTO
+// ==========================================
+(function initGlobalAdminTrigger() {
+  let clickCount = 0;
+  let lastClickTime = 0;
+
+  document.addEventListener('click', (e) => {
+    // Detecta clics en el encabezado, título, logo o barra superior
+    const headerElement = e.target.closest('header, .chat-header, .brand-title, #app-title, .admin-logo, h1, h2, nav');
+    
+    if (headerElement) {
+      const currentTime = Date.now();
+      
+      // Si el tiempo entre clics es mayor a 2.5 segundos, reiniciar contador
+      if (currentTime - lastClickTime > 2500) {
+        clickCount = 0;
+      }
+      
+      clickCount++;
+      lastClickTime = currentTime;
+
+      if (clickCount >= 5) {
+        clickCount = 0;
+        localStorage.setItem('sodie_show_admin_banner', 'true');
+        window.location.href = 'admin.html';
+      }
+    }
+  });
 /* ==========================================================================
    1. TOAST & NOTIFICACIONES
    ========================================================================== */
@@ -106,38 +135,6 @@ function initSSEMetrics() {
     console.warn('SSE desactivado, fallback a estático.');
   }
 }
-
-//------------
-//ACCESOADMIN
-//--------------
-
-// Captura universal de 5 clics para ingresar a Admin
-(function setupAdminSecretTrigger() {
-  let clickCount = 0;
-  let resetTimer = null;
-
-  document.addEventListener('click', (e) => {
-    // Detecta clics en el header, logo o título principal
-    const isTarget = e.target.closest('header, .chat-header, .brand-title, #app-title, h1, h2');
-    
-    if (!isTarget) return;
-
-    clickCount++;
-    clearTimeout(resetTimer);
-
-    // Reinicia el contador si pasan más de 3 segundos
-    resetTimer = setTimeout(() => {
-      clickCount = 0;
-    }, 3000);
-
-    // Al completar 5 clics
-    if (clickCount >= 5) {
-      clickCount = 0;
-      localStorage.setItem('sodie_show_admin_banner', 'true');
-      window.location.href = 'admin.html';
-    }
-  });
-})();
 
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
