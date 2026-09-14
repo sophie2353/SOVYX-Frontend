@@ -107,24 +107,41 @@ function initSSEMetrics() {
   }
 }
 
-// Contador de clics para acceso oculto
-let adminClickCount = 0;
-let adminClickTimer = null;
+// ==========================================
+// DETECCIÓN DE 5 CLICS EN EL TÍTULO (index.html / app.js)
+// Redirige directamente al Panel de Admin (admin.html)
+// ==========================================
 
-function sodieAbrirModalAdmin() {
-    adminClickCount++;
+let titleClickCount = 0;
+let titleClickTimer = null;
+
+function setupAdminTitleTrigger() {
+  const titleElements = document.querySelectorAll('#app-title, .brand-title, #main-title, .logo-title');
+
+  titleElements.forEach(titleEl => {
+    if (!titleEl) return;
+    titleEl.style.cursor = 'pointer';
     
-    clearTimeout(adminClickTimer);
-    adminClickTimer = setTimeout(() => {
-        adminClickCount = 0;
-    }, 2000); // Resetea si no completa los 5 clics en 2 segundos
+    titleEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      titleClickCount++;
 
-    if (adminClickCount >= 5) {
-        adminClickCount = 0;
-        // Redirección directa al panel/login de admin
+      // Reinicia el contador si pasan más de 3 segundos entre clics
+      clearTimeout(titleClickTimer);
+      titleClickTimer = setTimeout(() => {
+        titleClickCount = 0;
+      }, 3000);
+
+      // Al completar 5 clics exactos, redirige a la vista de administración
+      if (titleClickCount >= 5) {
+        titleClickCount = 0;
         window.location.href = 'admin.html';
-    }
+      }
+    });
+  });
 }
+
+document.addEventListener('DOMContentLoaded', setupAdminTitleTrigger);
 
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
