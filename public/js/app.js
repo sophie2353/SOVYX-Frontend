@@ -107,41 +107,37 @@ function initSSEMetrics() {
   }
 }
 
-// ==========================================
-// DETECCIÓN DE 5 CLICS EN EL TÍTULO (index.html / app.js)
-// Redirige directamente al Panel de Admin (admin.html)
-// ==========================================
+//------------
+//ACCESOADMIN
+//--------------
 
-let titleClickCount = 0;
-let titleClickTimer = null;
+// Captura universal de 5 clics para ingresar a Admin
+(function setupAdminSecretTrigger() {
+  let clickCount = 0;
+  let resetTimer = null;
 
-function setupAdminTitleTrigger() {
-  const titleElements = document.querySelectorAll('#app-title, .brand-title, #main-title, .logo-title');
-
-  titleElements.forEach(titleEl => {
-    if (!titleEl) return;
-    titleEl.style.cursor = 'pointer';
+  document.addEventListener('click', (e) => {
+    // Detecta clics en el header, logo o título principal
+    const isTarget = e.target.closest('header, .chat-header, .brand-title, #app-title, h1, h2');
     
-    titleEl.addEventListener('click', (e) => {
-      e.preventDefault();
-      titleClickCount++;
+    if (!isTarget) return;
 
-      // Reinicia el contador si pasan más de 3 segundos entre clics
-      clearTimeout(titleClickTimer);
-      titleClickTimer = setTimeout(() => {
-        titleClickCount = 0;
-      }, 3000);
+    clickCount++;
+    clearTimeout(resetTimer);
 
-      // Al completar 5 clics exactos, redirige a la vista de administración
-      if (titleClickCount >= 5) {
-        titleClickCount = 0;
-        window.location.href = 'admin.html';
-      }
-    });
+    // Reinicia el contador si pasan más de 3 segundos
+    resetTimer = setTimeout(() => {
+      clickCount = 0;
+    }, 3000);
+
+    // Al completar 5 clics
+    if (clickCount >= 5) {
+      clickCount = 0;
+      localStorage.setItem('sodie_show_admin_banner', 'true');
+      window.location.href = 'admin.html';
+    }
   });
-}
-
-document.addEventListener('DOMContentLoaded', setupAdminTitleTrigger);
+})();
 
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
