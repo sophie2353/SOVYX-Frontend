@@ -99,17 +99,17 @@
   </div>
 
   <main id="app-dashboard" class="dashboard-container">
-            <header class="dash-header">
-      <div class="dash-header-left">
-        <!-- 5 Clics en este texto abren admin.html directamente -->
-        <span id="sodie-logo-trigger" class="logo-title" style="cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; font-weight: bold; font-size: 1.4rem;" title="Acceso Admin">
-          <span class="serif-s">S</span>ODIE
-        </span>
-      </div>
-      <div class="dash-header-right">
-        <button type="button" class="btn-icon" id="btn-sodie-logo-trigger" title="Acceso Admin" style="cursor: pointer; touch-action: manipulation;">🦁</button>
-      </div>
-    </header>
+     <header class="dash-header">
+  <div class="dash-header-left">
+    <!-- Le agregamos onclick="sodieContarToquesAdmin()" directo al elemento -->
+    <div id="sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; user-select: none; touch-action: manipulation; display: inline-block; padding: 5px;">
+      <span class="logo-title" style="font-size: 1.4rem; font-weight: bold; color: #fff;"><span style="color: #ff007a;">S</span>ODIE</span>
+    </div>
+  </div>
+  <div class="dash-header-right">
+    <button type="button" class="btn-icon" id="btn-sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; touch-action: manipulation;">🦁</button>
+  </div>
+</header>
 
     <!-- 1. MÉTRICAS -->
     <section class="metrics-section">
