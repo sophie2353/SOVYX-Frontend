@@ -5,7 +5,7 @@
  */
 
 // ==========================================
-// TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO
+// TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO (CAPTURADOR MODO TRUE)
 // ==========================================
 (function initGlobalAdminTrigger() {
   let count = 0, last = 0;
@@ -22,7 +22,7 @@
         window.location.href = 'admin.html';
       }
     }
-  }, true); // Modador "true" (capture) para ejecutar ANTES que cualquier otro script
+  }, true); // Modo capture "true" para ejecutarse antes de cualquier otro interceptor de eventos
 })();
 
 // ==========================================
@@ -40,12 +40,29 @@ document.addEventListener('DOMContentLoaded', () => {
   handleUrlRedirects();
   initTimer24h();
   checkWaitlistClosedStatus(); // Sincronización automática de V4
+
+  // Configurar enlace de descarga del Contrato PDF
+  const btnDescargarContrato = document.getElementById('btn-download-contract');
+  if (btnDescargarContrato) {
+    btnDescargarContrato.href = '/contract/contrato.pdf';
+    btnDescargarContrato.setAttribute('download', 'Contrato_SODIE.pdf');
+    btnDescargarContrato.setAttribute('target', '_blank');
+  }
+
+  // Configurar la fuente del Video de Demostración
+  const demoVideo = document.getElementById('sodie-demo-video');
+  if (demoVideo) {
+    const source = demoVideo.querySelector('source');
+    if (source) {
+      source.src = '/video/video_demo.mp4';
+      demoVideo.load();
+    }
+  }
 });
 
-
-//--------
-//   1. TOAST & NOTIFICACIONES
- //  ========================================================================== */
+/* ==========================================================================
+   1. TOAST & NOTIFICACIONES
+   ========================================================================== */
 function showToast(title, body, isError = false) {
   const toast = document.getElementById('toast-notification');
   const toastTitle = document.getElementById('toast-title');
@@ -130,73 +147,6 @@ function initSSEMetrics() {
   }
 }
 
-//-----
-// ACTUALIZACIÓN PARA SUBIR VIDEO, CONTRATO Y DESCARGAR CONTRATO. SI ABAJO HAY REPETIDO EN ALGÚN BOTÓN PARECIDO A SEND CONTRACT O DOWNLOAD SE ELIMINA Y SE DEJA ESTE
-//---------
-
-// ==========================================
-// CONFIGURACIÓN DE RUTAS DE CONTRATO Y VIDEO + PRÓXIMO PASO EXCEL (ESTE ACTUALIZAR CON RUTA A SUBIR.  SOLO EL EXCEL QUE ESTÁ MÁS ABAJO)
-// ==========================================
-
-document.addEventListener('DOMContentLoaded', () => {
-
-  // 1. Configurar enlace de descarga del Contrato PDF
-  const btnDescargarContrato = document.getElementById('btn-download-contract');
-  if (btnDescargarContrato) {
-    btnDescargarContrato.href = '/contract/contrato.pdf';
-    btnDescargarContrato.setAttribute('download', 'Contrato_SODIE.pdf');
-    btnDescargarContrato.setAttribute('target', '_blank');
-  }
-
-  // 2. Configurar la fuente del Video de Demostración
-  const demoVideo = document.getElementById('sodie-demo-video');
-  if (demoVideo) {
-    // Si deseas cambiar dinámicamente la fuente desde JS:
-    const source = demoVideo.querySelector('source');
-    if (source) {
-      source.src = '/video/video_demo.mp4';
-      demoVideo.load(); // Recarga el reproductor con el nuevo video
-    }
-  }
-
-});
-
-// 3. Función para subir el contrato firmado (Paso 3)
-function sodieSubirContrato() {
-  const fileInput = document.getElementById('client-contract-file-input');
-  const pctLabel = document.getElementById('client-contract-pct');
-  const btnSubir = document.getElementById('btn-client-send-contract');
-
-  if (!fileInput || fileInput.files.length === 0) {
-    alert('Por favor selecciona el archivo de tu contrato firmado primero.');
-    return;
-  }
-
-  const archivo = fileInput.files[0];
-  console.log('Subiendo contrato:', archivo.name);
-
-  // Simulación de progreso de carga
-  let progreso = 0;
-  btnSubir.disabled = true;
-
-  const intervalo = setInterval(() => {
-    progreso += 20;
-    if (pctLabel) pctLabel.textContent = `${progreso}%`;
-
-    if (progreso >= 100) {
-      clearInterval(intervalo);
-      btnSubir.disabled = false;
-      
-      // Ocultar paso 3 (Contrato) y mostrar paso 4 (Excel)
-      document.getElementById('step-4-contract-flow').classList.add('hidden');
-      document.getElementById('step-5-excel-flow').classList.remove('hidden');
-
-      if (typeof mostrarToast === 'function') {
-        mostrarToast('Contrato recibido con éxito', 'Paso 4 habilitado: Sube tu Excel');
-      }
-    }
-  }, 300);
-}
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
    ========================================================================== */
@@ -419,12 +369,14 @@ async function obtenerContratoPDF() {
   }
 }
 
+// Función unificada para la carga del contrato firmado (Paso 3 -> Paso 4/5)
 async function sodieSubirContrato() {
   const fileInput = document.getElementById('client-contract-file-input');
   const pctLabel = document.getElementById('client-contract-pct');
+  const btnSubir = document.getElementById('btn-client-send-contract');
 
   if (!fileInput || !fileInput.files[0]) {
-    showToast('Archivo Requerido', 'Selecciona el PDF de tu contrato.', true);
+    showToast('Archivo Requerido', 'Selecciona el PDF de tu contrato firmado.', true);
     return;
   }
 
@@ -432,6 +384,7 @@ async function sodieSubirContrato() {
   formData.append('file', fileInput.files[0]);
 
   if (pctLabel) pctLabel.textContent = '50%';
+  if (btnSubir) btnSubir.disabled = true;
 
   try {
     const res = await fetch('/api/evaluator/contract', { 
@@ -442,13 +395,23 @@ async function sodieSubirContrato() {
     if (!res.ok) throw new Error('Error al procesar contrato');
 
     if (pctLabel) pctLabel.textContent = '100%';
-    showToast('Contrato Confirmado', 'Procede a subir tu lista de compradores.');
+    if (btnSubir) btnSubir.disabled = false;
+
+    showToast('Contrato Confirmado', 'Procede a subir tu lista de compradores (Excel).');
     
-    document.getElementById('step-5-excel-flow')?.classList.remove('hidden');
-    document.getElementById('step-5-excel-flow')?.scrollIntoView({ behavior: 'smooth' });
+    // Oculta paso de contrato y muestra paso de Excel
+    const stepContract = document.getElementById('step-4-contract-flow');
+    const stepExcel = document.getElementById('step-5-excel-flow');
+
+    if (stepContract) stepContract.classList.add('hidden');
+    if (stepExcel) {
+      stepExcel.classList.remove('hidden');
+      stepExcel.scrollIntoView({ behavior: 'smooth' });
+    }
 
   } catch (error) {
     console.error('Error contrato:', error);
+    if (btnSubir) btnSubir.disabled = false;
     showToast('Error', 'No se pudo procesar el archivo en el servidor.', true);
   }
 }
