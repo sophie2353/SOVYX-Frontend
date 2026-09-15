@@ -43,40 +43,42 @@ document.addEventListener('DOMContentLoaded', () => {
    1. VALIDACIÓN DE CONTRASEÑA SIMPLE (SIN BIOMETRÍA)
    ========================================================================== */
 function sodieValidarPasswordDirecta() {
+  console.log("👉 Intentando iniciar sesión...");
+
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
   const passIngresada = inputPass ? inputPass.value.trim() : "";
 
-  // Clave definida en tu script
+  // Tu clave exacta
   const ADMIN_KEY = "sodie_202623555"; 
 
   if (passIngresada === ADMIN_KEY) {
+    console.log("✅ Contraseña correcta");
+
     if (errorElem) {
       errorElem.innerText = "✅ Acceso concedido.";
-      errorElem.style.color = "#00ffcc";
+      errorElem.style.color = "#00FFCC";
       errorElem.style.display = "block";
     }
-    
-    // Guardar sesión activa
+
+    // Guarda sesión
     sessionStorage.setItem("sodie_admin_session", "active");
 
-    // Ocultar login y mostrar el dashboard
-    setTimeout(() => {
-      const loginView = document.getElementById("admin-login-view");
-      const dashView = document.getElementById("admin-dashboard-view");
+    // Muestra el dashboard inmediatamente
+    const loginView = document.getElementById("admin-login-view");
+    const dashView = document.getElementById("admin-dashboard-view");
 
-      if (loginView) loginView.style.display = "none";
-      if (dashView) dashView.style.display = "block";
+    if (loginView) loginView.style.display = "none";
+    if (dashView) dashView.style.display = "block";
 
-      // Arrancar cronómetros si la función existe
-      if (typeof sodieIniciarCronometro24h === "function") sodieIniciarCronometro24h();
-      if (typeof sodieIniciarTimer120h === "function") sodieIniciarTimer120h();
-    }, 300);
+    // Si tu panel usa otra vista o página completa, usa redirección:
+    // window.location.href = "panel.html";
 
   } else {
+    console.log("❌ Contraseña incorrecta");
     if (errorElem) {
       errorElem.innerText = "❌ Contraseña incorrecta";
-      errorElem.style.color = "#ff4d4d";
+      errorElem.style.color = "#FF3366";
       errorElem.style.display = "block";
     }
   }
