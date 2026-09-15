@@ -6,198 +6,252 @@
   <title>SODIE - Panel Administrador</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    /* Estilos de layout para unificar con el Dashboard Principal */
+    .admin-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .admin-header-card {
+      background: rgba(21, 15, 36, 0.85);
+      border: 1px solid rgba(0, 255, 204, 0.25);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .admin-grid-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .admin-card {
+      background: rgba(21, 15, 36, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.3s ease;
+    }
+
+    .admin-card:hover {
+      border-color: rgba(0, 255, 204, 0.3);
+    }
+
+    .admin-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #00FFCC;
+      margin-top: 0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-card-title.danger {
+      color: #FF007F;
+    }
+
+    .timer-box {
+      background: rgba(13, 8, 24, 0.8);
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .timer-display {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #00FFCC;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(0, 255, 204, 0.4);
+    }
+
+    .btn-group-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-action {
+      background: rgba(0, 255, 204, 0.15);
+      color: #00FFCC;
+      border: 1px solid #00FFCC;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: #00FFCC;
+      color: #0B0813;
+      box-shadow: 0 0 12px rgba(0, 255, 204, 0.4);
+    }
+
+    .btn-action.fuchsia {
+      background: rgba(255, 0, 127, 0.15);
+      color: #FF007F;
+      border-color: #FF007F;
+    }
+
+    .btn-action.fuchsia:hover {
+      background: #FF007F;
+      color: #FFFFFF;
+      box-shadow: 0 0 12px rgba(255, 0, 127, 0.4);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .file-drop-zone {
+      background: rgba(13, 8, 24, 0.6);
+      border: 1px dashed rgba(0, 255, 204, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .file-drop-zone input[type="file"] {
+      width: 100%;
+      color: #A098B5;
+      font-size: 0.85rem;
+    }
+  </style>
 </head>
-<body class="admin-body">
+<body class="admin-body" style="background: #0B0813; color: #FFFFFF; margin: 0; font-family: system-ui, -apple-system, sans-serif;">
 
-  <!-- SECCIÓN 1: FORMULARIO DE ACCESO (LOGIN) -->
+  <!-- PANTALLA LOGIN -->
   <main id="admin-login-view" style="display: none;">
-    <div class="admin-login-card" style="background: #150F24; border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 16px; padding: 25px; max-width: 400px; margin: 40px auto; text-align: center; box-shadow: 0 0 25px rgba(157, 0, 255, 0.2);">
-      
-      <div class="lion-avatar" style="font-size: 2.8rem; margin-bottom: 8px;">🦁</div>
-      
-      <h2 style="color: #FFFFFF; font-size: 1.4rem; margin-bottom: 6px; font-weight: 700;">Acceso Administrativo SODIE</h2>
-      <p style="color: #A098B5; font-size: 0.9rem; margin-bottom: 20px;">Introduce tu contraseña para continuar.</p>
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div style="background: #150F24; border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 20px; padding: 32px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 30px rgba(157, 0, 255, 0.15);">
+        <div style="font-size: 3rem; margin-bottom: 10px;">🦁</div>
+        <h2 style="margin: 0 0 8px 0; font-size: 1.3rem;">Acceso Administrativo</h2>
+        <p style="color: #A098B5; font-size: 0.85rem; margin-bottom: 20px;">Panel de control SODIE</p>
 
-      <div class="input-group" style="text-align: left; margin-bottom: 15px;">
-        <label for="admin-pass" style="color: #00FFCC; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Contraseña Admin</label>
-        <input 
-          type="password" 
-          id="admin-pass" 
-          placeholder="••••••••••••" 
-          style="width: 100%; padding: 12px; background: #0D0818; border: 1px solid #2A1C47; border-radius: 10px; color: #00FFCC; font-size: 1rem; outline: none; box-sizing: border-box;"
-          onkeyup="if(event.key === 'Enter') sodieValidarPasswordDirecta()"
-        />
-      </div>
+        <div style="text-align: left; margin-bottom: 16px;">
+          <label for="admin-pass" style="color: #00FFCC; font-size: 0.8rem; display: block; margin-bottom: 6px;">Contraseña</label>
+          <input type="password" id="admin-pass" placeholder="••••••••••••" style="width: 100%; padding: 12px; background: #0D0818; border: 1px solid #2A1C47; border-radius: 10px; color: #00FFCC; box-sizing: border-box; outline: none;" />
+        </div>
 
-      <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0; font-size: 0.9rem; text-align: center;"></div>
+        <div id="admin-auth-error" style="display: none; margin-bottom: 12px; font-size: 0.85rem;"></div>
 
-      <div class="admin-btn-grid" style="margin-top: 15px;">
-        <button 
-          type="button" 
-          id="btn-admin-login-pass" 
-          onclick="sodieValidarPasswordDirecta()" 
-          class="btn-mint" 
-          style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-weight: bold; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);">
-          Iniciar Sesión
+        <button type="button" id="btn-admin-login-pass" onclick="sodieValidarPasswordDirecta()" class="btn-action" style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-size: 0.95rem;">
+          Entrar al Panel
         </button>
       </div>
     </div>
-  </main> <!-- AQUÍ FALTABA EL CIERRE DE MAIN DE LOGIN -->
-
-  <!-- SECCIÓN 2: PANEL ADMINISTRATIVO COMPLETO (PROTEGIDO) -->
-  <main id="admin-dashboard-view" class="dashboard-container" style="display: block; padding: 20px;">
-    
-    <div id="admin-dashboard" class="glass-card-dash margin-v-md">
-      
-      <!-- HEADER -->
-      <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="section-title fuchsia-txt" style="margin: 0;">Panel Administrador (Yo) 👺</h3>
-        <button type="button" class="btn-pf-action btn-fuchsia-solid" onclick="sodieCerrarSesionAdmin()" style="width: auto; padding: 6px 16px;">
-          Cerrar Sesión
-        </button>
-      </div>
-      <p class="step-desc">Control total de archivos, campañas y estados del Dashboard Principal.</p>
-
-      <!-- VISTAS DE NAVEGACIÓN -->
-      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.3);">
-        <h4 class="mint-txt">Vistas</h4>
-        <div class="admin-grid two-cols margin-v-sm">
-          <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/'">
-            Vista Principal
-          </button>
-          <button type="button" class="btn-pf-action btn-mint-solid" onclick="window.location.href='/client.html'">
-            Vista Cliente
-          </button>
-        </div>
-      </div>
-
-      <!-- CRONÓMETRO DE CONTROL DE LANZAMIENTO -->
-      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
-        <h3 class="mint-txt">Control del Cronómetro de Lanzamiento</h3>
-        <div class="timer-digits margin-v-sm" id="admin-timer-display" style="font-family: monospace; font-size: 2.2rem; letter-spacing: 2px; color: #00ffcc;">
-          --:--:--:--
-        </div>
-        <div class="admin-grid margin-v-sm" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-          <button type="button" onclick="sodieIniciarCronometro24h()" class="btn-pf-action btn-mint-solid">▶️ Iniciar</button>
-          <button type="button" onclick="sodiePausarCronometro()" class="btn-pf-action btn-fuchsia-solid">⏸️ Pausar</button>
-          <button type="button" onclick="sodieReiniciarCronometro()" class="btn-pf-action btn-fuchsia-solid">🔄 Reiniciar</button>
-        </div>
-      </div>
-
-      <!-- TIMER ADMIN (120 HORAS PARA CERRAR LISTA DE ESPERA) -->
-      <div class="glass-card-dash margin-v-sm" style="background: rgba(0,0,0,0.4); text-align: center;">
-        <h4 class="mint-txt">Timer (Límite para Cerrar Lista de Espera)</h4>
-        
-        <div id="admin-120h-timer" class="timer-digits margin-v-sm" style="font-family: monospace; font-size: 2rem; letter-spacing: 2px; color: #00ffcc;">
-          120:00:00
-        </div>
-        
-        <p class="step-desc" style="margin-bottom: 10px;">Cuenta regresiva de 120 horas en curso</p>
-        
-        <div class="admin-grid margin-v-sm" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-          <button type="button" onclick="sodieIniciarTimer120h()" class="btn-pf-action btn-mint-solid">▶️ Iniciar</button>
-          <button type="button" onclick="sodiePausarTimer120h()" class="btn-pf-action btn-fuchsia-solid">⏸️ Pausar</button>
-          <button type="button" onclick="sodieReiniciarTimer120h()" class="btn-pf-action btn-fuchsia-solid">🔄 Reiniciar</button>
-        </div>
-      </div>
-
-      <!-- SUBIDA DE VIDEO -->
-      <div class="glass-card-dash margin-v-sm">
-        <h4 class="mint-txt">Subida de Video</h4>
-        <div class="margin-v-sm">
-          <input type="file" id="admin-video-file" class="file-input-custom" accept="video/*" />
-          
-          <div id="progress-video-container" class="margin-v-sm hidden" style="display: none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-              <span class="mint-txt">Cargando Video...</span>
-              <span id="progress-video-text" class="mint-txt" style="font-weight: bold;">0%</span>
-            </div>
-            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; height: 10px; overflow: hidden;">
-              <div id="progress-video-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff007f); transition: width 0.2s ease;"></div>
-            </div>
-          </div>
-
-          <button type="button" id="btn-upload-video" class="btn-pf-action btn-mint-solid margin-top-10">
-             Subir Video
-          </button>
-        </div>
-      </div>
-
-      <!-- SUBIR CONTRATO -->
-      <div class="glass-card-dash margin-v-sm">
-        <h4 class="mint-txt">Subir Contrato</h4>
-        <div class="margin-v-sm">
-          <input type="file" id="admin-contract-file" class="file-input-custom" accept=".pdf" />
-          
-          <div id="progress-contract-container" class="margin-v-sm hidden" style="display: none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-              <span class="mint-txt">Cargando PDF...</span>
-              <span id="progress-contract-text" class="mint-txt" style="font-weight: bold;">0%</span>
-            </div>
-            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; height: 10px; overflow: hidden;">
-              <div id="progress-contract-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff007f); transition: width 0.2s ease;"></div>
-            </div>
-          </div>
-
-          <button type="button" id="btn-upload-contract" class="btn-pf-action btn-mint-solid margin-top-10">
-            Subir Contrato
-          </button>
-        </div>
-      </div>
-
-      <!-- SUBIR EXCEL -->
-      <div class="glass-card-dash margin-v-sm">
-        <h4 class="mint-txt">Subir Excel</h4>
-        <div class="margin-v-sm">
-          <input type="file" id="admin-excel-file" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          
-          <div id="progress-excel-container" class="margin-v-sm hidden" style="display: none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; border: 1px solid rgba(0,255,204,0.2);">
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-              <span class="mint-txt">Inyectando Audiencia...</span>
-              <span id="progress-excel-text" class="mint-txt" style="font-weight: bold;">0%</span>
-            </div>
-            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; height: 10px; overflow: hidden;">
-              <div id="progress-excel-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff007f); transition: width 0.2s ease;"></div>
-            </div>
-          </div>
-
-          <button type="button" id="btn-upload-excel" class="btn-pf-action btn-mint-solid margin-top-10">
-             Subir Excel
-          </button>
-        </div>
-      </div>
-
-      <!-- ACTIVAR CAMPAÑA -->
-      <div class="glass-card-dash margin-v-sm">
-        <h4 class="fuchsia-txt">Activar Campaña</h4>
-        <button type="button" id="btn-admin-activate-campaign" class="btn-pf-action btn-activate-gradient margin-v-sm" onclick="sodieConfirmarActivacion()">
-           Activar Campaña Directa
-        </button>
-      </div>
-
-      <!-- CERRAR DASHBOARD PRINCIPAL -->
-      <div class="glass-card-dash margin-v-sm">
-        <h4 class="fuchsia-txt">Cerrar Dashboard Principal</h4>
-        <p class="step-desc">Activar la lista de espera para nuevos registros.</p>
-        <button type="button" id="btn-open-waitlist" class="btn-pf-action btn-fuchsia-solid margin-top-10">
-          Activar Lista de Espera
-        </button>
-      </div>
-
-      <!-- CERRAR LISTA DE ESPERA -->
-      <div class="glass-card-dash margin-v-sm">
-        <h4 class="fuchsia-txt">Cerrar Lista de Espera</h4>
-        <p class="step-desc">Cierra la lista de espera y dispara el temporizador de 14 días para la V4 en el Dashboard Principal.</p>
-        <button type="button" id="btn-close-waitlist" class="btn-pf-action btn-fuchsia-solid margin-top-10" onclick="sodieCerrarListaEspera()">
-          Activar Temporizador para la V4
-        </button>
-      </div>
-
-    </div>
-
   </main>
 
-  <!-- CARGA DEL ENGINE JS DE ADMINISTRACIÓN -->
+  <!-- DASHBOARD PRINCIPAL DE ADMIN -->
+  <main id="admin-dashboard-view" class="admin-container" style="display: block;">
+    
+    <!-- HEADER SUPERIOR -->
+    <header class="admin-header-card">
+      <div>
+        <h2 style="margin: 0; font-size: 1.4rem; color: #FFFFFF;">Panel de Control Admin 👺</h2>
+        <p style="margin: 4px 0 0 0; color: #A098B5; font-size: 0.85rem;">Gestión central de SODIE, archivos y estado del sistema</p>
+      </div>
+      <button type="button" onclick="sodieCerrarSesionAdmin()" class="btn-action fuchsia">
+        Cerrar Sesión
+      </button>
+    </header>
+
+    <!-- GRID DE TARJETAS TIPO DASHBOARD -->
+    <div class="admin-grid-layout">
+
+      <!-- TARJETA 1: NAVEGACIÓN -->
+      <div class="admin-card">
+        <h3 class="admin-card-title">Vista Rápida</h3>
+        <p style="color: #A098B5; font-size: 0.8rem; margin-bottom: 14px;">Accede a las vistas públicas del sistema para verificar cambios.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" onclick="window.location.href='/'" class="btn-action">Ver Principal</button>
+          <button type="button" onclick="window.location.href='/client.html'" class="btn-action">Ver Cliente</button>
+        </div>
+      </div>
+
+      <!-- TARJETA 2: TIMERS Y CRONÓMETROS -->
+      <div class="admin-card">
+        <h3 class="admin-card-title">Timer de Lanzamiento (24h)</h3>
+        <div class="timer-box">
+          <div id="admin-timer-display" class="timer-display">24:00:00</div>
+        </div>
+        <div class="btn-group-3">
+          <button type="button" onclick="sodieIniciarCronometro24h()" class="btn-action">▶️ Iniciar</button>
+          <button type="button" onclick="sodiePausarCronometro()" class="btn-action fuchsia">⏸️ Pausar</button>
+          <button type="button" onclick="sodieReiniciarCronometro()" class="btn-action fuchsia">🔄 Reset</button>
+        </div>
+      </div>
+
+      <!-- TARJETA 3: SUBIDA DE VIDEO -->
+      <div class="admin-card">
+        <h3 class="admin-card-title">Video Demo Principal</h3>
+        <div class="file-drop-zone">
+          <input type="file" id="admin-video-file" accept="video/*" />
+        </div>
+        <button type="button" id="btn-upload-video" class="btn-action" style="width: 100%;">
+          Subir Video Demo
+        </button>
+      </div>
+
+      <!-- TARJETA 4: SUBIDA DE CONTRATO -->
+      <div class="admin-card">
+        <h3 class="admin-card-title">Contrato PDF</h3>
+        <div class="file-drop-zone">
+          <input type="file" id="admin-contract-file" accept=".pdf" />
+        </div>
+        <button type="button" id="btn-upload-contract" class="btn-action" style="width: 100%;">
+          Subir PDF Contrato
+        </button>
+      </div>
+
+      <!-- TARJETA 5: BASE DE DATOS EXCEL -->
+      <div class="admin-card">
+        <h3 class="admin-card-title">Audiencia Excel / CSV</h3>
+        <div class="file-drop-zone">
+          <input type="file" id="admin-excel-file" accept=".csv, .xlsx, .xls" />
+        </div>
+        <button type="button" id="btn-upload-excel" class="btn-action" style="width: 100%;">
+          Inyectar Base de Datos
+        </button>
+      </div>
+
+      <!-- TARJETA 6: ACCIONES CRÍTICAS (ANCHO COMPLETO) -->
+      <div class="admin-card full-width" style="border-color: rgba(255, 0, 127, 0.3);">
+        <h3 class="admin-card-title danger">Disparadores de Campaña y V4</h3>
+        <p style="color: #A098B5; font-size: 0.85rem; margin-bottom: 16px;">Controles directos para cambiar el estado global de la app.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+          <button type="button" id="btn-admin-activate-campaign" onclick="sodieConfirmarActivacion()" class="btn-action" style="background: linear-gradient(90deg, #00FFCC, #FF007F); color: #FFFFFF; border: none; padding: 14px; font-size: 0.95rem;">
+            Activar Campaña Directa
+          </button>
+          
+          <button type="button" id="btn-close-waitlist" onclick="sodieCerrarListaEspera()" class="btn-action fuchsia" style="padding: 14px; font-size: 0.95rem;">
+            Cerrar Lista y Disparar V4 (14 días)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
   <script src="admin.js"></script>
 </body>
 </html>
