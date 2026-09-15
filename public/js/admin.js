@@ -384,7 +384,7 @@ function sodieSubirVideoAdmin() {
   }
 }
 
-// Subir Contrato PDF desde el Admin
+// Subir Contrato PDF desde el Admin (NECESITO ID DEL BOTON)
 async function subirContratoAdmin(fileInputId) {
   const fileInput = document.getElementById(fileInputId);
   if (!fileInput || !fileInput.files[0]) {
@@ -413,6 +413,7 @@ async function subirContratoAdmin(fileInputId) {
   }
 }
 
+
 function sodieSubirExcelAdmin() {
   const fileInput = document.getElementById('admin-excel-file');
   const btn = document.getElementById('btn-upload-excel');
@@ -439,7 +440,7 @@ function sodieSubirExcelAdmin() {
 }
 
 /* ==========================================================================
-   6. ACTIVACIÓN Y LISTA DE ESPERA
+   6. ACTIVACIÓN DE CAMPAÑA + ACTIVAR Y CERRAR LISTA DE ESPERA
    ========================================================================== */
 async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-admin-activate-campaign');
@@ -461,6 +462,29 @@ async function sodieConfirmarActivacion() {
   }
 }
 
+// Activar Lista de Espera (Cambia la vista en el frontend cliente)... NECESITO BOTÓN DE ACTIVAR LISTA DE ESPERA (EL ID)
+async function adminActivarWaitlist() {
+  try {
+    const res = await fetch('/api/v1/waitlist/open', { method: 'POST' });
+    const data = await res.json();
+
+    if (data.success) {
+      alert('¡Lista de Espera ACTIVADA exitosamente!');
+      
+      // Si la función de app.js para actualizar la interfaz cliente existe, la invocamos
+      if (typeof sodieAlternarVistaWaitlist === 'function') {
+        sodieAlternarVistaWaitlist(true);
+      }
+    } else {
+      alert('Error activando lista de espera: ' + data.error);
+    }
+  } catch (err) {
+    console.error('Error al conectar con /waitlist/open:', err);
+    alert('Error de conexión con el servidor');
+  }
+}
+
+// Cerrar Lista de Espera / Cierre de sesión Admin
 async function sodieCerrarListaEspera() {
   const btn = document.getElementById('btn-close-waitlist');
   if (btn) btn.textContent = 'Procesando Cierre...';
