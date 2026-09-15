@@ -129,6 +129,77 @@ async function sodieAutenticarBiometriaAdmin() {
 }
 
 /**
+/**
+ * Registrar Huella / PIN Nativo en el Dispositivo
+ */
+async function sodieRegistrarHuellaDispositivo() {
+  const errorElem = document.getElementById("admin-auth-error");
+
+  // WebAuthn exige HTTPS o localhost de forma estricta
+  if (location.protocol !== "https:" && location.hostname !== "localhost") {
+    alert("⚠️ La biometría nativa requiere ingresar mediante HTTPS (ej. tu dominio en Render).");
+    return;
+  }
+
+  if (!window.PublicKeyCredential || !navigator.credentials) {
+    alert("⚠️ Tu navegador o dispositivo no soporta biometría WebAuthn.");
+    return;
+  }
+
+  try {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    // Limpiamos el hostname para asegurar que pase la validación de WebAuthn
+    const cleanHost = window.location.hostname;
+
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { 
+          name: "SODIE Admin System", 
+          id: cleanHost 
+        },
+        user: { 
+          id: new TextEncoder().encode("sodie_admin_master"), 
+          name: "admin@sodie.app", 
+          displayName: "Master Admin" 
+        },
+        pubKeyCredParams: [
+          { alg: -7, type: "public-key" },  // ES256 (Móviles Android / iOS)
+          { alg: -257, type: "public-key" } // RS256 (Windows / Mac)
+        ],
+        authenticatorSelection: { 
+          authenticatorAttachment: "platform", // OBLIGA a abrir la huella / FaceID / PIN del teléfono
+          userVerification: "required"
+        },
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      // Guardamos la credencial en Base64 para el inicio de sesión posterior
+      const rawId = String.fromCharCode(...new Uint8Array(credential.rawId));
+      localStorage.setItem("sodie_cred_id", btoa(rawId));
+      localStorage.removeItem('sodie_show_admin_banner');
+      sessionStorage.setItem("sodie_admin_session", "active");
+
+      if (errorElem) {
+        errorElem.innerText = "✅ ¡Llave biométrica / PIN registrado con éxito!";
+        errorElem.style.color = "#00ffcc";
+        errorElem.style.display = "block";
+      }
+      setTimeout(() => mostrarDashboard(), 400);
+    }
+  } catch (err) {
+    console.error("Error al registrar la credencial biométrica:", err);
+    if (errorElem) {
+      errorElem.innerText = "❌ Cancelado o error de compatibilidad biométrica.";
+      errorElem.style.color = "#ff4d4d";
+      errorElem.style.display = "block";
+    }
+  }
+}
 
 
 function mostrarDashboard() {
