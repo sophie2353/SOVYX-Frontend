@@ -101,11 +101,11 @@
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header">
       <div class="dash-header-left">
-        <!-- 5 Clics en este título abren la autenticación Admin -->
+        <!-- 5 Clics en este título saltan directamente a admin.html -->
         <span id="header-brand-title" class="brand-text" style="cursor: pointer; user-select: none;" title="Haz 5 clics para el acceso secreto Admin">SODIE</span>
       </div>
       <div class="dash-header-right">
-        <button type="button" class="btn-icon" onclick="sodieAbrirModalAdmin()" title="Acceso Admin">🦁</button>
+        <button type="button" class="btn-icon" id="btn-admin-direct-trigger" title="Acceso Admin">🦁</button>
       </div>
     </header>
 
@@ -115,7 +115,7 @@
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-spend">40$</div>
+          <div class="card-value" id="metric-spend">38$</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
           </div>
@@ -148,7 +148,7 @@
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots">•••</span></div>
+          <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots"></span></div>
           <div class="card-value" id="metric-pay-clicks">8</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,35 Q50,15 100,25 T200,8" fill="none" stroke="#d946ef" stroke-width="3" /></svg>
@@ -226,11 +226,11 @@
         <div class="pf-summary-list">
           <div class="pf-row">
             <span id="pf-label-initial">Hora 0 (Reserva de Slot)</span>
-            <strong id="price-initial" class="price-value">1.000$</strong>
+            <strong id="price-initial" class="price-value">2.000$</strong>
           </div>
           <div id="pf-row-post" class="pf-row">
-            <span>Resultados (Hora 48-72-96 con Binance Pay)</span>
-            <strong id="price-post" class="price-value">9.000$ <small class="price-subtext">(3 cuotas de $3.000)</small></strong>
+            <span>Resultados (Hora 48-72-96 en cripto)</span>
+            <strong id="price-post" class="price-value"> 3K$, 3K$ y 2K$<small class="price-subtext">(3 cuotas de $3.000)</small></strong>
           </div>
           <div class="pf-row pf-total">
             <span>Total</span>
@@ -374,6 +374,11 @@
       </div>
       <span class="step-desc" style="color: #00ffcc;">Días : Horas : Minutos : Segundos : Microsegundos</span>
     </div>
+
+    <!-- PIE DE PÁGINA / COPYRIGHT -->
+    <footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem;">
+      <p>© SODIE v3.5. 2026</p>
+    </footer>
   </main>
 
   <script src="app.js"></script>
