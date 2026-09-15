@@ -12,41 +12,31 @@
 // ==========================================
 // TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO
 // ==========================================
-(function initGlobalAdminTrigger() {
-  let clickCount = 0;
-  let clickTimer = null;
+(function initAdminTriggerUltra() {
+  let count = 0;
+  let timer = null;
 
-  function handleMultiClick(e) {
-    if (e) e.preventDefault();
-    clickCount++;
+  function handleTouch(e) {
+    count++;
+    
+    // Reinicia si pasan más de 2 segundos entre toques
+    clearTimeout(timer);
+    timer = setTimeout(() => { count = 0; }, 2000);
 
-    clearTimeout(clickTimer);
-    // Reinicia el contador si pasan más de 1.5 segundos entre clics
-    clickTimer = setTimeout(() => {
-      clickCount = 0;
-    }, 1500);
-
-    if (clickCount >= 5) {
-      clickCount = 0;
-      clearTimeout(clickTimer);
-      // Redirección directa al panel de administración
+    if (count >= 5) {
+      count = 0;
+      clearTimeout(timer);
       window.location.href = "admin.html";
     }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const triggerText = document.getElementById("sodie-logo-trigger");
-    const triggerIcon = document.getElementById("btn-sodie-logo-trigger");
+    const elText = document.getElementById("sodie-logo-trigger");
+    const elIcon = document.getElementById("btn-sodie-logo-trigger");
 
-    if (triggerText) {
-      triggerText.addEventListener("click", handleMultiClick);
-      triggerText.addEventListener("touchstart", handleMultiClick, { passive: false });
-    }
-
-    if (triggerIcon) {
-      triggerIcon.addEventListener("click", handleMultiClick);
-      triggerIcon.addEventListener("touchstart", handleMultiClick, { passive: false });
-    }
+    // 'pointerdown' se dispara instantáneamente al tocar la pantalla (sin retardo)
+    if (elText) elText.addEventListener("pointerdown", handleTouch);
+    if (elIcon) elIcon.addEventListener("pointerdown", handleTouch);
   });
 })();
 // ==========================================
