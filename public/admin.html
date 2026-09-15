@@ -11,30 +11,29 @@
 
   <!-- SECCIÓN 1: FORMULARIO DE ACCESO (LOGIN) -->
   <main id="admin-login-view">
-    <div class="glass-card-dash admin-auth-card margin-v-md" style="max-width: 450px; margin: 40px auto; text-align: center;">
-      <div class="admin-logo" style="font-size: 3rem; margin-bottom: 10px; cursor: pointer;">🦁</div>
-      <h2 class="fuchsia-txt">Acceso Administrativo SODIE</h2>
-      <p class="step-desc">Introduce tu clave o usa la autenticación biométrica.</p>
-      
-      <div class="margin-v-sm">
-        <div class="form-group margin-v-sm" style="text-align: left;">
-          <label for="admin-pass" class="mint-txt">Contraseña Admin</label>
-          <input type="password" id="admin-pass" class="file-input-custom" placeholder="••••••••" style="width: 100%; box-sizing: border-box; margin-top: 6px;">
-        </div>
+<div class="admin-login-card">
+  <div class="lion-avatar">🦁</div>
+  <h2>Acceso Administrativo SODIE</h2>
+  <p>Introduce tu clave o usa la autenticación biométrica.</p>
 
-        <div class="admin-grid two-cols margin-v-sm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" id="btn-admin-login-pass" class="btn-pf-action btn-mint-solid">
-            Iniciar Sesión
-          </button>
-          <button type="button" id="btn-admin-biometric" class="btn-pf-action btn-mint-solid">
-            Login Biométrico
-          </button>
-        </div>
-        
-        <p id="admin-auth-error" style="display: none; margin-top: 10px; font-weight: bold; text-align: center;"></p>
-      </div>
-    </div>
-  </main>
+  <div class="input-group">
+    <label for="admin-pass">Contraseña Admin</label>
+    <input type="password" id="admin-pass" placeholder="••••••••••••" />
+  </div>
+
+  <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0;"></div>
+
+  <div class="admin-btn-grid" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+    <button type="button" id="btn-admin-login-pass" class="btn-mint" style="flex: 1;">Iniciar Sesión</button>
+    <button type="button" id="btn-admin-biometric" class="btn-mint" style="flex: 1;">Login Biométrico</button>
+  </div>
+
+  <!-- ESTE ES EL BOTÓN QUE FALTA EN TU PANTALLA -->
+  <button type="button" id="btn-admin-register-bio" class="btn-outline-mint" style="width: 100%; margin-top: 10px; padding: 10px;">
+    Registrar Huella / PIN en este dispositivo
+  </button>
+</div>
+
 
   <!-- SECCIÓN 2: PANEL ADMINISTRATIVO COMPLETO (PROTEGIDO) -->
   <main id="admin-dashboard-view" class="dashboard-container" style="display: none; padding: 20px;">
