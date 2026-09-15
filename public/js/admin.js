@@ -1,10 +1,10 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Sistema de Autenticación A Prueba de Fallos y Control con Registro Biométrico Automático
+ * Sistema de Autenticación Simple con Contraseña
  */
 
 const API_URL = "https://api.sodie.app";
-const ADMIN_KEY = "sodie_202623555";
+const ADMIN_KEY = "sodie_202623555"; // Tu contraseña aquí
 
 // Estado global de temporizadores para el Admin
 const ADMIN_STATE = {
@@ -20,39 +20,34 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarDashboard();
   }
 
-  // 2. Comprobar si debemos mostrar el banner de registrar huella
-  if (localStorage.getItem('sodie_show_admin_banner') === 'true') {
-    const banner = document.getElementById("admin-bio-register-banner");
-    if (banner) banner.style.display = "block";
-  }
-
-  // 3. Listener del botón de contraseña
+  // 2. Listener del botón de contraseña
   const btnPass = document.getElementById("btn-admin-login-pass");
   if (btnPass) {
     btnPass.addEventListener("click", sodieValidarPasswordDirecta);
   }
 
-  // 4. Listener del botón biométrico directo / autorregistro
-  const btnBio = document.getElementById("btn-admin-biometric");
-  if (btnBio) {
-    btnBio.addEventListener("click", sodieLoginOAutoregistroBiometrico);
-  }
-
-  // 5. Listener del botón para registrar huella explícitamente
-  const btnRegBio = document.getElementById("btn-admin-register-bio");
-  if (btnRegBio) {
-    btnRegBio.addEventListener("click", sodieRegistrarHuellaDispositivo);
+  // Permite presionar "Enter" en el input de la contraseña para iniciar sesión
+  const inputPass = document.getElementById("admin-pass");
+  if (inputPass) {
+    inputPass.addEventListener("keyup", (event) => {
+      if (event.key === "Enter") {
+        sodieValidarPasswordDirecta();
+      }
+    });
   }
 
   initListeners();
 });
 
+/* ==========================================================================
+   1. VALIDACIÓN DE CONTRASEÑA SIMPLE (SIN BIOMETRÍA)
+   ========================================================================== */
 function sodieValidarPasswordDirecta() {
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
   const passIngresada = inputPass ? inputPass.value.trim() : "";
 
-  if (typeof ADMIN_KEY !== "undefined" && passIngresada === ADMIN_KEY) {
+  if (passIngresada === ADMIN_KEY) {
     if (errorElem) {
       errorElem.innerText = "✅ Acceso concedido.";
       errorElem.style.color = "#00ffcc";
@@ -63,143 +58,6 @@ function sodieValidarPasswordDirecta() {
   } else {
     if (errorElem) {
       errorElem.innerText = "❌ Contraseña incorrecta";
-      errorElem.style.color = "#ff4d4d";
-      errorElem.style.display = "block";
-    }
-  }
-}
-
-/**
- * Intenta Login Biométrico directo; si no existe credencial previa,
- * redirige automáticamente a la solicitud de registro nativa sin bloquearse.
- */
-async function sodieLoginOAutoregistroBiometrico() {
-  const errorElem = document.getElementById("admin-auth-error");
-
-  if (!window.PublicKeyCredential || !navigator.credentials) {
-    if (errorElem) {
-      errorElem.innerText = "⚠️ Navegador incompatible con biometría o requiere conexión HTTPS.";
-      errorElem.style.color = "#ffb84d";
-      errorElem.style.display = "block";
-    }
-    return;
-  }
-
-  const storedCredId = localStorage.getItem("sodie_cred_id");
-
-  // Si no hay credencial registrada previamente en este navegador, lanza el registro directo
-  if (!storedCredId) {
-    if (errorElem) {
-      errorElem.innerText = "ℹ️ Registrando dispositivo por primera vez...";
-      errorElem.style.color = "#00ffcc";
-      errorElem.style.display = "block";
-    }
-    await sodieRegistrarHuellaDispositivo();
-    return;
-  }
-
-  // Si ya existe credencial, intenta validar huella/PIN existente
-  try {
-    if (errorElem) {
-      errorElem.innerText = "👆 Coloca tu huella o usa el PIN...";
-      errorElem.style.color = "#00ffcc";
-      errorElem.style.display = "block";
-    }
-
-    const challenge = new Uint8Array(32);
-    window.crypto.getRandomValues(challenge);
-
-    const credential = await navigator.credentials.get({
-      publicKey: {
-        challenge: challenge,
-        timeout: 60000,
-        userVerification: "required",
-        allowCredentials: [{
-          id: Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0)),
-          type: "public-key"
-        }]
-      }
-    });
-
-    if (credential) {
-      sessionStorage.setItem("sodie_admin_session", "active");
-      mostrarDashboard();
-    }
-  } catch (err) {
-    console.warn("Fallo en lectura biométrica:", err);
-    if (errorElem) {
-      errorElem.innerText = "❌ Huella no reconocida o acción cancelada.";
-      errorElem.style.color = "#ff4d4d";
-      errorElem.style.display = "block";
-    }
-  }
-}
-
-/**
- * Registrar Huella / PIN Nativo en el Dispositivo (WebAuthn)
- */
-async function sodieRegistrarHuellaDispositivo() {
-  const errorElem = document.getElementById("admin-auth-error");
-
-  // WebAuthn exige HTTPS o localhost de forma estricta
-  if (location.protocol !== "https:" && location.hostname !== "localhost") {
-    alert("⚠️ La biometría nativa requiere ingresar mediante HTTPS.");
-    return;
-  }
-
-  if (!window.PublicKeyCredential || !navigator.credentials) {
-    alert("⚠️ Tu navegador o dispositivo no soporta biometría WebAuthn.");
-    return;
-  }
-
-  try {
-    const challenge = new Uint8Array(32);
-    window.crypto.getRandomValues(challenge);
-
-    // Hostname limpio para garantizar la creación del ID
-    const cleanHost = window.location.hostname;
-
-    const credential = await navigator.credentials.create({
-      publicKey: {
-        challenge: challenge,
-        rp: { 
-          name: "SODIE Admin System", 
-          id: cleanHost 
-        },
-        user: { 
-          id: new TextEncoder().encode("sodie_admin_master"), 
-          name: "admin@sodie.app", 
-          displayName: "Master Admin" 
-        },
-        pubKeyCredParams: [
-          { alg: -7, type: "public-key" },  // ES256 (Móviles Android / iOS)
-          { alg: -257, type: "public-key" } // RS256 (Windows / Mac)
-        ],
-        authenticatorSelection: { 
-          authenticatorAttachment: "platform", // Fuerza el sensor/PIN local del celular/PC
-          userVerification: "required"
-        },
-        timeout: 60000
-      }
-    });
-
-    if (credential) {
-      const rawId = String.fromCharCode(...new Uint8Array(credential.rawId));
-      localStorage.setItem("sodie_cred_id", btoa(rawId));
-      localStorage.removeItem('sodie_show_admin_banner');
-      sessionStorage.setItem("sodie_admin_session", "active");
-
-      if (errorElem) {
-        errorElem.innerText = "✅ ¡Dispositivo y huella vinculados con éxito!";
-        errorElem.style.color = "#00ffcc";
-        errorElem.style.display = "block";
-      }
-      setTimeout(() => mostrarDashboard(), 400);
-    }
-  } catch (err) {
-    console.error("Error al registrar la credencial biométrica:", err);
-    if (errorElem) {
-      errorElem.innerText = "❌ Registro cancelado o error de compatibilidad.";
       errorElem.style.color = "#ff4d4d";
       errorElem.style.display = "block";
     }
@@ -224,7 +82,7 @@ function sodieCerrarSesionAdmin() {
 }
 
 /* ==========================================================================
-   3. CRONÓMETROS Y TEMPORIZADORES (Réplica adaptada de app.js)
+   2. CRONÓMETROS Y TEMPORIZADORES
    ========================================================================== */
 
 function sodieIniciarCronometro24h() {
@@ -290,7 +148,7 @@ function sodieReiniciarTimer120h() {
 }
 
 /* ==========================================================================
-   4. NOTIFICACIONES Y PROGRESO DE ARCHIVOS (%)
+   3. NOTIFICACIONES Y PROGRESO DE ARCHIVOS (%)
    ========================================================================== */
 function showAdminAlert(message, isError = false) {
   console.log(`[ADMIN ALERT]: ${message}`);
@@ -330,7 +188,7 @@ function animateUploadProgress(type, callback) {
 }
 
 /* ==========================================================================
-   5. LISTENERS DE SUBIDA DE ARCHIVOS Y ACCIONES
+   4. LISTENERS DE SUBIDA DE ARCHIVOS Y ACCIONES
    ========================================================================== */
 function initListeners() {
   const btnVideo = document.getElementById('btn-upload-video');
@@ -471,7 +329,7 @@ function sodieSubirExcelAdmin() {
 }
 
 /* ==========================================================================
-   6. ACTIVACIÓN DE CAMPAÑA + ACTIVAR Y CERRAR LISTA DE ESPERA
+   5. ACTIVACIÓN DE CAMPAÑA Y LISTA DE ESPERA
    ========================================================================== */
 async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-admin-activate-campaign');
