@@ -134,64 +134,65 @@ async function sodieAutenticarBiometriaAdmin() {
 async function sodieRegistrarHuellaDispositivo() {
   const errorElem = document.getElementById("admin-auth-error");
 
-  if (!window.PublicKeyCredential || !navigator.credentials) {
-    alert("Requiere conexión segura HTTPS o localhost.");
+  // Check 1: HTTPS o Localhost obligatorio
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    alert("⚠️ WebAuthn requiere HTTPS activo para usar el lector de huella/PIN.");
+    return;
+  }
+
+  if (!window.PublicKeyCredential) {
+    alert("Tu navegador o dispositivo no soporta biometría WebAuthn.");
     return;
   }
 
   try {
-    const challenge = new Uint8Array(32);
-    window.crypto.getRandomValues(challenge);
+    // ID limpio sin subdominios raros ni puertos
+    let cleanDomain = window.location.hostname;
 
-    // Limpieza de hostname para evitar fallos de subdominio
-    let currentHost = window.location.hostname;
-    if (currentHost === "localhost" || currentHost.length === 0) {
-      currentHost = "localhost";
-    }
-
-    const newCred = await navigator.credentials.create({
+    const options = {
       publicKey: {
-        challenge: challenge,
+        challenge: window.crypto.getRandomValues(new Uint8Array(32)),
         rp: { 
-          name: "SODIE Admin System", 
-          id: currentHost 
+          name: "SODIE System", 
+          id: cleanDomain 
         },
         user: { 
-          id: Uint8Array.from("sodie_admin_id_" + Date.now(), c => c.charCodeAt(0)), 
+          id: new TextEncoder().encode("sodie_admin_user"), 
           name: "admin@sodie.app", 
           displayName: "Master Admin" 
         },
         pubKeyCredParams: [
-          { alg: -7, type: "public-key" },  // ES256
-          { alg: -257, type: "public-key" } // RS256
+          { alg: -7, type: "public-key" },  // ES256 (Android/iOS)
+          { alg: -257, type: "public-key" } // RS256 (Windows/Mac)
         ],
         authenticatorSelection: { 
-          authenticatorAttachment: "platform", 
-          userVerification: "required",
-          requireResidentKey: false
+          authenticatorAttachment: "platform", // Fuerza Huella/FaceID/PIN del dispositivo
+          userVerification: "required"
         },
         timeout: 60000
       }
-    });
+    };
 
-    if (newCred) {
-      // Guardar el ID de credencial codificado en Base64 para el futuro login
-      const rawId = String.fromCharCode(...new Uint8Array(newCred.rawId));
-      localStorage.setItem("sodie_cred_id", btoa(rawId));
-      localStorage.removeItem('sodie_show_admin_banner');
+    // Esto abre la ventana emergente nativa del celular
+    const credential = await navigator.credentials.create(options);
+
+    if (credential) {
+      // Guardar identificador para logins futuros
+      const credIdBase64 = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+      localStorage.setItem("sodie_cred_id", credIdBase64);
       sessionStorage.setItem("sodie_admin_session", "active");
 
       if (errorElem) {
-        errorElem.innerText = "✅ ¡Huella/PIN vinculados con éxito!";
+        errorElem.innerText = "✅ ¡Huella / PIN registrado con éxito!";
         errorElem.style.color = "#00ffcc";
         errorElem.style.display = "block";
       }
-      setTimeout(() => mostrarDashboard(), 400);
+      setTimeout(() => mostrarDashboard(), 500);
     }
   } catch (err) {
-    console.error("Error al registrar credencial:", err);
+    console.error("Error WebAuthn:", err);
     if (errorElem) {
-      errorElem.innerText = "❌ No se pudo completar el registro biométrico.";
+      errorElem.innerText = "❌ Cancelado o no compatible en este dominio.";
       errorElem.style.color = "#ff4d4d";
       errorElem.style.display = "block";
     }
