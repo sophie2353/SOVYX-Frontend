@@ -1029,3 +1029,9 @@ button:disabled,
   object-fit: contain; /* o 'contain' si quieres ver la pantalla completa sin recortes */
   border-radius: 12px;
 }
+
+#sodie-logo-trigger, #btn-sodie-logo-trigger {
+  touch-action: manipulation; /* Inhabilita el zoom por doble toque */
+  user-select: none;
+  -webkit-user-select: none;
+}
