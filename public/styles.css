@@ -1022,3 +1022,10 @@ button:disabled,
     font-size: 3rem !important;
   }
 }
+
+#sodie-demo-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* o 'contain' si quieres ver la pantalla completa sin recortes */
+  border-radius: 12px;
+}
