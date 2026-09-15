@@ -647,25 +647,20 @@ function initTimer24h() {
 // DISPARADOR SECRETO DE 5 CLICS (REPARADO)
 // ==========================================
 (function initAdminTriggerDirect() {
-  let clickCounter = 0;
-  let resetTimer = null;
+let adminToques = 0;
+let adminTimer = null;
 
-  function manejarToqueSecreto(e) {
-    clickCounter++;
+function sodieContarToquesAdmin() {
+  adminToques++;
+  clearTimeout(adminTimer);
+  adminTimer = setTimeout(() => { adminToques = 0; }, 2000);
 
-    clearTimeout(resetTimer);
-    // Si pasan más de 1.5 segundos entre toques, el contador se reinicia
-    resetTimer = setTimeout(() => {
-      clickCounter = 0;
-    }, 1500);
-
-    if (clickCounter >= 5) {
-      clickCounter = 0;
-      clearTimeout(resetTimer);
-      // Redirección inmediata a admin.html
-      window.location.href = "admin.html";
-    }
+  if (adminToques >= 5) {
+    adminToques = 0;
+    clearTimeout(adminTimer);
+    window.location.href = "admin.html";
   }
+}
 
   document.addEventListener("DOMContentLoaded", () => {
     const logoTxt = document.getElementById("sodie-logo-trigger");
