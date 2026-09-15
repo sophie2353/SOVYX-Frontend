@@ -42,9 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
   checkWaitlistClosedStatus(); // Sincronización automática de V4
 });
 
-/* ==========================================================================
-   1. TOAST & NOTIFICACIONES
-   ========================================================================== */
+
+//--------
+//   1. TOAST & NOTIFICACIONES
+ //  ========================================================================== */
 function showToast(title, body, isError = false) {
   const toast = document.getElementById('toast-notification');
   const toastTitle = document.getElementById('toast-title');
@@ -129,6 +130,25 @@ function initSSEMetrics() {
   }
 }
 
+async function cargarVideoFront() {
+  const videoPlayer = document.getElementById('sodie-main-video-player');
+  if (!videoPlayer) return;
+
+  try {
+    const res = await fetch('/api/v1/media/active-video');
+    const data = await res.json();
+
+    if (data.success && data.videoUrl) {
+      videoPlayer.src = data.videoUrl;
+      videoPlayer.load();
+    }
+  } catch (err) {
+    console.warn('Error cargando video, usando fallback directo:', err);
+    if (videoPlayer) videoPlayer.src = '/video_demo.mp4';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', cargarVideoFront);
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
    ========================================================================== */
@@ -335,6 +355,19 @@ async function sodieProcesarPasoPago() {
   } catch (error) {
     console.error('Error de pago:', error);
     showToast('Error de Pago', 'No se pudo verificar la transacción en el servidor.', true);
+  }
+}
+
+async function obtenerContratoPDF() {
+  try {
+    const res = await fetch('/api/v1/media/contract');
+    const data = await res.json();
+
+    if (data.success && data.contractUrl) {
+      window.open(data.contractUrl, '_blank');
+    }
+  } catch (err) {
+    console.error('Error abriendo el contrato:', err);
   }
 }
 
