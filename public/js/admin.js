@@ -47,14 +47,32 @@ function sodieValidarPasswordDirecta() {
   const errorElem = document.getElementById("admin-auth-error");
   const passIngresada = inputPass ? inputPass.value.trim() : "";
 
+  // Clave definida en tu script
+  const ADMIN_KEY = "sodie_202623555"; 
+
   if (passIngresada === ADMIN_KEY) {
     if (errorElem) {
       errorElem.innerText = "✅ Acceso concedido.";
       errorElem.style.color = "#00ffcc";
       errorElem.style.display = "block";
     }
+    
+    // Guardar sesión activa
     sessionStorage.setItem("sodie_admin_session", "active");
-    setTimeout(() => mostrarDashboard(), 300);
+
+    // Ocultar login y mostrar el dashboard
+    setTimeout(() => {
+      const loginView = document.getElementById("admin-login-view");
+      const dashView = document.getElementById("admin-dashboard-view");
+
+      if (loginView) loginView.style.display = "none";
+      if (dashView) dashView.style.display = "block";
+
+      // Arrancar cronómetros si la función existe
+      if (typeof sodieIniciarCronometro24h === "function") sodieIniciarCronometro24h();
+      if (typeof sodieIniciarTimer120h === "function") sodieIniciarTimer120h();
+    }, 300);
+
   } else {
     if (errorElem) {
       errorElem.innerText = "❌ Contraseña incorrecta";
@@ -77,7 +95,7 @@ function mostrarDashboard() {
 }
 
 function sodieCerrarSesionAdmin() {
-  sessionStorage.removeItem("sodie_admin_session");
+  sessionStorage.rmoveItem("sodie_admin_session");
   window.location.reload();
 }
 
