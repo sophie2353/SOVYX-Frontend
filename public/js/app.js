@@ -7,24 +7,32 @@
 // ==========================================
 // TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO (CAPTURADOR MODO TRUE)
 // ==========================================
-(function initGlobalAdminTrigger() {
-  let count = 0, last = 0;
-  window.addEventListener('click', function(e) {
-    // Detecta clics en el encabezado, título, logo o barra superior
-    if (e.target.closest('header, .chat-header, .brand-title, #app-title, .admin-logo, h1, h2, nav')) {
-      const now = Date.now();
-      if (now - last > 2000) count = 0;
-      count++;
-      last = now;
-      if (count >= 5) {
-        count = 0;
-        localStorage.setItem('sodie_show_admin_banner', 'true');
-        window.location.href = 'admin.html';
-      }
-    }
-  }, true); // Modo capture "true" para ejecutarse antes de cualquier otro interceptor de eventos
-})();
 
+// Agrega este bloque en tu app.js o en un <script> al final de tu dashboard
+(function initAdminRedirectTrigger() {
+  let clickCount = 0;
+  let clickTimer = null;
+
+  // Seleccionamos el elemento del Logo o Titulo SODIE
+  const triggerElement = document.getElementById('sodie-logo-trigger') || document;
+
+  triggerElement.addEventListener('click', (e) => {
+    // Si el listener está en document, verificamos que sea en la zona superior
+    clickCount++;
+
+    clearTimeout(clickTimer);
+    clickTimer = setTimeout(() => {
+      clickCount = 0;
+    }, 1500); // 1.5 segundos para completar los 5 clics
+
+    if (clickCount >= 5) {
+      clickCount = 0;
+      clearTimeout(clickTimer);
+      // Redirección directa al panel de administración
+      window.location.href = '/admin.html'; // o la ruta HTML de tu admin
+    }
+  });
+})();
 // ==========================================
 // CONFIGURACIÓN INICIAL & CONSTANTES SODIE
 // ==========================================
