@@ -16,7 +16,7 @@ const CLIENT_STATE = {
   activeModalidad: null, // '3_CUOTAS', '2_CUOTAS', '1_CUOTA'
   paidInstallments: [],
   campaignActivated: false,
-  startTime: Date.now(),
+  timerInterval: null,
   totalSeconds: 96 * 3600, // 96 Horas totales en segundos
   elapsedSeconds: 0        // Segundos transcurridos
 };
@@ -270,58 +270,56 @@ function checkCallbackStatus() {
 }
 
 /* ==========================================================================
-   8. TEMPORIZADOR GLOBAL EN TIEMPO REAL & HITOS
+   8. TEMPORIZADOR GLOBAL EN TIEMPO REAL & HITOS (0 a 96 Horas Progresivo)
    ========================================================================== */
 function initGlobalTimer() {
-  const formatHHMMSS = (sec) => {
-    if (sec <= 0) return "00:00:00";
-    const h = Math.floor(sec / 3600).toString().padStart(2, '0');
-    const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
-    const s = Math.floor(sec % 60).toString().padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  };
+  const mainTimer = document.getElementById('timer-main-display');
+  const globalTimerDisplay = document.getElementById('global-timer-display');
+  const timer24hDisplay = document.getElementById('timer-24h-display');
+  const timerPostDisplay = document.getElementById('timer-post-display');
 
-  // Función ejecutada cada segundo (1000ms)
-  setInterval(() => {
-    if (CLIENT_STATE.totalSeconds <= 0) {
+  if (CLIENT_STATE.timerInterval) return;
+
+  const MAX_SECONDS = 96 * 3600; // Límite máximo de 96 horas
+  const SECONDS_24H = 24 * 3600;
+
+  CLIENT_STATE.timerInterval = setInterval(() => {
+    // Si alcanza el tope de 96 horas, ejecuta eventos finales y se detiene
+    if (CLIENT_STATE.elapsedSeconds >= MAX_SECONDS) {
+      clearInterval(CLIENT_STATE.timerInterval);
+      CLIENT_STATE.timerInterval = null;
       triggerHour96Events();
       return;
     }
 
-    // Decrementar total y elevar tiempo transcurrido
-    CLIENT_STATE.totalSeconds--;
+    // Incrementar los segundos transcurridos (Cronómetro progresivo de 0 en adelante)
     CLIENT_STATE.elapsedSeconds++;
 
-    const formattedGlobal = formatHHMMSS(CLIENT_STATE.totalSeconds);
+    // Formateador estándar HH:MM:SS para el tiempo acumulado
+    const h = Math.floor(CLIENT_STATE.elapsedSeconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((CLIENT_STATE.elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (CLIENT_STATE.elapsedSeconds % 60).toString().padStart(2, '0');
+    const timeFormatted = `${h}:${m}:${s}`;
 
-    // 1. Actualizar Pantalla Principal Dashboard
-    const mainTimer = document.getElementById('timer-main-display');
-    if (mainTimer) mainTimer.textContent = formattedGlobal;
+    // 1. Mostrar tiempo global transcurrido en el Dashboard (Avanza de 00:00:00 en adelante)
+    if (mainTimer) mainTimer.textContent = timeFormatted;
+    if (globalTimerDisplay) globalTimerDisplay.textContent = timeFormatted;
 
-    const globalTimerDisplay = document.getElementById('global-timer-display');
-    if (globalTimerDisplay) globalTimerDisplay.textContent = formattedGlobal;
-
-    // 2. Cronómetro Etapa 1: Primeras 24 horas (Configuración e Inyección)
-    const timer24hDisplay = document.getElementById('timer-24h-display');
-    const secondsIn24h = 24 * 3600;
-    if (CLIENT_STATE.elapsedSeconds < secondsIn24h) {
-      const remaining24 = secondsIn24h - CLIENT_STATE.elapsedSeconds;
-      if (timer24hDisplay) timer24hDisplay.textContent = formatHHMMSS(remaining24);
+    // 2. Etapa 1: Registro / Inyección (Primeras 24 horas)
+    if (CLIENT_STATE.elapsedSeconds <= SECONDS_24H) {
+      if (timer24hDisplay) timer24hDisplay.textContent = timeFormatted;
     } else {
-      if (timer24hDisplay) timer24hDisplay.textContent = "00:00:00 (Completado)";
+      if (timer24hDisplay) timer24hDisplay.textContent = "24:00:00 (Completado)";
     }
 
-    // 3. Cronómetro Etapa 2: Post-Resultados (Horas 24 a 96)
-    const timerPostDisplay = document.getElementById('timer-post-display');
-    if (CLIENT_STATE.elapsedSeconds >= secondsIn24h && CLIENT_STATE.totalSeconds > 0) {
-      if (timerPostDisplay) timerPostDisplay.textContent = formattedGlobal;
-    } else if (CLIENT_STATE.elapsedSeconds < secondsIn24h) {
-      if (timerPostDisplay) timerPostDisplay.textContent = "72:00:00 (En Espera)";
+    // 3. Etapa 2: Post-Resultados (De hora 24 a 96)
+    if (CLIENT_STATE.elapsedSeconds > SECONDS_24H) {
+      if (timerPostDisplay) timerPostDisplay.textContent = timeFormatted;
     } else {
-      if (timerPostDisplay) timerPostDisplay.textContent = "00:00:00 (Completado)";
+      if (timerPostDisplay) timerPostDisplay.textContent = "00:00:00 (En Espera)";
     }
 
-    // Evaluar desborde de eventos por hora (Horas transcurridas = transcurridos / 3600)
+    // Evaluar liberación progresiva de botones (alcanzar hora 48, 72 o 96)
     const hoursElapsed = CLIENT_STATE.elapsedSeconds / 3600;
     evaluateTimelineTriggers(hoursElapsed);
 
