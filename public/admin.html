@@ -11,36 +11,36 @@
 
   <!-- SECCIÓN 1: FORMULARIO DE ACCESO (LOGIN) -->
   <main id="admin-login-view">
-<div class="admin-login-card" style="max-width: 400px; margin: 40px auto; padding: 25px; background: #16102b; border: 1px solid #00f2fe; border-radius: 16px; font-family: sans-serif; color: white;">
-  <div style="font-size: 2.5rem; text-align: center; margin-bottom: 10px;">🦁</div>
-  <h2 style="text-align: center; margin-bottom: 8px;">Acceso Administrativo SODIE</h2>
-  <p style="text-align: center; color: #a0a0c0; font-size: 0.9rem; margin-bottom: 20px;">
-    Introduce tu contraseña para continuar.
-  </p>
+<div class="admin-login-card" style="background: #150F24; border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 16px; padding: 25px; max-width: 400px; margin: 40px auto; text-align: center; box-shadow: 0 0 25px rgba(157, 0, 255, 0.2);">
+  
+  <div class="lion-avatar" style="font-size: 2.8rem; margin-bottom: 8px;">🦁</div>
+  
+  <h2 style="color: #FFFFFF; font-size: 1.4rem; margin-bottom: 6px; font-weight: 700;">Acceso Administrativo SODIE</h2>
+  <p style="color: #A098B5; font-size: 0.9rem; margin-bottom: 20px;">Introduce tu contraseña para continuar.</p>
 
-  <form onsubmit="validarAdminSimple(event)">
-    <div style="margin-bottom: 15px;">
-      <label for="admin-pass" style="display: block; margin-bottom: 5px; font-size: 0.85rem; color: #00f2fe;">Contraseña Admin</label>
-      <input 
-        type="password" 
-        id="admin-pass" 
-        placeholder="••••••••••••" 
-        required 
-        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #0a0618; color: #fff; box-sizing: border-box;"
-      />
-    </div>
+  <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+    <label for="admin-pass" style="color: #00FFCC; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Contraseña Admin</label>
+    <input 
+      type="password" 
+      id="admin-pass" 
+      placeholder="••••••••••••" 
+      style="width: 100%; padding: 12px; background: #0D0818; border: 1px solid #2A1C47; border-radius: 10px; color: #00FFCC; font-size: 1rem; outline: none; box-sizing: border-box;"
+      onkeyup="if(event.key === 'Enter') sodieValidarPasswordDirecta()"
+    />
+  </div>
 
-    <!-- Mensaje de error si la clave es incorrecta -->
-    <div id="admin-error" style="display: none; color: #ff4d4d; font-size: 0.85rem; margin-bottom: 15px; text-align: center;">
-      ❌ Contraseña incorrecta. Inténtalo de nuevo.
-    </div>
+  <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0; font-size: 0.9rem; text-align: center;"></div>
 
+  <div class="admin-btn-grid" style="margin-top: 15px;">
     <button 
-      type="submit" 
-      style="width: 100%; padding: 12px; border: none; border-radius: 8px; background: linear-gradient(90deg, #00f2fe, #4facfe); color: #000; font-weight: bold; cursor: pointer;">
+      type="button" 
+      id="btn-admin-login-pass" 
+      onclick="sodieValidarPasswordDirecta()" 
+      class="btn-mint" 
+      style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-weight: bold; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);">
       Iniciar Sesión
     </button>
-  </form>
+  </div>
 </div>
 
   <!-- SECCIÓN 2: PANEL ADMINISTRATIVO COMPLETO (PROTEGIDO) -->
