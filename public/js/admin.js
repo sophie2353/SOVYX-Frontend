@@ -354,54 +354,63 @@ function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
   xhr.send(formData);
 }
 
+// Subir Video Demo desde el Admin
 function sodieSubirVideoAdmin() {
   const fileInput = document.getElementById('admin-video-file');
   const btn = document.getElementById('btn-upload-video');
   if (!fileInput || !fileInput.files[0]) {
-    showAdminAlert('Selecciona un archivo de video primero.', true);
+    alert('Selecciona un archivo de video primero.');
     return;
   }
-  if (btn) btn.textContent = 'Subiendo Video...';
-  uploadFileWithProgress('/api/v1/media/upload', fileInput.files[0], 'video', () => {
-    showAdminAlert('🎬 Video cargado exitosamente.');
-    if (btn) {
-      btn.textContent = '✓ Video Cargado';
-      btn.style.background = 'rgba(0, 255, 204, 0.2)';
-    }
-  }, () => {
-    animateUploadProgress('video', () => {
-      showAdminAlert('🎬 Video cargado correctamente.');
-      if (btn) {
-        btn.textContent = '✓ Video Cargado';
-        btn.style.background = 'rgba(0, 255, 204, 0.2)';
-      }
+
+  const formData = new FormData();
+  formData.append('video', fileInput.files[0]);
+
+  try {
+    const res = await fetch('/api/v1/media/upload-video', {
+      method: 'POST',
+      body: formData
     });
-  });
+    const data = await res.json();
+
+    if (data.success) {
+      alert('¡Video demo actualizado con éxito!');
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (err) {
+    console.error('Error al subir video:', err);
+    alert('Error al conectar con el servidor.');
+  }
 }
 
-function sodieSubirContratoAdmin() {
-  const fileInput = document.getElementById('admin-contract-file');
-  const btn = document.getElementById('btn-upload-contract');
+// Subir Contrato PDF desde el Admin
+async function subirContratoAdmin(fileInputId) {
+  const fileInput = document.getElementById(fileInputId);
   if (!fileInput || !fileInput.files[0]) {
-    showAdminAlert('Selecciona un archivo PDF de contrato.', true);
+    alert('Selecciona un archivo PDF primero.');
     return;
   }
-  if (btn) btn.textContent = 'Subiendo Contrato...';
-  uploadFileWithProgress('/api/evaluator/contract', fileInput.files[0], 'contract', () => {
-    showAdminAlert('📄 Contrato PDF registrado correctamente.');
-    if (btn) {
-      btn.textContent = '✓ Contrato Cargado';
-      btn.style.background = 'rgba(0, 255, 204, 0.2)';
-    }
-  }, () => {
-    animateUploadProgress('contract', () => {
-      showAdminAlert('📄 Contrato PDF registrado correctamente.');
-      if (btn) {
-        btn.textContent = '✓ Contrato Cargado';
-        btn.style.background = 'rgba(0, 255, 204, 0.2)';
-      }
+
+  const formData = new FormData();
+  formData.append('contract', fileInput.files[0]);
+
+  try {
+    const res = await fetch('/api/v1/media/upload-contract', {
+      method: 'POST',
+      body: formData
     });
-  });
+    const data = await res.json();
+
+    if (data.success) {
+      alert('¡Contrato PDF actualizado con éxito!');
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (err) {
+    console.error('Error al subir contrato:', err);
+    alert('Error al conectar con el servidor.');
+  }
 }
 
 function sodieSubirExcelAdmin() {
