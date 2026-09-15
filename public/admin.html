@@ -11,37 +11,38 @@
 
   <!-- SECCIÓN 1: FORMULARIO DE ACCESO (LOGIN) -->
   <main id="admin-login-view" style="display: none;">
-<div class="admin-login-card" style="background: #150F24; border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 16px; padding: 25px; max-width: 400px; margin: 40px auto; text-align: center; box-shadow: 0 0 25px rgba(157, 0, 255, 0.2);">
-  
-  <div class="lion-avatar" style="font-size: 2.8rem; margin-bottom: 8px;">🦁</div>
-  
-  <h2 style="color: #FFFFFF; font-size: 1.4rem; margin-bottom: 6px; font-weight: 700;">Acceso Administrativo SODIE</h2>
-  <p style="color: #A098B5; font-size: 0.9rem; margin-bottom: 20px;">Introduce tu contraseña para continuar.</p>
+    <div class="admin-login-card" style="background: #150F24; border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 16px; padding: 25px; max-width: 400px; margin: 40px auto; text-align: center; box-shadow: 0 0 25px rgba(157, 0, 255, 0.2);">
+      
+      <div class="lion-avatar" style="font-size: 2.8rem; margin-bottom: 8px;">🦁</div>
+      
+      <h2 style="color: #FFFFFF; font-size: 1.4rem; margin-bottom: 6px; font-weight: 700;">Acceso Administrativo SODIE</h2>
+      <p style="color: #A098B5; font-size: 0.9rem; margin-bottom: 20px;">Introduce tu contraseña para continuar.</p>
 
-  <div class="input-group" style="text-align: left; margin-bottom: 15px;">
-    <label for="admin-pass" style="color: #00FFCC; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Contraseña Admin</label>
-    <input 
-      type="password" 
-      id="admin-pass" 
-      placeholder="••••••••••••" 
-      style="width: 100%; padding: 12px; background: #0D0818; border: 1px solid #2A1C47; border-radius: 10px; color: #00FFCC; font-size: 1rem; outline: none; box-sizing: border-box;"
-      onkeyup="if(event.key === 'Enter') sodieValidarPasswordDirecta()"
-    />
-  </div>
+      <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+        <label for="admin-pass" style="color: #00FFCC; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Contraseña Admin</label>
+        <input 
+          type="password" 
+          id="admin-pass" 
+          placeholder="••••••••••••" 
+          style="width: 100%; padding: 12px; background: #0D0818; border: 1px solid #2A1C47; border-radius: 10px; color: #00FFCC; font-size: 1rem; outline: none; box-sizing: border-box;"
+          onkeyup="if(event.key === 'Enter') sodieValidarPasswordDirecta()"
+        />
+      </div>
 
-  <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0; font-size: 0.9rem; text-align: center;"></div>
+      <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0; font-size: 0.9rem; text-align: center;"></div>
 
-  <div class="admin-btn-grid" style="margin-top: 15px;">
-    <button 
-      type="button" 
-      id="btn-admin-login-pass" 
-      onclick="sodieValidarPasswordDirecta()" 
-      class="btn-mint" 
-      style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-weight: bold; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);">
-      Iniciar Sesión
-    </button>
-  </div>
-</div>
+      <div class="admin-btn-grid" style="margin-top: 15px;">
+        <button 
+          type="button" 
+          id="btn-admin-login-pass" 
+          onclick="sodieValidarPasswordDirecta()" 
+          class="btn-mint" 
+          style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-weight: bold; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);">
+          Iniciar Sesión
+        </button>
+      </div>
+    </div>
+  </main> <!-- AQUÍ FALTABA EL CIERRE DE MAIN DE LOGIN -->
 
   <!-- SECCIÓN 2: PANEL ADMINISTRATIVO COMPLETO (PROTEGIDO) -->
   <main id="admin-dashboard-view" class="dashboard-container" style="display: block; padding: 20px;">
@@ -77,7 +78,7 @@
           --:--:--:--
         </div>
         <div class="admin-grid margin-v-sm" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-          <button type="button" onclick="sodieIniciarCronometro()" class="btn-pf-action btn-mint-solid">▶️ Iniciar</button>
+          <button type="button" onclick="sodieIniciarCronometro24h()" class="btn-pf-action btn-mint-solid">▶️ Iniciar</button>
           <button type="button" onclick="sodiePausarCronometro()" class="btn-pf-action btn-fuchsia-solid">⏸️ Pausar</button>
           <button type="button" onclick="sodieReiniciarCronometro()" class="btn-pf-action btn-fuchsia-solid">🔄 Reiniciar</button>
         </div>
@@ -178,7 +179,7 @@
       <div class="glass-card-dash margin-v-sm">
         <h4 class="fuchsia-txt">Cerrar Dashboard Principal</h4>
         <p class="step-desc">Activar la lista de espera para nuevos registros.</p>
-        <button type="button" class="btn-pf-action btn-fuchsia-solid margin-top-10" onclick="sodieToggleWaitlistMode(true)">
+        <button type="button" id="btn-open-waitlist" class="btn-pf-action btn-fuchsia-solid margin-top-10">
           Activar Lista de Espera
         </button>
       </div>
