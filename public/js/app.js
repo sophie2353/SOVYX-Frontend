@@ -3,42 +3,6 @@
  * Versión Final Sincronizada con Backend, confirmacion.html
  * y Temporizador V4 Gigante (14 días con Microsegundos).
  */
-
-// ==========================================
-// TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO (CAPTURADOR MODO TRUE)
-// ==========================================
-
-// Agrega este bloque en tu app.js o en un <script> al final de tu dashboard
-// ==========================================
-// TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO
-// ==========================================
-(function initAdminTriggerUltra() {
-  let count = 0;
-  let timer = null;
-
-  function handleTouch(e) {
-    count++;
-    
-    // Reinicia si pasan más de 2 segundos entre toques
-    clearTimeout(timer);
-    timer = setTimeout(() => { count = 0; }, 2000);
-
-    if (count >= 5) {
-      count = 0;
-      clearTimeout(timer);
-      window.location.href = "admin.html";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const elText = document.getElementById("sodie-logo-trigger");
-    const elIcon = document.getElementById("btn-sodie-logo-trigger");
-
-    // 'pointerdown' se dispara instantáneamente al tocar la pantalla (sin retardo)
-    if (elText) elText.addEventListener("pointerdown", handleTouch);
-    if (elIcon) elIcon.addEventListener("pointerdown", handleTouch);
-  });
-})();
 // ==========================================
 // CONFIGURACIÓN INICIAL & CONSTANTES SODIE
 // ==========================================
@@ -678,3 +642,37 @@ function initTimer24h() {
     timerDisplay.textContent = `${h}:${m}:${s}`;
   }, 1000);
 }
+
+// ==========================================
+// DISPARADOR SECRETO DE 5 CLICS (REPARADO)
+// ==========================================
+(function initAdminTriggerDirect() {
+  let clickCounter = 0;
+  let resetTimer = null;
+
+  function manejarToqueSecreto(e) {
+    clickCounter++;
+
+    clearTimeout(resetTimer);
+    // Si pasan más de 1.5 segundos entre toques, el contador se reinicia
+    resetTimer = setTimeout(() => {
+      clickCounter = 0;
+    }, 1500);
+
+    if (clickCounter >= 5) {
+      clickCounter = 0;
+      clearTimeout(resetTimer);
+      // Redirección inmediata a admin.html
+      window.location.href = "admin.html";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const logoTxt = document.getElementById("sodie-logo-trigger");
+    const logoIcon = document.getElementById("btn-sodie-logo-trigger");
+
+    // 'pointerdown' se activa tanto con clic de mouse como con toque de pantalla instantáneo
+    if (logoTxt) logoTxt.addEventListener("pointerdown", manejarToqueSecreto);
+    if (logoIcon) logoIcon.addEventListener("pointerdown", manejarToqueSecreto);
+  });
+})();
