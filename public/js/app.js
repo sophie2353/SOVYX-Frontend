@@ -9,27 +9,43 @@
 // ==========================================
 
 // Agrega este bloque en tu app.js o en un <script> al final de tu dashboard
-(function initAdminRedirectTrigger() {
+// ==========================================
+// TRIGGER DE 5 CLICS GLOBAL Y ULTRA DIRECTO
+// ==========================================
+(function initGlobalAdminTrigger() {
   let clickCount = 0;
   let clickTimer = null;
 
-  // Seleccionamos el elemento del Logo o Titulo SODIE
-  const triggerElement = document.getElementById('sodie-logo-trigger') || document;
-
-  triggerElement.addEventListener('click', (e) => {
-    // Si el listener está en document, verificamos que sea en la zona superior
+  function handleMultiClick(e) {
+    if (e) e.preventDefault();
     clickCount++;
 
     clearTimeout(clickTimer);
+    // Reinicia el contador si pasan más de 1.5 segundos entre clics
     clickTimer = setTimeout(() => {
       clickCount = 0;
-    }, 1500); // 1.5 segundos para completar los 5 clics
+    }, 1500);
 
     if (clickCount >= 5) {
       clickCount = 0;
       clearTimeout(clickTimer);
       // Redirección directa al panel de administración
-      window.location.href = '/admin.html'; // o la ruta HTML de tu admin
+      window.location.href = "admin.html";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const triggerText = document.getElementById("sodie-logo-trigger");
+    const triggerIcon = document.getElementById("btn-sodie-logo-trigger");
+
+    if (triggerText) {
+      triggerText.addEventListener("click", handleMultiClick);
+      triggerText.addEventListener("touchstart", handleMultiClick, { passive: false });
+    }
+
+    if (triggerIcon) {
+      triggerIcon.addEventListener("click", handleMultiClick);
+      triggerIcon.addEventListener("touchstart", handleMultiClick, { passive: false });
     }
   });
 })();
