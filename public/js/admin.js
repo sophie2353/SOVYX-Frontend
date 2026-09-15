@@ -1,10 +1,18 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Sistema de Autenticación A Prueba de Fallos
+ * Sistema de Autenticación A Prueba de Fallos y Control
  */
 
 const API_URL = "https://api.sodie.app";
 const ADMIN_KEY = "sodie_202623555";
+
+// Estado global de temporizadores para el Admin
+const ADMIN_STATE = {
+  timer24Interval: null,
+  timer24Seconds: 24 * 3600,
+  timer120Interval: null,
+  timer120Seconds: 120 * 3600
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Si la sesión ya está activa, ir directo al dashboard
@@ -18,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (banner) banner.style.display = "block";
   }
 
-  // 3. Listener del botón de contraseña (evita formularios tradicionales)
+  // 3. Listener del botón de contraseña
   const btnPass = document.getElementById("btn-admin-login-pass");
   if (btnPass) {
     btnPass.addEventListener("click", sodieValidarPasswordDirecta);
@@ -35,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnRegBio) {
     btnRegBio.addEventListener("click", sodieRegistrarHuellaDispositivo);
   }
+
+  // Inicializar listeners de archivos y acciones
+  initListeners();
 });
 
 /**
@@ -174,6 +185,10 @@ function mostrarDashboard() {
 
   if (loginView) loginView.style.display = "none";
   if (dashView) dashView.style.display = "block";
+
+  // Arrancar temporizadores una vez iniciada la sesión
+  sodieIniciarCronometro24h();
+  sodieIniciarTimer120h();
 }
 
 function sodieCerrarSesionAdmin() {
@@ -182,55 +197,63 @@ function sodieCerrarSesionAdmin() {
 }
 
 /* ==========================================================================
-   3. CRONÓMETROS Y TEMPORIZADORES
+   3. CRONÓMETROS Y TEMPORIZADORES (Réplica adaptada de app.js)
    ========================================================================== */
-function sodieIniciarCronometro() {
-  if (timerInterval) return;
-  timerInterval = setInterval(() => {
-    if (totalSeconds <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
+
+/**
+ * Temporizador de 24 horas (Adaptado con ID admin-timer-display)
+ */
+function sodieIniciarCronometro24h() {
+  const timerDisplay = document.getElementById('admin-timer-display');
+  if (!timerDisplay || ADMIN_STATE.timer24Interval) return;
+
+  ADMIN_STATE.timer24Interval = setInterval(() => {
+    if (ADMIN_STATE.timer24Seconds <= 0) {
+      clearInterval(ADMIN_STATE.timer24Interval);
+      ADMIN_STATE.timer24Interval = null;
       return;
     }
-    totalSeconds--;
-    actualizarDisplayCronometro();
+    ADMIN_STATE.timer24Seconds--;
+
+    const h = Math.floor(ADMIN_STATE.timer24Seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((ADMIN_STATE.timer24Seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (ADMIN_STATE.timer24Seconds % 60).toString().padStart(2, '0');
+
+    timerDisplay.textContent = `${h}:${m}:${s}`;
   }, 1000);
 }
 
 function sodiePausarCronometro() {
-  clearInterval(timerInterval);
-  timerInterval = null;
+  clearInterval(ADMIN_STATE.timer24Interval);
+  ADMIN_STATE.timer24Interval = null;
 }
 
 function sodieReiniciarCronometro() {
   sodiePausarCronometro();
-  totalSeconds = 86400;
-  actualizarDisplayCronometro();
+  ADMIN_STATE.timer24Seconds = 24 * 3600;
+  sodieIniciarCronometro24h();
 }
 
-function actualizarDisplayCronometro() {
-  const dias = Math.floor(totalSeconds / (3600 * 24));
-  const horas = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-  const minutos = Math.floor((totalSeconds % 3600) / 60);
-  const segundos = totalSeconds % 60;
-
-  const display = `${String(dias).padStart(2, '0')}:${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-  
-  const elem = document.getElementById("admin-timer-display");
-  if (elem) elem.innerText = display;
-}
-
+/**
+ * Temporizador de 120 horas (5 días) para extensión de panel
+ */
 function sodieIniciarTimer120h() {
-  if (ADMIN_STATE.timer120Interval) return;
+  const timerDisplay = document.getElementById('admin-120h-timer');
+  if (!timerDisplay || ADMIN_STATE.timer120Interval) return;
+
   ADMIN_STATE.timer120Interval = setInterval(() => {
-    if (ADMIN_STATE.timer120Seconds > 0) {
-      ADMIN_STATE.timer120Seconds--;
-      actualizarDisplay120h();
-    } else {
+    if (ADMIN_STATE.timer120Seconds <= 0) {
       sodiePausarTimer120h();
-      const timerDisplay = document.getElementById('admin-120h-timer');
-      if (timerDisplay) timerDisplay.textContent = "000:00:00 (Agotado)";
+      timerDisplay.textContent = "000:00:00 (Agotado)";
+      return;
     }
+    ADMIN_STATE.timer120Seconds--;
+
+    const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600).toString().padStart(3, '0');
+    const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60).toString().padStart(2, '0');
+    const seconds = (ADMIN_STATE.timer120Seconds % 60).toString().padStart(2, '0');
+
+    timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
   }, 1000);
 }
 
@@ -242,22 +265,7 @@ function sodiePausarTimer120h() {
 function sodieReiniciarTimer120h() {
   sodiePausarTimer120h();
   ADMIN_STATE.timer120Seconds = 120 * 3600;
-  actualizarDisplay120h();
-}
-
-function actualizarDisplay120h() {
-  const timerDisplay = document.getElementById('admin-120h-timer');
-  if (!timerDisplay) return;
-
-  const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600);
-  const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60);
-  const seconds = ADMIN_STATE.timer120Seconds % 60;
-
-  const hStr = hours.toString().padStart(3, '0');
-  const mStr = minutes.toString().padStart(2, '0');
-  const sStr = seconds.toString().padStart(2, '0');
-
-  timerDisplay.textContent = `${hStr}:${mStr}:${sStr}`;
+  sodieIniciarTimer120h();
 }
 
 /* ==========================================================================
@@ -301,7 +309,7 @@ function animateUploadProgress(type, callback) {
 }
 
 /* ==========================================================================
-   5. LISTENERS DE SUBIDA DE ARCHIVOS
+   5. LISTENERS DE SUBIDA DE ARCHIVOS Y ACCIONES
    ========================================================================== */
 function initListeners() {
   const btnVideo = document.getElementById('btn-upload-video');
@@ -312,7 +320,7 @@ function initListeners() {
 
   const btnContract = document.getElementById('btn-upload-contract');
   if (btnContract && !btnContract.dataset.bound) {
-    btnContract.addEventListener('click', sodieSubirContratoAdmin);
+    btnContract.addEventListener('click', () => sodieSubirContratoAdmin('admin-contract-file'));
     btnContract.dataset.bound = "true";
   }
 
@@ -320,6 +328,12 @@ function initListeners() {
   if (btnExcel && !btnExcel.dataset.bound) {
     btnExcel.addEventListener('click', sodieSubirExcelAdmin);
     btnExcel.dataset.bound = "true";
+  }
+
+  const btnWaitlistOpen = document.getElementById('btn-open-waitlist');
+  if (btnWaitlistOpen && !btnWaitlistOpen.dataset.bound) {
+    btnWaitlistOpen.addEventListener('click', adminActivarWaitlist);
+    btnWaitlistOpen.dataset.bound = "true";
   }
 }
 
@@ -355,7 +369,7 @@ function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
 }
 
 // Subir Video Demo desde el Admin
-function sodieSubirVideoAdmin() {
+async function sodieSubirVideoAdmin() {
   const fileInput = document.getElementById('admin-video-file');
   const btn = document.getElementById('btn-upload-video');
   if (!fileInput || !fileInput.files[0]) {
@@ -384,8 +398,8 @@ function sodieSubirVideoAdmin() {
   }
 }
 
-// Subir Contrato PDF desde el Admin (NECESITO ID DEL BOTON)
-async function subirContratoAdmin(fileInputId) {
+// Subir Contrato PDF desde el Admin
+async function sodieSubirContratoAdmin(fileInputId = 'admin-contract-file') {
   const fileInput = document.getElementById(fileInputId);
   if (!fileInput || !fileInput.files[0]) {
     alert('Selecciona un archivo PDF primero.');
@@ -412,7 +426,6 @@ async function subirContratoAdmin(fileInputId) {
     alert('Error al conectar con el servidor.');
   }
 }
-
 
 function sodieSubirExcelAdmin() {
   const fileInput = document.getElementById('admin-excel-file');
@@ -462,7 +475,7 @@ async function sodieConfirmarActivacion() {
   }
 }
 
-// Activar Lista de Espera (Cambia la vista en el frontend cliente)... NECESITO BOTÓN DE ACTIVAR LISTA DE ESPERA (EL ID)
+// Activar Lista de Espera (Vinculado a id "btn-open-waitlist")
 async function adminActivarWaitlist() {
   try {
     const res = await fetch('/api/v1/waitlist/open', { method: 'POST' });
@@ -471,7 +484,6 @@ async function adminActivarWaitlist() {
     if (data.success) {
       alert('¡Lista de Espera ACTIVADA exitosamente!');
       
-      // Si la función de app.js para actualizar la interfaz cliente existe, la invocamos
       if (typeof sodieAlternarVistaWaitlist === 'function') {
         sodieAlternarVistaWaitlist(true);
       }
@@ -484,7 +496,7 @@ async function adminActivarWaitlist() {
   }
 }
 
-// Cerrar Lista de Espera / Cierre de sesión Admin
+// Cerrar Lista de Espera
 async function sodieCerrarListaEspera() {
   const btn = document.getElementById('btn-close-waitlist');
   if (btn) btn.textContent = 'Procesando Cierre...';
