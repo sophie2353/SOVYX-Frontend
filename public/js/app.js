@@ -130,33 +130,73 @@ function initSSEMetrics() {
   }
 }
 
-//--------
-// 1.5. CARGAR VIDEO FRONTEND
+//-----
+// ACTUALIZACIÓN PARA SUBIR VIDEO, CONTRATO Y DESCARGAR CONTRATO. SI ABAJO HAY REPETIDO EN ALGÚN BOTÓN PARECIDO A SEND CONTRACT O DOWNLOAD SE ELIMINA Y SE DEJA ESTE
 //---------
 
-async function cargarVideoPrincipal() {
-  const videoPlayer = document.getElementById('sodie-main-video-player');
-  if (!videoPlayer) return;
+// ==========================================
+// CONFIGURACIÓN DE RUTAS DE CONTRATO Y VIDEO + PRÓXIMO PASO EXCEL (ESTE ACTUALIZAR CON RUTA A SUBIR.  SOLO EL EXCEL QUE ESTÁ MÁS ABAJO)
+// ==========================================
 
-  try {
-    const res = await fetch('/api/v1/media/active-video');
-    const data = await res.json();
-
-    if (data.success && data.videoUrl) {
-      // Asignar el atributo src con un query param para evitar el caché del navegador si se actualiza el video
-      videoPlayer.src = `${data.videoUrl}?v=${Date.now()}`;
-      videoPlayer.load();
-    }
-  } catch (err) {
-    console.warn('Cargando video fallback por defecto...');
-    videoPlayer.src = '/video_demo.mp4';
-  }
-}
-
-// Cargar el video tan pronto cargue el DOM
 document.addEventListener('DOMContentLoaded', () => {
-  cargarVideoPrincipal();
+
+  // 1. Configurar enlace de descarga del Contrato PDF
+  const btnDescargarContrato = document.getElementById('btn-download-contract');
+  if (btnDescargarContrato) {
+    btnDescargarContrato.href = '/contract/contrato.pdf';
+    btnDescargarContrato.setAttribute('download', 'Contrato_SODIE.pdf');
+    btnDescargarContrato.setAttribute('target', '_blank');
+  }
+
+  // 2. Configurar la fuente del Video de Demostración
+  const demoVideo = document.getElementById('sodie-demo-video');
+  if (demoVideo) {
+    // Si deseas cambiar dinámicamente la fuente desde JS:
+    const source = demoVideo.querySelector('source');
+    if (source) {
+      source.src = '/video/video_demo.mp4';
+      demoVideo.load(); // Recarga el reproductor con el nuevo video
+    }
+  }
+
 });
+
+// 3. Función para subir el contrato firmado (Paso 3)
+function sodieSubirContrato() {
+  const fileInput = document.getElementById('client-contract-file-input');
+  const pctLabel = document.getElementById('client-contract-pct');
+  const btnSubir = document.getElementById('btn-client-send-contract');
+
+  if (!fileInput || fileInput.files.length === 0) {
+    alert('Por favor selecciona el archivo de tu contrato firmado primero.');
+    return;
+  }
+
+  const archivo = fileInput.files[0];
+  console.log('Subiendo contrato:', archivo.name);
+
+  // Simulación de progreso de carga
+  let progreso = 0;
+  btnSubir.disabled = true;
+
+  const intervalo = setInterval(() => {
+    progreso += 20;
+    if (pctLabel) pctLabel.textContent = `${progreso}%`;
+
+    if (progreso >= 100) {
+      clearInterval(intervalo);
+      btnSubir.disabled = false;
+      
+      // Ocultar paso 3 (Contrato) y mostrar paso 4 (Excel)
+      document.getElementById('step-4-contract-flow').classList.add('hidden');
+      document.getElementById('step-5-excel-flow').classList.remove('hidden');
+
+      if (typeof mostrarToast === 'function') {
+        mostrarToast('Contrato recibido con éxito', 'Paso 4 habilitado: Sube tu Excel');
+      }
+    }
+  }, 300);
+}
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
    ========================================================================== */
