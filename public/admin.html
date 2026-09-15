@@ -21,19 +21,17 @@
     <input type="password" id="admin-pass" placeholder="••••••••••••" />
   </div>
 
-  <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0;"></div>
+  <div id="admin-auth-error" class="auth-msg-box" style="display: none; margin: 10px 0; font-size: 0.9rem;"></div>
 
-  <div class="admin-btn-grid" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-    <button type="button" id="btn-admin-login-pass" class="btn-mint" style="flex: 1;">Iniciar Sesión</button>
-    <button type="button" id="btn-admin-biometric" class="btn-mint" style="flex: 1;">Login Biométrico</button>
+  <div class="admin-btn-grid" style="display: flex; gap: 10px; margin-top: 15px;">
+    <button type="button" id="btn-admin-login-pass" onclick="sodieValidarPasswordDirecta()" class="btn-mint" style="flex: 1;">Iniciar Sesión</button>
+    <button type="button" id="btn-admin-biometric" onclick="sodieLoginOAutoregistroBiometrico()" class="btn-mint" style="flex: 1;">Login Biométrico</button>
   </div>
 
-  <!-- ESTE ES EL BOTÓN QUE FALTA EN TU PANTALLA -->
-  <button type="button" id="btn-admin-register-bio" class="btn-outline-mint" style="width: 100%; margin-top: 10px; padding: 10px;">
+  <button type="button" id="btn-admin-register-bio" onclick="sodieRegistrarHuellaDispositivo()" class="btn-outline-mint" style="width: 100%; margin-top: 10px; padding: 10px;">
     Registrar Huella / PIN en este dispositivo
   </button>
 </div>
-
 
   <!-- SECCIÓN 2: PANEL ADMINISTRATIVO COMPLETO (PROTEGIDO) -->
   <main id="admin-dashboard-view" class="dashboard-container" style="display: none; padding: 20px;">
