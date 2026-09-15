@@ -130,7 +130,11 @@ function initSSEMetrics() {
   }
 }
 
-async function cargarVideoFront() {
+//--------
+// 1.5. CARGAR VIDEO FRONTEND
+//---------
+
+async function cargarVideoPrincipal() {
   const videoPlayer = document.getElementById('sodie-main-video-player');
   if (!videoPlayer) return;
 
@@ -139,16 +143,20 @@ async function cargarVideoFront() {
     const data = await res.json();
 
     if (data.success && data.videoUrl) {
-      videoPlayer.src = data.videoUrl;
+      // Asignar el atributo src con un query param para evitar el caché del navegador si se actualiza el video
+      videoPlayer.src = `${data.videoUrl}?v=${Date.now()}`;
       videoPlayer.load();
     }
   } catch (err) {
-    console.warn('Error cargando video, usando fallback directo:', err);
-    if (videoPlayer) videoPlayer.src = '/video_demo.mp4';
+    console.warn('Cargando video fallback por defecto...');
+    videoPlayer.src = '/video_demo.mp4';
   }
 }
 
-document.addEventListener('DOMContentLoaded', cargarVideoFront);
+// Cargar el video tan pronto cargue el DOM
+document.addEventListener('DOMContentLoaded', () => {
+  cargarVideoPrincipal();
+});
 /* ==========================================================================
    3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
    ========================================================================== */
