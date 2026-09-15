@@ -1,12 +1,12 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Sistema de Autenticación Simple con Contraseña
+ * Versión Corregida Sin Errores de Sintaxis ni Bloqueos de Sesión
  */
 
 const API_URL = "https://api.sodie.app";
-const ADMIN_KEY = "sodie_202623555"; // Tu contraseña aquí
+const ADMIN_KEY = "sodie_202623555";
 
-// Estado global de temporizadores para el Admin
+// Estado global de temporizadores
 const ADMIN_STATE = {
   timer24Interval: null,
   timer24Seconds: 24 * 3600,
@@ -15,18 +15,26 @@ const ADMIN_STATE = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Si la sesión ya está activa, ir directo al dashboard
+  console.log("🟢 SODIE Admin Engine Inicializado");
+
+  // Si se decide usar el login por JS, verificar estado
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
+  } else {
+    // Si el HTML ya tiene el dashboard visible manualmente (modo dev), no lo ocultamos
+    const dashView = document.getElementById("admin-dashboard-view");
+    if (dashView && dashView.style.display === "block") {
+      sodieIniciarCronometro24h();
+      sodieIniciarTimer120h();
+    }
   }
 
-  // 2. Listener del botón de contraseña
+  // Bindear eventos
   const btnPass = document.getElementById("btn-admin-login-pass");
   if (btnPass) {
     btnPass.addEventListener("click", sodieValidarPasswordDirecta);
   }
 
-  // Permite presionar "Enter" en el input de la contraseña para iniciar sesión
   const inputPass = document.getElementById("admin-pass");
   if (inputPass) {
     inputPass.addEventListener("keyup", (event) => {
@@ -37,23 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initListeners();
+  actualizarDisplayCronometro();
+  actualizarDisplay120h();
 });
 
 /* ==========================================================================
-   1. VALIDACIÓN DE CONTRASEÑA SIMPLE (SIN BIOMETRÍA)
+   1. AUTENTICACIÓN Y SESIÓN (EXPLICITAMENTE GLOBAL)
    ========================================================================== */
-function sodieValidarPasswordDirecta() {
-  console.log("👉 Intentando iniciar sesión...");
+window.sodieValidarPasswordDirecta = function() {
+  console.log("👉 Validando contraseña admin...");
 
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
   const passIngresada = inputPass ? inputPass.value.trim() : "";
 
-  // Tu clave exacta
-  const ADMIN_KEY = "sodie_202623555"; 
-
   if (passIngresada === ADMIN_KEY) {
-    console.log("✅ Contraseña correcta");
+    console.log("✅ Acceso concedido");
 
     if (errorElem) {
       errorElem.innerText = "✅ Acceso concedido.";
@@ -61,28 +68,21 @@ function sodieValidarPasswordDirecta() {
       errorElem.style.display = "block";
     }
 
-    // Guarda sesión
     sessionStorage.setItem("sodie_admin_session", "active");
 
-    // Muestra el dashboard inmediatamente
-    const loginView = document.getElementById("admin-login-view");
-    const dashView = document.getElementById("admin-dashboard-view");
-
-    if (loginView) loginView.style.display = "none";
-    if (dashView) dashView.style.display = "block";
-
-    // Si tu panel usa otra vista o página completa, usa redirección:
-    // window.location.href = "panel.html";
+    setTimeout(() => {
+      mostrarDashboard();
+    }, 200);
 
   } else {
-    console.log("❌ Contraseña incorrecta");
+    console.log("❌ Clave incorrecta");
     if (errorElem) {
       errorElem.innerText = "❌ Contraseña incorrecta";
       errorElem.style.color = "#FF3366";
       errorElem.style.display = "block";
     }
   }
-}
+};
 
 function mostrarDashboard() {
   const loginView = document.getElementById("admin-login-view");
@@ -91,23 +91,33 @@ function mostrarDashboard() {
   if (loginView) loginView.style.display = "none";
   if (dashView) dashView.style.display = "block";
 
-  // Arrancar temporizadores una vez iniciada la sesión
   sodieIniciarCronometro24h();
   sodieIniciarTimer120h();
 }
 
-function sodieCerrarSesionAdmin() {
-  sessionStorage.rmoveItem("sodie_admin_session");
+window.sodieCerrarSesionAdmin = function() {
+  // ERROR CORREGIDO: Se arregló rmoveItem por removeItem
+  sessionStorage.removeItem("sodie_admin_session");
   window.location.reload();
-}
+};
 
 /* ==========================================================================
    2. CRONÓMETROS Y TEMPORIZADORES
    ========================================================================== */
 
-function sodieIniciarCronometro24h() {
+function actualizarDisplayCronometro() {
   const timerDisplay = document.getElementById('admin-timer-display');
-  if (!timerDisplay || ADMIN_STATE.timer24Interval) return;
+  if (!timerDisplay) return;
+
+  const h = Math.floor(ADMIN_STATE.timer24Seconds / 3600).toString().padStart(2, '0');
+  const m = Math.floor((ADMIN_STATE.timer24Seconds % 3600) / 60).toString().padStart(2, '0');
+  const s = (ADMIN_STATE.timer24Seconds % 60).toString().padStart(2, '0');
+
+  timerDisplay.textContent = `${h}:${m}:${s}`;
+}
+
+function sodieIniciarCronometro24h() {
+  if (ADMIN_STATE.timer24Interval) return;
 
   ADMIN_STATE.timer24Interval = setInterval(() => {
     if (ADMIN_STATE.timer24Seconds <= 0) {
@@ -116,12 +126,7 @@ function sodieIniciarCronometro24h() {
       return;
     }
     ADMIN_STATE.timer24Seconds--;
-
-    const h = Math.floor(ADMIN_STATE.timer24Seconds / 3600).toString().padStart(2, '0');
-    const m = Math.floor((ADMIN_STATE.timer24Seconds % 3600) / 60).toString().padStart(2, '0');
-    const s = (ADMIN_STATE.timer24Seconds % 60).toString().padStart(2, '0');
-
-    timerDisplay.textContent = `${h}:${m}:${s}`;
+    actualizarDisplayCronometro();
   }, 1000);
 }
 
@@ -133,26 +138,33 @@ function sodiePausarCronometro() {
 function sodieReiniciarCronometro() {
   sodiePausarCronometro();
   ADMIN_STATE.timer24Seconds = 24 * 3600;
+  actualizarDisplayCronometro();
   sodieIniciarCronometro24h();
 }
 
-function sodieIniciarTimer120h() {
+function actualizarDisplay120h() {
   const timerDisplay = document.getElementById('admin-120h-timer');
-  if (!timerDisplay || ADMIN_STATE.timer120Interval) return;
+  if (!timerDisplay) return;
+
+  const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600).toString().padStart(3, '0');
+  const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60).toString().padStart(2, '0');
+  const seconds = (ADMIN_STATE.timer120Seconds % 60).toString().padStart(2, '0');
+
+  timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+function sodieIniciarTimer120h() {
+  if (ADMIN_STATE.timer120Interval) return;
 
   ADMIN_STATE.timer120Interval = setInterval(() => {
     if (ADMIN_STATE.timer120Seconds <= 0) {
       sodiePausarTimer120h();
-      timerDisplay.textContent = "000:00:00 (Agotado)";
+      const timerDisplay = document.getElementById('admin-120h-timer');
+      if (timerDisplay) timerDisplay.textContent = "000:00:00 (Agotado)";
       return;
     }
     ADMIN_STATE.timer120Seconds--;
-
-    const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600).toString().padStart(3, '0');
-    const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60).toString().padStart(2, '0');
-    const seconds = (ADMIN_STATE.timer120Seconds % 60).toString().padStart(2, '0');
-
-    timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    actualizarDisplay120h();
   }, 1000);
 }
 
@@ -164,11 +176,12 @@ function sodiePausarTimer120h() {
 function sodieReiniciarTimer120h() {
   sodiePausarTimer120h();
   ADMIN_STATE.timer120Seconds = 120 * 3600;
+  actualizarDisplay120h();
   sodieIniciarTimer120h();
 }
 
 /* ==========================================================================
-   3. NOTIFICACIONES Y PROGRESO DE ARCHIVOS (%)
+   3. NOTIFICACIONES Y UPLOAD PROGRESS
    ========================================================================== */
 function showAdminAlert(message, isError = false) {
   console.log(`[ADMIN ALERT]: ${message}`);
@@ -208,7 +221,7 @@ function animateUploadProgress(type, callback) {
 }
 
 /* ==========================================================================
-   4. LISTENERS DE SUBIDA DE ARCHIVOS Y ACCIONES
+   4. LISTENERS Y ACCIONES BACKEND
    ========================================================================== */
 function initListeners() {
   const btnVideo = document.getElementById('btn-upload-video');
@@ -349,7 +362,7 @@ function sodieSubirExcelAdmin() {
 }
 
 /* ==========================================================================
-   5. ACTIVACIÓN DE CAMPAÑA Y LISTA DE ESPERA
+   5. ACTIVACIÓN DE CAMPAÑA Y WAITLIST
    ========================================================================== */
 async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-admin-activate-campaign');
