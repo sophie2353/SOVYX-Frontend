@@ -30,7 +30,7 @@
 </head>
 <body class="confirmation-body">
 
-  <div class="card confirmation-card">
+  <div class="card confirmation-card" id="main-card">
     <h2 id="conf-title">Procesando...</h2>
     <p id="conf-body">Cargando estado de la operación...</p>
     
@@ -54,11 +54,59 @@
       const actionBtn = document.getElementById('conf-action-btn');
       const verifyBtn = document.getElementById('conf-verify-btn');
 
-      // CASO 1: POST AUTH (Viene del OAuth callback de Meta)
-      if (step === 'procesar_excel') {
+      // =========================================================================
+      // PASO 0: ACEPTAR ROL (POST PAGO AUTOMÁTICO)
+      // =========================================================================
+      if (step === 'aceptar_rol') {
         loaderEl.style.display = 'none';
-        titleEl.textContent = ' Conexión Exitosa con Meta';
-        bodyEl.textContent = 'Tu cuenta ha sido vinculada correctamente. Procede a cargar la audiencia para generar el borrador.';
+        titleEl.textContent = '🎉 ¡Pago Confirmado!';
+        bodyEl.innerHTML = `
+          Te hemos enviado una invitación para habilitar tu cuenta en la app de Meta.
+          <ol style="text-align: left; margin: 20px 0; padding-left: 20px;">
+            <li style="margin-bottom: 8px;">Haz clic en el botón de abajo para <b>aceptar la solicitud en Facebook</b>.</li>
+            <li>Regresa a esta pestaña y presiona <b>Conectar con Facebook</b>.</li>
+          </ol>
+        `;
+
+        actionBtn.style.display = 'inline-block';
+        actionBtn.className = 'btn btn-secondary';
+        actionBtn.textContent = '1. Aceptar Invitación en Facebook ↗';
+        actionBtn.onclick = () => {
+          window.open('https://developers.facebook.com/requests/', '_blank');
+        };
+
+        verifyBtn.style.display = 'inline-block';
+        verifyBtn.className = 'btn btn-primary';
+        verifyBtn.textContent = '2. Conectar con Facebook 🚀';
+        verifyBtn.onclick = async () => {
+          verifyBtn.textContent = 'Conectando...';
+          try {
+            const res = await fetch('/api/facebook/connect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId })
+            });
+            const data = await res.json();
+            if (data.redirectUrl) {
+              window.location.href = data.redirectUrl;
+            } else {
+              alert('Error al obtener URL de login de Meta.');
+            }
+          } catch (err) {
+            alert('Error al conectar con la API de Facebook.');
+          } finally {
+            verifyBtn.textContent = '2. Conectar con Facebook 🚀';
+          }
+        };
+      }
+
+      // =========================================================================
+      // PASO 1: POST AUTH (Viene del OAuth callback de Meta)
+      // =========================================================================
+      else if (step === 'procesar_excel') {
+        loaderEl.style.display = 'none';
+        titleEl.textContent = 'Conexión Exitosa con Meta';
+        bodyEl.textContent = 'Tu cuenta ha sido vinculada correctamente. Generando borrador e inyectando datos...';
         actionBtn.style.display = 'block';
         actionBtn.textContent = 'Ir a Carga de Archivo';
         actionBtn.onclick = () => {
@@ -66,14 +114,17 @@
         };
       }
 
-      // CASO 2: POST CREAR BORRADOR (Borrador en PAUSED listo en Meta)
+      // =========================================================================
+      // PASO 2: ACTIVAR CAMPAÑA Y REDIRIGIR A CLIENT.HTML (DASHBOARD EN VERIFICACIÓN)
+      // =========================================================================
       else if (step === 'activar_campana') {
         loaderEl.style.display = 'none';
-        titleEl.textContent = 'Borrador Generado en Meta';
-        bodyEl.textContent = 'Abre Meta Ads Manager para publicar creativos y presupuesto, luego confirma la activación aquí.';
+        titleEl.textContent = '🚀 Borrador Generado en Meta';
+        bodyEl.textContent = 'Abre Meta Ads Manager para publicar creativos y presupuesto. Una vez publicado, pasará a revisión de Meta y tu Dashboard se activará.';
         
-        actionBtn.style.display = 'block';
-        actionBtn.textContent = 'Abrir Meta Ads Manager';
+        actionBtn.style.display = 'inline-block';
+        actionBtn.className = 'btn btn-secondary';
+        actionBtn.textContent = '1. Abrir Meta Ads Manager ↗';
         actionBtn.onclick = () => {
           const webUrl = `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${actId}&selected_campaign_ids=${campaignId}`;
           const appUrl = `fb://adsmanager/campaign?act=${actId}&campaign_id=${campaignId}`;
@@ -89,50 +140,55 @@
           }
         };
 
-        verifyBtn.style.display = 'block';
+        verifyBtn.style.display = 'inline-block';
+        verifyBtn.className = 'btn btn-primary';
+        verifyBtn.textContent = '2. Ir a mi Dashboard (En Verificación) 📊';
         verifyBtn.onclick = async () => {
-          verifyBtn.textContent = 'Verificando en Meta...';
+          verifyBtn.textContent = 'Registrando estado...';
           try {
-            const res = await fetch(`/api/facebook/verificar-estado?campaignId=${campaignId}&actId=${actId}`);
-            const data = await res.json();
-            if (data.isActive) {
-              window.location.href = `/index.html?view=dashboard&status=active&campaignId=${campaignId}`;
-            } else {
-              alert("Meta aún reporta la campaña como PAUSED. Publica los cambios en Ads Manager e intenta de nuevo.");
-              verifyBtn.textContent = 'Verificar Estado en Meta';
-            }
+            // Notificar activación al backend en background
+            await fetch('/api/facebook/activar-campana', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId, campaignId })
+            });
           } catch (err) {
-            alert("Error al verificar estado con la API.");
-            verifyBtn.textContent = 'Verificar Estado en Meta';
+            console.warn("Continuando hacia el dashboard...");
           }
+
+          // Redirección inmediata a client.html en estado de revisión/verificación
+          window.location.href = `/client.html?sessionId=${sessionId || ''}&campaignId=${campaignId || ''}&status=verifying`;
         };
       }
 
-      // CASO 3: POST PAGO / CAPI (Confirmación de Pago/Pixel)
+      // =========================================================================
+      // PASO 3: CONFIRMAR PAGO / CAPI
+      // =========================================================================
       else if (step === 'confirmar_pago') {
         localStorage.setItem('sodie_payment_completed', 'true');
 
-        // Disparar evento de Purchase en Pixel solo si viene de flujo de pago
         if (typeof fbq === 'function') {
-          fbq('track', 'Purchase', { value: 1000.00, currency: 'USD', content_name: 'Reserva Slot SODIE' });
+          fbq('track', 'Purchase', { value: 2000.00, currency: 'USD', content_name: 'Reserva Slot SODIE' });
         }
 
-        titleEl.textContent = ' ¡Pago Confirmado!';
+        titleEl.textContent = '¡Pago Confirmado!';
         bodyEl.textContent = 'Registrando evento CAPI/Pixel y preparando tu panel...';
         
         setTimeout(() => {
-          window.location.href = '/index.html?status=paid_success';
+          window.location.href = `/client.html?sessionId=${sessionId || ''}&status=paid_success`;
         }, 2500);
       }
 
+      // =========================================================================
       // FALLBACK POR DEFECTO
+      // =========================================================================
       else {
         loaderEl.style.display = 'none';
         titleEl.textContent = 'Confirmación SODIE';
         bodyEl.textContent = 'Redirigiendo al panel principal...';
         actionBtn.style.display = 'block';
-        actionBtn.textContent = 'Ir al Inicio';
-        actionBtn.onclick = () => window.location.href = '/index.html';
+        actionBtn.textContent = 'Ir al Dashboard';
+        actionBtn.onclick = () => window.location.href = `/client.html?sessionId=${sessionId || ''}`;
       }
     });
   </script>
