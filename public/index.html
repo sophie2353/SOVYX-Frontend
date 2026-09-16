@@ -43,7 +43,7 @@
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       <div class="logo-wrapper">
-        <h1 class="logo-title"><span class="serif-s" style="color: #ff007a;">S</span>ODIE</h1>
+        <h1 class="logo-title"><span class="brand-s">S</span>ODIE</h1>
       </div>
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
@@ -101,8 +101,8 @@
     <header class="dash-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
       <div class="dash-header-left">
         <div id="sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; user-select: none; touch-action: manipulation; display: inline-block;">
-          <h1 class="logo-title" style="font-size: 1.8rem; font-weight: 800; margin: 0; color: #fff; letter-spacing: 1px;">
-            <span style="color: #ff007a;">S</span>ODIE
+          <h1 class="logo-title" style="font-size: 1.8rem; font-weight: 800; margin: 0; color: #fff; letter-spacing: 1px; text-transform: none;">
+            <span class="brand-s" style="color: #ff007a;">S</span>ODIE
           </h1>
         </div>
       </div>
@@ -114,9 +114,9 @@
       </div>
     </header>
 
-    <!-- 1. MÉTRICAS (INICIALIZADAS EN 0) -->
+    <!-- 1. MÉTRICAS (INICIALIZADAS EN 0 / SE ACTIVAN TRAS FACEBOOK/CONNECT) -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas</h3>
+      <h3 class="section-title">Métricas en Tiempo Real</h3>
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
@@ -124,7 +124,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Estado Meta</span><span class="fuchsia-txt">En espera</span></div>
+          <div class="card-foot"><span>Estado Meta</span><span id="metric-spend-status" class="fuchsia-txt">Esperando Conexión</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -133,6 +133,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
+          <div class="card-foot"><span>Impresiones</span><span id="metric-reach-status" class="mint-txt">0.00</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -141,7 +142,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span></span><span class="mint-txt">Pendiente</span></div>
+          <div class="card-foot"><span>Tráfico Web</span><span class="mint-txt">Inactivo</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -150,6 +151,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
+          <div class="card-foot"><span>Campañas</span><span class="fuchsia-txt">0 creadas</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -199,13 +201,13 @@
       
       <div id="chat-body" class="chat-body">
         <div class="incoming-simple">
-          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a marcas que invierten de 900$ a 18K$/mes. Solo 3 Cupos iniciales disponibles. Pagas la cuota de Hora 0 para iniciar la inyección automatizada con contrato firmado. Conoce todo sobre la plataforma a continuación.</p>
+          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a marcas que invierten de 900$ a 18K$/mes. Solo 2 Cupos iniciales disponibles. Pagas la cuota de Hora 0 para iniciar la inyección automatizada con contrato firmado. Conoce todo sobre la plataforma a continuación.</p>
         </div>
       </div>
 
       <div id="quick-replies" class="chat-quick-options">
         <button type="button" class="opt-btn" data-payload="tres_cuotas">¿Cómo son las cuotas?</button>
-        <button type="button" class="opt-btn" data-payload="cupo_3">¿Qué ocurre en el Cupo 3?</button>
+        <button type="button" class="opt-btn" data-payload="cupo_4">¿Qué ocurre en el Cupo 4?</button>
         <button type="button" class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
         <button type="button" class="opt-btn" data-payload="ecommerce">Ecommerce</button>
         <button type="button" class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
@@ -219,81 +221,73 @@
       </div>
     </section>
 
-    <!-- 4. SECCIÓN DE PAGO FINAL (ESTRUCTURA DE CLIENTES & HELIO PAY) -->
-    <section id="pf-card" class="glass-card-dash pf-section">
-      <div id="pf-standard-content">
-        <h3 id="pf-main-title" class="section-title mint-txt">Pago Final y Esquema de Cuotas</h3>
-        
-        <!-- PLAN DE CLIENTE 1 & 2 -->
-        <div class="pf-plan-box style-card-dark margin-v-sm" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(0,255,204,0.2);">
-          <h4 style="color: #00ffcc; margin-bottom: 10px; font-size: 1.1rem;">Cliente 1 & 2:</h4>
-          <div class="pf-summary-list">
-            <div class="pf-row">
-              <span>Hora 0</span>
-              <strong class="price-value">$3.000</strong>
+    <!-- 4. SECCIÓN DE PAGO FINAL / LISTA DE ESPERA (REEMPLAZO DINÁMICO TRAS 3 PAGOS) -->
+    <section id="pf-card" class="glass-card-dash pf-section" style="border: 1px solid rgba(0, 255, 204, 0.25); background: rgba(13, 17, 23, 0.75); backdrop-filter: blur(16px); padding: 24px; border-radius: 16px;">
+      
+      <!-- CONTENIDO A: FLUJO DE PAGO ACTIVO (CUPOS DISPONIBLES) -->
+      <div id="pf-active-payment-flow">
+        <!-- ENCABEZADO Y TARJETA INICIAL -->
+        <div id="pf-intro-card" class="pf-clean-card text-center margin-v-sm">
+          <h3 id="pf-main-title" class="section-title mint-txt" style="font-size: 1.4rem; margin-bottom: 8px;">Reserva de Slot e Inyección Automatizada</h3>
+          <p class="step-desc" style="max-width: 650px; margin: 0 auto 18px; line-height: 1.5; color: #cbd5e1;">
+            Accede al despliegue del algoritmo en Meta Ads pagando tu cuota inicial de <strong>Hora 0</strong>. Completa tus datos de facturación, firma el contrato de servicio y sube tu base de compradores.
+          </p>
+
+          <!-- TARJETA LIMPIA DE PRECIOS -->
+          <div class="pf-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            
+            <div class="plan-card-clean" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 255, 204, 0.2); border-radius: 12px; padding: 18px; text-align: left;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: #00ffcc; margin: 0; font-size: 1.1rem;">Cliente 1 & 2</h4>
+                <span class="badge-client badge-mint-border">Cupo Exclusivo</span>
+              </div>
+              <div style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 8px;">$3.000 <small style="font-size: 0.85rem; font-weight: normal; color: #94a3b8;">/ Hora 0</small></div>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.8;">
+                <li>• Hora 24: $1.000</li>
+                <li>• Hora 48: $3.000</li>
+                <li>• Hora 72: $3.000</li>
+                <li style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 6px; padding-top: 6px; font-weight: bold; color: #00ffcc;">Total: $10.000 USD</li>
+              </ul>
             </div>
-            <div class="pf-row">
-              <span>Hora 24</span>
-              <strong class="price-value">$1.000</strong>
+
+            <div class="plan-card-clean" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 0, 122, 0.2); border-radius: 12px; padding: 18px; text-align: left;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: #ff007a; margin: 0; font-size: 1.1rem;">Cliente 4</h4>
+                <span class="badge-client" style="border: 1px solid #ff007a; color: #ff007a;">Escalado</span>
+              </div>
+              <div style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 8px;">$5.000 <small style="font-size: 0.85rem; font-weight: normal; color: #94a3b8;">/ Hora 0</small></div>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.8;">
+                <li>• Hora 24: $2.000</li>
+                <li>• Hora 48: $3.000</li>
+                <li>• Hora 72: $3.000</li>
+                <li style="border-top: 1px dashed rgba(255,0,122,0.3); margin-top: 6px; padding-top: 6px; font-weight: bold; color: #ff007a;">Total: $13.000 USD</li>
+              </ul>
             </div>
-            <div class="pf-row">
-              <span>Hora 48</span>
-              <strong class="price-value">$3.000</strong>
-            </div>
-            <div class="pf-row">
-              <span>Hora 72</span>
-              <strong class="price-value">$3.000</strong>
-            </div>
-            <div class="pf-row pf-total" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 5px;">
-              <span style="font-weight: bold;">Total</span>
-              <strong class="mint-txt" style="font-size: 1.2rem;">$10.000</strong>
-            </div>
+
           </div>
+
+          <!-- BOTÓN INICIAL DEL FLUJO ENCAPSULADO -->
+          <button type="button" id="btn-iniciar-pago" class="btn-pf-action btn-pay-gradient" style="width: 100%; max-width: 420px; margin: 0 auto; padding: 14px 24px; font-size: 1rem; font-weight: 700;">
+            PAGAR AHORA
+          </button>
         </div>
 
-        <!-- PLAN DE CLIENTE 3 -->
-        <div class="pf-plan-box style-card-dark margin-v-sm" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,0,122,0.2);">
-          <h4 style="color: #ff007a; margin-bottom: 10px; font-size: 1.1rem;">Cliente 3:</h4>
-          <div class="pf-summary-list">
-            <div class="pf-row">
-              <span>Hora 0</span>
-              <strong class="price-value">$5.000</strong>
-            </div>
-            <div class="pf-row">
-              <span>Hora 24</span>
-              <strong class="price-value">$2.000 <small style="color: #9ca3af;"></small></strong>
-            </div>
-            <div class="pf-row">
-              <span>Hora 48</span>
-              <strong class="price-value">$3.000</strong>
-            </div>
-            <div class="pf-row">
-              <span>Hora 72</span>
-              <strong class="price-value">$3.000</strong>
-            </div>
-            <div class="pf-row pf-total" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 5px;">
-              <span style="font-weight: bold;">Total</span>
-              <strong class="fuchsia-txt" style="font-size: 1.2rem;">$13.000</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- PASO 1: DATOS DE FACTURACIÓN -->
-        <div id="form-pago-datos" class="form-billing-box margin-v-sm">
-          <h4 class="fuchsia-txt">Paso 1: Datos para Facturación</h4>
+        <!-- PASO 2: FORMULARIO DE FACTURACIÓN (INICIALMENTE OCULTO) -->
+        <div id="pf-step-billing" class="form-billing-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+          <h4 class="fuchsia-txt" style="margin-bottom: 12px; font-size: 1.1rem;">Paso 1: Datos para Facturación y Conexión</h4>
           <div class="form-stack-compact">
-            <div class="form-row-2">
-              <input type="number" id="pay-age" placeholder="Edad *" required />
-              <input type="text" id="pay-country" placeholder="País *" required />
+            <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <input type="number" id="pay-age" placeholder="Edad *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
+              <input type="text" id="pay-country" placeholder="País *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
             </div>
-            <div class="form-row-2">
-              <input type="text" id="pay-city" placeholder="Ciudad *" required />
-              <input type="text" id="pay-zip" placeholder="Código Postal *" required />
+            <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+              <input type="text" id="pay-city" placeholder="Ciudad *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
+              <input type="text" id="pay-zip" placeholder="Código Postal *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
             </div>
-            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" required />
+            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" required style="width: 100%; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
 
-            <div class="form-group" style="margin-top: 10px;">
-              <label for="fbUserId" style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">
+            <div class="form-group" style="margin-top: 12px;">
+              <label for="fbUserId" style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85rem; color: #94a3b8;">
                 Usuario o ID de Facebook <span style="color: #ff007a;">*</span>
               </label>
               <input 
@@ -302,67 +296,86 @@
                 name="fbUserId" 
                 placeholder="ej. juan.perez.12 o 1000123456789" 
                 required 
-                style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff;"
+                style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.4); color: #fff;"
               />
             </div>
 
-            <div class="privacy-link-wrapper margin-v-sm text-center">
-              <a href="/privacidad y datos" class="mint-txt link-underline" style="font-size: 0.85rem;" target="_blank">
-                Términos de Privacidad y Datos requeridos
-              </a>
-            </div>
+            <!-- BOTÓN IR A PAGAR (CONECTADO A APP.JS Y BACKEND) -->
+            <button type="button" id="btn-procesar-pago-pasarela" class="btn-pf-action btn-pay-gradient" style="width: 100%; margin-top: 16px; padding: 12px; font-weight: bold;">
+              IR A PAGAR
+            </button>
           </div>
         </div>
 
-        <!-- PASO 2: BOTONES DE PAGO CON ENLACES A HELIO PAY -->
-        <div id="step-3-pay-trigger" class="margin-v-sm">
-          <h4 class="mint-txt">Paso 2: Selecciona y Realiza tu Pago Hora 0</h4>
+        <!-- PASO 3: CONTRATO FIRMADO (DESBLOQUEADO TRAS EL PAGO) -->
+        <div id="pf-step-contract" class="contract-flow-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.2);">
+          <h4 class="mint-txt" style="margin-bottom: 8px;">Paso 2: Contrato de Servicio Firmado</h4>
+          <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;">Descarga el contrato, firma digitalmente y adjúntalo para habilitar el paso final de inyección:</p>
+          <a id="btn-download-contract" href="contrato-sodie.pdf" download class="btn-pf-action btn-blue-solid" style="display: inline-block; text-decoration: none; padding: 10px 18px; margin-bottom: 12px;">Descargar Contrato PDF</a>
           
-          <div class="pay-buttons-stack" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
-            <!-- Opción Cliente 1 & 2 ($3.000 = $2.500 + $500) -->
-            <a href="https://helio.pay/3000" target="_blank" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;" onclick="sodieRegistrarClicPago('cliente_1_2')">
-              PAGAR HORA 0 - CLIENTE 1 & 2 ($3.000)
-              <span style="display: block; font-size: 0.75rem; font-weight: normal; opacity: 0.9;">Bloque Helio Pay: $2.500 + $500</span>
-            </a>
-
-            <!-- Opción Cliente 3 ($5.000 = $2.500 x 2) -->
-            <a href="https://helio.pay/5000" target="_blank" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none; border: 1px solid #ff007a; color: #fff;" onclick="sodieRegistrarClicPago('cliente_3')">
-              PAGAR HORA 0 - CLIENTE 3 ($5.000)
-              <span style="display: block; font-size: 0.75rem; font-weight: normal; opacity: 0.9;">Bloque Helio Pay: $2.500 × 2</span>
-            </a>
+          <div class="input-group-flow" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf,.png,.jpg" style="flex: 1;" />
+            <button type="button" id="btn-client-send-contract" class="btn-pf-action" style="padding: 10px 18px;">Subir Contrato Firmado</button>
           </div>
         </div>
 
-        <!-- PASO 3: CONTRATO -->
-        <div id="step-4-contract-flow" class="contract-flow-box margin-v-sm">
-          <h4 class="mint-txt">Paso 3: Contrato de Servicio Firmado</h4>
-          <p class="step-desc">Descarga el PDF, fírmalo digitalmente y súbelo para habilitar la carga de tu base de datos:</p>
-          <a id="btn-download-contract" href="contrato-sodie.pdf" download class="btn-pf-action btn-blue-solid margin-v-sm" style="display: inline-block; text-align: center; text-decoration: none;">Descargar Contrato PDF</a>
-          <div class="input-group-flow">
-            <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf,.png,.jpg" />
-            <button type="button" id="btn-client-send-contract" class="btn-pf-action" onclick="sodieSubirContrato()">Subir Contrato Firmado</button>
-          </div>
-        </div>
-
-        <!-- PASO 4: CARGA DE EXCEL Y REDIRECCIÓN A CONFIRMACION.HTML -->
-        <div id="step-5-excel-flow" class="upload-excel-box margin-v-sm">
-          <h4 class="mint-txt">Paso 4: Subir Excel de Compradores</h4>
-          <p class="step-desc">Sube tu archivo de compradores para inyectar la segmentación y finalizar:</p>
-          <div class="input-group-flow">
-            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv,.xlsx,.xls" />
-            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient" onclick="sodieProcesarExcelYRedireccionar()">
-              Generar Borrador e Ir a Confirmación 🚀
+        <!-- PASO 4: CARGA DE EXCEL Y REDIRECCIÓN FINAL -->
+        <div id="pf-step-excel" class="upload-excel-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 0, 122, 0.2);">
+          <h4 class="fuchsia-txt" style="margin-bottom: 8px;">Paso 3: Subir Excel de Compradores</h4>
+          <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;">Carga tu lista para crear el borrador y finalizar el registro:</p>
+          <div class="input-group-flow" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv,.xlsx,.xls" style="flex: 1;" />
+            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient" style="padding: 10px 20px; font-weight: bold;">
+              Procesar e Ir a Confirmación
             </button>
           </div>
         </div>
       </div>
+
+      <!-- CONTENIDO B: BLOQUE LISTA DE ESPERA (SE MUESTRA CUANDO CUPOS = 0 TRAS 3 PAGOS) -->
+      <div id="pf-waitlist-block" class="hidden text-center margin-v-sm" style="max-width: 580px; margin: 0 auto; padding: 10px;">
+        <span class="badge-client" style="border: 1px solid #ff007a; color: #ff007a; margin-bottom: 12px; display: inline-block;">CUPOS AGOTADOS</span>
+        <h3 class="section-title fuchsia-txt" style="font-size: 1.5rem; margin-bottom: 10px;">Unirse a la Lista de Espera Exclusiva</h3>
+        <p class="step-desc" style="line-height: 1.5; color: #cbd5e1; margin-bottom: 20px;">
+          Los cupos activos para esta ventana de inyección se han completado. Ingresa tus datos para asegurar prioridad de acceso en la próxima apertura de cupos en <strong>18 días</strong>.
+        </p>
+
+        <form id="form-waitlist" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 12px;">
+          <input 
+            type="text" 
+            id="wl-brand-name" 
+            placeholder="Nombre de tu Marca / Empresa *" 
+            required 
+            style="padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 0.95rem;" 
+          />
+          <input 
+            type="email" 
+            id="wl-email" 
+            placeholder="Correo Electrónico *" 
+            required 
+            style="padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 0.95rem;" 
+          />
+          <input 
+            type="tel" 
+            id="wl-phone" 
+            placeholder="WhatsApp con Código de País *" 
+            required 
+            style="padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 0.95rem;" 
+          />
+          
+          <button type="button" id="btn-waitlist-access" class="btn-pf-action btn-pay-gradient" style="padding: 14px; font-weight: 800; font-size: 1.05rem; margin-top: 8px; width: 100%;">
+            ACCEDER A LISTA DE ESPERA
+          </button>
+        </form>
+      </div>
+
     </section>
 
-    <!-- 5. CRONÓMETRO REGRESIVO -->
+    <!-- 5. CRONÓMETRO REGRESIVO (18 DÍAS DE DISPONIBILIDAD PARA SIGUIENTE APERTURA) -->
     <section class="glass-card-dash timer-section text-center">
-      <span class="timer-label">CUENTA REGRESIVA DE DISPONIBILIDAD</span>
-      <div id="timer-main-display" class="timer-digits mint-txt">24:00:00</div>
-      <span class="timer-sub">Estado del Sistema: Conectado a Meta API</span>
+      <span class="timer-label" id="timer-status-title">TIEMPO PARA PRÓXIMA APERTURA DE CUPOS</span>
+      <div id="timer-main-display" class="timer-digits mint-txt">432:00:00</div>
+      <span class="timer-sub" id="timer-status-sub">Estado del Sistema: Servidores SODIE en Capacidad Máxima (18 Días)</span>
     </section>
 
     <footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem;">
@@ -372,46 +385,6 @@
   
   <script src="config.js"></script>
   <script src="app.js"></script>
-
-  <!-- SCRIPT DE MANEJO DE REDIRECCIÓN A CONFIRMACION.HTML -->
-  <script>
-    function sodieRegistrarClicPago(tipo) {
-      fetch('/api/metrics/pay-click', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipoCliente: tipo })
-      }).catch(() => {});
-    }
-
-    function sodieSubirContrato() {
-      const fileInput = document.getElementById('client-contract-file-input');
-      if (!fileInput.files.length) {
-        alert("Por favor selecciona tu contrato firmado antes de subirlo.");
-        return;
-      }
-      alert("Contrato recibido con éxito. Procede con el Paso 4.");
-    }
-
-    function sodieProcesarExcelYRedireccionar() {
-      const age = document.getElementById('pay-age')?.value;
-      const country = document.getElementById('pay-country')?.value;
-      const fbUserId = document.getElementById('fbUserId')?.value;
-      const excelFile = document.getElementById('client-file-input')?.files[0];
-
-      if (!age || !country || !fbUserId) {
-        alert("Por favor completa los datos de facturación e ID de Facebook del Paso 1.");
-        return;
-      }
-
-      if (!excelFile) {
-        alert("Por favor selecciona tu archivo Excel de compradores para inyectar.");
-        return;
-      }
-
-      // Redirección directa hacia confirmacion.html
-      window.location.href = `confirmacion.html?status=excel_uploaded&fbId=${encodeURIComponent(fbUserId)}`;
-    }
-  </script>
 
 </body>
 </html>
