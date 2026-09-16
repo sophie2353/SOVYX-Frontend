@@ -55,31 +55,48 @@
       const verifyBtn = document.getElementById('conf-verify-btn');
 
       // =========================================================================
-      // PASO 0: ACEPTAR ROL (POST PAGO AUTOMÁTICO)
+      // PASO 0: POST PAGO -> ACEPTAR EVALUADOR -> IR A CONTRATO / EXCEL
       // =========================================================================
       if (step === 'aceptar_rol') {
         loaderEl.style.display = 'none';
         titleEl.textContent = '🎉 ¡Pago Confirmado!';
         bodyEl.innerHTML = `
-          Te hemos enviado una invitación para habilitar tu cuenta en la app de Meta.
+          Te hemos enviado la invitación como evaluador a tu cuenta de Meta.
           <ol style="text-align: left; margin: 20px 0; padding-left: 20px;">
-            <li style="margin-bottom: 8px;">Haz clic en el botón de abajo para <b>aceptar la solicitud en Facebook</b>.</li>
-            <li>Regresa a esta pestaña y presiona <b>Conectar con Facebook</b>.</li>
+            <li style="margin-bottom: 8px;">Haz clic abajo para <b>aceptar la solicitud en Facebook</b>.</li>
+            <li>Luego presiona el botón para <b>continuar al Contrato y Carga de Excel</b>.</li>
           </ol>
         `;
 
         actionBtn.style.display = 'inline-block';
         actionBtn.className = 'btn btn-secondary';
-        actionBtn.textContent = '1. Aceptar Invitación en Facebook ↗';
+        actionBtn.textContent = '1. Aceptar Solicitud en Facebook ↗';
         actionBtn.onclick = () => {
           window.open('https://developers.facebook.com/requests/', '_blank');
         };
 
         verifyBtn.style.display = 'inline-block';
         verifyBtn.className = 'btn btn-primary';
-        verifyBtn.textContent = '2. Conectar con Facebook 🚀';
+        verifyBtn.textContent = '2. Continuar a Contrato y Excel 📋';
+        verifyBtn.onclick = () => {
+          // Redirige a index.html para completar contrato y cargar Excel
+          window.location.href = `/index.html?step=contrato_excel&sessionId=${sessionId || ''}`;
+        };
+      }
+
+      // =========================================================================
+      // PASO 1: CONECTAR META (Viene tras subir todo al 100% en index.html)
+      // =========================================================================
+      else if (step === 'conectar_meta') {
+        loaderEl.style.display = 'none';
+        titleEl.textContent = 'Archivos Recibidos al 100%';
+        bodyEl.textContent = 'Tu contrato y segmentación en Excel están procesados. Ahora conecta tu cuenta de Facebook para inyectar la campaña.';
+
+        verifyBtn.style.display = 'block';
+        verifyBtn.className = 'btn btn-primary';
+        verifyBtn.textContent = 'Conectar con Facebook';
         verifyBtn.onclick = async () => {
-          verifyBtn.textContent = 'Conectando...';
+          verifyBtn.textContent = 'Iniciando sesión en Meta...';
           try {
             const res = await fetch('/api/facebook/connect', {
               method: 'POST',
@@ -90,37 +107,23 @@
             if (data.redirectUrl) {
               window.location.href = data.redirectUrl;
             } else {
-              alert('Error al obtener URL de login de Meta.');
+              alert('Error al obtener URL de inicio de sesión de Meta.');
             }
           } catch (err) {
             alert('Error al conectar con la API de Facebook.');
           } finally {
-            verifyBtn.textContent = '2. Conectar con Facebook 🚀';
+            verifyBtn.textContent = 'Conectar con Facebook';
           }
         };
       }
 
       // =========================================================================
-      // PASO 1: POST AUTH (Viene del OAuth callback de Meta)
-      // =========================================================================
-      else if (step === 'procesar_excel') {
-        loaderEl.style.display = 'none';
-        titleEl.textContent = 'Conexión Exitosa con Meta';
-        bodyEl.textContent = 'Tu cuenta ha sido vinculada correctamente. Generando borrador e inyectando datos...';
-        actionBtn.style.display = 'block';
-        actionBtn.textContent = 'Ir a Carga de Archivo';
-        actionBtn.onclick = () => {
-          window.location.href = `/index.html?step=procesar_excel&sessionId=${sessionId || ''}`;
-        };
-      }
-
-      // =========================================================================
-      // PASO 2: ACTIVAR CAMPAÑA Y REDIRIGIR A CLIENT.HTML (DASHBOARD EN VERIFICACIÓN)
+      // PASO 2: ACTIVAR CAMPAÑA Y REDIRIGIR A CLIENT.HTML (EN VERIFICACIÓN)
       // =========================================================================
       else if (step === 'activar_campana') {
         loaderEl.style.display = 'none';
-        titleEl.textContent = '🚀 Borrador Generado en Meta';
-        bodyEl.textContent = 'Abre Meta Ads Manager para publicar creativos y presupuesto. Una vez publicado, pasará a revisión de Meta y tu Dashboard se activará.';
+        titleEl.textContent = 'Borrador Generado en Meta';
+        bodyEl.textContent = 'Abre Meta Ads Manager para publicar creativos y presupuesto. Una vez publicado, pasará a revisión y tu Dashboard se activará.';
         
         actionBtn.style.display = 'inline-block';
         actionBtn.className = 'btn btn-secondary';
@@ -146,7 +149,6 @@
         verifyBtn.onclick = async () => {
           verifyBtn.textContent = 'Registrando estado...';
           try {
-            // Notificar activación al backend en background
             await fetch('/api/facebook/activar-campana', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -156,7 +158,7 @@
             console.warn("Continuando hacia el dashboard...");
           }
 
-          // Redirección inmediata a client.html en estado de revisión/verificación
+          // Redirección directa a client.html
           window.location.href = `/client.html?sessionId=${sessionId || ''}&campaignId=${campaignId || ''}&status=verifying`;
         };
       }
@@ -168,7 +170,7 @@
         localStorage.setItem('sodie_payment_completed', 'true');
 
         if (typeof fbq === 'function') {
-          fbq('track', 'Purchase', { value: 2000.00, currency: 'USD', content_name: 'Reserva Slot SODIE' });
+          fbq('track', 'Purchase', { value: 3000.00, currency: 'USD', content_name: 'Reserva Slot SODIE' });
         }
 
         titleEl.textContent = '¡Pago Confirmado!';
