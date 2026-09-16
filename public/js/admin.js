@@ -1,10 +1,15 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Versión Corregida Sin Errores de Sintaxis ni Bloqueos de Sesión
+ * Versión Dinámica Sincronizada con Configuración Global
  */
 
-const API_URL = "https://api.sodie.app";
-const ADMIN_KEY = "sodie_202623555";
+// Helper para obtener la base URL limpia en cada llamada
+function getBaseUrl() {
+  if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
+    return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
+  }
+  return window.location.origin;
+}
 
 // Estado global de temporizadores
 const ADMIN_STATE = {
@@ -17,11 +22,10 @@ const ADMIN_STATE = {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🟢 SODIE Admin Engine Inicializado");
 
-  // Si se decide usar el login por JS, verificar estado
+  // Verificar sesión persistente local
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
   } else {
-    // Si el HTML ya tiene el dashboard visible manualmente (modo dev), no lo ocultamos
     const dashView = document.getElementById("admin-dashboard-view");
     if (dashView && dashView.style.display === "block") {
       sodieIniciarCronometro24h();
@@ -50,34 +54,59 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================================
-   1. AUTENTICACIÓN Y SESIÓN (EXPLICITAMENTE GLOBAL)
+   1. AUTENTICACIÓN Y SESIÓN SEGURA (CONSULTA AL BACKEND)
    ========================================================================== */
-window.sodieValidarPasswordDirecta = function() {
-  console.log("👉 Validando contraseña admin...");
+window.sodieValidarPasswordDirecta = async function() {
+  console.log("👉 Validando contraseña admin con el servidor...");
 
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
-  const passIngresada = inputPass ? inputPass.value.trim() : "";
+  const password = inputPass ? inputPass.value.trim() : "";
 
-  if (passIngresada === ADMIN_KEY) {
-    console.log("✅ Acceso concedido");
-
+  if (!password) {
     if (errorElem) {
-      errorElem.innerText = "✅ Acceso concedido.";
-      errorElem.style.color = "#00FFCC";
+      errorElem.innerText = "❌ Ingresa una contraseña";
+      errorElem.style.color = "#FF3366";
       errorElem.style.display = "block";
     }
+    return;
+  }
 
-    sessionStorage.setItem("sodie_admin_session", "active");
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
 
-    setTimeout(() => {
-      mostrarDashboard();
-    }, 200);
+    const data = await response.json();
 
-  } else {
-    console.log("❌ Clave incorrecta");
+    if (data.success) {
+      console.log("✅ Acceso concedido");
+      if (errorElem) {
+        errorElem.innerText = "✅ Acceso concedido.";
+        errorElem.style.color = "#00FFCC";
+        errorElem.style.display = "block";
+      }
+
+      sessionStorage.setItem("sodie_admin_session", "active");
+
+      setTimeout(() => {
+        mostrarDashboard();
+      }, 200);
+
+    } else {
+      console.log("❌ Clave incorrecta");
+      if (errorElem) {
+        errorElem.innerText = `❌ ${data.message || 'Contraseña incorrecta'}`;
+        errorElem.style.color = "#FF3366";
+        errorElem.style.display = "block";
+      }
+    }
+  } catch (err) {
+    console.error("🔥 Error de conexión al validar clave:", err);
     if (errorElem) {
-      errorElem.innerText = "❌ Contraseña incorrecta";
+      errorElem.innerText = "❌ Error de conexión con el servidor";
       errorElem.style.color = "#FF3366";
       errorElem.style.display = "block";
     }
@@ -96,7 +125,6 @@ function mostrarDashboard() {
 }
 
 window.sodieCerrarSesionAdmin = function() {
-  // ERROR CORREGIDO: Se arregló rmoveItem por removeItem
   sessionStorage.removeItem("sodie_admin_session");
   window.location.reload();
 };
@@ -104,7 +132,6 @@ window.sodieCerrarSesionAdmin = function() {
 /* ==========================================================================
    2. CRONÓMETROS Y TEMPORIZADORES
    ========================================================================== */
-
 function actualizarDisplayCronometro() {
   const timerDisplay = document.getElementById('admin-timer-display');
   if (!timerDisplay) return;
@@ -221,7 +248,7 @@ function animateUploadProgress(type, callback) {
 }
 
 /* ==========================================================================
-   4. LISTENERS Y ACCIONES BACKEND
+   4. LISTENERS Y ACCIONES BACKEND DINÁMICAS
    ========================================================================== */
 function initListeners() {
   const btnVideo = document.getElementById('btn-upload-video');
@@ -276,7 +303,7 @@ function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
     onError(new Error('Error de conexión en red'));
   });
 
-  xhr.open('POST', endpoint, true);
+  xhr.open('POST', `${getBaseUrl()}${endpoint}`, true);
   xhr.send(formData);
 }
 
@@ -291,7 +318,7 @@ async function sodieSubirVideoAdmin() {
   formData.append('video', fileInput.files[0]);
 
   try {
-    const res = await fetch('/api/v1/media/upload-video', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload-video`, {
       method: 'POST',
       body: formData
     });
@@ -319,7 +346,7 @@ async function sodieSubirContratoAdmin(fileInputId = 'admin-contract-file') {
   formData.append('contract', fileInput.files[0]);
 
   try {
-    const res = await fetch('/api/v1/media/upload-contract', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload-contract`, {
       method: 'POST',
       body: formData
     });
@@ -368,7 +395,7 @@ async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-admin-activate-campaign');
   if (btn) btn.textContent = 'Activando en Meta...';
   try {
-    const res = await fetch('/api/v1/campaigns/activate', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/campaigns/activate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'ACTIVE', triggeredBy: 'ADMIN', timestamp: Date.now() })
@@ -386,7 +413,7 @@ async function sodieConfirmarActivacion() {
 
 async function adminActivarWaitlist() {
   try {
-    const res = await fetch('/api/v1/waitlist/open', { method: 'POST' });
+    const res = await fetch(`${getBaseUrl()}/api/v1/waitlist/open`, { method: 'POST' });
     const data = await res.json();
 
     if (data.success) {
@@ -407,7 +434,7 @@ async function sodieCerrarListaEspera() {
   const btn = document.getElementById('btn-close-waitlist');
   if (btn) btn.textContent = 'Procesando Cierre...';
   try {
-    const res = await fetch('/api/v1/waitlist/close', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/waitlist/close`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ closed: true, triggerV4Timer: true, v4TimerDays: 14, timestamp: Date.now() })
