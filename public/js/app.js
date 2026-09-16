@@ -1,7 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Final Sincronizada con Backend Dinámico, confirmacion.html
- * y Temporizador V4 Gigante (14 días con Microsegundos).
+ * Versión Sincronizada con Meta CAPI, Lista de Espera y Contador Dinámico de Cupos.
  */
 
 // Helper para obtener la base URL limpia en cada llamada
@@ -20,13 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initChatEngine();
   initWebAuthnBiometrics();
   handleUrlRedirects();
-  initTimer24h();
-  checkWaitlistClosedStatus(); // Sincronización automática de V4
+  initTimer18d();
+  initPaymentFlowEvents();
+  initWaitlistEvents();
 
   // Configurar enlace de descarga del Contrato PDF
   const btnDescargarContrato = document.getElementById('btn-download-contract');
   if (btnDescargarContrato) {
-    btnDescargarContrato.href = '/contract/contrato.pdf';
+    btnDescargarContrato.href = 'contrato-sodie.pdf';
     btnDescargarContrato.setAttribute('download', 'Contrato_SODIE.pdf');
     btnDescargarContrato.setAttribute('target', '_blank');
   }
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (demoVideo) {
     const source = demoVideo.querySelector('source');
     if (source) {
-      source.src = '/video/video_demo.mp4';
+      source.src = 'sodie-demo-borrador.mp4';
       demoVideo.load();
     }
   }
@@ -130,31 +130,53 @@ function initSSEMetrics() {
 }
 
 /* ==========================================================================
-   3. CUPOS & DISPONIBILIDAD (/api/clientes/disponibles)
+   3. CONTADOR DE CUPOS & DISPONIBILIDAD DINÁMICA DE PRECIOS
    ========================================================================== */
 async function checkAvailableSlots() {
   try {
     const res = await fetch(`${getBaseUrl()}/api/clientes/disponibles`);
-    if (!res.ok) throw new Error('Error al obtener cupos');
-    const data = await res.json();
+    let slots = 2;
 
-    const cuposVal = document.getElementById('metric-cupos-val');
-    const cuposBadge = document.getElementById('cupos-count-badge');
-    const pfStandard = document.getElementById('pf-standard-content');
-    const pfWaitlist = document.getElementById('pf-waitlist-replacement');
-
-    const slots = data.disponibles !== undefined ? data.disponibles : 2;
-
-    if (cuposVal) cuposVal.textContent = slots;
-    if (cuposBadge) cuposBadge.textContent = slots > 0 ? `solo ${slots} cupos disponibles` : 'agotado';
-
-    if (slots <= 0) {
-      if (pfStandard) pfStandard.classList.add('hidden');
-      if (pfWaitlist) pfWaitlist.classList.remove('hidden');
-      showToast('Cupos Agotados', 'Acceso directo cerrado. Lista de espera activada.');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.disponibles !== undefined) slots = data.disponibles;
     }
+
+    actualizarInterfazCupos(slots);
   } catch (error) {
-    console.error('Error backend cupos:', error);
+    console.warn('Error obteniendo cupos del servidor. Usando valor por defecto.', error);
+    actualizarInterfazCupos(2);
+  }
+}
+
+function actualizarInterfazCupos(slots) {
+  const cuposVal = document.getElementById('metric-cupos-val');
+  const cuposSub = document.getElementById('metric-cupos-sub');
+  const cuposBadge = document.getElementById('cupos-count-badge');
+  const pfActive = document.getElementById('pf-active-payment-flow');
+  const pfWaitlist = document.getElementById('pf-waitlist-block');
+
+  if (cuposVal) cuposVal.textContent = slots;
+
+  if (slots >= 2) {
+    // Cupo 1 y 2 -> $3.000 / Hora 0
+    if (cuposSub) cuposSub.textContent = 'Cupo 1 y 2 ($3.000)';
+    if (cuposBadge) cuposBadge.textContent = 'solo 2 cupos disponibles';
+    if (pfActive) pfActive.classList.remove('hidden');
+    if (pfWaitlist) pfWaitlist.classList.add('hidden');
+  } else if (slots === 1) {
+    // Cupo 3 (Cliente 4) -> $5.000 / Hora 0
+    if (cuposSub) cuposSub.textContent = 'Último Cupo ($5.000)';
+    if (cuposBadge) cuposBadge.textContent = '¡ÚLTIMO CUPO DISPONIBLE!';
+    if (pfActive) pfActive.classList.remove('hidden');
+    if (pfWaitlist) pfWaitlist.classList.add('hidden');
+  } else {
+    // 0 Cupos -> Activa Lista de Espera automáticamente
+    if (cuposSub) cuposSub.textContent = 'Agotado';
+    if (cuposBadge) cuposBadge.textContent = 'cupos agotados';
+    if (pfActive) pfActive.classList.add('hidden');
+    if (pfWaitlist) pfWaitlist.classList.remove('hidden');
+    showToast('Cupos Agotados', 'Acceso directo cerrado. Lista de espera activada.');
   }
 }
 
@@ -163,14 +185,18 @@ async function checkAvailableSlots() {
    ========================================================================== */
 async function initFacebookMetrics() {
   const elSpend = document.getElementById('metric-spend');
+  const elSpendStatus = document.getElementById('metric-spend-status');
   const elReach = document.getElementById('metric-reach');
+  const elReachStatus = document.getElementById('metric-reach-status');
   const elVisitors = document.getElementById('metric-visitors');
   const elActivos = document.getElementById('metric-activos');
   const elPayClicks = document.getElementById('metric-pay-clicks');
 
   const setZeroMetrics = () => {
-    if (elSpend) elSpend.textContent = '0$';
+    if (elSpend) elSpend.textContent = '$0';
+    if (elSpendStatus) elSpendStatus.textContent = 'Esperando Conexión';
     if (elReach) elReach.textContent = '0';
+    if (elReachStatus) elReachStatus.textContent = '0.00';
     if (elVisitors) elVisitors.textContent = '0';
     if (elActivos) elActivos.textContent = '0';
     if (elPayClicks) elPayClicks.textContent = '0';
@@ -182,8 +208,10 @@ async function initFacebookMetrics() {
     const data = await res.json();
 
     if (data && data.hasActiveCampaign) {
-      if (elSpend) elSpend.textContent = `${data.spend || 0}$`;
+      if (elSpend) elSpend.textContent = `$${data.spend || 0}`;
+      if (elSpendStatus) elSpendStatus.textContent = 'Conectado Meta Ads';
       if (elReach) elReach.textContent = (data.reach || 0).toLocaleString();
+      if (elReachStatus) elReachStatus.textContent = (data.impressions || 0).toLocaleString();
       if (elVisitors) elVisitors.textContent = data.visitors || 0;
       if (elActivos) elActivos.textContent = data.activos || 0;
       if (elPayClicks) elPayClicks.textContent = data.payClicks || 0;
@@ -196,7 +224,7 @@ async function initFacebookMetrics() {
 }
 
 /* ==========================================================================
-   5. CHAT & ASISTENTE IA2 CON FRAGMENTACIÓN DE MENSAJES LARGOS (/api/v1/chat/message)
+   5. CHAT & ASISTENTE IA2 (/api/v1/chat/message)
    ========================================================================== */
 function initChatEngine() {
   const sendBtn = document.getElementById('chat-send');
@@ -293,106 +321,112 @@ async function sendChatMessage(messageText, payload = null) {
     loadingBubble.remove();
     const errorBubble = document.createElement('div');
     errorBubble.className = 'incoming-simple';
-    errorBubble.innerHTML = `<p class="fuchsia-txt">Selecciona tu reserva ($1,000) para habilitar la carga de audiencias.</p>`;
+    errorBubble.innerHTML = `<p class="fuchsia-txt">Selecciona tu reserva para habilitar la carga de audiencias e inyección.</p>`;
     chatBody.appendChild(errorBubble);
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 }
 
 /* ==========================================================================
-   6. FLUJO PASO A PASO & BACKEND CONECTADO
+   6. EVENTOS DE SECCIÓN DE PAGO (PAGO -> CONTRATO -> EXCEL -> META CAPI)
    ========================================================================== */
+function initPaymentFlowEvents() {
+  const btnIniciar = document.getElementById('btn-iniciar-pago');
+  const btnProcesar = document.getElementById('btn-procesar-pago-pasarela');
+  const btnSubirContrato = document.getElementById('btn-client-send-contract');
+  const btnSubirExcel = document.getElementById('btn-client-upload-file');
 
-async function sodieProcesarPasoPago() {
-  const age = document.getElementById('pay-age')?.value;
-  const country = document.getElementById('pay-country')?.value;
-  const city = document.getElementById('pay-city')?.value;
-  const zip = document.getElementById('pay-zip')?.value;
-  const phone = document.getElementById('pay-phone')?.value;
-
-  if (!age || !country || !city || !zip || !phone) {
-    showToast('Campos Incompletos', 'Completa la información de facturación.', true);
-    return;
-  }
-document.getElementById('btnPagar').addEventListener('click', async (e) => {
-  e.preventDefault();
-
-  const fbUserIdInput = document.getElementById('fbUserId');
-  const fbUserId = fbUserIdInput ? fbUserIdInput.value.trim() : '';
-
-  // ⛔ BLOQUEO DE SEGURIDAD: Si no ingresó el usuario, detiene el pago al instante
-  if (!fbUserId) {
-    alert('⚠️ Debes ingresar tu Usuario o ID de Facebook para poder continuar con el pago.');
-    fbUserIdInput.focus();
-    fbUserIdInput.style.borderColor = 'red';
-    return; // Cancela la ejecución del pago
-  }
-
-  // Restaurar estilo si está correcto
-  fbUserIdInput.style.borderColor = '#ccc';
-
-  // 🚀 Proceder con el Pago y enviar la data al backend
-  try {
-    const response = await fetch('/api/facebook/capi', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionId: window.sessionId || localStorage.getItem('sessionId'),
-        eventName: 'Purchase',
-        fbUserId: fbUserId // Se envía al backend para la invitación automática
-      })
+  // Transición del paso intro al formulario
+  if (btnIniciar) {
+    btnIniciar.addEventListener('click', () => {
+      document.getElementById('pf-intro-card')?.classList.add('hidden');
+      const stepBilling = document.getElementById('pf-step-billing');
+      if (stepBilling) {
+        stepBilling.classList.remove('hidden');
+        stepBilling.scrollIntoView({ behavior: 'smooth' });
+      }
     });
-
-    const data = await response.json();
-    if (data.redirectUrl) {
-      window.location.href = data.redirectUrl;
-    }
-  } catch (error) {
-    console.error('Error al procesar el pago:', error);
   }
-});
-  
-  showToast('Iniciando Pago', 'Procesando transacción con el servidor...');
 
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/payments/checkout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ age, country, city, zip, phone, amount: 1000 })
+  // Procesamiento del Pago + Envío a CAPI Facebook
+  if (btnProcesar) {
+    btnProcesar.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const age = document.getElementById('pay-age')?.value;
+      const country = document.getElementById('pay-country')?.value;
+      const city = document.getElementById('pay-city')?.value;
+      const zip = document.getElementById('pay-zip')?.value;
+      const phone = document.getElementById('pay-phone')?.value;
+      const fbUserIdInput = document.getElementById('fbUserId');
+      const fbUserId = fbUserIdInput ? fbUserIdInput.value.trim() : '';
+
+      // Validación de campos
+      if (!age || !country || !city || !zip || !phone) {
+        showToast('Campos Incompletos', 'Completa la información de facturación.', true);
+        return;
+      }
+
+      // Bloqueo estricto de Facebook ID
+      if (!fbUserId) {
+        showToast('Facebook Requerido', 'Debes ingresar tu Usuario o ID de Facebook.', true);
+        fbUserIdInput.focus();
+        fbUserIdInput.style.borderColor = '#ff007a';
+        return;
+      }
+
+      fbUserIdInput.style.borderColor = 'rgba(255,255,255,0.15)';
+      showToast('Procesando Pago', 'Conectando con la pasarela y Meta CAPI...');
+
+      try {
+        // 1. Checkout del Pago
+        const payRes = await fetch(`${getBaseUrl()}/api/v1/payments/checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ age, country, city, zip, phone, fbUserId, amount: 3000 })
+        });
+
+        // 2. Notificación CAPI Facebook
+        await fetch(`${getBaseUrl()}/api/facebook/capi`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: window.sessionId || localStorage.getItem('sessionId') || 'SODIE-SESSION',
+            eventName: 'Purchase',
+            fbUserId: fbUserId
+          })
+        });
+
+        showToast('Pago Aprobado', 'Transacción completada. Habilitando contrato.');
+
+        // Oculta billing y habilita contrato
+        document.getElementById('pf-step-billing')?.classList.add('hidden');
+        const stepContract = document.getElementById('pf-step-contract');
+        if (stepContract) {
+          stepContract.classList.remove('hidden');
+          stepContract.scrollIntoView({ behavior: 'smooth' });
+        }
+
+      } catch (error) {
+        console.error('Error de pago / CAPI:', error);
+        showToast('Error de Pago', 'No se pudo procesar la transacción.', true);
+      }
     });
-
-    if (!res.ok) throw new Error('Fallo en la pasarela de pago');
-    await res.json();
-
-    showToast('Pago Aprobado', 'Desbloqueando pasos de contrato y audiencia.');
-    
-    document.getElementById('step-4-contract-flow')?.classList.remove('hidden');
-    document.getElementById('step-4-contract-flow')?.scrollIntoView({ behavior: 'smooth' });
-
-  } catch (error) {
-    console.error('Error de pago:', error);
-    showToast('Error de Pago', 'No se pudo verificar la transacción en el servidor.', true);
   }
-}
 
-async function obtenerContratoPDF() {
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/media/contract`);
-    const data = await res.json();
+  // Envío de Contrato Firmado
+  if (btnSubirContrato) {
+    btnSubirContrato.addEventListener('click', sodieSubirContrato);
+  }
 
-    if (data.success && data.contractUrl) {
-      window.open(data.contractUrl, '_blank');
-    }
-  } catch (err) {
-    console.error('Error abriendo el contrato:', err);
+  // Carga del Excel de Compradores
+  if (btnSubirExcel) {
+    btnSubirExcel.addEventListener('click', sodieProcesarExcelYConectarFB);
   }
 }
 
 async function sodieSubirContrato() {
   const fileInput = document.getElementById('client-contract-file-input');
-  const pctLabel = document.getElementById('client-contract-pct');
-  const btnSubir = document.getElementById('btn-client-send-contract');
-
   if (!fileInput || !fileInput.files[0]) {
     showToast('Archivo Requerido', 'Selecciona el PDF de tu contrato firmado.', true);
     return;
@@ -401,8 +435,7 @@ async function sodieSubirContrato() {
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
 
-  if (pctLabel) pctLabel.textContent = '50%';
-  if (btnSubir) btnSubir.disabled = true;
+  showToast('Subiendo Contrato', 'Validando archivo firmado...');
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/evaluator/contract`, { 
@@ -412,15 +445,10 @@ async function sodieSubirContrato() {
 
     if (!res.ok) throw new Error('Error al procesar contrato');
 
-    if (pctLabel) pctLabel.textContent = '100%';
-    if (btnSubir) btnSubir.disabled = false;
-
     showToast('Contrato Confirmado', 'Procede a subir tu lista de compradores (Excel).');
     
-    const stepContract = document.getElementById('step-4-contract-flow');
-    const stepExcel = document.getElementById('step-5-excel-flow');
-
-    if (stepContract) stepContract.classList.add('hidden');
+    document.getElementById('pf-step-contract')?.classList.add('hidden');
+    const stepExcel = document.getElementById('pf-step-excel');
     if (stepExcel) {
       stepExcel.classList.remove('hidden');
       stepExcel.scrollIntoView({ behavior: 'smooth' });
@@ -428,24 +456,21 @@ async function sodieSubirContrato() {
 
   } catch (error) {
     console.error('Error contrato:', error);
-    if (btnSubir) btnSubir.disabled = false;
     showToast('Error', 'No se pudo procesar el archivo en el servidor.', true);
   }
 }
 
-async function sodieCrearBorrador() {
+async function sodieProcesarExcelYConectarFB() {
   const fileInput = document.getElementById('client-file-input');
-  const pctLabel = document.getElementById('client-file-pct');
-
   if (!fileInput || !fileInput.files[0]) {
-    showToast('Archivo Requerido', 'Selecciona tu archivo de audiencias.', true);
+    showToast('Archivo Requerido', 'Selecciona tu archivo Excel / CSV de compradores.', true);
     return;
   }
 
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
 
-  if (pctLabel) pctLabel.textContent = '45%';
+  showToast('Procesando Audiencia', 'Creando borrador de campaña...');
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, { 
@@ -455,49 +480,86 @@ async function sodieCrearBorrador() {
 
     if (!res.ok) throw new Error('Error subiendo audiencia');
 
-    if (pctLabel) pctLabel.textContent = '100%';
-    showToast('Audiencia Creada', 'Todo listo para conectar Meta Ads.');
-    
-    document.getElementById('step-6-fb-flow')?.classList.remove('hidden');
-    document.getElementById('step-6-fb-flow')?.scrollIntoView({ behavior: 'smooth' });
+    showToast('Borrador Creado', 'Redirigiendo a la confirmación de campaña...');
+
+    // Redirección final a confirmacion.html
+    setTimeout(() => {
+      window.location.href = 'confirmacion.html?step=activar_campana&status=ready';
+    }, 1200);
 
   } catch (error) {
     console.error('Error audiencia:', error);
-    showToast('Error', 'Fallo al subir el archivo de audiencia.', true);
-  }
-}
-
-async function sodieConnectFacebook() {
-  showToast('Meta Ads', 'Conectando cuenta publicitaria...');
-
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/facebook/connect`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        redirect_uri: window.location.origin + '/confirmacion.html?step=activar_campana' 
-      })
-    });
-
-    if (!res.ok) throw new Error('Fallo al conectar con Facebook');
-    const data = await res.json();
-
-    if (data.redirectUrl) {
-      window.location.href = data.redirectUrl;
-    } else {
-      const campId = data.campaignId || 'CAMP-SODIE-9982';
-      const actId = data.actId || 'act_12345';
-      window.location.href = `/confirmacion.html?step=activar_campana&campaignId=${campId}&actId=${actId}`;
-    }
-
-  } catch (error) {
-    console.error('Error conectando Facebook:', error);
-    window.location.href = '/confirmacion.html?step=activar_campana&campaignId=CAMP-SODIE-9982&actId=act_12345';
+    showToast('Error', 'Fallo al procesar el archivo de audiencia.', true);
   }
 }
 
 /* ==========================================================================
-   7. LISTA DE ESPERA, BIOMETRÍA Y TEMPORIZADOR V4 (14 DÍAS)
+   7. LISTA DE ESPERA (REEMPLAZO DE PAGO AL AGOTAR CUPOS)
+   ========================================================================== */
+function initWaitlistEvents() {
+  const btnWaitlist = document.getElementById('btn-waitlist-access');
+
+  if (btnWaitlist) {
+    btnWaitlist.addEventListener('click', async () => {
+      const brand = document.getElementById('wl-brand-name')?.value;
+      const email = document.getElementById('wl-email')?.value;
+      const phone = document.getElementById('wl-phone')?.value;
+
+      if (!brand || !email || !phone) {
+        showToast('Campos Incompletos', 'Completa los campos obligatorios para unirte.', true);
+        return;
+      }
+
+      showToast('Enviando Registro', 'Guardando tu posición en la Lista de Espera...');
+
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/v1/waitlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ company: brand, email, phone })
+        });
+
+        if (!res.ok) throw new Error('Error guardando en lista de espera');
+
+        showToast('Acceso Confirmado', 'Te has unido correctamente a la Lista de Espera.');
+        
+        // Deshabilita el botón tras el registro
+        btnWaitlist.disabled = true;
+        btnWaitlist.textContent = 'REGISTRADO EN LISTA DE ESPERA ✓';
+        btnWaitlist.style.background = 'rgba(0, 255, 204, 0.2)';
+
+      } catch (error) {
+        console.error('Error lista de espera:', error);
+        showToast('Error', 'No se pudo completar el registro.', true);
+      }
+    });
+  }
+}
+
+/* ==========================================================================
+   8. CRONÓMETRO REGRESIVO DE 18 DÍAS
+   ========================================================================== */
+function initTimer18d() {
+  const timerDisplay = document.getElementById('timer-main-display');
+  if (!timerDisplay) return;
+
+  // 18 días en segundos (18 * 24 * 3600 = 1,555,200 segundos)
+  let totalSeconds = 18 * 24 * 3600;
+
+  setInterval(() => {
+    if (totalSeconds <= 0) return;
+    totalSeconds--;
+
+    const totalHours = Math.floor(totalSeconds / 3600).toString().padStart(3, '0');
+    const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+
+    timerDisplay.textContent = `${totalHours}:${m}:${s}`;
+  }, 1000);
+}
+
+/* ==========================================================================
+   9. BIOMETRÍA Y REDIRECCIONES
    ========================================================================== */
 function initWebAuthnBiometrics() {
   const bioBtn = document.getElementById('btn-register-biometrics');
@@ -552,94 +614,6 @@ function initWebAuthnBiometrics() {
   });
 }
 
-async function sodieEnviarListaEspera() {
-  const name = document.getElementById('v4-user-name')?.value;
-  const company = document.getElementById('v4-user-company')?.value;
-  const email = document.getElementById('waitlist-email-input')?.value;
-  const password = document.getElementById('v4-user-password')?.value;
-
-  if (!name || !company || !email || !password) {
-    showToast('Campos Incompletos', 'Ingresa todos los datos requeridos.', true);
-    return;
-  }
-
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/waitlist`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, company, email, password, tier: '5K_MONTHLY' })
-    });
-
-    if (!res.ok) throw new Error('Error al registrar en lista de espera');
-
-    document.getElementById('waitlist-success-msg')?.classList.remove('hidden');
-    showToast('Lista de Espera', 'Te has unido exitosamente.');
-
-  } catch (error) {
-    console.error('Error lista espera:', error);
-    showToast('Error', 'No se pudo guardar la solicitud en el servidor.', true);
-  }
-}
-
-async function checkWaitlistClosedStatus() {
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/waitlist/status`);
-    if (!res.ok) return;
-    const data = await res.json();
-
-    if (data.closed || data.triggerV4Timer) {
-      const targetTime = data.targetTimestamp || (Date.now() + 14 * 24 * 3600 * 1000);
-      activarTemporizadorGiganteV4(targetTime);
-    }
-  } catch (err) {
-    console.warn('Endpoint de lista de espera no disponible, listo para evento.');
-  }
-}
-
-function activarTemporizadorGiganteV4(targetTimestamp) {
-  const v4Container = document.getElementById('v4-giant-timer-container');
-  const v4TimerDisplay = document.getElementById('v4-giant-timer-digits');
-  const pfWaitlist = document.getElementById('pf-waitlist-replacement');
-  const pfStandard = document.getElementById('pf-standard-content');
-
-  if (pfStandard) pfStandard.classList.add('hidden');
-  if (pfWaitlist) pfWaitlist.classList.add('hidden');
-  if (v4Container) v4Container.classList.remove('hidden');
-
-  const updateTimer = () => {
-    const now = performance.timeOrigin + performance.now();
-    const remainingMs = targetTimestamp - now;
-
-    if (remainingMs <= 0) {
-      if (v4TimerDisplay) v4TimerDisplay.textContent = '00d : 00h : 00m : 00s : 000000us';
-      return;
-    }
-
-    const days = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-    const microseconds = Math.floor((remainingMs % 1000) * 1000);
-
-    const dStr = days.toString().padStart(2, '0');
-    const hStr = hours.toString().padStart(2, '0');
-    const mStr = minutes.toString().padStart(2, '0');
-    const sStr = seconds.toString().padStart(2, '0');
-    const usStr = microseconds.toString().padStart(6, '0');
-
-    if (v4TimerDisplay) {
-      v4TimerDisplay.textContent = `${dStr}d : ${hStr}h : ${mStr}m : ${sStr}s : ${usStr}us`;
-    }
-
-    requestAnimationFrame(updateTimer);
-  };
-
-  requestAnimationFrame(updateTimer);
-}
-
-/* ==========================================================================
-   8. MANEJO DE ESTADOS DE REGRESO DIRECTOS AL INDEX
-   ========================================================================== */
 function handleUrlRedirects() {
   const urlParams = new URLSearchParams(window.location.search);
   const status = urlParams.get('status');
@@ -647,35 +621,14 @@ function handleUrlRedirects() {
   if (status === 'active' || urlParams.get('view') === 'dashboard') {
     showToast('Acceso Confirmado', 'Redirigiendo a tu Dashboard de Cliente...');
     setTimeout(() => {
-      window.location.href = '/client.html';
+      window.location.href = 'client.html';
     }, 1200);
   }
 }
 
 /* ==========================================================================
-   9. TIMER REGRESIVO 24H
+   10. DISPARADOR SECRETO DE 5 CLICS (ADMIN)
    ========================================================================== */
-function initTimer24h() {
-  const timerDisplay = document.getElementById('timer-main-display');
-  if (!timerDisplay) return;
-
-  let totalSeconds = 24 * 3600;
-
-  setInterval(() => {
-    if (totalSeconds <= 0) return;
-    totalSeconds--;
-
-    const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-    const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-    const s = (totalSeconds % 60).toString().padStart(2, '0');
-
-    timerDisplay.textContent = `${h}:${m}:${s}`;
-  }, 1000);
-}
-
-// ==========================================
-// DISPARADOR SECRETO DE 5 CLICS (REPARADO)
-// ==========================================
 (function initAdminTriggerDirect() {
   let adminToques = 0;
   let adminTimer = null;
