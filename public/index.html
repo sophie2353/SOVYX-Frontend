@@ -25,7 +25,6 @@
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
   /></noscript>
-  <!-- End Meta Pixel Code -->
 </head>
 <body>
 
@@ -44,7 +43,7 @@
   <div id="view-splash" class="full-screen">
     <div class="splash-content">
       <div class="logo-wrapper">
-        <h1 class="logo-title"><span class="serif-s">S</span>ODIE</h1>
+        <h1 class="logo-title"><span class="serif-s" style="color: #ff007a;">S</span>ODIE</h1>
       </div>
       <div class="hud-percentage-wrapper">
         <span id="splash-pct" class="splash-pct-num">0%</span>
@@ -99,65 +98,65 @@
   </div>
 
   <main id="app-dashboard" class="dashboard-container">
-     <header class="dash-header">
-  <div class="dash-header-left">
-    <!-- Le agregamos onclick="sodieContarToquesAdmin()" directo al elemento -->
-    <div id="sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; user-select: none; touch-action: manipulation; display: inline-block; padding: 5px;">
-      <span class="logo-title" style="font-size: 1.4rem; font-weight: bold; color: #fff;"><span style="color: #ff007a;">S</span>ODIE</span>
-    </div>
-  </div>
-  <div class="dash-header-right">
-    <button type="button" class="btn-icon" id="btn-sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; touch-action: manipulation;">🦁</button>
-  </div>
-</header>
-    
-<!-- Opción A: Botón visible o en el menú/cabecera -->
-<a href="admin.html" style="color: #fff; text-decoration: none; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-weight: bold;">
-  Admin
-</a>
-    <!-- 1. MÉTRICAS -->
+    <header class="dash-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+      <div class="dash-header-left">
+        <div id="sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; user-select: none; touch-action: manipulation; display: inline-block;">
+          <h1 class="logo-title" style="font-size: 1.8rem; font-weight: 800; margin: 0; color: #fff; letter-spacing: 1px;">
+            <span style="color: #ff007a;">S</span>ODIE
+          </h1>
+        </div>
+      </div>
+      <div class="dash-header-right" style="display: flex; align-items: center; gap: 10px;">
+        <a href="admin.html" style="color: #fff; text-decoration: none; padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; font-weight: 600; font-size: 0.85rem;">
+          Admin
+        </a>
+        <button type="button" class="btn-icon" id="btn-sodie-logo-trigger" onclick="sodieContarToquesAdmin()" style="cursor: pointer; background: transparent; border: none; font-size: 1.2rem;">🦁</button>
+      </div>
+    </header>
+
+    <!-- 1. MÉTRICAS (INICIALIZADAS EN 0) -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas</h3>
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Inversión</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-spend">38$</div>
+          <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-spend">$0</div>
           <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,20 Q50,50 100,25 T200,40" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Presupuesto Prueba 1</span><span class="fuchsia-txt"></span></div>
+          <div class="card-foot"><span>Estado Meta</span><span class="fuchsia-txt">En espera</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Alcance</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-reach">2.000</div>
+          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-reach">0</div>
           <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,45 Q50,10 100,35 T200,15" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
-          </div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Visitas</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-visitors">82</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 Q50,10 100,20 T200,5" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
-          </div>
-          <div class="card-foot"><span></span><span class="mint-txt">En vivo</span></div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Activos</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-activos">3</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,40 Q50,20 100,30 T200,10" fill="none" stroke="#00ffcc" stroke-width="3" /></svg>
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-pay-clicks">8</div>
+          <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-visitors">0</div>
           <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,35 Q50,15 100,25 T200,8" fill="none" stroke="#d946ef" stroke-width="3" /></svg>
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
+          </div>
+          <div class="card-foot"><span></span><span class="mint-txt">Pendiente</span></div>
+        </article>
+
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-activos">0</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
+          </div>
+        </article>
+
+        <article class="glass-card-dash metric-square">
+          <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots">•••</span></div>
+          <div class="card-value" id="metric-pay-clicks">0</div>
+          <div class="card-chart">
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#d946ef" stroke-width="2" /></svg>
           </div>
         </article>
 
@@ -167,7 +166,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,10 Q50,30 100,20 T200,50" fill="none" stroke="#d946ef" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span id="metric-cupos-label">Exclusividad</span><span id="metric-cupos-sub" class="fuchsia-txt">Solo 2</span></div>
+          <div class="card-foot"><span id="metric-cupos-label">Exclusividad</span><span id="metric-cupos-sub" class="fuchsia-txt">Cupo 1 y 2</span></div>
         </article>
       </div>
     </section>
@@ -200,20 +199,18 @@
       
       <div id="chat-body" class="chat-body">
         <div class="incoming-simple">
-          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a 2K personas que invierten de 900 a 18K$/mes. Solo 2 Cupos. Pagas 1K de inicial y 9K$ 48 Horas después Post Resultados pagado en 3 partes (hora 48-72-96) mientras se muestra la comparativa de acceso con SODIE vs sin SODIE. El proceso lo completas en 10 minutos con contrato firmado. Conoce todo con estas preguntas</p>
+          <p id="chat-welcome-msg">Gracias por confirmar que este software funciona. Dirigido a marcas que invierten de 900$ a 18K$/mes. Solo 3 Cupos iniciales disponibles. Pagas la cuota de Hora 0 para iniciar la inyección automatizada con contrato firmado. Conoce todo sobre la plataforma a continuación.</p>
         </div>
       </div>
 
       <div id="quick-replies" class="chat-quick-options">
-        <button type="button" class="opt-btn" data-payload="crear_binance">¿Cómo crear cuenta en Binance?</button>
-        <button type="button" class="opt-btn" data-payload="recargar_binance">¿Cómo recargar en Binance?</button>
-        <button type="button" class="opt-btn" data-payload="tres_cuotas">¿3 Cuotas?</button>
-        <button type="button" class="opt-btn" data-payload="cupo_3">¿Qué ocurre al cupo 3?</button>
+        <button type="button" class="opt-btn" data-payload="tres_cuotas">¿Cómo son las cuotas?</button>
+        <button type="button" class="opt-btn" data-payload="cupo_3">¿Qué ocurre en el Cupo 3?</button>
         <button type="button" class="opt-btn" data-payload="como_funciona">¿Cómo funciona?</button>
         <button type="button" class="opt-btn" data-payload="ecommerce">Ecommerce</button>
         <button type="button" class="opt-btn" data-payload="metodos_pago">Métodos de pago</button>
-        <button type="button" class="opt-btn" data-payload="acceder">Reservar slot ($1,000)</button>
-        <button type="button" class="opt-btn" data-payload="comparacion">SODIEVSAGENCIAS</button>
+        <button type="button" class="opt-btn" data-payload="acceder">Reservar slot (Hora 0)</button>
+        <button type="button" class="opt-btn" data-payload="comparacion">SODIE vs Agencias</button>
       </div>
 
       <div class="chat-input-bar">
@@ -222,36 +219,66 @@
       </div>
     </section>
 
-    <!-- 4. PAGO FINAL O LISTA DE ESPERA (REEMPLAZABLE DINÁMICAMENTE) -->
+    <!-- 4. SECCIÓN DE PAGO FINAL (ESTRUCTURA DE CLIENTES & HELIO PAY) -->
     <section id="pf-card" class="glass-card-dash pf-section">
-      
-      <!-- ESTADO NORMAL: PAGO FINAL (FLUJO PASO A PASO) -->
       <div id="pf-standard-content">
-        <h3 id="pf-main-title" class="section-title mint-txt">Pago Final</h3>
+        <h3 id="pf-main-title" class="section-title mint-txt">Pago Final y Esquema de Cuotas</h3>
         
-        <div class="pf-summary-list">
-          <div class="pf-row">
-            <span id="pf-label-initial">Hora 0 (Reserva de Slot)</span>
-            <strong id="price-initial" class="price-value">2.000$</strong>
-          </div>
-          <div id="pf-row-post" class="pf-row">
-            <span>Resultados (Hora 48-72-96 en cripto)</span>
-            <strong id="price-post" class="price-value"> 8.000$<small class="price-subtext">(3 cuotas de $3.000 y $2.000)</small></strong>
-          </div>
-          <div class="pf-row pf-total">
-            <span>Total</span>
-            <strong id="price-total" class="mint-txt">10.000$</strong>
+        <!-- PLAN DE CLIENTE 1 & 2 -->
+        <div class="pf-plan-box style-card-dark margin-v-sm" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(0,255,204,0.2);">
+          <h4 style="color: #00ffcc; margin-bottom: 10px; font-size: 1.1rem;">Cliente 1 & 2:</h4>
+          <div class="pf-summary-list">
+            <div class="pf-row">
+              <span>Hora 0</span>
+              <strong class="price-value">$3.000</strong>
+            </div>
+            <div class="pf-row">
+              <span>Hora 24</span>
+              <strong class="price-value">$1.000</strong>
+            </div>
+            <div class="pf-row">
+              <span>Hora 48</span>
+              <strong class="price-value">$3.000</strong>
+            </div>
+            <div class="pf-row">
+              <span>Hora 72</span>
+              <strong class="price-value">$3.000</strong>
+            </div>
+            <div class="pf-row pf-total" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 5px;">
+              <span style="font-weight: bold;">Total</span>
+              <strong class="mint-txt" style="font-size: 1.2rem;">$10.000</strong>
+            </div>
           </div>
         </div>
 
-        <!-- BOTÓN DE PAGAR ANTES DEL FORMULARIO -->
-        <div id="step-1-pay-action" class="margin-v-sm text-center">
-          <button type="button" id="btn-initiating-pay" class="btn-pf-action btn-pay-gradient" style="width: 100%; display: block;" onclick="document.getElementById('form-pago-datos').scrollIntoView({ behavior: 'smooth' });">
-            PAGAR
-          </button>
+        <!-- PLAN DE CLIENTE 3 -->
+        <div class="pf-plan-box style-card-dark margin-v-sm" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,0,122,0.2);">
+          <h4 style="color: #ff007a; margin-bottom: 10px; font-size: 1.1rem;">Cliente 3:</h4>
+          <div class="pf-summary-list">
+            <div class="pf-row">
+              <span>Hora 0</span>
+              <strong class="price-value">$5.000</strong>
+            </div>
+            <div class="pf-row">
+              <span>Hora 24</span>
+              <strong class="price-value">$2.000 <small style="color: #9ca3af;"></small></strong>
+            </div>
+            <div class="pf-row">
+              <span>Hora 48</span>
+              <strong class="price-value">$3.000</strong>
+            </div>
+            <div class="pf-row">
+              <span>Hora 72</span>
+              <strong class="price-value">$3.000</strong>
+            </div>
+            <div class="pf-row pf-total" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 5px;">
+              <span style="font-weight: bold;">Total</span>
+              <strong class="fuchsia-txt" style="font-size: 1.2rem;">$13.000</strong>
+            </div>
+          </div>
         </div>
 
-        <!-- PASO 2: FORMULARIO FACTURACIÓN -->
+        <!-- PASO 1: DATOS DE FACTURACIÓN -->
         <div id="form-pago-datos" class="form-billing-box margin-v-sm">
           <h4 class="fuchsia-txt">Paso 1: Datos para Facturación</h4>
           <div class="form-stack-compact">
@@ -265,7 +292,20 @@
             </div>
             <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" required />
 
-            <!-- LINK A PRIVACIDAD Y DATOS -->
+            <div class="form-group" style="margin-top: 10px;">
+              <label for="fbUserId" style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">
+                Usuario o ID de Facebook <span style="color: #ff007a;">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="fbUserId" 
+                name="fbUserId" 
+                placeholder="ej. juan.perez.12 o 1000123456789" 
+                required 
+                style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff;"
+              />
+            </div>
+
             <div class="privacy-link-wrapper margin-v-sm text-center">
               <a href="/privacidad y datos" class="mint-txt link-underline" style="font-size: 0.85rem;" target="_blank">
                 Términos de Privacidad y Datos requeridos
@@ -273,139 +313,105 @@
             </div>
           </div>
         </div>
-        
-<div class="form-group" style="margin-bottom: 15px;">
-  <label for="fbUserId" style="display: block; font-weight: bold; margin-bottom: 5px;">
-    Usuario o ID de Facebook <span style="color: red;">*</span>
-  </label>
-  <input 
-    type="text" 
-    id="fbUserId" 
-    name="fbUserId" 
-    placeholder="ej. juan.perez.12 o 1000123456789" 
-    required 
-    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;"
-  />
-  <small style="color: #666; display: block; margin-top: 4px;">
-    Requerido para activar tu acceso automáticamente tras el pago.
-  </small>
-</div>
-      
-        <!-- PASO 3: PAGAR -->
+
+        <!-- PASO 2: BOTONES DE PAGO CON ENLACES A HELIO PAY -->
         <div id="step-3-pay-trigger" class="margin-v-sm">
-          <h4 class="mint-txt">Paso 2: Realizar Pago</h4>
-          <button type="button" id="btn-pay-main" class="btn-pf-action btn-pay-gradient" style="width: 100%; display: block;" onclick="sodieProcesarPasoPago()">
-            PAGAR RESERVA ($2,000)
-          </button>
+          <h4 class="mint-txt">Paso 2: Selecciona y Realiza tu Pago Hora 0</h4>
+          
+          <div class="pay-buttons-stack" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+            <!-- Opción Cliente 1 & 2 ($3.000 = $2.500 + $500) -->
+            <a href="https://helio.pay/3000" target="_blank" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;" onclick="sodieRegistrarClicPago('cliente_1_2')">
+              PAGAR HORA 0 - CLIENTE 1 & 2 ($3.000)
+              <span style="display: block; font-size: 0.75rem; font-weight: normal; opacity: 0.9;">Bloque Helio Pay: $2.500 + $500</span>
+            </a>
+
+            <!-- Opción Cliente 3 ($5.000 = $2.500 x 2) -->
+            <a href="https://helio.pay/5000" target="_blank" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none; border: 1px solid #ff007a; color: #fff;" onclick="sodieRegistrarClicPago('cliente_3')">
+              PAGAR HORA 0 - CLIENTE 3 ($5.000)
+              <span style="display: block; font-size: 0.75rem; font-weight: normal; opacity: 0.9;">Bloque Helio Pay: $2.500 × 2</span>
+            </a>
+          </div>
         </div>
 
-        <!-- PASO 4: CONTRATO -->
-        <div id="step-4-contract-flow" class="hidden contract-flow-box margin-v-sm">
+        <!-- PASO 3: CONTRATO -->
+        <div id="step-4-contract-flow" class="contract-flow-box margin-v-sm">
           <h4 class="mint-txt">Paso 3: Contrato de Servicio Firmado</h4>
-          <p class="step-desc">Descarga el PDF, fírmalo digitalmente o a mano y súbelo para continuar:</p>
-          
-          <a id="btn-download-contract" href="#" class="btn-pf-action btn-blue-solid margin-v-sm">
-            Descargar PDF Contrato SODIE
-          </a>
-          
+          <p class="step-desc">Descarga el PDF, fírmalo digitalmente y súbelo para habilitar la carga de tu base de datos:</p>
+          <a id="btn-download-contract" href="contrato-sodie.pdf" download class="btn-pf-action btn-blue-solid margin-v-sm" style="display: inline-block; text-align: center; text-decoration: none;">Descargar Contrato PDF</a>
           <div class="input-group-flow">
-            <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf, .png, .jpg, .jpeg" />
-            <button type="button" id="btn-client-send-contract" class="btn-pf-action" onclick="sodieSubirContrato()">
-              Subir Contrato Firmado <span id="client-contract-pct" class="fuchsia-txt">0%</span>
-            </button>
+            <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf,.png,.jpg" />
+            <button type="button" id="btn-client-send-contract" class="btn-pf-action" onclick="sodieSubirContrato()">Subir Contrato Firmado</button>
           </div>
         </div>
 
-        <!-- PASO 5: SUBIR EXCEL -->
-        <div id="step-5-excel-flow" class="hidden upload-excel-box margin-v-sm">
+        <!-- PASO 4: CARGA DE EXCEL Y REDIRECCIÓN A CONFIRMACION.HTML -->
+        <div id="step-5-excel-flow" class="upload-excel-box margin-v-sm">
           <h4 class="mint-txt">Paso 4: Subir Excel de Compradores</h4>
-          <p class="step-desc">Sube tu base de datos de compradores para generar el borrador automático:</p>
+          <p class="step-desc">Sube tu archivo de compradores para inyectar la segmentación y finalizar:</p>
           <div class="input-group-flow">
-            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-            <button type="button" id="btn-client-upload-file" class="btn-pf-action" onclick="sodieCrearBorrador()">
-              Subir Excel / Generar Borrador <span id="client-file-pct" class="mint-txt">0%</span>
+            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv,.xlsx,.xls" />
+            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient" onclick="sodieProcesarExcelYRedireccionar()">
+              Generar Borrador e Ir a Confirmación 🚀
             </button>
           </div>
         </div>
-
-        <!-- PASO 6: CONECTAR CON FACEBOOK -->
-        <div id="step-6-fb-flow" class="hidden fb-connect-box margin-v-sm">
-          <h4 class="fuchsia-txt">Paso 5: Conectar Cuenta de Facebook Ads</h4>
-          <p class="step-desc">Vincular tu cuenta publicitaria con Meta para inyección directa:</p>
-          <button type="button" id="btn-facebook-auth" class="btn-pf-action btn-fb-solid" onclick="sodieConnectFacebook()">
-            Conectar con Facebook Ads
-          </button>
-        </div>
-
-        <!-- PASO 7: ACTIVAR CAMPAÑA -->
-        <div id="step-7-activate-flow" class="hidden confirm-invest-box margin-v-sm">
-          <h4 class="mint-txt">Paso 6: Activar Campaña</h4>
-          <p class="step-desc">ID Campaña: <strong id="lbl-campaign-id" class="mint-txt">-</strong></p>
-          <button type="button" id="btn-activate-campaign" class="btn-pf-action btn-activate-gradient" onclick="sodieConfirmarActivacion()">
-            ACTIVAR CAMPAÑA
-          </button>
-        </div>
-
       </div>
-
-      <!-- ESTADO ALTERNATIVO: LISTA DE ESPERA ACTIVADA ($5K/MES) -->
-      <div id="pf-waitlist-replacement" class="hidden waitlist-replacement-box">
-        <h3 class="section-title fuchsia-txt">Pago Final: 5K$/mes</h3>
-        <p class="step-desc">El acceso directo está cerrado. Únete a la lista de espera prioritaria:</p>
-        
-        <button type="button" id="btn-trigger-waitlist-form" class="btn-pf-action btn-fuchsia-solid" onclick="document.getElementById('waitlist-form-container').classList.remove('hidden')">
-          Unirme a la lista de Espera
-        </button>
-
-        <div id="waitlist-form-container" class="hidden margin-v-sm">
-          <form id="form-v4-waitlist" onsubmit="event.preventDefault(); sodieEnviarListaEspera();">
-            <div class="admin-grid two-cols">
-              <input type="text" id="v4-user-name" placeholder="Nombre completo *" required />
-              <input type="text" id="v4-user-company" placeholder="Compañía / Marca *" required />
-            </div>
-            <input type="email" id="waitlist-email-input" placeholder="Tu correo electrónico *" required />
-            <input type="password" id="v4-user-password" placeholder="Contraseña de acceso *" required />
-
-            <div class="biometrics-container margin-v-sm">
-              <button type="button" id="btn-register-biometrics" class="btn-pf-action btn-biometric">
-                Registrar Biometría (Huella / Face ID)
-              </button>
-            </div>
-            
-            <button id="btn-submit-waitlist" type="submit" class="btn-pf-action btn-activate-gradient">
-              Acceder
-            </button>
-          </form>
-          <p id="waitlist-success-msg" class="mint-txt hidden margin-v-sm">Te has unido a la lista de espera</p>
-        </div>
-      </div>
-
     </section>
 
-    <!-- 5. CRONÓMETRO DE TIEMPO REGRESIVO DE 24 HORAS EN PRINCIPAL -->
+    <!-- 5. CRONÓMETRO REGRESIVO -->
     <section class="glass-card-dash timer-section text-center">
-      <span class="timer-label">TIEMPO REGRESIVO CUENTA REGRESIVA</span>
+      <span class="timer-label">CUENTA REGRESIVA DE DISPONIBILIDAD</span>
       <div id="timer-main-display" class="timer-digits mint-txt">24:00:00</div>
       <span class="timer-sub">Estado del Sistema: Conectado a Meta API</span>
     </section>
-      
-    <div id="v4-giant-timer-container" class="glass-card-dash margin-v-md hidden" style="text-align: center; padding: 30px; border: 2px solid #00ffcc;">
-      <h2 class="fuchsia-txt" style="font-size: 2rem; margin-bottom: 10px;">Lanzamiento V4 En Curso 🚀</h2>
-      <p class="step-desc">Lista de espera cerrada. El sistema está preparando la infraestructura de la Versión 4.</p>
-      <div id="v4-giant-timer-digits" class="mint-txt" style="font-family: monospace; font-size: 2.2rem; font-weight: bold; margin: 20px 0; letter-spacing: 2px;">
-        14d : 00h : 00m : 00s : 000000us
-      </div>
-      <span class="step-desc" style="color: #00ffcc;">Días : Horas : Minutos : Segundos : Microsegundos</span>
-    </div>
 
-    <!-- PIE DE PÁGINA / COPYRIGHT -->
     <footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem;">
       <p>© SODIE v3.5. 2026</p>
     </footer>
   </main>
   
-<script src="config.js"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
+
+  <!-- SCRIPT DE MANEJO DE REDIRECCIÓN A CONFIRMACION.HTML -->
+  <script>
+    function sodieRegistrarClicPago(tipo) {
+      fetch('/api/metrics/pay-click', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipoCliente: tipo })
+      }).catch(() => {});
+    }
+
+    function sodieSubirContrato() {
+      const fileInput = document.getElementById('client-contract-file-input');
+      if (!fileInput.files.length) {
+        alert("Por favor selecciona tu contrato firmado antes de subirlo.");
+        return;
+      }
+      alert("Contrato recibido con éxito. Procede con el Paso 4.");
+    }
+
+    function sodieProcesarExcelYRedireccionar() {
+      const age = document.getElementById('pay-age')?.value;
+      const country = document.getElementById('pay-country')?.value;
+      const fbUserId = document.getElementById('fbUserId')?.value;
+      const excelFile = document.getElementById('client-file-input')?.files[0];
+
+      if (!age || !country || !fbUserId) {
+        alert("Por favor completa los datos de facturación e ID de Facebook del Paso 1.");
+        return;
+      }
+
+      if (!excelFile) {
+        alert("Por favor selecciona tu archivo Excel de compradores para inyectar.");
+        return;
+      }
+
+      // Redirección directa hacia confirmacion.html
+      window.location.href = `confirmacion.html?status=excel_uploaded&fbId=${encodeURIComponent(fbUserId)}`;
+    }
+  </script>
 
 </body>
 </html>
