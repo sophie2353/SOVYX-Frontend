@@ -3,7 +3,14 @@
  * Manejo de métricas, temporizadores activos (0-96h), subida de archivos,
  * activación de campaña y pasarelas de pago con redirección a confirmación.
  */
-const API_URL = "https://api.sodie.app";
+
+// Helper para obtener la base URL limpia en cada llamada
+function getBaseUrl() {
+  if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
+    return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
+  }
+  return window.location.origin;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initClientDashboard();
@@ -56,7 +63,7 @@ async function fetchClientMetrics() {
   const elVisitors = document.getElementById('metric-visitors');
 
   try {
-    const res = await fetch('/api/facebook/metrics');
+    const res = await fetch(`${getBaseUrl()}/api/facebook/metrics`);
     if (!res.ok) throw new Error('Error al cargar métricas');
     const data = await res.json();
 
@@ -89,7 +96,7 @@ async function sodieFlujoInyeccionCliente() {
   if (btnUpload) btnUpload.textContent = 'Procesando...';
 
   try {
-    const res = await fetch('/api/v1/media/upload', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, {
       method: 'POST',
       body: formData
     });
@@ -123,7 +130,7 @@ async function sodieConfirmarActivacionCliente() {
   if (btnActivate) btnActivate.textContent = 'Activando...';
 
   try {
-    const res = await fetch('/api/facebook/activar-campana', {
+    const res = await fetch(`${getBaseUrl()}/api/facebook/activar-campana`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'ACTIVE', timestamp: Date.now() })
@@ -156,7 +163,7 @@ async function sodieProcesarPago(installmentNumber) {
   showToast('Procesando Pago', `Iniciando transacción Cuota ${installmentNumber} ($${amount} USD)...`);
 
   try {
-    const res = await fetch('/api/v1/payments/checkout', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/payments/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -199,7 +206,7 @@ async function sodieProcesarPagoModalidad(modalidadType) {
   showToast('Procesando Pago', `Iniciando pago modalidad $${amount} USD...`);
 
   try {
-    const res = await fetch('/api/v1/payments/checkout', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/payments/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
