@@ -403,7 +403,7 @@ async function sodieConfirmarActivacion() {
     if (!res.ok) throw new Error('Error al activar campaña');
     showAdminAlert('🚀 Campaña activada desde Admin.');
     setTimeout(() => {
-      window.location.href = '/confirmacion.html?type=campaign&status=success&role=admin';
+      window.location.href = '/confirmacion.html?step=activar_campana&role=admin&sessionId=XYZ&campaignId=ABC&actId=123';
     }, 1000);
   } catch (error) {
     showAdminAlert('No se pudo activar la campaña en el servidor.', true);
