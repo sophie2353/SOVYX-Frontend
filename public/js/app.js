@@ -1,12 +1,16 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Final Sincronizada con Backend, confirmacion.html
+ * Versión Final Sincronizada con Backend Dinámico, confirmacion.html
  * y Temporizador V4 Gigante (14 días con Microsegundos).
  */
-// ==========================================
-// CONFIGURACIÓN INICIAL & CONSTANTES SODIE
-// ==========================================
-const API_URL = "https://api.sodie.app";
+
+// Helper para obtener la base URL limpia en cada llamada
+function getBaseUrl() {
+  if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
+    return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
+  }
+  return window.location.origin;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initSplashGauges();
@@ -99,7 +103,7 @@ function initSSEMetrics() {
   const gauge2Val = document.getElementById('gauge-val-2');
 
   try {
-    const evtSource = new EventSource('/api/v1/metrics/live');
+    const evtSource = new EventSource(`${getBaseUrl()}/api/v1/metrics/live`);
 
     evtSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -130,7 +134,7 @@ function initSSEMetrics() {
    ========================================================================== */
 async function checkAvailableSlots() {
   try {
-    const res = await fetch('/api/clientes/disponibles');
+    const res = await fetch(`${getBaseUrl()}/api/clientes/disponibles`);
     if (!res.ok) throw new Error('Error al obtener cupos');
     const data = await res.json();
 
@@ -173,7 +177,7 @@ async function initFacebookMetrics() {
   };
 
   try {
-    const res = await fetch('/api/facebook/metrics');
+    const res = await fetch(`${getBaseUrl()}/api/facebook/metrics`);
     if (!res.ok) throw new Error('Campaña no activa');
     const data = await res.json();
 
@@ -260,7 +264,7 @@ async function sendChatMessage(messageText, payload = null) {
   chatBody.scrollTop = chatBody.scrollHeight;
 
   try {
-    const res = await fetch('/api/v1/chat/message', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/chat/message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: messageText, payload: payload })
@@ -314,7 +318,7 @@ async function sodieProcesarPasoPago() {
   showToast('Iniciando Pago', 'Procesando transacción con el servidor...');
 
   try {
-    const res = await fetch('/api/v1/payments/checkout', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/payments/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ age, country, city, zip, phone, amount: 1000 })
@@ -336,7 +340,7 @@ async function sodieProcesarPasoPago() {
 
 async function obtenerContratoPDF() {
   try {
-    const res = await fetch('/api/v1/media/contract');
+    const res = await fetch(`${getBaseUrl()}/api/v1/media/contract`);
     const data = await res.json();
 
     if (data.success && data.contractUrl) {
@@ -347,7 +351,6 @@ async function obtenerContratoPDF() {
   }
 }
 
-// Función unificada para la carga del contrato firmado (Paso 3 -> Paso 4/5)
 async function sodieSubirContrato() {
   const fileInput = document.getElementById('client-contract-file-input');
   const pctLabel = document.getElementById('client-contract-pct');
@@ -365,7 +368,7 @@ async function sodieSubirContrato() {
   if (btnSubir) btnSubir.disabled = true;
 
   try {
-    const res = await fetch('/api/evaluator/contract', { 
+    const res = await fetch(`${getBaseUrl()}/api/evaluator/contract`, { 
       method: 'POST', 
       body: formData 
     });
@@ -377,7 +380,6 @@ async function sodieSubirContrato() {
 
     showToast('Contrato Confirmado', 'Procede a subir tu lista de compradores (Excel).');
     
-    // Oculta paso de contrato y muestra paso de Excel
     const stepContract = document.getElementById('step-4-contract-flow');
     const stepExcel = document.getElementById('step-5-excel-flow');
 
@@ -409,7 +411,7 @@ async function sodieCrearBorrador() {
   if (pctLabel) pctLabel.textContent = '45%';
 
   try {
-    const res = await fetch('/api/v1/media/upload', { 
+    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, { 
       method: 'POST', 
       body: formData 
     });
@@ -432,7 +434,7 @@ async function sodieConnectFacebook() {
   showToast('Meta Ads', 'Conectando cuenta publicitaria...');
 
   try {
-    const res = await fetch('/api/facebook/connect', {
+    const res = await fetch(`${getBaseUrl()}/api/facebook/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -474,7 +476,7 @@ function initWebAuthnBiometrics() {
       bioBtn.style.borderColor = '#00ffcc';
       bioBtn.textContent = '⚡ Solicitando Face ID / Huella...';
 
-      const challengeRes = await fetch('/api/v1/auth/biometrics/challenge', { method: 'POST' });
+      const challengeRes = await fetch(`${getBaseUrl()}/api/v1/auth/biometrics/challenge`, { method: 'POST' });
       const challengeData = await challengeRes.json();
       
       const challengeBuffer = new Uint8Array(challengeData.challenge || [1, 2, 3, 4, 5, 6, 7, 8]);
@@ -494,7 +496,7 @@ function initWebAuthnBiometrics() {
         }
       });
 
-      await fetch('/api/v1/auth/biometrics/register', {
+      await fetch(`${getBaseUrl()}/api/v1/auth/biometrics/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credentialId: credential.id })
@@ -525,7 +527,7 @@ async function sodieEnviarListaEspera() {
   }
 
   try {
-    const res = await fetch('/api/v1/waitlist', {
+    const res = await fetch(`${getBaseUrl()}/api/v1/waitlist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, company, email, password, tier: '5K_MONTHLY' })
@@ -542,13 +544,9 @@ async function sodieEnviarListaEspera() {
   }
 }
 
-/**
- * Consulta el estado del backend al cargar la página para saber si la lista de
- * espera fue cerrada desde admin.html y activar el temporizador gigante V4.
- */
 async function checkWaitlistClosedStatus() {
   try {
-    const res = await fetch('/api/v1/waitlist/status');
+    const res = await fetch(`${getBaseUrl()}/api/v1/waitlist/status`);
     if (!res.ok) return;
     const data = await res.json();
 
@@ -561,17 +559,12 @@ async function checkWaitlistClosedStatus() {
   }
 }
 
-/**
- * Temporizador Gigante V4 (14 Días)
- * Formato: Días : Horas : Minutos : Segundos : Microsegundos
- */
 function activarTemporizadorGiganteV4(targetTimestamp) {
   const v4Container = document.getElementById('v4-giant-timer-container');
   const v4TimerDisplay = document.getElementById('v4-giant-timer-digits');
   const pfWaitlist = document.getElementById('pf-waitlist-replacement');
   const pfStandard = document.getElementById('pf-standard-content');
 
-  // Oculta formularios estándar y muestra la vista del temporizador V4
   if (pfStandard) pfStandard.classList.add('hidden');
   if (pfWaitlist) pfWaitlist.classList.add('hidden');
   if (v4Container) v4Container.classList.remove('hidden');
@@ -647,26 +640,25 @@ function initTimer24h() {
 // DISPARADOR SECRETO DE 5 CLICS (REPARADO)
 // ==========================================
 (function initAdminTriggerDirect() {
-let adminToques = 0;
-let adminTimer = null;
+  let adminToques = 0;
+  let adminTimer = null;
 
-function sodieContarToquesAdmin() {
-  adminToques++;
-  clearTimeout(adminTimer);
-  adminTimer = setTimeout(() => { adminToques = 0; }, 2000);
-
-  if (adminToques >= 5) {
-    adminToques = 0;
+  function manejarToqueSecreto() {
+    adminToques++;
     clearTimeout(adminTimer);
-    window.location.href = "admin.html";
+    adminTimer = setTimeout(() => { adminToques = 0; }, 2000);
+
+    if (adminToques >= 5) {
+      adminToques = 0;
+      clearTimeout(adminTimer);
+      window.location.href = "admin.html";
+    }
   }
-}
 
   document.addEventListener("DOMContentLoaded", () => {
     const logoTxt = document.getElementById("sodie-logo-trigger");
     const logoIcon = document.getElementById("btn-sodie-logo-trigger");
 
-    // 'pointerdown' se activa tanto con clic de mouse como con toque de pantalla instantáneo
     if (logoTxt) logoTxt.addEventListener("pointerdown", manejarToqueSecreto);
     if (logoIcon) logoIcon.addEventListener("pointerdown", manejarToqueSecreto);
   });
