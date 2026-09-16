@@ -314,7 +314,44 @@ async function sodieProcesarPasoPago() {
     showToast('Campos Incompletos', 'Completa la información de facturación.', true);
     return;
   }
+document.getElementById('btnPagar').addEventListener('click', async (e) => {
+  e.preventDefault();
 
+  const fbUserIdInput = document.getElementById('fbUserId');
+  const fbUserId = fbUserIdInput ? fbUserIdInput.value.trim() : '';
+
+  // ⛔ BLOQUEO DE SEGURIDAD: Si no ingresó el usuario, detiene el pago al instante
+  if (!fbUserId) {
+    alert('⚠️ Debes ingresar tu Usuario o ID de Facebook para poder continuar con el pago.');
+    fbUserIdInput.focus();
+    fbUserIdInput.style.borderColor = 'red';
+    return; // Cancela la ejecución del pago
+  }
+
+  // Restaurar estilo si está correcto
+  fbUserIdInput.style.borderColor = '#ccc';
+
+  // 🚀 Proceder con el Pago y enviar la data al backend
+  try {
+    const response = await fetch('/api/facebook/capi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: window.sessionId || localStorage.getItem('sessionId'),
+        eventName: 'Purchase',
+        fbUserId: fbUserId // Se envía al backend para la invitación automática
+      })
+    });
+
+    const data = await response.json();
+    if (data.redirectUrl) {
+      window.location.href = data.redirectUrl;
+    }
+  } catch (error) {
+    console.error('Error al procesar el pago:', error);
+  }
+});
+  
   showToast('Iniciando Pago', 'Procesando transacción con el servidor...');
 
   try {
