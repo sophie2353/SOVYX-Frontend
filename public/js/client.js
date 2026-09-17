@@ -13,6 +13,39 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
+// Agregar este bloque en client.js al iniciar
+function initClientPersistAndNotifications() {
+  const clientId = getClientId(); // Detecta CLIENT-#01, CLIENT-#02, etc.
+
+  // Guardar en localStorage para visitas futuras directas (sin URL param)
+  if (clientId) {
+    localStorage.setItem('sodie_client_id', clientId);
+  }
+
+  // Lanzar Notificación Push / Guardado de PWA
+  solicitarPermisoNotificacionesYAccesoDirecto(clientId);
+}
+
+function solicitarPermisoNotificacionesYAccesoDirecto(clientId) {
+  // 1. Notificación Push de bienvenida en el teléfono
+  if ('Notification' in window && Notification.permission !== 'granted') {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        new Notification('SODIE AI - Dashboard Activo', {
+          body: `Bienvenido ${clientId}. Tu acceso directo ha sido configurado.`,
+          icon: '/assets/icon.png'
+        });
+      }
+    });
+  }
+
+  // 2. Notificación en pantalla (Toast) para guardar en la pantalla de inicio del teléfono
+  showToast(
+    'Guarda tu Dashboard', 
+    `Estás ingresando como ${clientId}. Añade esta página a tu pantalla de inicio para ingresar siempre a tu panel.`
+  );
+}
+
 function getClientId() {
   const urlParams = new URLSearchParams(window.location.search);
   const paramId = urlParams.get('clientId') || urlParams.get('client_id') || urlParams.get('id');
