@@ -29,11 +29,11 @@
         <span id="client-id-badge" class="badge-client badge-mint-border">Cliente Activo</span>
       </div>
       <div class="dash-header-right">
-        <button type="button" class="btn-icon" onclick="window.location.href='/admin.html'" title="Acceso Admin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer;">🔐</button>
+        <button type="button" class="btn-icon" onclick="window.location.href='admin.html'" title="Acceso Admin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer;">🔐</button>
       </div>
     </header>
 
-    <!-- 1. MÉTRICAS CLIENTE -->
+    <!-- 1. MÉTRICAS CLIENTE (Inicializadas en 0) -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
@@ -43,7 +43,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Presupuesto Pruebas</span><span class="fuchsia-txt">$40.00</span></div>
+          <div class="card-foot"><span id="metric-spend-status">Presupuesto Pruebas</span><span class="fuchsia-txt">$40.00</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -52,7 +52,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Audiencia Objetivos</span><span class="mint-txt">2K personas</span></div>
+          <div class="card-foot"><span>Impresiones</span><span id="metric-reach-status" class="mint-txt">0</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
@@ -61,7 +61,7 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Tráfico Activo</span><span class="mint-txt">En vivo</span></div>
+          <div class="card-foot"><span>Tráfico Activo</span><span id="metric-activos" class="mint-txt">0</span></div>
         </article>
       </div>
     </section>
@@ -73,29 +73,29 @@
       
       <div class="input-group-flow margin-v-sm">
         <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-        <button type="button" id="btn-client-upload-excel" class="btn-pf-action btn-mint-solid" onclick="sodieFlujoInyeccionCliente()">
+        <button type="button" id="btn-client-upload-excel" class="btn-pf-action btn-mint-solid">
           Subir Excel
         </button>
       </div>
 
-      <button type="button" id="btn-client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm" onclick="sodieConfirmarActivacionCliente()">
+      <button type="button" id="btn-client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
         Activar Campaña
       </button>
     </section>
 
-    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (SISTEMA ADAPTATIVO SEGÚN TIPO DE CUPO) -->
+    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (CONTROLADO Y VINCULADO CON CLIENT.JS) -->
     <section class="glass-card-dash margin-v-sm">
       <h3 class="section-title fuchsia-txt">Cronograma de Pagos Post-Resultados</h3>
       <div id="timer-post-display" class="timer-digits fuchsia-txt">00:00:00</div>
 
       <div id="payment-options-container" class="margin-v-sm">
-        <!-- RENDERIZADO DINÁMICO POR CLIENT.JS SEGÚN CUPO 1 & 2 VS CUPO 3 -->
+        <!-- RENDERIZADO / MANEJO DINÁMICO POR CLIENT.JS (HELIO PAY / KONTIGO / PASARELA) -->
         
-        <!-- HORA 24 (KONTIGO) -->
+        <!-- HORA 24 -->
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(0, 255, 204, 0.2); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Hora 24 (Enlace Kontigo)</h4>
+          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Hora 24</h4>
           <p id="desc-hora-24" class="step-desc" style="margin-bottom: 10px;">Cargando monto...</p>
-          <a id="btn-pay-hora24" href="#" target="_blank" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
+          <a id="btn-pay-hora24" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
             Pagar Cuota Hora 24 ↗
           </a>
         </div>
@@ -104,7 +104,7 @@
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
           <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Hora 48 ($3.000)</h4>
           <p class="step-desc" style="margin-bottom: 10px;">Liquidación intermedia post-resultados.</p>
-          <a id="btn-pay-hora48" href="#" target="_blank" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none;">
+          <a id="btn-pay-hora48" href="javascript:void(0);" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none;">
             Pagar Cuota Hora 48 ($3.000) ↗
           </a>
         </div>
@@ -113,19 +113,18 @@
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
           <h4 class="fuchsia-txt" style="margin-bottom: 5px;">Cuota Hora 72 ($3.000)</h4>
           <p class="step-desc" style="margin-bottom: 10px;">Liquidación final del ciclo de inyección.</p>
-          <a id="btn-pay-hora72" href="#" target="_blank" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
+          <a id="btn-pay-hora72" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
             Pagar Cuota Hora 72 ($3.000) ↗
           </a>
         </div>
       </div>
     </section>
 
-    <!-- 4. COMPARATIVA SECUENCIAL (SE ACTIVA EN LA HORA 72) -->
-    <!-- 5. CIERRE DE CICLO HORA 96 -->
+    <!-- 4. CIERRE DE CICLO HORA 96 -->
     <section id="section-hour-96-complete" class="glass-card-dash hidden text-center margin-v-sm">
       <h3 class="section-title mint-txt">¡Ciclo Completado!</h3>
       <p class="step-desc">Has completado las 96 horas de ejecución y el total de pagos después de obtener resultados.</p>
-      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" onclick="window.location.href='/index.html'">
+      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" onclick="window.location.href='index.html'">
         Unirse a Lista de Espera (2 cupos disponibles)
       </button>
     </section>
