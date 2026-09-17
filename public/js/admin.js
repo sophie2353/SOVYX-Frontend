@@ -1,6 +1,6 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Versión Dinámica Sincronizada con Configuración Global
+ * Versión Dinámica Sincronizada con Gestión de Vistas Multi-Cliente (client.html)
  */
 
 // Helper para obtener la base URL limpia en cada llamada
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Bindear eventos
+  // Bindear eventos de autenticación
   const btnPass = document.getElementById("btn-admin-login-pass");
   if (btnPass) {
     btnPass.addEventListener("click", sodieValidarPasswordDirecta);
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================================
-   1. AUTENTICACIÓN Y SESIÓN SEGURA (CONSULTA AL BACKEND)
+   1. AUTENTICACIÓN Y SESIÓN SEGURA
    ========================================================================== */
 window.sodieValidarPasswordDirecta = async function() {
   console.log("👉 Validando contraseña admin con el servidor...");
@@ -208,7 +208,25 @@ function sodieReiniciarTimer120h() {
 }
 
 /* ==========================================================================
-   3. NOTIFICACIONES Y UPLOAD PROGRESS
+   3. NAVEGACIÓN VISTA CLIENTE (client.html?clientId=...)
+   ========================================================================== */
+/**
+ * Abre la interfaz client.html para un cliente específico o para los 3 clientes
+ * @param {string} clientId - Ej: 'CLIENT-01', 'CLIENT-02', 'CLIENT-03' o 'ALL'
+ */
+window.sodieAbrirVistaCliente = function(clientId = 'CLIENT-01') {
+  if (clientId === 'ALL') {
+    const clientes = ['CLIENT-01', 'CLIENT-02', 'CLIENT-03'];
+    clientes.forEach(id => {
+      window.open(`client.html?clientId=${id}`, `_blank_${id}`);
+    });
+  } else {
+    window.open(`client.html?clientId=${clientId}`, '_blank');
+  }
+};
+
+/* ==========================================================================
+   4. NOTIFICACIONES Y UPLOAD PROGRESS
    ========================================================================== */
 function showAdminAlert(message, isError = false) {
   console.log(`[ADMIN ALERT]: ${message}`);
@@ -248,7 +266,7 @@ function animateUploadProgress(type, callback) {
 }
 
 /* ==========================================================================
-   4. LISTENERS Y ACCIONES BACKEND DINÁMICAS
+   5. LISTENERS Y ACCIONES BACKEND DINÁMICAS
    ========================================================================== */
 function initListeners() {
   const btnVideo = document.getElementById('btn-upload-video');
@@ -273,6 +291,17 @@ function initListeners() {
   if (btnWaitlistOpen && !btnWaitlistOpen.dataset.bound) {
     btnWaitlistOpen.addEventListener('click', adminActivarWaitlist);
     btnWaitlistOpen.dataset.bound = "true";
+  }
+
+  // Evento para cambiar/abrir Vista Cliente
+  const btnSwitchClient = document.getElementById('btn-switch-client');
+  if (btnSwitchClient && !btnSwitchClient.dataset.bound) {
+    btnSwitchClient.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Por defecto abre CLIENT-01, o puedes cambiarlo a 'ALL' para abrir los 3
+      sodieAbrirVistaCliente('CLIENT-01');
+    });
+    btnSwitchClient.dataset.bound = "true";
   }
 }
 
@@ -389,7 +418,7 @@ function sodieSubirExcelAdmin() {
 }
 
 /* ==========================================================================
-   5. ACTIVACIÓN DE CAMPAÑA Y WAITLIST
+   6. ACTIVACIÓN DE CAMPAÑA Y WAITLIST
    ========================================================================== */
 async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-admin-activate-campaign');
