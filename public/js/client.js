@@ -1,6 +1,6 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Flujo Secuencial: Subida de Excel -> Pago de Cuota -> Confirmación -> Activación de Campaña
+ * Flujo Secuencial: Subida de Excel (ID + Horas) -> Pago por Hora/ID -> Confirmación -> Activación de Campaña
  */
 
 /* ==========================================================================
@@ -13,7 +13,6 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
-// Agregar este bloque en client.js al iniciar
 function initClientPersistAndNotifications() {
   const clientId = getClientId(); // Detecta CLIENT-#01, CLIENT-#02, etc.
 
@@ -60,7 +59,7 @@ function getClientId() {
     return container.dataset.clientId;
   }
 
-  return 'CLIENT-#01'; // Fallback por defecto
+  return localStorage.getItem('sodie_client_id') || 'CLIENT-#01'; // Fallback por defecto
 }
 
 /* ==========================================================================
@@ -68,6 +67,7 @@ function getClientId() {
    ========================================================================== */
 const CLIENT_STATE = {
   clientId: null,
+  currentHours: 24, // Hora por defecto para el cliente (24, 48 o 72)
   excelUploaded: false,
   paymentConfirmed: false,
   campaignActivated: false,
@@ -80,6 +80,7 @@ const CLIENT_STATE = {
 
 document.addEventListener('DOMContentLoaded', () => {
   initClientDashboard();
+  initClientPersistAndNotifications();
 });
 
 function initClientDashboard() {
@@ -100,7 +101,7 @@ function initClientDashboard() {
    3. EVENT LISTENERS DE INTERFAZ
    ========================================================================== */
 function setupEventListeners() {
-  // 1. Subir Excel
+  // 1. Subir Excel (con ID + Horas)
   const btnUpload = document.getElementById('btn-client-upload-excel');
   if (btnUpload) {
     btnUpload.addEventListener('click', sodieFlujoInyeccionCliente);
@@ -112,15 +113,15 @@ function setupEventListeners() {
     btnActivate.addEventListener('click', sodieConfirmarActivacionCliente);
   }
 
-  // 3. Enlaces de Pago dinamizados por ID de Cliente
+  // 3. Enlaces de Pago dinamizados por ID de Cliente + Horas (24, 48, 72)
   const btnPayH24 = document.getElementById('btn-pay-hora24');
-  if (btnPayH24) btnPayH24.addEventListener('click', (e) => sodieProcesarPago(e, 'hora24'));
+  if (btnPayH24) btnPayH24.addEventListener('click', (e) => sodieProcesarPago(e, 24));
 
   const btnPayH48 = document.getElementById('btn-pay-hora48');
-  if (btnPayH48) btnPayH48.addEventListener('click', (e) => sodieProcesarPago(e, 'hora48'));
+  if (btnPayH48) btnPayH48.addEventListener('click', (e) => sodieProcesarPago(e, 48));
 
   const btnPayH72 = document.getElementById('btn-pay-hora72');
-  if (btnPayH72) btnPayH72.addEventListener('click', (e) => sodieProcesarPago(e, 'hora72'));
+  if (btnPayH72) btnPayH72.addEventListener('click', (e) => sodieProcesarPago(e, 72));
 }
 
 /* ==========================================================================
@@ -172,7 +173,7 @@ async function fetchClientMetrics() {
 }
 
 /* ==========================================================================
-   6. PASO 1: SUBIDA DE EXCEL DE AUDIENCIA
+   6. PASO 1: SUBIDA DE EXCEL DE AUDIENCIA (ENVÍA CLIENT ID + HORAS)
    ========================================================================== */
 async function sodieFlujoInyeccionCliente() {
   const fileInput = document.getElementById('client-file-input');
@@ -186,6 +187,7 @@ async function sodieFlujoInyeccionCliente() {
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
   formData.append('clientId', CLIENT_STATE.clientId);
+  formData.append('hours', CLIENT_STATE.currentHours); // Horas (24, 48, 72)
 
   if (btnUpload) {
     btnUpload.textContent = 'Procesando Excel...';
@@ -201,7 +203,7 @@ async function sodieFlujoInyeccionCliente() {
     if (!res.ok) throw new Error('Fallo al subir el archivo');
 
     CLIENT_STATE.excelUploaded = true;
-    showToast('Audiencia Inyectada', 'Excel procesado con éxito. Por favor procede con el pago de la cuota.');
+    showToast('Audiencia Inyectada', `Excel cargado para ${CLIENT_STATE.clientId} (Hora ${CLIENT_STATE.currentHours}). Procede con el pago de la cuota.`);
 
     if (btnUpload) {
       btnUpload.textContent = '✓ Excel Cargado';
@@ -225,9 +227,9 @@ async function sodieFlujoInyeccionCliente() {
 }
 
 /* ==========================================================================
-   7. PASO 2: PROCESAMIENTO DE PAGO SEGÚN ID DE CLIENTE Y HORA
+   7. PASO 2: PROCESAMIENTO DE PAGO SEGÚN ID DE CLIENTE Y HORAS (24, 48, 72)
    ========================================================================== */
-async function sodieProcesarPago(event, quotaType) {
+async function sodieProcesarPago(event, hours) {
   if (event) event.preventDefault();
 
   if (!CLIENT_STATE.excelUploaded) {
@@ -237,33 +239,31 @@ async function sodieProcesarPago(event, quotaType) {
     return;
   }
 
-  showToast('Iniciando Pago', `Generando checkout para ${CLIENT_STATE.clientId} (${quotaType})...`);
+  CLIENT_STATE.currentHours = hours;
+  showToast('Iniciando Pago', `Generando checkout para ${CLIENT_STATE.clientId} (Hora ${hours})...`);
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/payments/generate-link`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clientId: CLIENT_STATE.clientId,
-        quota: quotaType,
-        timestamp: Date.now()
-      })
-    });
-
-    if (!res.ok) throw new Error('No se pudo generar la pasarela de pago');
+    // Solicitud a la pasarela incluyendo clientId y hours
+    const res = await fetch(`${getBaseUrl()}/api/pasarela/get-link?clientId=${encodeURIComponent(CLIENT_STATE.clientId)}&hours=${hours}`);
+    
+    if (!res.ok) throw new Error('No se pudo conectar con la pasarela de pago');
     const data = await res.json();
 
-    // Redirección a la pasarela externa (Helio Pay / Kontigo) o a confirmación
-    if (data.paymentUrl) {
-      window.location.href = data.paymentUrl;
+    if (!data.success || !data.blocks || data.blocks.length === 0) {
+      throw new Error(data.error || 'No se obtuvieron enlaces de pago válidos.');
+    }
+
+    const currentBlock = data.blocks[0];
+
+    if (currentBlock && currentBlock.url) {
+      window.location.href = currentBlock.url;
     } else {
-      // Simulación/Fallback de respuesta de pasarela exitosa
-      window.location.href = `/confirmacion.html?type=payment&quota=${quotaType}&clientId=${encodeURIComponent(CLIENT_STATE.clientId)}&status=success`;
+      window.location.href = `/confirmacion.html?type=payment&hours=${hours}&clientId=${encodeURIComponent(CLIENT_STATE.clientId)}&status=success`;
     }
 
   } catch (error) {
     console.error('Error al procesar pago:', error);
-    showToast('Error de Pasarela', 'No se pudo conectar con la pasarela de pago.', true);
+    showToast('Error de Pasarela', error.message || 'No se pudo conectar con la pasarela de pago.', true);
   }
 }
 
@@ -274,14 +274,15 @@ function checkCallbackStatus() {
   const urlParams = new URLSearchParams(window.location.search);
   const type = urlParams.get('type');
   const status = urlParams.get('status');
-  const quota = urlParams.get('quota');
+  const hours = urlParams.get('hours') || urlParams.get('quota');
 
   if (status === 'success' || status === 'confirmed') {
-    if (type === 'payment') {
+    if (type === 'payment' || hours) {
       CLIENT_STATE.paymentConfirmed = true;
       CLIENT_STATE.excelUploaded = true;
+      if (hours) CLIENT_STATE.currentHours = parseInt(hours, 10);
 
-      showToast('Pago Confirmado', `Pago registrado para ${CLIENT_STATE.clientId}. Ahora puedes activar la campaña.`);
+      showToast('Pago Confirmado', `Pago registrado para ${CLIENT_STATE.clientId} (Hora ${hours || 'activa'}). Ahora puedes activar la campaña.`);
 
       // HABILITAR Y DESPLEGAR EL BOTÓN ACTIVAR CAMPAÑA
       const btnActivate = document.getElementById('btn-client-activate-campaign');
@@ -292,11 +293,11 @@ function checkCallbackStatus() {
         btnActivate.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
 
-      // Marcar cuota como pagada en interfaz
-      if (quota) {
-        const btnQuota = document.getElementById(`btn-pay-${quota}`);
+      // Marcar cuota/hora como pagada en la interfaz
+      if (hours) {
+        const btnQuota = document.getElementById(`btn-pay-hora${hours}`);
         if (btnQuota) {
-          btnQuota.textContent = `✓ Cuota ${quota.toUpperCase()} Pagada`;
+          btnQuota.textContent = `✓ Hora ${hours} Pagada`;
           btnQuota.style.background = 'rgba(0, 255, 204, 0.25)';
           btnQuota.onclick = null;
         }
@@ -339,6 +340,7 @@ async function sodieConfirmarActivacionCliente() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         clientId: CLIENT_STATE.clientId,
+        hours: CLIENT_STATE.currentHours,
         status: 'ACTIVE',
         timestamp: Date.now()
       })
@@ -363,7 +365,7 @@ async function sodieConfirmarActivacionCliente() {
 }
 
 /* ==========================================================================
-   10. TEMPORIZADORES EN TIEMPO REAL (REPARADO Y SIN ERRORES DE ARRANQUE)
+   10. TEMPORIZADORES EN TIEMPO REAL
    ========================================================================== */
 function initGlobalTimer() {
   const globalTimerDisplay = document.getElementById('global-timer-display');
