@@ -315,7 +315,7 @@
         verifyBtn.textContent = '2. Ir a Contrato Digital';
         verifyBtn.onclick = () => {
           verifyBtn.textContent = 'Redirigiendo a contrato...';
-          window.location.href = `/index.html?clientId=${encodeURIComponent(activeClientId)}#contrato`;
+          window.location.href = `/index.html?clientId=${encodeURIComponent(activeClientId)}#pf-step-contract`;
         };
       }
 
@@ -347,7 +347,7 @@
           } catch (err) {
             alert('Error de conexión con el servidor.');
           } finally {
-            verifyBtn.textContent = 'Conectar con Facebook Ads 🚀';
+            verifyBtn.textContent = 'Conectar con Facebook Ads';
           }
         };
       }
@@ -360,7 +360,7 @@
 
         if (role === 'admin') {
           badgeEl.textContent = 'Panel Administrador • Verificación';
-          titleEl.textContent = '⚙️ Gestión Admin: Campaña Generada';
+          titleEl.textContent = 'Gestión Admin: Campaña Generada';
           bodyEl.textContent = 'Se ha inyectado el borrador de la campaña para el cliente. Puedes revisarlo en Meta Ads Manager y confirmar la activación en el panel general.';
 
           stepsContainer.innerHTML = `
@@ -384,7 +384,7 @@
           };
 
           verifyBtn.style.display = 'inline-flex';
-          verifyBtn.textContent = '2. Confirmar y Volver a Admin.html ⚙️';
+          verifyBtn.textContent = '2. Confirmar y Volver a Admin.html';
           verifyBtn.onclick = async () => {
             verifyBtn.textContent = 'Confirmando cambios...';
             try {
@@ -404,7 +404,7 @@
           const activeClientId = await resolveClientId();
 
           badgeEl.textContent = `Paso Final • ${activeClientId}`;
-          titleEl.textContent = '🚀 Borrador Generado en Meta';
+          titleEl.textContent = 'Borrador Generado en Meta';
           bodyEl.textContent = 'El borrador de tu campaña ha sido preparado. Abre Meta Ads Manager para publicar presupuesto/creativos y pasa a tu Dashboard.';
 
           stepsContainer.innerHTML = `
