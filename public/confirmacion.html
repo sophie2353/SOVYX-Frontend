@@ -235,7 +235,7 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const step = urlParams.get('step');
       const campaignId = urlParams.get('campaignId');
@@ -243,6 +243,7 @@
       const sessionId = urlParams.get('sessionId');
       const paymentType = urlParams.get('paymentType'); // 'hora0' | 'recurring'
       const role = urlParams.get('role'); // 'admin' | null (cliente)
+      let clientIdParam = urlParams.get('clientId');
 
       const titleEl = document.getElementById('conf-title');
       const bodyEl = document.getElementById('conf-body');
@@ -252,14 +253,44 @@
       const actionBtn = document.getElementById('conf-action-btn');
       const verifyBtn = document.getElementById('conf-verify-btn');
 
+      // Helper: Obtiene o asigna el ID del cliente secuencial desde el servidor
+      async function resolveClientId() {
+        if (clientIdParam) {
+          localStorage.setItem('sodie_client_id', clientIdParam);
+          return clientIdParam;
+        }
+
+        const savedId = localStorage.getItem('sodie_client_id');
+        if (savedId) return savedId;
+
+        try {
+          const res = await fetch('/api/v1/clients/next-id');
+          if (res.ok) {
+            const data = await res.json();
+            const newId = data.clientId || 'CLIENT-#01';
+            localStorage.setItem('sodie_client_id', newId);
+            return newId;
+          }
+        } catch (err) {
+          console.warn('Fallback a ID local por defecto');
+        }
+
+        const fallbackId = 'CLIENT-#01';
+        localStorage.setItem('sodie_client_id', fallbackId);
+        return fallbackId;
+      }
+
       // =========================================================================
-      // PASO 0: HORA 0 (PRIMER PAGO - ACEPTAR EVALUADOR -> CONTRATO Y EXCEL)
+      // PASO 0: HORA 0 (PRIMER PAGO - ASIGNA ID -> CONTRATO EN INDEX.HTML)
       // =========================================================================
       if (step === 'aceptar_rol' || paymentType === 'hora0') {
         loaderEl.style.display = 'none';
-        badgeEl.textContent = 'Paso 1 de 3 • Onboarding';
+        
+        const activeClientId = await resolveClientId();
+
+        badgeEl.textContent = `Paso 1 de 3 • Cliente ${activeClientId}`;
         titleEl.textContent = '🎉 ¡Primer Pago Confirmado!';
-        bodyEl.textContent = 'Para iniciar la inyección automatizada de audiencias, debemos habilitar los permisos de evaluador en Meta Developers y cargar tu contrato.';
+        bodyEl.textContent = `Tu ID asignado es ${activeClientId}. Para iniciar la inyección automatizada de audiencias, por favor acepta el rol de evaluador y firma el contrato digital.`;
 
         stepsContainer.innerHTML = `
           <ul class="steps-list">
@@ -269,7 +300,7 @@
             </li>
             <li>
               <span class="step-number">2</span>
-              <div>Continúa a la firma de contrato digital y carga de archivo Excel.</div>
+              <div>Continúa a la firma del contrato digital identificado como <strong>${activeClientId}</strong>.</div>
             </li>
           </ul>
         `;
@@ -281,14 +312,15 @@
         };
 
         verifyBtn.style.display = 'inline-flex';
-        verifyBtn.textContent = '2. Ir a Contrato y Carga de Excel 📋';
+        verifyBtn.textContent = '2. Ir a Contrato Digital';
         verifyBtn.onclick = () => {
-          window.location.href = `/index.html?step=contrato_excel&sessionId=${sessionId || ''}`;
+          verifyBtn.textContent = 'Redirigiendo a contrato...';
+          window.location.href = `/index.html?clientId=${encodeURIComponent(activeClientId)}#contrato`;
         };
       }
 
       // =========================================================================
-      // PASO 1: CONEXIÓN OAUTH CON META (Viene tras subir Excel en index.html)
+      // PASO 1: CONEXIÓN OAUTH CON META (Viene tras subir Excel)
       // =========================================================================
       else if (step === 'conectar_meta') {
         loaderEl.style.display = 'none';
@@ -369,7 +401,9 @@
 
         } else {
           // Flujo Normal para Clientes
-          badgeEl.textContent = 'Paso Final • Activación';
+          const activeClientId = await resolveClientId();
+
+          badgeEl.textContent = `Paso Final • ${activeClientId}`;
           titleEl.textContent = '🚀 Borrador Generado en Meta';
           bodyEl.textContent = 'El borrador de tu campaña ha sido preparado. Abre Meta Ads Manager para publicar presupuesto/creativos y pasa a tu Dashboard.';
 
@@ -411,13 +445,13 @@
               await fetch('/api/facebook/activar-campana', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, campaignId })
+                body: JSON.stringify({ sessionId, campaignId, clientId: activeClientId })
               });
             } catch (err) {
               console.warn("Navegando hacia el dashboard...");
             }
 
-            window.location.href = `/client.html?sessionId=${sessionId || ''}&campaignId=${campaignId || ''}&status=verifying`;
+            window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&campaignId=${campaignId || ''}&status=verifying`;
           };
         }
       }
@@ -426,20 +460,23 @@
       // PASO 3: CONFIRMAR PAGO / EVENTO CAPI
       // =========================================================================
       else if (step === 'confirmar_pago') {
+        loaderEl.style.display = 'none';
+        const activeClientId = await resolveClientId();
+
         localStorage.setItem('sodie_payment_completed', 'true');
 
         if (typeof fbq === 'function') {
           fbq('track', 'Purchase', { value: 1000.00, currency: 'USD', content_name: 'Reserva Hito SODIE' });
         }
 
-        badgeEl.textContent = 'Pago Exitoso';
+        badgeEl.textContent = `Pago Exitoso • ${activeClientId}`;
         titleEl.textContent = '¡Pago Registrado!';
         bodyEl.textContent = 'Registrando evento CAPI y redirigiendo a tu panel...';
         
         setTimeout(() => {
           const targetUrl = role === 'admin' 
             ? `/admin.html?sessionId=${sessionId || ''}&status=paid_success` 
-            : `/client.html?sessionId=${sessionId || ''}&status=paid_success`;
+            : `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=paid_success`;
           window.location.href = targetUrl;
         }, 2000);
       }
@@ -449,7 +486,9 @@
       // =========================================================================
       else {
         loaderEl.style.display = 'none';
-        badgeEl.textContent = role === 'admin' ? 'SODIE Admin' : 'SODIE Panel';
+        const activeClientId = await resolveClientId();
+
+        badgeEl.textContent = role === 'admin' ? 'SODIE Admin' : `SODIE Panel • ${activeClientId}`;
         titleEl.textContent = 'Confirmación SODIE';
         bodyEl.textContent = 'Redirigiendo a tu panel principal...';
         verifyBtn.style.display = 'inline-flex';
@@ -457,7 +496,7 @@
         verifyBtn.onclick = () => {
           window.location.href = role === 'admin' 
             ? `/admin.html?sessionId=${sessionId || ''}` 
-            : `/client.html?sessionId=${sessionId || ''}`;
+            : `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}`;
         };
       }
     });
