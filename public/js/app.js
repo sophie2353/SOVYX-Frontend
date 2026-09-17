@@ -1,6 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Sincronizada con Meta CAPI, Lista de Espera y Contador Dinámico de Cupos.
+ * Versión Sincronizada: Pasarela Exclusiva Hora 0 + Carga por ID de Cliente para Contrato y Audiencia.
  */
 
 // Helper para obtener la base URL limpia en cada llamada
@@ -10,6 +10,13 @@ function getBaseUrl() {
   }
   return window.location.origin;
 }
+
+// Estado global local para el flujo de pago inicial (Hora 0)
+let currentPaymentState = {
+  hours: 0,
+  currentStep: 1,
+  blocks: []
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   initSplashGauges();
@@ -159,19 +166,16 @@ function actualizarInterfazCupos(slots) {
   if (cuposVal) cuposVal.textContent = slots;
 
   if (slots >= 2) {
-    // Cupo 1 y 2 -> $3.000 / Hora 0
     if (cuposSub) cuposSub.textContent = 'Cupo 1 y 2 ($3.000)';
     if (cuposBadge) cuposBadge.textContent = 'solo 2 cupos disponibles';
     if (pfActive) pfActive.classList.remove('hidden');
     if (pfWaitlist) pfWaitlist.classList.add('hidden');
   } else if (slots === 1) {
-    // Cupo 3 (Cliente 4) -> $5.000 / Hora 0
     if (cuposSub) cuposSub.textContent = 'Último Cupo ($5.000)';
     if (cuposBadge) cuposBadge.textContent = '¡ÚLTIMO CUPO DISPONIBLE!';
     if (pfActive) pfActive.classList.remove('hidden');
     if (pfWaitlist) pfWaitlist.classList.add('hidden');
   } else {
-    // 0 Cupos -> Activa Lista de Espera automáticamente
     if (cuposSub) cuposSub.textContent = 'Agotado';
     if (cuposBadge) cuposBadge.textContent = 'cupos agotados';
     if (pfActive) pfActive.classList.add('hidden');
@@ -328,7 +332,7 @@ async function sendChatMessage(messageText, payload = null) {
 }
 
 /* ==========================================================================
-   6. EVENTOS DE SECCIÓN DE PAGO (PAGO -> CONTRATO -> EXCEL -> META CAPI)
+   6. EVENTOS DE PAGO POR HORA (HORA 0) + CARGA POR ID DE CLIENTE
    ========================================================================== */
 function initPaymentFlowEvents() {
   const btnIniciar = document.getElementById('btn-iniciar-pago');
@@ -336,7 +340,6 @@ function initPaymentFlowEvents() {
   const btnSubirContrato = document.getElementById('btn-client-send-contract');
   const btnSubirExcel = document.getElementById('btn-client-upload-file');
 
-  // Transición del paso intro al formulario
   if (btnIniciar) {
     btnIniciar.addEventListener('click', () => {
       document.getElementById('pf-intro-card')?.classList.add('hidden');
@@ -348,7 +351,7 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // Procesamiento del Pago + Envío a CAPI Facebook
+  // PAGO INICIAL POR HORA 0
   if (btnProcesar) {
     btnProcesar.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -361,13 +364,11 @@ function initPaymentFlowEvents() {
       const fbUserIdInput = document.getElementById('fbUserId');
       const fbUserId = fbUserIdInput ? fbUserIdInput.value.trim() : '';
 
-      // Validación de campos
       if (!age || !country || !city || !zip || !phone) {
         showToast('Campos Incompletos', 'Completa la información de facturación.', true);
         return;
       }
 
-      // Bloqueo estricto de Facebook ID
       if (!fbUserId) {
         showToast('Facebook Requerido', 'Debes ingresar tu Usuario o ID de Facebook.', true);
         fbUserIdInput.focus();
@@ -376,56 +377,87 @@ function initPaymentFlowEvents() {
       }
 
       fbUserIdInput.style.borderColor = 'rgba(255,255,255,0.15)';
-      showToast('Procesando Pago', 'Conectando con la pasarela y Meta CAPI...');
 
       try {
-        // 1. Checkout del Pago
-        const payRes = await fetch(`${getBaseUrl()}/api/v1/payments/checkout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ age, country, city, zip, phone, fbUserId, amount: 3000 })
-        });
-
-        // 2. Notificación CAPI Facebook
+        // Notificación Meta CAPI
         await fetch(`${getBaseUrl()}/api/facebook/capi`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId: window.sessionId || localStorage.getItem('sessionId') || 'SODIE-SESSION',
-            eventName: 'Purchase',
+            eventName: 'InitiateCheckout',
             fbUserId: fbUserId
           })
         });
 
-        showToast('Pago Aprobado', 'Transacción completada. Habilitando contrato.');
+        // Solicitud a la pasarela SOLO POR HORA 0
+        if (currentPaymentState.blocks.length === 0) {
+          showToast('Consultando Pasarela', 'Generando enlaces de pago para Hora 0...');
+          
+          const pasarelaRes = await fetch(`${getBaseUrl()}/api/pasarela/get-link?hours=0`);
+          const pasarelaData = await pasarelaRes.json();
 
-        // Oculta billing y habilita contrato
-        document.getElementById('pf-step-billing')?.classList.add('hidden');
-        const stepContract = document.getElementById('pf-step-contract');
-        if (stepContract) {
-          stepContract.classList.remove('hidden');
-          stepContract.scrollIntoView({ behavior: 'smooth' });
+          if (!pasarelaData.success || !pasarelaData.blocks || pasarelaData.blocks.length === 0) {
+            throw new Error(pasarelaData.error || 'No se pudieron obtener los enlaces de pago');
+          }
+
+          currentPaymentState.hours = 0;
+          currentPaymentState.blocks = pasarelaData.blocks;
+          currentPaymentState.currentStep = 1;
+        }
+
+        const currentBlock = currentPaymentState.blocks[currentPaymentState.currentStep - 1];
+        if (!currentBlock || !currentBlock.url) {
+          showToast('Error', 'Enlace de pago no disponible', true);
+          return;
+        }
+
+        showToast('Redirigiendo a Pasarela', `${currentBlock.label} - Preparando transacción...`);
+
+        // Manejo Multipaso (Ej: Hora 0 con 2 pagos en $3.000)
+        if (currentPaymentState.blocks.length > 1 && currentPaymentState.currentStep === 1) {
+          window.open(currentBlock.url, '_blank');
+          
+          currentPaymentState.currentStep = 2;
+          const nextBlock = currentPaymentState.blocks[1];
+
+          btnProcesar.textContent = `Pagar Paso 2/2 ($${nextBlock.amount} USD) ➔`;
+          btnProcesar.style.background = '#00ffcc';
+          btnProcesar.style.color = '#000';
+          
+          showToast('Paso 1 Iniciado', 'Completa la primera parte y haz clic aquí para el Pago 2 de 2.');
+        } else {
+          // Pago único o último bloque: Redirige a la pasarela (la pasarela enviará luego a confirmacion.html)
+          window.location.href = currentBlock.url;
         }
 
       } catch (error) {
-        console.error('Error de pago / CAPI:', error);
-        showToast('Error de Pago', 'No se pudo procesar la transacción.', true);
+        console.error('Error pasarela / CAPI:', error);
+        showToast('Error de Pago', error.message || 'No se pudo procesar la transacción.', true);
       }
     });
   }
 
-  // Envío de Contrato Firmado
+  // ENVÍO DE CONTRATO FIRMADO (REQUIERE CLIENT ID CREADO PREVIAMENTE EN CONFIRMACION.HTML)
   if (btnSubirContrato) {
     btnSubirContrato.addEventListener('click', sodieSubirContrato);
   }
 
-  // Carga del Excel de Compradores
+  // CARGA DE EXCEL/CSV DE AUDIENCIA (REQUIERE CLIENT ID CREADO PREVIAMENTE)
   if (btnSubirExcel) {
     btnSubirExcel.addEventListener('click', sodieProcesarExcelYConectarFB);
   }
 }
 
 async function sodieSubirContrato() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_client_id');
+
+  if (!clientId) {
+    showToast('ID Requerido', 'No se encontró tu ID de cliente. Por favor accede desde la confirmación de tu pago.', true);
+    return;
+  }
+
   const fileInput = document.getElementById('client-contract-file-input');
   if (!fileInput || !fileInput.files[0]) {
     showToast('Archivo Requerido', 'Selecciona el PDF de tu contrato firmado.', true);
@@ -434,6 +466,7 @@ async function sodieSubirContrato() {
 
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
+  formData.append('clientId', clientId);
 
   showToast('Subiendo Contrato', 'Validando archivo firmado...');
 
@@ -461,6 +494,14 @@ async function sodieSubirContrato() {
 }
 
 async function sodieProcesarExcelYConectarFB() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_client_id');
+
+  if (!clientId) {
+    showToast('ID Requerido', 'No se encontró tu ID de cliente. Por favor accede desde la confirmación de tu pago.', true);
+    return;
+  }
+
   const fileInput = document.getElementById('client-file-input');
   if (!fileInput || !fileInput.files[0]) {
     showToast('Archivo Requerido', 'Selecciona tu archivo Excel / CSV de compradores.', true);
@@ -469,6 +510,7 @@ async function sodieProcesarExcelYConectarFB() {
 
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
+  formData.append('clientId', clientId);
 
   showToast('Procesando Audiencia', 'Creando borrador de campaña...');
 
@@ -482,9 +524,8 @@ async function sodieProcesarExcelYConectarFB() {
 
     showToast('Borrador Creado', 'Redirigiendo a la confirmación de campaña...');
 
-    // Redirección final a confirmacion.html
     setTimeout(() => {
-      window.location.href = 'confirmacion.html?step=activar_campana&status=ready';
+      window.location.href = `confirmacion.html?clientId=${encodeURIComponent(clientId)}&step=activar_campana&status=ready`;
     }, 1200);
 
   } catch (error) {
@@ -523,7 +564,6 @@ function initWaitlistEvents() {
 
         showToast('Acceso Confirmado', 'Te has unido correctamente a la Lista de Espera.');
         
-        // Deshabilita el botón tras el registro
         btnWaitlist.disabled = true;
         btnWaitlist.textContent = 'REGISTRADO EN LISTA DE ESPERA ✓';
         btnWaitlist.style.background = 'rgba(0, 255, 204, 0.2)';
@@ -543,7 +583,6 @@ function initTimer18d() {
   const timerDisplay = document.getElementById('timer-main-display');
   if (!timerDisplay) return;
 
-  // 18 días en segundos (18 * 24 * 3600 = 1,555,200 segundos)
   let totalSeconds = 18 * 24 * 3600;
 
   setInterval(() => {
