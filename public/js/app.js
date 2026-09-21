@@ -1,6 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Sincronizada: Pasarela Exclusiva Hora 0 + Carga por ID de Cliente para Contrato y Audiencia.
+ * Versión Actualizada: Integración IA3 Backend + Flujo de Pago en "Verificar Pago" (btn-verificar-transaccion).
  */
 
 // Helper para obtener la base URL limpia en cada llamada
@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSSEMetrics();
   initFacebookMetrics();
   initChatEngine();
+  initIA3Engine();
   initWebAuthnBiometrics();
   handleUrlRedirects();
   initTimer18d();
@@ -332,11 +333,67 @@ async function sendChatMessage(messageText, payload = null) {
 }
 
 /* ==========================================================================
-   6. EVENTOS DE PAGO POR HORA (HORA 0) + CARGA POR ID DE CLIENTE
+   6. IA3 ANALYZER ENGINE (/api/ia3/analizar)
+   ========================================================================== */
+function initIA3Engine() {
+  const btnAnalizar = document.getElementById('btn-ia3-analizar');
+  if (!btnAnalizar) return;
+
+  btnAnalizar.addEventListener('click', async () => {
+    const spendInput = document.getElementById('ia3-ad-spend');
+    const roasInput = document.getElementById('ia3-roas');
+
+    const spend = spendInput ? spendInput.value : '';
+    const roas = roasInput ? roasInput.value : '';
+
+    if (!spend || !roas) {
+      showToast('Campos Faltantes', 'Por favor ingresa la Inversión y el ROAS actual.', true);
+      return;
+    }
+
+    const modal = document.getElementById('ia3-modal-result');
+    const valUser = document.getElementById('ia3-val-user');
+    const valProblems = document.getElementById('ia3-val-problems');
+    const valSolution = document.getElementById('ia3-val-solution');
+    const valSavings = document.getElementById('ia3-val-savings');
+
+    if (modal) modal.classList.remove('hidden');
+    if (valUser) valUser.innerText = `$${spend} USD / ROAS ${roas}`;
+    if (valProblems) valProblems.innerText = "Analizando fuga de capital...";
+    if (valSolution) valSolution.innerText = "IA3 procesando solución algorítmica...";
+    if (valSavings) valSavings.innerText = "Calculando optimización...";
+
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/ia3/analizar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adSpend: spend, roas: roas })
+      });
+
+      if (!res.ok) throw new Error('Error al conectar con la IA3');
+
+      const data = await res.json();
+
+      if (valProblems) valProblems.innerText = data.problemas || data.problems || "Fuga identificada en segmentación amplia.";
+      if (valSolution) valSolution.innerText = data.solucion || data.solution || "Inyección directa a audiencia optimizada por IA3.";
+      if (valSavings) valSavings.innerText = data.ahorro || data.savings || "Ahorro potencial recalculado con éxito.";
+
+      showToast('Análisis IA3 Listo', 'El diagnóstico del backend se ha generado correctamente.');
+
+    } catch (error) {
+      console.error('Error IA3:', error);
+      if (valSolution) valSolution.innerText = "Error en el servidor al generar diagnóstico IA3.";
+      showToast('Error IA3', 'No se pudo obtener la respuesta del backend de IA3.', true);
+    }
+  });
+}
+
+/* ==========================================================================
+   7. EVENTOS DE PAGO POR HORA (HORA 0) + VERIFICAR PAGO
    ========================================================================== */
 function initPaymentFlowEvents() {
   const btnIniciar = document.getElementById('btn-iniciar-pago');
-  const btnProcesar = document.getElementById('btn-procesar-pago-pasarela');
+  const btnVerificar = document.getElementById('btn-verificar-transaccion');
   const btnSubirContrato = document.getElementById('btn-client-send-contract');
   const btnSubirExcel = document.getElementById('btn-client-upload-file');
 
@@ -351,9 +408,9 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // PAGO INICIAL POR HORA 0
-  if (btnProcesar) {
-    btnProcesar.addEventListener('click', async (e) => {
+  // LLAMADA Y PROCESAMIENTO DE PAGO EN EL BOTÓN "VERIFICAR PAGO"
+  if (btnVerificar) {
+    btnVerificar.addEventListener('click', async (e) => {
       e.preventDefault();
 
       const age = document.getElementById('pay-age')?.value;
@@ -371,12 +428,14 @@ function initPaymentFlowEvents() {
 
       if (!fbUserId) {
         showToast('Facebook Requerido', 'Debes ingresar tu Usuario o ID de Facebook.', true);
-        fbUserIdInput.focus();
-        fbUserIdInput.style.borderColor = '#ff007a';
+        if (fbUserIdInput) {
+          fbUserIdInput.focus();
+          fbUserIdInput.style.borderColor = '#ff007a';
+        }
         return;
       }
 
-      fbUserIdInput.style.borderColor = 'rgba(255,255,255,0.15)';
+      if (fbUserIdInput) fbUserIdInput.style.borderColor = 'rgba(255,255,255,0.15)';
 
       try {
         // Notificación Meta CAPI
@@ -421,13 +480,13 @@ function initPaymentFlowEvents() {
           currentPaymentState.currentStep = 2;
           const nextBlock = currentPaymentState.blocks[1];
 
-          btnProcesar.textContent = `Pagar Paso 2/2 ($${nextBlock.amount} USD) ➔`;
-          btnProcesar.style.background = '#00ffcc';
-          btnProcesar.style.color = '#000';
+          btnVerificar.textContent = `Pagar Paso 2/2 ($${nextBlock.amount} USD) ➔`;
+          btnVerificar.style.background = '#00ffcc';
+          btnVerificar.style.color = '#000';
           
           showToast('Paso 1 Iniciado', 'Completa la primera parte y haz clic aquí para el Pago 2 de 2.');
         } else {
-          // Pago único o último bloque: Redirige a la pasarela (la pasarela enviará luego a confirmacion.html)
+          // Pago único o último bloque: Redirige a la pasarela
           window.location.href = currentBlock.url;
         }
 
@@ -438,12 +497,12 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // ENVÍO DE CONTRATO FIRMADO (REQUIERE CLIENT ID CREADO PREVIAMENTE EN CONFIRMACION.HTML)
+  // ENVÍO DE CONTRATO FIRMADO (REQUIERE CLIENT ID)
   if (btnSubirContrato) {
     btnSubirContrato.addEventListener('click', sodieSubirContrato);
   }
 
-  // CARGA DE EXCEL/CSV DE AUDIENCIA (REQUIERE CLIENT ID CREADO PREVIAMENTE)
+  // CARGA DE EXCEL/CSV DE AUDIENCIA (REQUIERE CLIENT ID)
   if (btnSubirExcel) {
     btnSubirExcel.addEventListener('click', sodieProcesarExcelYConectarFB);
   }
@@ -535,7 +594,7 @@ async function sodieProcesarExcelYConectarFB() {
 }
 
 /* ==========================================================================
-   7. LISTA DE ESPERA (REEMPLAZO DE PAGO AL AGOTAR CUPOS)
+   8. LISTA DE ESPERA (REEMPLAZO DE PAGO AL AGOTAR CUPOS)
    ========================================================================== */
 function initWaitlistEvents() {
   const btnWaitlist = document.getElementById('btn-waitlist-access');
@@ -577,7 +636,7 @@ function initWaitlistEvents() {
 }
 
 /* ==========================================================================
-   8. CRONÓMETRO REGRESIVO DE 18 DÍAS
+   9. CRONÓMETRO REGRESIVO DE 18 DÍAS
    ========================================================================== */
 function initTimer18d() {
   const timerDisplay = document.getElementById('timer-main-display');
@@ -598,7 +657,7 @@ function initTimer18d() {
 }
 
 /* ==========================================================================
-   9. BIOMETRÍA Y REDIRECCIONES
+   10. BIOMETRÍA Y REDIRECCIONES
    ========================================================================== */
 function initWebAuthnBiometrics() {
   const bioBtn = document.getElementById('btn-register-biometrics');
@@ -666,7 +725,7 @@ function handleUrlRedirects() {
 }
 
 /* ==========================================================================
-   10. DISPARADOR SECRETO DE 5 CLICS (ADMIN)
+   11. DISPARADOR SECRETO DE 5 CLICS (ADMIN)
    ========================================================================== */
 (function initAdminTriggerDirect() {
   let adminToques = 0;
