@@ -66,107 +66,101 @@
       </div>
     </section>
 
-    <!-- 2. BLOQUE DE INYECCIÓN (TIMER 0 A 24 HORAS) -->
+    <!-- 2. BLOQUE DE INYECCIÓN (TIMER 24 HORAS PARA EXCEL & TIMER DÍA 7 PAGO) -->
     <section id="card-injection-flow" class="glass-card-dash margin-v-sm">
-      <h3 class="section-title mint-txt">Inyección de Audiencia</h3>
-      <div id="timer-24h-display" class="timer-digits mint-txt">00:00:00</div>
+      <h3 class="section-title mint-txt">Inyección de Audiencia (Cada 24h)</h3>
+      <div id="timer-24h-display" class="timer-digits mint-txt">24:00:00</div>
       
       <div class="input-group-flow margin-v-sm">
         <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
         <button type="button" id="btn-client-upload-excel" class="btn-pf-action btn-mint-solid">
-          Subir Excel
+          Subir Excel (Paso Diario)
         </button>
       </div>
 
       <button type="button" id="btn-client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
         Activar Campaña
       </button>
+
+      <!-- ALERTA DE DÍA 7 DE PAGO OBLIGATORIO -->
+      <div id="weekly-payment-lock-warning" class="hidden margin-v-sm" style="padding: 12px; border-radius: 8px; background: rgba(255, 0, 122, 0.15); border: 1px solid #ff007a;">
+        <span class="fuchsia-txt" style="font-weight: bold; display: block; margin-bottom: 4px;">⚠️ Día 7 de Ciclo Alcanzado</span>
+        <p style="font-size: 0.85rem; color: #e0e0e0; margin: 0;">Es necesario liquidar la cuota semanal pendiente ($6,000 USDT) para desbloquear la inyección del siguiente ciclo y continuar ejecutando la campaña.</p>
+      </div>
     </section>
 
-    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (CONTROLADO Y VINCULADO CON CLIENT.JS) -->
+    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (CUOTAS SEMANALES: 72% RESTANTE = $6.000/SEM) -->
     <section class="glass-card-dash margin-v-sm">
-      <h3 class="section-title fuchsia-txt">Cronograma de Pagos Post-Resultados</h3>
-      <div id="timer-post-display" class="timer-digits fuchsia-txt">00:00:00</div>
+      <h3 class="section-title fuchsia-txt">Cronograma de Pagos Semanales Post-Resultados</h3>
+      <div id="timer-weekly-pay-display" class="timer-digits fuchsia-txt">07d 00h 00m 00s</div>
 
       <div id="payment-options-container" class="margin-v-sm">
-        <!-- RENDERIZADO / MANEJO DINÁMICO POR CLIENT.JS (HELIO PAY / KONTIGO / PASARELA) -->
-        
-        <!-- HORA 24 -->
+        <!-- SEMANA 1 (DÍA 7) -->
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(0, 255, 204, 0.2); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Hora 24</h4>
-          <p id="desc-hora-24" class="step-desc" style="margin-bottom: 10px;">Cargando monto...</p>
-          <a id="btn-pay-hora24" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
-            Pagar Cuota Hora 24 ↗
+          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Semana 1 ($6,000 USDT)</h4>
+          <p id="desc-semana-1" class="step-desc" style="margin-bottom: 10px;">Liquidación del 72% restante del ciclo tras los primeros 7 días de resultados.</p>
+          <a id="btn-pay-semana1" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
+            Pagar Cuota Semana 1 ($6,000) ↗
           </a>
         </div>
 
-        <!-- HORA 48 (HELIO PAY / PASARELA) -->
+        <!-- SEMANA 2 (DÍA 14) -->
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Hora 48 ($3.000)</h4>
-          <p class="step-desc" style="margin-bottom: 10px;">Liquidación intermedia post-resultados.</p>
-          <a id="btn-pay-hora48" href="javascript:void(0);" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none;">
-            Pagar Cuota Hora 48 ($3.000) ↗
+          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Semana 2 ($6,000 USDT)</h4>
+          <p id="desc-semana-2" class="step-desc" style="margin-bottom: 10px;">Segunda cuota de mantenimiento y escalabilidad de ROAS On-Chain.</p>
+          <a id="btn-pay-semana2" href="javascript:void(0);" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none;">
+            Pagar Cuota Semana 2 ($6,000) ↗
           </a>
         </div>
 
-        <!-- HORA 72 (HELIO PAY / PASARELA) -->
+        <!-- SEMANA 3 (DÍA 21) -->
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="fuchsia-txt" style="margin-bottom: 5px;">Cuota Hora 72 ($3.000)</h4>
-          <p class="step-desc" style="margin-bottom: 10px;">Liquidación final del ciclo de inyección.</p>
-          <a id="btn-pay-hora72" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
-            Pagar Cuota Hora 72 ($3.000) ↗
+          <h4 class="fuchsia-txt" style="margin-bottom: 5px;">Cuota Semana 3 ($6,000 USDT)</h4>
+          <p id="desc-semana-3" class="step-desc" style="margin-bottom: 10px;">Cuota previa al cierre de la cuarta semana de optimización continua.</p>
+          <a id="btn-pay-semana3" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
+            Pagar Cuota Semana 3 ($6,000) ↗
           </a>
         </div>
       </div>
     </section>
 
-    <!-- 4. CIERRE DE CICLO HORA 96 -->
-    <section id="section-hour-96-complete" class="glass-card-dash hidden text-center margin-v-sm">
-      <h3 class="section-title mint-txt">¡Ciclo Completado!</h3>
-      <p class="step-desc">Has completado las 96 horas de ejecución y el total de pagos después de obtener resultados.</p>
+    <!-- 4. CIERRE DE CICLO FINAL EN SEMANA 4 (DÍA 28) -->
+    <section id="section-week-4-complete" class="glass-card-dash hidden text-center margin-v-sm">
+      <h3 class="section-title mint-txt">¡Ciclo de 4 Semanas Completado!</h3>
+      <p class="step-desc">Has finalizado satisfactoriamente las 4 semanas de ejecución, optimización de audiencia y liquidación de cuotas.</p>
       <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" onclick="window.location.href='index.html'">
-        Unirse a Lista de Espera (2 cupos disponibles)
+        Unirse a Lista de Espera / Renovar Cupo
       </button>
     </section>
 
-    <!-- CRONOGRAMA GLOBAL DETALLADO DE RESERVA Y MODALIDADES POR CUPO -->
+    <!-- DESGLOSE GLOBAL DE ESQUEMA DE PAGOS POR CUPO Y FASE -->
     <section class="glass-card-dash margin-v-sm" style="padding: 24px; border: 1px solid rgba(0, 255, 204, 0.2);">
-      <h3 class="section-title mint-txt" style="font-size: 1.2rem; margin-bottom: 12px;">Desglose de Esquema de Cuotas (0h - 72h)</h3>
+      <h3 class="section-title mint-txt" style="font-size: 1.2rem; margin-bottom: 12px;">Estructura de Cuotas y Modulo On-Chain</h3>
       <p class="step-desc" style="margin-bottom: 18px; line-height: 1.5;">
-        Estructura de cobros programada por fases para asegurar la optimización del algoritmo en Meta Ads:
+        Cobros programados por semanas (28% inicial en Hora 0 y 72% restante diferido en 3 cuotas semanales de $6,000 USD):
       </p>
 
       <div class="timeline-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-        <!-- CUPO 1 & 2 -->
+        <!-- ESTRUCTURA GENERAL DE PAGOS -->
         <div class="time-step active" style="flex: 1; min-width: 220px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid rgba(0,255,204,0.15);">
-          <span class="step-hours mint-txt" style="font-weight: bold; display: block; margin-bottom: 6px;">Cupo 1 & 2 (Total $10.000)</span>
+          <span class="step-hours mint-txt" style="font-weight: bold; display: block; margin-bottom: 6px;">Desglose por Etapas</span>
           <span class="step-desc" style="font-size: 0.85rem; line-height: 1.4; display: block;">
-            • Hora 0: $3.000<br>
-            • Hora 24: $1.000 (Kontigo)<br>
-            • Hora 48: $3.000<br>
-            • Hora 72: $3.000
-          </span>
-        </div>
-
-        <!-- CUPO 3 -->
-        <div class="time-step" style="flex: 1; min-width: 220px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid rgba(255,0,122,0.15);">
-          <span class="step-hours fuchsia-txt" style="font-weight: bold; display: block; margin-bottom: 6px;">Cupo 3 (Total $13.000)</span>
-          <span class="step-desc" style="font-size: 0.85rem; line-height: 1.4; display: block;">
-            • Hora 0: $5.000<br>
-            • Hora 24: $2.000<br>
-            • Hora 48: $3.000<br>
-            • Hora 72: $3.000
+            • Hora 0: $7,000 USDT (Pago Inicial - 28%)<br>
+            • Semana 1 (Día 7): $6,000 USDT<br>
+            • Semana 2 (Día 14): $6,000 USDT<br>
+            • Semana 3 (Día 21): $6,000 USDT<br>
+            • Semana 4 (Día 28): $0 USDT (Final de Ciclo)
           </span>
         </div>
       </div>
     </section>
 
-    <!-- TEMPORIZADOR GLOBAL 0 - 96H -->
+    <!-- TEMPORIZADOR GLOBAL DE CICLO (4 SEMANAS / 28 DÍAS) -->
     <section class="glass-card-dash timer-section" style="margin-top: 20px;">
-      <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO</span>
-      <div id="global-timer-display" class="timer-digits">96:00:00</div>
+      <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO (4 SEMANAS)</span>
+      <div id="global-timer-display" class="timer-digits">28d 00h 00m 00s</div>
       <span class="timer-sub" style="margin-top: 8px; display: block; font-weight: bold; letter-spacing: 1px;">
-        TIEMPO TOTAL EN EJECUCIÓN
+        TIEMPO TOTAL DE OPTIMIZACIÓN Y EJECUCIÓN
       </span>
     </section>
     
