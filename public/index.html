@@ -190,7 +190,7 @@
       </div>
     </section>
 
-    <!-- 3. NUEVA SECCIÓN: ANALIZA TUS MÉTRICAS ACTUALES CON IA3 -->
+    <!-- 3. ANALIZA TUS MÉTRICAS ACTUALES CON IA3 -->
     <section class="glass-card-dash metrics-analyzer-section" style="margin-bottom: 24px;">
       <h3 class="section-title mint-txt" style="font-size: 1.3rem; margin-bottom: 8px;">Analiza Tus Métricas Actuales</h3>
       <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 16px;">
@@ -309,75 +309,44 @@
             </div>
           </div>
 
-          <button type="button" id="btn-iniciar-pago" class="btn-pf-action btn-pay-gradient" style="width: 100%; max-width: 420px; margin: 0 auto; padding: 14px 24px; font-size: 1rem; font-weight: 700;">
+          <button type="button" id="btn-iniciar-pago" onclick="mostrarPasoConexion()" class="btn-pf-action btn-pay-gradient" style="width: 100%; max-width: 420px; margin: 0 auto; padding: 14px 24px; font-size: 1rem; font-weight: 700;">
             PAGAR
           </button>
         </div>
 
-        <!-- PASO 1: FORMULARIO DE DATOS + USUARIO FACEBOOK -->
-        <div id="pf-step-billing" class="form-billing-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-          <h4 class="fuchsia-txt" style="margin-bottom: 12px; font-size: 1.1rem;">Paso 1: Datos para Facturación y Conexión</h4>
-          <div class="form-stack-compact">
-            <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <input type="number" id="pay-age" placeholder="Edad *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
-              <input type="text" id="pay-country" placeholder="País *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
-            </div>
-            <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-              <input type="text" id="pay-city" placeholder="Ciudad *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
-              <input type="text" id="pay-zip" placeholder="Código Postal *" required style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
-            </div>
-            <input type="tel" id="pay-phone" placeholder="Número de Teléfono *" required style="width: 100%; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
-
-            <div class="form-group" style="margin-top: 12px;">
-              <label for="fbUserId" style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85rem; color: #94a3b8;">
-                User de Facebook <span style="color: #ff007a;">*</span>
-              </label>
-              <input 
-                type="text" 
-                id="fbUserId" 
-                name="fbUserId" 
-                placeholder="ej. juan.perez.12 o ID numérico" 
-                required 
-                style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.4); color: #fff;"
-              />
-            </div>
-
-            <button type="button" id="btn-procesar-pago-pasarela" class="btn-pf-action btn-pay-gradient" style="width: 100%; margin-top: 16px; padding: 12px; font-weight: bold;">
-              IR A PAGAR
-            </button>
-          </div>
-        </div>
-
-        <!-- PASO 2: SECCIÓN DE PAGO POLYGON USDC -->
-       <div id="pf-step-pay" class= "pay-flow-box margin -v-sm hidden">
-         <iframe src="https://nowpayments.io/embeds/payment-widget?iid=5260032422" width="410" height="696" frameborder="0" scrolling="no" style="overflow-y: hidden;">
-        No se puede cargar el widget
-     </iframe>
-        </div>
-        
-        <!-- Aqui necesito que vaya antes de ir a pagar un input donde separe tan los servicios del contrato [link contrato.html] para ir a el contrato.html y abajo debe colocar su nombre y apellido. ya la data obtenida antes va al contrato final con backend recolectando id post webhook pues) -->
-          <!-- Tambien necesito que post pago vaya a confirmacion.html para confirmar pago y asignar ID -->
-
-        <!-- PASO 3: CONTRATO DE SERVICIO. esto se elimina evidentemente con el Paso 2-->
-        <div id="pf-step-contract" class="contract-flow-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.2);">
-          <h4 class="mint-txt" style="margin-bottom: 8px;">Paso 3: Contrato de Servicio Firmado</h4>
-          <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;">Descarga el contrato, firma digitalmente y adjúntalo para habilitar el paso final:</p>
-          <a id="btn-download-contract" href="contrato-sodie.pdf" download class="btn-pf-action btn-blue-solid" style="display: inline-block; text-decoration: none; padding: 10px 18px; margin-bottom: 12px;">Descargar Contrato PDF</a>
+        <!-- PASO 1: USER DE FACEBOOK ANTES DE IR A FIRMAR Y PAGAR -->
+        <div id="pf-step-billing" class="form-billing-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); max-width: 420px; margin: 0 auto;">
+          <h4 class="fuchsia-txt" style="margin-bottom: 12px; font-size: 1.1rem; text-align: center;">Paso 1: Conexión con Meta Ads</h4>
           
-          <div class="input-group-flow" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input type="file" id="client-contract-file-input" class="file-input-custom" accept=".pdf,.png,.jpg" style="flex: 1;" />
-            <button type="button" id="btn-client-send-contract" class="btn-pf-action btn-pay-gradient" style="padding: 10px 18px; font-weight: bold;">Siguiente</button>
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="fbUserId" style="display: block; font-weight: bold; margin-bottom: 8px; font-size: 0.85rem; color: #94a3b8;">
+              User de Facebook / ID de Perfil <span style="color: #ff007a;">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="fbUserId" 
+              name="fbUserId" 
+              placeholder="ej. juan.perez.12 o ID numérico" 
+              required 
+              style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.95rem;"
+            />
           </div>
+
+          <button type="button" id="btn-procesar-pago-pasarela" onclick="irAContratoYPago()" class="btn-pf-action btn-pay-gradient" style="width: 100%; margin-top: 18px; padding: 14px; font-weight: bold;">
+            IR A FIRMAR Y PAGAR ➔
+          </button>
         </div>
 
-        <!-- PASO 3: CARGA DE EXCEL -->
-        <div id="pf-step-excel" class="upload-excel-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 0, 122, 0.2);">
-          <h4 class="fuchsia-txt" style="margin-bottom: 8px;">Paso 3: Subir Excel de Compradores</h4>
-          <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;">Carga tu lista de compradores para crear el borrador y finalizar el registro:</p>
-          <div class="input-group-flow" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv,.xlsx,.xls" style="flex: 1;" />
-            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient" style="padding: 10px 20px; font-weight: bold;">
-              Siguiente (Ir a Confirmación)
+        <!-- PASO 2: CARGA DE EXCEL (Aparece tras retornar de contrato.html) -->
+        <div id="pf-step-excel" class="upload-excel-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.3); max-width: 480px; margin: 0 auto;">
+          <h4 class="mint-txt" style="margin-bottom: 8px;">Paso 2: Subir Excel de Compradores</h4>
+          <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 14px;">
+            Firma y pago completados. Carga la lista de compradores para generar los borradores e iniciar la inyección automatizada:
+          </p>
+          <div class="input-group-flow" style="display: flex; flex-direction: column; gap: 12px;">
+            <input type="file" id="client-file-input" class="file-input-custom" accept=".csv,.xlsx,.xls" style="width: 100%;" />
+            <button type="button" id="btn-client-upload-file" onclick="finalizarYConfirmar()" class="btn-pf-action btn-pay-gradient" style="padding: 12px; font-weight: bold;">
+              Finalizar Registro (Ir a Confirmación) 🚀
             </button>
           </div>
         </div>
@@ -433,6 +402,48 @@
       <p>© SODIE v3.5. 2026. TODOS LOS DERECHOS RESERVADOS</p>
     </footer>
   </main>
+
+  <script style="display: none;">
+    // Muestra la caja del User de Facebook al pulsar PAGAR
+    function mostrarPasoConexion() {
+      document.getElementById('pf-intro-card').classList.add('hidden');
+      document.getElementById('pf-step-billing').classList.remove('hidden');
+    }
+
+    // Guarda el User de Facebook y envía al usuario a firmar y pagar en contrato.html
+    function irAContratoYPago() {
+      const fbUser = document.getElementById('fbUserId').value.trim();
+      if (!fbUser) {
+        alert('Por favor ingresa tu User de Facebook para continuar.');
+        return;
+      }
+      
+      localStorage.setItem('sodie_fb_user', fbUser);
+      window.location.href = 'contrato.html';
+    }
+
+    // Procesa la carga del Excel y redirige a la confirmación
+    function finalizarYConfirmar() {
+      const fileInput = document.getElementById('client-file-input');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Por favor selecciona tu archivo Excel antes de continuar.');
+        return;
+      }
+
+      // Redirecciona a confirmación de pago
+      window.location.href = 'confirmacion.html';
+    }
+
+    // Detecta si el cliente viene de vuelta tras firmar/pagar en contrato.html
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
+        document.getElementById('pf-intro-card').classList.add('hidden');
+        document.getElementById('pf-step-billing').classList.add('hidden');
+        document.getElementById('pf-step-excel').classList.remove('hidden');
+      }
+    });
+  </script>
   
   <script src="config.js"></script>
   <script src="app.js"></script>
