@@ -1,6 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Actualizada: Integración IA3 Backend + Flujo de Pago en "Verificar Pago" (btn-verificar-transaccion).
+ * Versión Actualizada: Integración IA3 Backend + Flujo de Pago Simplificado & Carga Excel
  */
 
 // Helper para obtener la base URL limpia en cada llamada
@@ -11,7 +11,7 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
-// Estado global local para el flujo de pago inicial (Hora 0)
+// Estado global local para el flujo de pago inicial
 let currentPaymentState = {
   hours: 0,
   currentStep: 1,
@@ -27,17 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initIA3Engine();
   initWebAuthnBiometrics();
   handleUrlRedirects();
-  initTimer18d();
+  initTimer30d();
   initPaymentFlowEvents();
   initWaitlistEvents();
-
-  // Configurar enlace de descarga del Contrato PDF
-  const btnDescargarContrato = document.getElementById('btn-download-contract');
-  if (btnDescargarContrato) {
-    btnDescargarContrato.href = 'contrato-sodie.pdf';
-    btnDescargarContrato.setAttribute('download', 'Contrato_SODIE.pdf');
-    btnDescargarContrato.setAttribute('target', '_blank');
-  }
 
   // Configurar la fuente del Video de Demostración
   const demoVideo = document.getElementById('sodie-demo-video');
@@ -143,7 +135,7 @@ function initSSEMetrics() {
 async function checkAvailableSlots() {
   try {
     const res = await fetch(`${getBaseUrl()}/api/clientes/disponibles`);
-    let slots = 2;
+    let slots = 3;
 
     if (res.ok) {
       const data = await res.json();
@@ -153,7 +145,7 @@ async function checkAvailableSlots() {
     actualizarInterfazCupos(slots);
   } catch (error) {
     console.warn('Error obteniendo cupos del servidor. Usando valor por defecto.', error);
-    actualizarInterfazCupos(2);
+    actualizarInterfazCupos(3);
   }
 }
 
@@ -166,14 +158,9 @@ function actualizarInterfazCupos(slots) {
 
   if (cuposVal) cuposVal.textContent = slots;
 
-  if (slots >= 2) {
-    if (cuposSub) cuposSub.textContent = 'Cupo 1 y 2 ($3.000)';
-    if (cuposBadge) cuposBadge.textContent = 'solo 2 cupos disponibles';
-    if (pfActive) pfActive.classList.remove('hidden');
-    if (pfWaitlist) pfWaitlist.classList.add('hidden');
-  } else if (slots === 1) {
-    if (cuposSub) cuposSub.textContent = 'Último Cupo ($5.000)';
-    if (cuposBadge) cuposBadge.textContent = '¡ÚLTIMO CUPO DISPONIBLE!';
+  if (slots >= 1) {
+    if (cuposSub) cuposSub.textContent = `Cupos Disponibles: ${slots}`;
+    if (cuposBadge) cuposBadge.textContent = `solo ${slots} cupo${slots > 1 ? 's' : ''} disponible${slots > 1 ? 's' : ''}`;
     if (pfActive) pfActive.classList.remove('hidden');
     if (pfWaitlist) pfWaitlist.classList.add('hidden');
   } else {
@@ -389,42 +376,17 @@ function initIA3Engine() {
 }
 
 /* ==========================================================================
-   7. EVENTOS DE PAGO POR HORA (HORA 0) + VERIFICAR PAGO
+   7. EVENTOS DE FLUJO DE PAGO Y CONEXIÓN META ADS
    ========================================================================== */
 function initPaymentFlowEvents() {
-  const btnIniciar = document.getElementById('btn-iniciar-pago');
-  const btnVerificar = document.getElementById('btn-verificar-transaccion');
-  const btnSubirContrato = document.getElementById('btn-client-send-contract');
-  const btnSubirExcel = document.getElementById('btn-client-upload-file');
+  const btnProcesar = document.getElementById('btn-procesar-pago-pasarela');
 
-  if (btnIniciar) {
-    btnIniciar.addEventListener('click', () => {
-      document.getElementById('pf-intro-card')?.classList.add('hidden');
-      const stepBilling = document.getElementById('pf-step-billing');
-      if (stepBilling) {
-        stepBilling.classList.remove('hidden');
-        stepBilling.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  }
-
-  // LLAMADA Y PROCESAMIENTO DE PAGO EN EL BOTÓN "VERIFICAR PAGO"
-  if (btnVerificar) {
-    btnVerificar.addEventListener('click', async (e) => {
+  if (btnProcesar) {
+    btnProcesar.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const age = document.getElementById('pay-age')?.value;
-      const country = document.getElementById('pay-country')?.value;
-      const city = document.getElementById('pay-city')?.value;
-      const zip = document.getElementById('pay-zip')?.value;
-      const phone = document.getElementById('pay-phone')?.value;
       const fbUserIdInput = document.getElementById('fbUserId');
       const fbUserId = fbUserIdInput ? fbUserIdInput.value.trim() : '';
-
-      if (!age || !country || !city || !zip || !phone) {
-        showToast('Campos Incompletos', 'Completa la información de facturación.', true);
-        return;
-      }
 
       if (!fbUserId) {
         showToast('Facebook Requerido', 'Debes ingresar tu Usuario o ID de Facebook.', true);
@@ -449,147 +411,16 @@ function initPaymentFlowEvents() {
           })
         });
 
-        // Solicitud a la pasarela SOLO POR HORA 0
-        if (currentPaymentState.blocks.length === 0) {
-          showToast('Consultando Pasarela', 'Generando enlaces de pago para Hora 0...');
-          
-          const pasarelaRes = await fetch(`${getBaseUrl()}/api/pasarela/get-link?hours=0`);
-          const pasarelaData = await pasarelaRes.json();
-
-          if (!pasarelaData.success || !pasarelaData.blocks || pasarelaData.blocks.length === 0) {
-            throw new Error(pasarelaData.error || 'No se pudieron obtener los enlaces de pago');
-          }
-
-          currentPaymentState.hours = 0;
-          currentPaymentState.blocks = pasarelaData.blocks;
-          currentPaymentState.currentStep = 1;
-        }
-
-        const currentBlock = currentPaymentState.blocks[currentPaymentState.currentStep - 1];
-        if (!currentBlock || !currentBlock.url) {
-          showToast('Error', 'Enlace de pago no disponible', true);
-          return;
-        }
-
-        showToast('Redirigiendo a Pasarela', `${currentBlock.label} - Preparando transacción...`);
-
-        // Manejo Multipaso (Ej: Hora 0 con 2 pagos en $3.000)
-        if (currentPaymentState.blocks.length > 1 && currentPaymentState.currentStep === 1) {
-          window.open(currentBlock.url, '_blank');
-          
-          currentPaymentState.currentStep = 2;
-          const nextBlock = currentPaymentState.blocks[1];
-
-          btnVerificar.textContent = `Pagar Paso 2/2 ($${nextBlock.amount} USD) ➔`;
-          btnVerificar.style.background = '#00ffcc';
-          btnVerificar.style.color = '#000';
-          
-          showToast('Paso 1 Iniciado', 'Completa la primera parte y haz clic aquí para el Pago 2 de 2.');
-        } else {
-          // Pago único o último bloque: Redirige a la pasarela
-          window.location.href = currentBlock.url;
-        }
+        localStorage.setItem('sodie_fb_user', fbUserId);
+        window.location.href = 'contrato.html';
 
       } catch (error) {
-        console.error('Error pasarela / CAPI:', error);
-        showToast('Error de Pago', error.message || 'No se pudo procesar la transacción.', true);
+        console.error('Error enviando datos Meta CAPI:', error);
+        // Fallback: Redirige de todas formas
+        localStorage.setItem('sodie_fb_user', fbUserId);
+        window.location.href = 'contrato.html';
       }
     });
-  }
-
-  // ENVÍO DE CONTRATO FIRMADO (REQUIERE CLIENT ID)
-  if (btnSubirContrato) {
-    btnSubirContrato.addEventListener('click', sodieSubirContrato);
-  }
-
-  // CARGA DE EXCEL/CSV DE AUDIENCIA (REQUIERE CLIENT ID)
-  if (btnSubirExcel) {
-    btnSubirExcel.addEventListener('click', sodieProcesarExcelYConectarFB);
-  }
-}
-
-async function sodieSubirContrato() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_client_id');
-
-  if (!clientId) {
-    showToast('ID Requerido', 'No se encontró tu ID de cliente. Por favor accede desde la confirmación de tu pago.', true);
-    return;
-  }
-
-  const fileInput = document.getElementById('client-contract-file-input');
-  if (!fileInput || !fileInput.files[0]) {
-    showToast('Archivo Requerido', 'Selecciona el PDF de tu contrato firmado.', true);
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
-  formData.append('clientId', clientId);
-
-  showToast('Subiendo Contrato', 'Validando archivo firmado...');
-
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/evaluator/contract`, { 
-      method: 'POST', 
-      body: formData 
-    });
-
-    if (!res.ok) throw new Error('Error al procesar contrato');
-
-    showToast('Contrato Confirmado', 'Procede a subir tu lista de compradores (Excel).');
-    
-    document.getElementById('pf-step-contract')?.classList.add('hidden');
-    const stepExcel = document.getElementById('pf-step-excel');
-    if (stepExcel) {
-      stepExcel.classList.remove('hidden');
-      stepExcel.scrollIntoView({ behavior: 'smooth' });
-    }
-
-  } catch (error) {
-    console.error('Error contrato:', error);
-    showToast('Error', 'No se pudo procesar el archivo en el servidor.', true);
-  }
-}
-
-async function sodieProcesarExcelYConectarFB() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_client_id');
-
-  if (!clientId) {
-    showToast('ID Requerido', 'No se encontró tu ID de cliente. Por favor accede desde la confirmación de tu pago.', true);
-    return;
-  }
-
-  const fileInput = document.getElementById('client-file-input');
-  if (!fileInput || !fileInput.files[0]) {
-    showToast('Archivo Requerido', 'Selecciona tu archivo Excel / CSV de compradores.', true);
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
-  formData.append('clientId', clientId);
-
-  showToast('Procesando Audiencia', 'Creando borrador de campaña...');
-
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, { 
-      method: 'POST', 
-      body: formData 
-    });
-
-    if (!res.ok) throw new Error('Error subiendo audiencia');
-
-    showToast('Borrador Creado', 'Redirigiendo a la confirmación de campaña...');
-
-    setTimeout(() => {
-      window.location.href = `confirmacion.html?clientId=${encodeURIComponent(clientId)}&step=activar_campana&status=ready`;
-    }, 1200);
-
-  } catch (error) {
-    console.error('Error audiencia:', error);
-    showToast('Error', 'Fallo al procesar el archivo de audiencia.', true);
   }
 }
 
@@ -636,13 +467,13 @@ function initWaitlistEvents() {
 }
 
 /* ==========================================================================
-   9. CRONÓMETRO REGRESIVO DE 18 DÍAS
+   9. CRONÓMETRO REGRESIVO DE APERTURA DE CUPOS (30 DÍAS)
    ========================================================================== */
-function initTimer18d() {
+function initTimer30d() {
   const timerDisplay = document.getElementById('timer-main-display');
   if (!timerDisplay) return;
 
-  let totalSeconds = 18 * 24 * 3600;
+  let totalSeconds = 30 * 24 * 3600;
 
   setInterval(() => {
     if (totalSeconds <= 0) return;
@@ -731,7 +562,7 @@ function handleUrlRedirects() {
   let adminToques = 0;
   let adminTimer = null;
 
-  function manejarToqueSecreto() {
+  window.sodieContarToquesAdmin = function() {
     adminToques++;
     clearTimeout(adminTimer);
     adminTimer = setTimeout(() => { adminToques = 0; }, 2000);
@@ -741,13 +572,13 @@ function handleUrlRedirects() {
       clearTimeout(adminTimer);
       window.location.href = "admin.html";
     }
-  }
+  };
 
   document.addEventListener("DOMContentLoaded", () => {
     const logoTxt = document.getElementById("sodie-logo-trigger");
     const logoIcon = document.getElementById("btn-sodie-logo-trigger");
 
-    if (logoTxt) logoTxt.addEventListener("pointerdown", manejarToqueSecreto);
-    if (logoIcon) logoIcon.addEventListener("pointerdown", manejarToqueSecreto);
+    if (logoTxt) logoTxt.addEventListener("pointerdown", window.sodieContarToquesAdmin);
+    if (logoIcon) logoIcon.addEventListener("pointerdown", window.sodieContarToquesAdmin);
   });
 })();
