@@ -88,8 +88,8 @@
         <p style="margin-top: 10px;">En señal de conformidad y aceptación de todas las cláusulas precedentes, las partes perfeccionan el presente contrato mediante la aceptación digital y el pago correspondiente.</p>
     </div>
 
-    <!-- REGISTRO DE AUDITORÍA Y FIRMA DIGITAL DE METADATOS -->
-    <div class="audit-box">
+    <!-- REGISTRO DE AUDITORÍA Y FIRMA DIGITAL -->
+    <div id="signature-box" class="audit-box">
         <div class="audit-title">
             <span></span> Registro de Aceptación Digital y Firma Electrónica
         </div>
@@ -112,7 +112,7 @@
                     <input type="text" id="timestamp" value="" readonly>
                 </div>
             </div>
-
+            
             <div class="accept-section">
                 <input type="checkbox" id="accept_terms" required>
                 <label for="accept_terms">
@@ -122,6 +122,25 @@
 
             <button type="submit" class="btn-submit">Aceptar y Firmar Digitalmente</button>
         </form>
+    </div>
+
+    <!-- DIV DE PAGO (Inicialmente oculto y fuera del formulario de firma) -->
+    <div id="payment-section" class="audit-box" style="display: none; text-align: center;">
+        <div class="audit-title" style="justify-content: center;">
+            <span></span> Proceder al Pago Inicial ($7,000.00 USDC)
+        </div>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+            Firma registrada correctamente. Realiza la transacción a continuación para activar tu acceso.
+        </p>
+
+        <!-- Widget de NOWPayments -->
+        <div id="nowpayments-widget-container" style="display: flex; justify-content: center;">
+            <iframe src="https://nowpayments.io/embeds/payment-widget?iid=5260032422" width="410" height="696" frameborder="0" scrolling="no" style="overflow-y: hidden; border-radius: 12px;">
+                No se puede cargar el widget
+            </iframe>
+        </div>
+
+        <div id="payment-status" style="margin-top: 15px; font-family: monospace; color: #00f2fe;"></div>
     </div>
 </div>
 
@@ -139,10 +158,42 @@
             document.getElementById('ip_address').value = "127.0.0.1 (Local/Simulado)";
         });
 
-    // Manejador del formulario
-    document.getElementById('contract-form').addEventListener('submit', function(e) {
+    // Manejador del formulario (envía Webhook + swappea la vista al pago)
+    document.getElementById('contract-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-        alert('Contrato firmado correctamente. Metadatos de firma registrados.');
+
+        const btnSubmit = e.target.querySelector('.btn-submit');
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Enviando firma...';
+
+        const payload = {
+            fullName: document.getElementById('user_fullname').value,
+            email: document.getElementById('user_email').value,
+            ipAddress: document.getElementById('ip_address').value,
+            timestamp: document.getElementById('timestamp').value,
+            acceptedTerms: document.getElementById('accept_terms').checked,
+            softwareName: 'SODIE',
+            softwareVersion: '3.5.0'
+        };
+
+        try {
+            // Reemplaza esta URL con tu endpoint de backend / n8n / Make que envía el correo
+            const response = await fetch('/api/webhook/contrato-firmado', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // Ocultar formulario de firma y desplegar el iframe de NOWPayments
+            document.getElementById('signature-box').style.display = 'none';
+            document.getElementById('payment-section').style.display = 'block';
+
+        } catch (error) {
+            console.error('Error enviando webhook:', error);
+            // Si no tienes backend listo aún, puedes forzar la muestra del pago para pruebas:
+            document.getElementById('signature-box').style.display = 'none';
+            document.getElementById('payment-section').style.display = 'block';
+        }
     });
 </script>
 
