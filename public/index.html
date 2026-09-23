@@ -349,33 +349,16 @@
         </div>
 
         <!-- PASO 2: SECCIÓN DE PAGO POLYGON USDC -->
-        <div id="pf-step-crypto-pay" class="crypto-pay-box margin-v-sm hidden" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.3);">
-          <h4 class="mint-txt" style="margin-bottom: 8px; font-size: 1.1rem;">Paso 2: Realizar Transferencia</h4>
-          
-          <div style="margin-bottom: 12px;">
-            <span style="font-size: 0.85rem; color: #94a3b8; display: block;">Red Selección:</span>
-            <strong style="color: #00ffcc; font-size: 1rem;">Polygon USDC</strong>
-          </div>
-
-          <div style="margin-bottom: 16px;">
-            <label style="font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 4px;">Dirección de Billetera Destino:</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="crypto-wallet-address" value="0x999FC9A30A89Ed1C2aBD7a8851328564b6b1Cd59" readonly style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.2); border-radius: 8px; color: #00ffcc; font-family: monospace; font-size: 0.85rem;" />
-              <button type="button" id="btn-copy-wallet" class="btn-pf-action" style="padding: 10px 16px; font-weight: bold;">COPIAR</button>
-            </div>
-          </div>
-
-          <div style="margin-bottom: 16px;">
-            <label for="tx-hash-input" style="font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 4px;">Ingresar número de transacción (TxHash):</label>
-            <input type="text" id="tx-hash-input" placeholder="0x..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;" />
-          </div>
-
-          <button type="button" id="btn-verificar-transaccion" class="btn-pf-action btn-pay-gradient" style="width: 100%; padding: 12px; font-weight: bold;">
-            VERIFICAR Y CONTINUAR
-          </button>
+       <div id="pf-step-pay" class= "pay-flow-box margin -v-sm hidden">
+         <iframe src="https://nowpayments.io/embeds/payment-widget?iid=5260032422" width="410" height="696" frameborder="0" scrolling="no" style="overflow-y: hidden;">
+        No se puede cargar el widget
+     </iframe>
         </div>
+        
+        <!-- Aqui necesito que vaya antes de ir a pagar un input donde separe tan los servicios del contrato [link contrato.html] para ir a el contrato.html y abajo debe colocar su nombre y apellido. ya la data obtenida antes va al contrato final con backend recolectando id post webhook pues) -->
+          <!-- Tambien necesito que post pago vaya a confirmacion.html para confirmar pago y asignar ID -->
 
-        <!-- PASO 3: CONTRATO DE SERVICIO -->
+        <!-- PASO 3: CONTRATO DE SERVICIO. esto se elimina evidentemente con el Paso 2-->
         <div id="pf-step-contract" class="contract-flow-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.2);">
           <h4 class="mint-txt" style="margin-bottom: 8px;">Paso 3: Contrato de Servicio Firmado</h4>
           <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;">Descarga el contrato, firma digitalmente y adjúntalo para habilitar el paso final:</p>
@@ -387,9 +370,9 @@
           </div>
         </div>
 
-        <!-- PASO 4: CARGA DE EXCEL -->
+        <!-- PASO 3: CARGA DE EXCEL -->
         <div id="pf-step-excel" class="upload-excel-box margin-v-sm hidden" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 0, 122, 0.2);">
-          <h4 class="fuchsia-txt" style="margin-bottom: 8px;">Paso 4: Subir Excel de Compradores</h4>
+          <h4 class="fuchsia-txt" style="margin-bottom: 8px;">Paso 3: Subir Excel de Compradores</h4>
           <p class="step-desc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px;">Carga tu lista de compradores para crear el borrador y finalizar el registro:</p>
           <div class="input-group-flow" style="display: flex; gap: 10px; flex-wrap: wrap;">
             <input type="file" id="client-file-input" class="file-input-custom" accept=".csv,.xlsx,.xls" style="flex: 1;" />
