@@ -1,3 +1,9 @@
+function getBaseUrl() {
+  if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
+    return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
+  }
+  return window.location.origin;
+}
 // 1. Extraer Parámetros URL (clientId y fbUser)
     const urlParams = new URLSearchParams(window.location.search);
     const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_client_id') || 'CLIENT-#01';
