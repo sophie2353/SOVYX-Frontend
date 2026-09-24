@@ -6,8 +6,78 @@
   <title>Cliente | SODIE</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    /* Estilos para el Login / Registro Biométrico del Cliente */
+    .client-auth-overlay {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: #0b0813;
+    }
+
+    .client-auth-card {
+      background: rgba(21, 15, 36, 0.85);
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .auth-btn-biometric {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      background: linear-gradient(90deg, #00ffcc, #9d00ff);
+      color: #ffffff;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .auth-btn-biometric:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 16px rgba(0, 255, 204, 0.4);
+    }
+
+    .auth-btn-secondary {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #00ffcc;
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Estilo para los botones de NOWPayments */
+    .nowpayments-btn-container {
+      display: block;
+      text-align: center;
+      margin-top: 10px;
+    }
+    
+    .nowpayments-btn-container img {
+      max-width: 100%;
+      height: auto;
+      transition: transform 0.2s;
+    }
+
+    .nowpayments-btn-container img:hover {
+      transform: scale(1.02);
+    }
+  </style>
 </head>
-<body>
+<body style="background: #0b0813; color: #ffffff; margin: 0; font-family: system-ui, -apple-system, sans-serif;">
 
   <!-- TOAST NOTIFICACIÓN CLIENTE -->
   <div id="toast-notification" class="toast-bubble hidden">
@@ -20,7 +90,46 @@
     </div>
   </div>
 
-  <main id="app-dashboard" class="dashboard-container">
+  <!-- VISTA DE AUTENTICACIÓN Y REGISTRO BIOMÉTRICO CLIENTE -->
+  <main id="client-auth-view" class="client-auth-overlay">
+    <div class="client-auth-card">
+      <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
+      <h2 style="margin: 0 0 8px 0; font-size: 1.4rem; color: #fff;">Acceso Cliente SODIE</h2>
+      <p style="color: #a098b5; font-size: 0.85rem; margin-bottom: 24px;">Autenticación segura vía WebAuthn / Passkey</p>
+
+      <!-- PASO 1: ACCESO RÁPIDO CON BIOMETRÍA -->
+      <div id="client-login-box">
+        <button type="button" id="btn-client-biometric-login" onclick="sodieLoginBiometricoCliente()" class="auth-btn-biometric">
+          Ingresar con Biometría / Huella 👆
+        </button>
+        
+        <button type="button" onclick="sodieMostrarRegistroBiometrico()" class="auth-btn-secondary">
+          ¿Primer ingreso? Registrar Biometría 🔑
+        </button>
+      </div>
+
+      <!-- PASO 2: REGISTRO DE NUEVA BIOMETRÍA -->
+      <div id="client-register-box" style="display: none; text-align: left; margin-top: 15px;">
+        <label for="client-email-reg" style="color: #00ffcc; font-size: 0.8rem; display: block; margin-bottom: 6px;">
+          Correo del Cliente
+        </label>
+        <input type="email" id="client-email-reg" placeholder="cliente@empresa.com" style="width: 100%; padding: 12px; background: #0d0818; border: 1px solid #2a1c47; border-radius: 10px; color: #00ffcc; box-sizing: border-box; outline: none; margin-bottom: 12px;" />
+
+        <button type="button" id="btn-client-biometric-reg" onclick="sodieRegistrarBiometriaCliente()" class="auth-btn-biometric">
+          Registrar Mi Dispositivo 📲
+        </button>
+
+        <button type="button" onclick="sodieOcultarRegistroBiometrico()" class="auth-btn-secondary">
+          Volver a Inicio
+        </button>
+      </div>
+
+      <div id="client-auth-error" style="display: none; margin-top: 14px; font-size: 0.85rem; color: #ff007a;"></div>
+    </div>
+  </main>
+
+  <!-- DASHBOARD CLIENTE (OCULTO HASTA AUTENTICAR) -->
+  <main id="app-dashboard" class="dashboard-container" style="display: none;">
     <header class="dash-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
       <div class="dash-header-left">
         <span id="header-brand-title" class="brand-text" style="font-size: 1.8rem; font-weight: 800; color: #fff;">
@@ -89,7 +198,7 @@
       </div>
     </section>
 
-    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (CUOTAS SEMANALES: 72% RESTANTE = $6.000/SEM) -->
+    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (NOWPAYMENTS BUTTON EMBEDDED) -->
     <section class="glass-card-dash margin-v-sm">
       <h3 class="section-title fuchsia-txt">Cronograma de Pagos Semanales Post-Resultados</h3>
       <div id="timer-weekly-pay-display" class="timer-digits fuchsia-txt">07d 00h 00m 00s</div>
@@ -99,27 +208,33 @@
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(0, 255, 204, 0.2); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
           <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Semana 1 ($6,000 USDT)</h4>
           <p id="desc-semana-1" class="step-desc" style="margin-bottom: 10px;">Liquidación del 72% restante del ciclo tras los primeros 7 días de resultados.</p>
-          <a id="btn-pay-semana1" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
-            Pagar Cuota Semana 1 ($6,000) ↗
-          </a>
+          <div class="nowpayments-btn-container">
+            <a id="btn-pay-semana1" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
+              <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
+            </a>
+          </div>
         </div>
 
         <!-- SEMANA 2 (DÍA 14) -->
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
           <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Semana 2 ($6,000 USDT)</h4>
           <p id="desc-semana-2" class="step-desc" style="margin-bottom: 10px;">Segunda cuota de mantenimiento y escalabilidad de ROAS On-Chain.</p>
-          <a id="btn-pay-semana2" href="javascript:void(0);" class="btn-pf-action btn-secondary-glow" style="display: block; text-align: center; text-decoration: none;">
-            Pagar Cuota Semana 2 ($6,000) ↗
-          </a>
+          <div class="nowpayments-btn-container">
+            <a id="btn-pay-semana2" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
+              <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
+            </a>
+          </div>
         </div>
 
         <!-- SEMANA 3 (DÍA 21) -->
         <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
           <h4 class="fuchsia-txt" style="margin-bottom: 5px;">Cuota Semana 3 ($6,000 USDT)</h4>
           <p id="desc-semana-3" class="step-desc" style="margin-bottom: 10px;">Cuota previa al cierre de la cuarta semana de optimización continua.</p>
-          <a id="btn-pay-semana3" href="javascript:void(0);" class="btn-pf-action btn-pay-gradient" style="display: block; text-align: center; text-decoration: none;">
-            Pagar Cuota Semana 3 ($6,000) ↗
-          </a>
+          <div class="nowpayments-btn-container">
+            <a id="btn-pay-semana3" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
+              <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
+            </a>
+          </div>
         </div>
       </div>
     </section>
