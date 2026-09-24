@@ -69,7 +69,7 @@
 
     <div class="clause">
         <div class="clause-title">QUINTA: DE LAS CONDICIONES DE USO Y RESTRICCIONES</div>
-        <p>Durante el período de evaluación, la extensión temporal o el licenciamiento final, EL USUARIO se compromete a cumplir estrictamente con lo siguiente:</p>
+        <p>Durante el período de evaluación, la extensión temporal o el licenciamiento final, EL USUARIO se compromete a cumplir strictly con lo siguiente:</p>
         <ul>
             <li>Utilizar EL SOFTWARE exclusivamente para los fines de prueba, verificación y operación autorizados.</li>
             <li>Queda prohibido copiar, modificar, descompilar, realizar ingeniería inversa o extraer el código fuente de EL SOFTWARE.</li>
@@ -120,11 +120,11 @@
                 </label>
             </div>
 
-            <button type="submit" class="btn-submit">Aceptar y Firmar Digitalmente</button>
+            <button type="submit" class="btn-submit">Aceptar, Firmar y Continuar ➔</button>
         </form>
     </div>
 
-    <!-- DIV DE PAGO (Inicialmente oculto y fuera del formulario de firma) -->
+    <!-- DIV DE PAGO (Opcional si se realiza transacción previa/posterior) -->
     <div id="payment-section" class="audit-box" style="display: none; text-align: center;">
         <div class="audit-title" style="justify-content: center;">
             <span></span> Proceder al Pago Inicial ($7,000.00 USDC)
@@ -140,62 +140,11 @@
             </iframe>
         </div>
 
-        <div id="payment-status" style="margin-top: 15px; font-family: monospace; color: #00f2fe;"></div>
+        <button id="btn-finish-payment" class="btn-submit" style="margin-top: 20px; background: #10b981;">
+            Confirmar y Volver a Carga de Excel 🚀
+        </button>
     </div>
 </div>
-
-<script>
-    // Asignar Timestamp
-    document.getElementById('timestamp').value = new Date().toISOString();
-
-    // Obtener la IP pública mediante API gratuita
-    fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('ip_address').value = data.ip;
-        })
-        .catch(() => {
-            document.getElementById('ip_address').value = "127.0.0.1 (Local/Simulado)";
-        });
-
-    // Manejador del formulario (envía Webhook + swappea la vista al pago)
-    document.getElementById('contract-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const btnSubmit = e.target.querySelector('.btn-submit');
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Enviando firma...';
-
-        const payload = {
-            fullName: document.getElementById('user_fullname').value,
-            email: document.getElementById('user_email').value,
-            ipAddress: document.getElementById('ip_address').value,
-            timestamp: document.getElementById('timestamp').value,
-            acceptedTerms: document.getElementById('accept_terms').checked,
-            softwareName: 'SODIE',
-            softwareVersion: '3.5.0'
-        };
-
-        try {
-            // Reemplaza esta URL con tu endpoint de backend / n8n / Make que envía el correo
-            const response = await fetch('/api/webhook/contrato-firmado', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            // Ocultar formulario de firma y desplegar el iframe de NOWPayments
-            document.getElementById('signature-box').style.display = 'none';
-            document.getElementById('payment-section').style.display = 'block';
-
-        } catch (error) {
-            console.error('Error enviando webhook:', error);
-            // Si no tienes backend listo aún, puedes forzar la muestra del pago para pruebas:
-            document.getElementById('signature-box').style.display = 'none';
-            document.getElementById('payment-section').style.display = 'block';
-        }
-    });
-</script>
 
 </body>
 </html>
