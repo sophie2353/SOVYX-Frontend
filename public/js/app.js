@@ -378,51 +378,63 @@ function initIA3Engine() {
 /* ==========================================================================
    7. EVENTOS DE FLUJO DE PAGO Y CONEXIÓN META ADS
    ========================================================================== */
-function initPaymentFlowEvents() {
-  const btnProcesar = document.getElementById('btn-procesar-pago-pasarela');
+    function mostrarPasoConexion() {
+      document.getElementById('pf-intro-card').classList.add('hidden');
+      document.getElementById('pf-step-billing').classList.remove('hidden');
+    }
 
-  if (btnProcesar) {
-    btnProcesar.addEventListener('click', async (e) => {
-      e.preventDefault();
+    // Valida FB User, carga el iframe de la pasarela y lo despliega
+    function desplegarIframePago() {
+      const fbUser = document.getElementById('fbUserId').value.trim();
+      if (!fbUser) {
+        alert('Por favor ingresa tu User de Facebook para continuar.');
+        return;
+      }
+      
+      localStorage.setItem('sodie_fb_user', fbUser);
+      
+      // Muestra la caja del iframe
+      document.getElementById('pf-step-billing').classList.add('hidden');
+      const iframeBox = document.getElementById('pf-step-iframe');
+      iframeBox.classList.remove('hidden');
 
-      const fbUserIdInput = document.getElementById('fbUserId');
-      const fbUserId = fbUserIdInput ? fbUserIdInput.value.trim() : '';
+      // Asigna el link de la pasarela de pago configurado en config.js o link directo
+      const iframeElement = document.getElementById('payment-gateway-iframe');
+      const paymentUrl = (typeof PAYMENT_GATEWAY_URL !== 'undefined') 
+        ? PAYMENT_GATEWAY_URL 
+        : 'https://nowpayments.io/embeds/payment-widget?iid=5260032422?redirect=confirmacion.html?step=generar_id';
+      
+      iframeElement.src = paymentUrl;
+    }
 
-      if (!fbUserId) {
-        showToast('Facebook Requerido', 'Debes ingresar tu Usuario o ID de Facebook.', true);
-        if (fbUserIdInput) {
-          fbUserIdInput.focus();
-          fbUserIdInput.style.borderColor = '#ff007a';
-        }
+    // Listener de mensajes postMessage si la pasarela notifica el pago desde adentro del iframe
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
+        window.location.href = 'confirmacion.html?step=generar_id';
+      }
+    });
+
+    // Procesa la carga del Excel y redirige a la confirmación
+    function finalizarYConfirmar() {
+      const fileInput = document.getElementById('client-file-input');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Por favor selecciona tu archivo Excel antes de continuar.');
         return;
       }
 
-      if (fbUserIdInput) fbUserIdInput.style.borderColor = 'rgba(255,255,255,0.15)';
+      window.location.href = 'confirmacion.html?step=excel_and_fb';
+    }
 
-      try {
-        // Notificación Meta CAPI
-        await fetch(`${getBaseUrl()}/api/facebook/capi`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: window.sessionId || localStorage.getItem('sessionId') || 'SODIE-SESSION',
-            eventName: 'InitiateCheckout',
-            fbUserId: fbUserId
-          })
-        });
-
-        localStorage.setItem('sodie_fb_user', fbUserId);
-        window.location.href = 'contrato.html';
-
-      } catch (error) {
-        console.error('Error enviando datos Meta CAPI:', error);
-        // Fallback: Redirige de todas formas
-        localStorage.setItem('sodie_fb_user', fbUserId);
-        window.location.href = 'contrato.html';
+    // Detecta si el cliente viene de vuelta tras firmar/pagar en contrato.html
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
+        document.getElementById('pf-intro-card').classList.add('hidden');
+        document.getElementById('pf-step-billing').classList.add('hidden');
+        document.getElementById('pf-step-iframe').classList.add('hidden');
+        document.getElementById('pf-step-excel').classList.remove('hidden');
       }
     });
-  }
-}
 
 /* ==========================================================================
    8. LISTA DE ESPERA (REEMPLAZO DE PAGO AL AGOTAR CUPOS)
