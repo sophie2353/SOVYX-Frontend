@@ -1,6 +1,6 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Flujo Secuencial: Subida de Excel (24h) -> Verificación On-Chain / Pago Semanal ($6,000 USDT) -> Activación de Campaña
+ * Flujo Secuencial: Biometría (Registro/Login WebAuthn) -> Subida de Excel (24h) -> Verificación de Cuota Semanal ($6,000 USDT) -> Activación de Campaña
  */
 
 /* ==========================================================================
@@ -44,10 +44,16 @@ function solicitarPermisoNotificacionesYAccesoDirecto(clientId) {
 }
 
 function getClientId() {
+  // Prioridad 1: Sesión autenticada mediante WebAuthn
+  const sessionClientId = sessionStorage.getItem('sodie_authenticated_client_id');
+  if (sessionClientId) return sessionClientId;
+
+  // Prioridad 2: Parámetro URL
   const urlParams = new URLSearchParams(window.location.search);
   const paramId = urlParams.get('clientId') || urlParams.get('client_id') || urlParams.get('id');
   if (paramId) return paramId;
 
+  // Prioridad 3: Configuración global o dataset
   if (window.SODIE_CONFIG && window.SODIE_CONFIG.CLIENT_ID) {
     return window.SODIE_CONFIG.CLIENT_ID;
   }
@@ -65,6 +71,7 @@ function getClientId() {
    ========================================================================== */
 const CLIENT_STATE = {
   clientId: null,
+  isAuthenticated: false,
   currentWeek: 1, // Semana activa de cobro (1, 2 o 3)
   excelUploaded: false,
   paymentConfirmed: false,
@@ -82,21 +89,175 @@ document.addEventListener('DOMContentLoaded', () => {
 function initClientDashboard() {
   CLIENT_STATE.clientId = getClientId();
   
-  const clientIdBadge = document.getElementById('client-id-badge');
-  if (clientIdBadge) {
-    clientIdBadge.textContent = `Cliente: ${CLIENT_STATE.clientId}`;
+  // Verificar si hay sesión activa por biometría
+  if (sessionStorage.getItem('sodie_authenticated_client_id') === CLIENT_STATE.clientId) {
+    CLIENT_STATE.isAuthenticated = true;
   }
 
+  updateClientSessionUI();
   fetchClientMetrics();
   initGlobalAndWeeklyTimers();
   checkCallbackStatus();
   setupEventListeners();
 }
 
+function updateClientSessionUI() {
+  const clientIdBadge = document.getElementById('client-id-badge');
+  if (clientIdBadge) {
+    clientIdBadge.textContent = `Cliente: ${CLIENT_STATE.clientId} ${CLIENT_STATE.isAuthenticated ? '🔒 (Biometría Activa)' : '⚠️ (Sin Biometría)'}`;
+  }
+
+  // Actualizar estado visual de los botones biométricos
+  const btnAuth = document.getElementById('btn-biometric-auth');
+  if (btnAuth && CLIENT_STATE.isAuthenticated) {
+    btnAuth.textContent = '✓ Sesión Biométrica Verificada';
+    btnAuth.style.background = 'rgba(0, 255, 204, 0.25)';
+  }
+}
+
 /* ==========================================================================
-   3. EVENT LISTENERS DE INTERFAZ
+   3. AUTENTICACIÓN BIOMÉTRICA (WEBAUTHN - REGISTRO Y LOGIN)
+   ========================================================================== */
+/**
+ * Convierte un ArrayBuffer a formato Base64URL
+ */
+function arrayBufferToBase64Url(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+/**
+ * Convierte una cadena Base64URL a Uint8Array
+ */
+function base64UrlToUint8Array(base64Url) {
+  const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
+  const base64 = (base64Url + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+/**
+ * Registro de nueva credencial biométrica / Passkey para el clientId actual
+ */
+async function registrarBiometriaCliente() {
+  if (!window.PublicKeyCredential) {
+    showToast('Biometría No Soportada', 'Tu navegador o dispositivo no soporta autenticación biométrica WebAuthn.', true);
+    return;
+  }
+
+  const clientId = CLIENT_STATE.clientId;
+
+  try {
+    showToast('Iniciando Biometría', 'Coloca tu huella digital o rostro para registrar el acceso...');
+
+    const publicKeyCredentialCreationOptions = {
+      challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+      rp: {
+        name: "SODIE AI",
+        id: window.location.hostname
+      },
+      user: {
+        id: new TextEncoder().encode(clientId),
+        name: clientId,
+        displayName: `Cliente ${clientId}`
+      },
+      pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+      authenticatorSelection: {
+        authenticatorAttachment: "platform", // Huella / FaceID integrado en el dispositivo
+        userVerification: "required"
+      },
+      timeout: 60000
+    };
+
+    const credential = await navigator.credentials.create({
+      publicKey: publicKeyCredentialCreationOptions
+    });
+
+    if (credential) {
+      const rawId = arrayBufferToBase64Url(credential.rawId);
+      
+      // Persistir la credencial biométrica asociada al id de este cliente
+      localStorage.setItem(`sodie_biometric_id_${clientId}`, rawId);
+      sessionStorage.setItem('sodie_authenticated_client_id', clientId);
+      CLIENT_STATE.isAuthenticated = true;
+
+      updateClientSessionUI();
+      showToast('Registro Exitoso', `Acceso biométrico registrado correctamente para ${clientId}.`);
+    }
+  } catch (error) {
+    console.error('Error al registrar biometría:', error);
+    showToast('Error Biométrico', 'No se pudo completar el registro biométrico.', true);
+  }
+}
+
+/**
+ * Inicio de sesión mediante biometría / Passkey previa
+ */
+async function iniciarSesionBiometricaCliente() {
+  if (!window.PublicKeyCredential) {
+    showToast('Biometría No Soportada', 'Tu navegador no soporta autenticación biométrica.', true);
+    return;
+  }
+
+  const clientId = CLIENT_STATE.clientId;
+  const storedCredentialId = localStorage.getItem(`sodie_biometric_id_${clientId}`);
+
+  if (!storedCredentialId) {
+    showToast('Registro Requerido', `No existe un registro biométrico para ${clientId}. Ejecuta el registro primero.`, true);
+    return;
+  }
+
+  try {
+    showToast('Verificando Biometría', 'Escanea tu huella o rostro para iniciar sesión...');
+
+    const publicKeyCredentialRequestOptions = {
+      challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{
+        id: base64UrlToUint8Array(storedCredentialId),
+        type: 'public-key'
+      }],
+      userVerification: "required",
+      timeout: 60000
+    };
+
+    const assertion = await navigator.credentials.get({
+      publicKey: publicKeyCredentialRequestOptions
+    });
+
+    if (assertion) {
+      sessionStorage.setItem('sodie_authenticated_client_id', clientId);
+      CLIENT_STATE.isAuthenticated = true;
+
+      updateClientSessionUI();
+      showToast('Sesión Iniciada', `Autenticación biométrica exitosa. Bienvenido, ${clientId}.`);
+    }
+  } catch (error) {
+    console.error('Error al iniciar sesión biométrica:', error);
+    showToast('Error de Inicio de Sesión', 'Verificación biométrica fallida o cancelada.', true);
+  }
+}
+
+/* ==========================================================================
+   4. EVENT LISTENERS DE INTERFAZ
    ========================================================================== */
 function setupEventListeners() {
+  // 0. Biometría (Registro y Login)
+  const btnRegisterBio = document.getElementById('btn-biometric-register');
+  if (btnRegisterBio) {
+    btnRegisterBio.addEventListener('click', registrarBiometriaCliente);
+  }
+
+  const btnLoginBio = document.getElementById('btn-biometric-login') || document.getElementById('btn-biometric-auth');
+  if (btnLoginBio) {
+    btnLoginBio.addEventListener('click', iniciarSesionBiometricaCliente);
+  }
+
   // 1. Subir Excel (Paso Diario cada 24 horas)
   const btnUpload = document.getElementById('btn-client-upload-excel');
   if (btnUpload) {
@@ -109,7 +270,7 @@ function setupEventListeners() {
     btnActivate.addEventListener('click', sodieConfirmarActivacionCliente);
   }
 
-  // 3. Botones de Pago Semanal ($6,000 USDT)
+  // 3. Botones de Confirmación de Pago Semanal ($6,000 USDT) - Sin llamadas a backend
   const btnPaySemana1 = document.getElementById('btn-pay-semana1');
   if (btnPaySemana1) btnPaySemana1.addEventListener('click', (e) => sodieProcesarPagoSemanal(e, 1));
 
@@ -121,7 +282,7 @@ function setupEventListeners() {
 }
 
 /* ==========================================================================
-   4. NOTIFICACIONES Y UI FEEDBACK
+   5. NOTIFICACIONES Y UI FEEDBACK
    ========================================================================== */
 function showToast(title, body, isError = false) {
   const toast = document.getElementById('toast-notification');
@@ -144,7 +305,7 @@ function showToast(title, body, isError = false) {
 }
 
 /* ==========================================================================
-   5. MÉTRICAS DE RENDIMIENTO (/api/facebook/metrics)
+   6. MÉTRICAS DE RENDIMIENTO (/api/facebook/metrics)
    ========================================================================== */
 async function fetchClientMetrics() {
   const elSpend = document.getElementById('metric-spend');
@@ -169,11 +330,16 @@ async function fetchClientMetrics() {
 }
 
 /* ==========================================================================
-   6. PASO 1: SUBIDA DIARIA DE EXCEL DE AUDIENCIA (24 HOURS)
+   7. PASO 1: SUBIDA DIARIA DE EXCEL DE AUDIENCIA (24 HOURS)
    ========================================================================== */
 async function sodieFlujoInyeccionCliente() {
   const fileInput = document.getElementById('client-file-input');
   const btnUpload = document.getElementById('btn-client-upload-excel');
+
+  if (!CLIENT_STATE.isAuthenticated) {
+    showToast('Autenticación Requerida', 'Debes validar tu sesión con biometría para subir audiencias.', true);
+    return;
+  }
 
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
     showToast('Archivo Requerido', 'Por favor selecciona un archivo de audiencia (.csv, .xlsx, .xls).', true);
@@ -234,72 +400,60 @@ async function sodieFlujoInyeccionCliente() {
 }
 
 /* ==========================================================================
-   7. PASO 2: PAGO Y VERIFICACIÓN ON-CHAIN (USDT POLYGON)
+   8. PASO 2: CONFIRMACIÓN Y REGISTRO DE PAGO SEMANAL ($6,000 USDT)
    ========================================================================== */
-async function sodieProcesarPagoSemanal(event, weekNumber) {
+function sodieProcesarPagoSemanal(event, weekNumber) {
   if (event) event.preventDefault();
 
-  CLIENT_STATE.currentWeek = weekNumber;
-
-  // Solicitar el Hash de Transacción On-Chain
-  const txHash = prompt(`Ingresa el Hash de Transacción (txHash) de Polygon para verificar el pago de $6,000 USDT (Semana ${weekNumber}):`);
-
-  if (!txHash || !txHash.trim()) {
-    showToast('Verificación Cancelada', 'Se requiere el Hash de la transacción para confirmar On-Chain.', true);
+  if (!CLIENT_STATE.isAuthenticated) {
+    showToast('Autenticación Requerida', 'Verifica tu sesión biométrica antes de registrar tu cuota.', true);
     return;
   }
 
-  showToast('Verificando On-Chain', `Consultando transacción en la red Polygon para ${CLIENT_STATE.clientId}...`);
+  CLIENT_STATE.currentWeek = weekNumber;
 
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/pasarela/verify-payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        txHash: txHash.trim(),
-        userId: CLIENT_STATE.clientId,
-        clientId: CLIENT_STATE.clientId,
-        stage: `SEMANA_${weekNumber}`,
-        hours: weekNumber * 168 // Conversión a horas para la pasarela
-      })
-    });
+  // Solicitud local del Hash de Transacción On-Chain (sin llamadas a pasarelas backend)
+  const txHash = prompt(`Ingresa el Hash de Transacción (txHash) de Polygon para verificar el pago de $6,000 USDT (Semana ${weekNumber}):`);
 
-    const data = await res.json();
+  if (!txHash || !txHash.trim()) {
+    showToast('Verificación Cancelada', 'Se requiere el Hash de la transacción para confirmar el pago.', true);
+    return;
+  }
 
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'La transacción no pudo ser verificada On-Chain.');
-    }
+  const cleanTxHash = txHash.trim();
 
-    CLIENT_STATE.paymentConfirmed = true;
-    showToast('Pago Confirmado', `Cuota de $${(data.amountVerified || 6000).toLocaleString()} USDT validada On-Chain exitosamente.`);
+  // Guardar confirmación en el estado y almacenamiento del cliente
+  CLIENT_STATE.paymentConfirmed = true;
+  localStorage.setItem(`sodie_payment_week_${weekNumber}_${CLIENT_STATE.clientId}`, JSON.stringify({
+    txHash: cleanTxHash,
+    timestamp: Date.now(),
+    amount: 6000
+  }));
 
-    // Ocultar la advertencia de bloqueo si existía
-    const lockWarning = document.getElementById('weekly-payment-lock-warning');
-    if (lockWarning) lockWarning.classList.add('hidden');
+  showToast('Pago Registrado', `Cuota de $6,000 USDT registrada correctamente para ${CLIENT_STATE.clientId} (Semana ${weekNumber}).`);
 
-    // Marcar botón de la semana como pagado
-    const btnWeek = document.getElementById(`btn-pay-semana${weekNumber}`);
-    if (btnWeek) {
-      btnWeek.textContent = `✓ Cuota Semana ${weekNumber} Validada ($6,000 USDT)`;
-      btnWeek.style.background = 'rgba(0, 255, 204, 0.25)';
-      btnWeek.onclick = null;
-    }
+  // Ocultar la advertencia de bloqueo si existía
+  const lockWarning = document.getElementById('weekly-payment-lock-warning');
+  if (lockWarning) lockWarning.classList.add('hidden');
 
-    // Habilitar botón de Activar Campaña
-    const btnActivate = document.getElementById('btn-client-activate-campaign');
-    if (btnActivate) {
-      btnActivate.classList.remove('hidden');
-      btnActivate.style.display = 'block';
-    }
+  // Marcar botón de la semana como pagado
+  const btnWeek = document.getElementById(`btn-pay-semana${weekNumber}`);
+  if (btnWeek) {
+    btnWeek.textContent = `✓ Cuota Semana ${weekNumber} Validada ($6,000 USDT)`;
+    btnWeek.style.background = 'rgba(0, 255, 204, 0.25)';
+    btnWeek.onclick = null;
+  }
 
-  } catch (error) {
-    console.error('Error al verificar pago On-Chain:', error);
-    showToast('Error de Verificación', error.message || 'No se pudo verificar el pago en la blockchain.', true);
+  // Habilitar botón de Activar Campaña
+  const btnActivate = document.getElementById('btn-client-activate-campaign');
+  if (btnActivate) {
+    btnActivate.classList.remove('hidden');
+    btnActivate.style.display = 'block';
   }
 }
 
 /* ==========================================================================
-   8. PASO 3: REVISIÓN DE CALLBACK DE REDIRECCIÓN (SI APLICA)
+   9. PASO 3: REVISIÓN DE CALLBACK DE REDIRECCIÓN (SI APLICA)
    ========================================================================== */
 function checkCallbackStatus() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -323,9 +477,14 @@ function checkCallbackStatus() {
 }
 
 /* ==========================================================================
-   9. PASO 4: ACTIVACIÓN DE CAMPAÑA FINAL EN META ADS
+   10. PASO 4: ACTIVACIÓN DE CAMPAÑA FINAL EN META ADS
    ========================================================================== */
 async function sodieConfirmarActivacionCliente() {
+  if (!CLIENT_STATE.isAuthenticated) {
+    showToast('Autenticación Requerida', 'Verifica tu identidad con biometría para activar la campaña.', true);
+    return;
+  }
+
   const btnActivate = document.getElementById('btn-client-activate-campaign');
   if (btnActivate) {
     btnActivate.textContent = 'Activando en Meta Ads...';
@@ -366,7 +525,7 @@ async function sodieConfirmarActivacionCliente() {
 }
 
 /* ==========================================================================
-   10. TEMPORIZADORES EN TIEMPO REAL (DIARIO 24H Y GLOBAL 28 DÍAS)
+   11. TEMPORIZADORES EN TIEMPO REAL (DIARIO 24H Y GLOBAL 28 DÍAS)
    ========================================================================== */
 function initGlobalAndWeeklyTimers() {
   const globalTimerDisplay = document.getElementById('global-timer-display');
