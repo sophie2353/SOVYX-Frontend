@@ -244,6 +244,12 @@
       const paymentType = urlParams.get('paymentType'); // 'hora0' | 'recurring'
       const role = urlParams.get('role'); // 'admin' | null (cliente)
       let clientIdParam = urlParams.get('clientId');
+      let fbUserParam = urlParams.get('fbUser') || localStorage.getItem('sodie_fb_user');
+
+      // Guardar el fbUser en almacenamiento local para persistencia
+      if (fbUserParam) {
+        localStorage.setItem('sodie_fb_user', fbUserParam);
+      }
 
       const titleEl = document.getElementById('conf-title');
       const bodyEl = document.getElementById('conf-body');
@@ -281,46 +287,94 @@
       }
 
       // =========================================================================
-      // PASO 0: HORA 0 (PRIMER PAGO - ASIGNA ID -> CONTRATO EN INDEX.HTML)
+      // PASO 0: ASIGNAR ID Y SALTAR A CONTRATO.HTML
       // =========================================================================
-      if (step === 'aceptar_rol' || paymentType === 'hora0') {
+      if (step === 'generar_id' || step === 'aceptar_rol' || paymentType === 'hora0') {
         loaderEl.style.display = 'none';
         
         const activeClientId = await resolveClientId();
+        const activeFbUser = fbUserParam || 'Evaluador Meta';
 
         badgeEl.textContent = `Paso 1 de 3 • Cliente ${activeClientId}`;
-        titleEl.textContent = '🎉 ¡Primer Pago Confirmado!';
-        bodyEl.textContent = `Tu ID asignado es ${activeClientId}. Para iniciar la inyección automatizada de audiencias, por favor acepta el rol de evaluador y firma el contrato digital.`;
+        titleEl.textContent = '¡Pago Registrado con Éxito!';
+        bodyEl.textContent = `Se ha asignado el ID ${activeClientId} para el perfil de Facebook @${activeFbUser}. Acepta la solicitud como evaluador en Meta y firma el contrato digital para continuar.`;
 
         stepsContainer.innerHTML = `
           <ul class="steps-list">
             <li>
               <span class="step-number">1</span>
-              <div>Acepta la invitación de evaluador en la consola de Meta.</div>
+              <div>Acepta la invitación de evaluador enviado al usuario <strong>${activeFbUser}</strong> en Meta.</div>
             </li>
             <li>
               <span class="step-number">2</span>
-              <div>Continúa a la firma del contrato digital identificado como <strong>${activeClientId}</strong>.</div>
+              <div>Firma el contrato legal de prestación de servicios para activar tu cupo.</div>
             </li>
           </ul>
         `;
 
         actionBtn.style.display = 'inline-flex';
-        actionBtn.textContent = '1. Aceptar Solicitud en Meta ↗';
+        actionBtn.textContent = '1. Aceptar Evaluador en Meta ↗';
         actionBtn.onclick = () => {
           window.open('https://developers.facebook.com/requests/', '_blank');
         };
 
         verifyBtn.style.display = 'inline-flex';
-        verifyBtn.textContent = '2. Ir a Contrato Digital';
+        verifyBtn.textContent = '2. Ir a Firma de Contrato Digital ➔';
         verifyBtn.onclick = () => {
-          verifyBtn.textContent = 'Redirigiendo a contrato...';
-          window.location.href = `/index.html?clientId=${encodeURIComponent(activeClientId)}#pf-step-contract`;
+          verifyBtn.textContent = 'Redirigiendo a contrato.html...';
+          window.location.href = `contrato.html?clientId=${encodeURIComponent(activeClientId)}&fbUser=${encodeURIComponent(activeFbUser)}`;
         };
       }
 
       // =========================================================================
-      // PASO 1: CONEXIÓN OAUTH CON META (Viene tras subir Excel)
+      // PASO 1: REGRESO DESDE EL EXCEL -> INICIAR CICLO DE META
+      // =========================================================================
+      else if (step === 'excel_and_fb' || step === 'excel_uploaded') {
+        loaderEl.style.display = 'none';
+        const activeClientId = await resolveClientId();
+        const activeFbUser = fbUserParam || 'Evaluador Meta';
+
+        badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
+        titleEl.textContent = 'Excel Recibido • Inyectando Audiencias';
+        bodyEl.textContent = `Hemos vinculado la base de datos de compradores para el usuario @${activeFbUser}. Conecta tu cuenta publicitaria para compilar y generar los borradores.`;
+
+        stepsContainer.innerHTML = `
+          <ul class="steps-list">
+            <li>
+              <span class="step-number">1</span>
+              <div>Evaluador asignado: <strong>${activeFbUser}</strong></div>
+            </li>
+            <li>
+              <span class="step-number">2</span>
+              <div>Iniciando compilación de audiencias similares en Meta Ads.</div>
+            </li>
+          </ul>
+        `;
+
+        verifyBtn.style.display = 'inline-flex';
+        verifyBtn.textContent = 'Iniciar Ciclo en Meta Ads 🚀';
+        verifyBtn.onclick = async () => {
+          verifyBtn.textContent = 'Conectando con Meta API...';
+          try {
+            const res = await fetch('/api/facebook/connect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId, clientId: activeClientId, fbUser: activeFbUser })
+            });
+            const data = await res.json();
+            if (data.redirectUrl) {
+              window.location.href = data.redirectUrl;
+            } else {
+              window.location.href = `index.html?clientId=${encodeURIComponent(activeClientId)}&status=ready_meta#app-dashboard`;
+            }
+          } catch (err) {
+            window.location.href = `index.html?clientId=${encodeURIComponent(activeClientId)}&status=ready_meta#app-dashboard`;
+          }
+        };
+      }
+
+      // =========================================================================
+      // PASO 2: CONEXIÓN OAUTH CON META
       // =========================================================================
       else if (step === 'conectar_meta') {
         loaderEl.style.display = 'none';
@@ -329,7 +383,7 @@
         bodyEl.textContent = 'Tu segmentación en Excel está lista. Conecta tu cuenta corporativa de Facebook para inyectar los conjuntos de anuncios.';
 
         verifyBtn.style.display = 'inline-flex';
-        verifyBtn.textContent = 'Conectar con Facebook Ads 🚀';
+        verifyBtn.textContent = 'Conectar con Facebook Ads';
         verifyBtn.onclick = async () => {
           verifyBtn.textContent = 'Iniciando conexión con Meta...';
           try {
@@ -353,7 +407,7 @@
       }
 
       // =========================================================================
-      // PASO 2: ACTIVACIÓN DE CAMPAÑA (DIFERENCIADO: CLIENTE VS ADMIN)
+      // PASO 3: ACTIVACIÓN DE CAMPAÑA (CLIENTE VS ADMIN)
       // =========================================================================
       else if (step === 'activar_campana' || paymentType === 'recurring') {
         loaderEl.style.display = 'none';
@@ -457,7 +511,7 @@
       }
 
       // =========================================================================
-      // PASO 3: CONFIRMAR PAGO / EVENTO CAPI
+      // PASO 4: CONFIRMAR PAGO / EVENTO CAPI
       // =========================================================================
       else if (step === 'confirmar_pago') {
         loaderEl.style.display = 'none';
@@ -466,7 +520,7 @@
         localStorage.setItem('sodie_payment_completed', 'true');
 
         if (typeof fbq === 'function') {
-          fbq('track', 'Purchase', { value: 1000.00, currency: 'USD', content_name: 'Reserva Hito SODIE' });
+          fbq('track', 'Purchase', { value: 7000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
         }
 
         badgeEl.textContent = `Pago Exitoso • ${activeClientId}`;
