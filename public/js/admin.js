@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarDashboard();
   } else {
     const dashView = document.getElementById("admin-dashboard-view");
-    if (dashView && dashView.style.display === "block") {
+    if (dashView && window.getComputedStyle(dashView).display !== "none") {
       sodieIniciarCronometro24h();
       sodieIniciarTimer120h();
     }
@@ -130,62 +130,70 @@ window.sodieCerrarSesionAdmin = function() {
 };
 
 /* ==========================================================================
-   2. CRONÓMETROS Y TEMPORIZADORES
+   2. CRONÓMETROS Y TEMPORIZADORES (CORREGIDOS)
    ========================================================================== */
 function actualizarDisplayCronometro() {
   const timerDisplay = document.getElementById('admin-timer-display');
   if (!timerDisplay) return;
 
-  const h = Math.floor(ADMIN_STATE.timer24Seconds / 3600).toString().padStart(2, '0');
-  const m = Math.floor((ADMIN_STATE.timer24Seconds % 3600) / 60).toString().padStart(2, '0');
-  const s = (ADMIN_STATE.timer24Seconds % 60).toString().padStart(2, '0');
+  const totalSecs = Math.max(0, ADMIN_STATE.timer24Seconds);
+  const h = Math.floor(totalSecs / 3600).toString().padStart(2, '0');
+  const m = Math.floor((totalSecs % 3600) / 60).toString().padStart(2, '0');
+  const s = Math.floor(totalSecs % 60).toString().padStart(2, '0');
 
   timerDisplay.textContent = `${h}:${m}:${s}`;
 }
 
-function sodieIniciarCronometro24h() {
+window.sodieIniciarCronometro24h = function() {
   if (ADMIN_STATE.timer24Interval) return;
 
+  actualizarDisplayCronometro();
   ADMIN_STATE.timer24Interval = setInterval(() => {
     if (ADMIN_STATE.timer24Seconds <= 0) {
-      clearInterval(ADMIN_STATE.timer24Interval);
-      ADMIN_STATE.timer24Interval = null;
+      sodiePausarCronometro();
+      ADMIN_STATE.timer24Seconds = 0;
+      actualizarDisplayCronometro();
       return;
     }
     ADMIN_STATE.timer24Seconds--;
     actualizarDisplayCronometro();
   }, 1000);
-}
+};
 
-function sodiePausarCronometro() {
-  clearInterval(ADMIN_STATE.timer24Interval);
-  ADMIN_STATE.timer24Interval = null;
-}
+window.sodiePausarCronometro = function() {
+  if (ADMIN_STATE.timer24Interval) {
+    clearInterval(ADMIN_STATE.timer24Interval);
+    ADMIN_STATE.timer24Interval = null;
+  }
+};
 
-function sodieReiniciarCronometro() {
+window.sodieReiniciarCronometro = function() {
   sodiePausarCronometro();
   ADMIN_STATE.timer24Seconds = 24 * 3600;
   actualizarDisplayCronometro();
   sodieIniciarCronometro24h();
-}
+};
 
 function actualizarDisplay120h() {
   const timerDisplay = document.getElementById('admin-120h-timer');
   if (!timerDisplay) return;
 
-  const hours = Math.floor(ADMIN_STATE.timer120Seconds / 3600).toString().padStart(3, '0');
-  const minutes = Math.floor((ADMIN_STATE.timer120Seconds % 3600) / 60).toString().padStart(2, '0');
-  const seconds = (ADMIN_STATE.timer120Seconds % 60).toString().padStart(2, '0');
+  const totalSecs = Math.max(0, ADMIN_STATE.timer120Seconds);
+  const hours = Math.floor(totalSecs / 3600).toString().padStart(3, '0');
+  const minutes = Math.floor((totalSecs % 3600) / 60).toString().padStart(2, '0');
+  const seconds = Math.floor(totalSecs % 60).toString().padStart(2, '0');
 
   timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
 }
 
-function sodieIniciarTimer120h() {
+window.sodieIniciarTimer120h = function() {
   if (ADMIN_STATE.timer120Interval) return;
 
+  actualizarDisplay120h();
   ADMIN_STATE.timer120Interval = setInterval(() => {
     if (ADMIN_STATE.timer120Seconds <= 0) {
       sodiePausarTimer120h();
+      ADMIN_STATE.timer120Seconds = 0;
       const timerDisplay = document.getElementById('admin-120h-timer');
       if (timerDisplay) timerDisplay.textContent = "000:00:00 (Agotado)";
       return;
@@ -193,27 +201,25 @@ function sodieIniciarTimer120h() {
     ADMIN_STATE.timer120Seconds--;
     actualizarDisplay120h();
   }, 1000);
-}
+};
 
-function sodiePausarTimer120h() {
-  clearInterval(ADMIN_STATE.timer120Interval);
-  ADMIN_STATE.timer120Interval = null;
-}
+window.sodiePausarTimer120h = function() {
+  if (ADMIN_STATE.timer120Interval) {
+    clearInterval(ADMIN_STATE.timer120Interval);
+    ADMIN_STATE.timer120Interval = null;
+  }
+};
 
-function sodieReiniciarTimer120h() {
+window.sodieReiniciarTimer120h = function() {
   sodiePausarTimer120h();
   ADMIN_STATE.timer120Seconds = 120 * 3600;
   actualizarDisplay120h();
   sodieIniciarTimer120h();
-}
+};
 
 /* ==========================================================================
-   3. NAVEGACIÓN VISTA CLIENTE (client.html?clientId=...)
+   3. NAVEGACIÓN VISTA CLIENTE
    ========================================================================== */
-/**
- * Abre la interfaz client.html para un cliente específico o para los 3 clientes
- * @param {string} clientId - Ej: 'CLIENT-01', 'CLIENT-02', 'CLIENT-03' o 'ALL'
- */
 window.sodieAbrirVistaCliente = function(clientId = 'CLIENT-01') {
   if (clientId === 'ALL') {
     const clientes = ['CLIENT-01', 'CLIENT-02', 'CLIENT-03'];
@@ -275,12 +281,6 @@ function initListeners() {
     btnVideo.dataset.bound = "true";
   }
 
-  const btnContract = document.getElementById('btn-upload-contract');
-  if (btnContract && !btnContract.dataset.bound) {
-    btnContract.addEventListener('click', () => sodieSubirContratoAdmin('admin-contract-file'));
-    btnContract.dataset.bound = "true";
-  }
-
   const btnExcel = document.getElementById('btn-upload-excel');
   if (btnExcel && !btnExcel.dataset.bound) {
     btnExcel.addEventListener('click', sodieSubirExcelAdmin);
@@ -293,12 +293,10 @@ function initListeners() {
     btnWaitlistOpen.dataset.bound = "true";
   }
 
-  // Evento para cambiar/abrir Vista Cliente
   const btnSwitchClient = document.getElementById('btn-switch-client');
   if (btnSwitchClient && !btnSwitchClient.dataset.bound) {
     btnSwitchClient.addEventListener('click', (e) => {
       e.preventDefault();
-      // Por defecto abre CLIENT-01, o puedes cambiarlo a 'ALL' para abrir los 3
       sodieAbrirVistaCliente('CLIENT-01');
     });
     btnSwitchClient.dataset.bound = "true";
@@ -360,34 +358,6 @@ async function sodieSubirVideoAdmin() {
     }
   } catch (err) {
     console.error('Error al subir video:', err);
-    alert('Error al conectar con el servidor.');
-  }
-}
-
-async function sodieSubirContratoAdmin(fileInputId = 'admin-contract-file') {
-  const fileInput = document.getElementById(fileInputId);
-  if (!fileInput || !fileInput.files[0]) {
-    alert('Selecciona un archivo PDF primero.');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('contract', fileInput.files[0]);
-
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload-contract`, {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      alert('¡Contrato PDF actualizado con éxito!');
-    } else {
-      alert('Error: ' + data.error);
-    }
-  } catch (err) {
-    console.error('Error al subir contrato:', err);
     alert('Error al conectar con el servidor.');
   }
 }
