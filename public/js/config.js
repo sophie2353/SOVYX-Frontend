@@ -1,19 +1,21 @@
 // config.js
 window.SODIE_CONFIG = {
-  API_URL: ''
+  // Fallback de rescate inmediato basado en la ubicación actual
+  API_URL: window.location.origin
 };
 
-// Cargar la configuración dinámicamente desde el Backend
-async function sodieCargarConfiguracion() {
+// Guardamos la promesa de carga para que otros scripts puedan esperarla si lo necesitan
+window.SODIE_CONFIG_READY = (async function sodieCargarConfiguracion() {
   try {
     const res = await fetch('/api/config');
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    
     const data = await res.json();
-    window.SODIE_CONFIG.API_URL = data.API_URL;
+    if (data && data.API_URL) {
+      window.SODIE_CONFIG.API_URL = data.API_URL.replace(/\/$/, ''); // Limpia barra final
+    }
   } catch (err) {
-    // Si falla o no responde, usa la misma URL de origen de la página
+    console.warn('⚠️ No se pudo cargar /api/config. Usando URL de origen como fallback:', err);
     window.SODIE_CONFIG.API_URL = window.location.origin;
   }
-}
-
-// Ejecutar de inmediato
-sodieCargarConfiguracion();
+})();
