@@ -5,13 +5,16 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Extraer y Persistir Parámetros URL de Lista de Espera
+document.addEventListener('DOMContentLoaded', async () => {
+  // Esperar a la inicialización dinámica de configuración
+  if (window.SODIE_CONFIG_READY) {
+    await window.SODIE_CONFIG_READY;
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_v4_client_id') || 'CLIENT-V4-#1';
   const email = urlParams.get('email') || localStorage.getItem('sodie_v4_email') || '';
 
-  // Guardar en almacenamiento local para la versión V4
   localStorage.setItem('sodie_v4_client_id', clientId);
   if (email) {
     localStorage.setItem('sodie_v4_email', email);
@@ -21,13 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Asignar Timestamp
   const timestampInput = document.getElementById('timestamp');
   if (timestampInput) {
     timestampInput.value = new Date().toISOString();
   }
 
-  // Obtener la IP pública mediante API
   const ipInput = document.getElementById('ip_address');
   if (ipInput) {
     fetch('https://api.ipify.org?format=json')
@@ -40,13 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // Redirección final del flujo de lista de espera
   function finalizeAndRedirect() {
     alert("Cupo Reservado. Redirigiendo a dashboard principal para ver cuántos cupos están disponibles. Activa las notificaciones para saber nuevas actualizaciones y cuándo estará activa la V4 🚀");
     window.location.href = 'index.html';
   }
 
-  // 2. Manejador del Formulario de Firma Digital
   const contractForm = document.getElementById('contract-waitlist-form');
   if (contractForm) {
     contractForm.addEventListener('submit', async function(e) {
@@ -71,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       try {
-        // Envío al nuevo endpoint exclusivo de firma para Waitlist
         await fetch(`${getBaseUrl()}/api/webhook/contrato-waitlist-firmado`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -81,10 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Webhook de waitlist no disponible, continuando flujo local...', error);
       }
 
-      // Marcar contrato de waitlist firmado localmente
       localStorage.setItem('sodie_v4_contract_signed', 'true');
-
-      // Finalizar y redirigir a index.html
       finalizeAndRedirect();
     });
   }
