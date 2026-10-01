@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Asegurar resolución de API_URL antes de cualquier fetch
+  if (window.SODIE_CONFIG_READY) {
+    await window.SODIE_CONFIG_READY;
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
-  
-  // Extraer credenciales pasadas por URL o recuperar del localStorage
   const email = urlParams.get('email') || localStorage.getItem('sodie_v4_email');
   const userId = urlParams.get('userId') || localStorage.getItem('sodie_v4_user_id');
 
@@ -14,14 +17,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cuposRestantesElem = document.getElementById('cupos-restantes-text');
   const actionBtn = document.getElementById('conf-action-btn');
 
-  // Registrar evento CAPI / Meta Pixel por la reserva
   if (typeof fbq === 'function') {
     fbq('track', 'Purchase', { value: 2000.00, currency: 'USD', content_name: 'Reserva Lista de Espera V4' });
   }
 
   try {
-    // Llamada directa al endpoint POST /confirm-waitlist
-    const response = await fetch('/api/waitlist/confirm-waitlist', {
+    const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : window.location.origin;
+    const response = await fetch(`${baseUrl}/api/waitlist/confirm-waitlist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, userId })
@@ -33,11 +35,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const assignedClientId = data.clientId;
       const waitlistStatus = data.waitlistStatus;
 
-      // Guardar identificador y datos en localStorage
       localStorage.setItem('sodie_v4_client_id', assignedClientId);
       if (email) localStorage.setItem('sodie_v4_email', email);
 
-      // Actualizar interfaz con respuesta del Backend
       loaderEl.classList.add('d-none');
       
       badgeEl.textContent = `Lista de Espera V4 • ${assignedClientId}`;
@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       resultBox.classList.remove('d-none');
       actionBtn.classList.remove('d-none');
 
-      // Botón hacia el contrato de lista de espera
       actionBtn.onclick = () => {
         actionBtn.textContent = 'Redirigiendo a contrato...';
         window.location.href = `contract-waitlist.html?clientId=${encodeURIComponent(assignedClientId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`;
