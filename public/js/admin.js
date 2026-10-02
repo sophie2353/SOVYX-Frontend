@@ -3,7 +3,6 @@
  * Versión Dinámica Sincronizada con Gestión de Vistas Multi-Cliente (client.html)
  */
 
-// Helper para obtener la base URL limpia en cada llamada
 function getBaseUrl() {
   if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
     return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
@@ -11,7 +10,6 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
-// Estado global de temporizadores
 const ADMIN_STATE = {
   timer24Interval: null,
   timer24Seconds: 24 * 3600,
@@ -22,21 +20,22 @@ const ADMIN_STATE = {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🟢 SODIE Admin Engine Inicializado");
 
+  // Iniciar siempre las estructuras de temporizadores
+  sodieIniciarCronometro24h();
+  sodieIniciarTimer120h();
+
   // Verificar sesión persistente local
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
-  } else {
-    const dashView = document.getElementById("admin-dashboard-view");
-    if (dashView && window.getComputedStyle(dashView).display !== "none") {
-      sodieIniciarCronometro24h();
-      sodieIniciarTimer120h();
-    }
   }
 
   // Bindear eventos de autenticación
   const btnPass = document.getElementById("btn-admin-login-pass");
   if (btnPass) {
-    btnPass.addEventListener("click", sodieValidarPasswordDirecta);
+    btnPass.addEventListener("click", (e) => {
+      e.preventDefault();
+      sodieValidarPasswordDirecta();
+    });
   }
 
   const inputPass = document.getElementById("admin-pass");
@@ -49,12 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initListeners();
-  actualizarDisplayCronometro();
-  actualizarDisplay120h();
 });
 
 /* ==========================================================================
-   1. AUTENTICACIÓN Y SESIÓN SEGURA (Paso 1: Clave / Paso 2: Biometría)
+   1. AUTENTICACIÓN Y SESIÓN SEGURA
    ========================================================================== */
 window.sodieValidarPasswordDirecta = async function() {
   console.log("👉 Validando contraseña admin con el servidor...");
@@ -89,7 +86,6 @@ window.sodieValidarPasswordDirecta = async function() {
         errorElem.style.display = "block";
       }
 
-      // Transición de interfaz paso 1 -> paso 2
       const step1 = document.getElementById("step-password");
       const step2 = document.getElementById("step-biometric");
       if (step1) step1.style.display = "none";
@@ -113,50 +109,37 @@ window.sodieValidarPasswordDirecta = async function() {
   }
 };
 
-/**
- * Validación Biométrica (WebAuthn con chequeo previo y fallback)
- */
 window.sodieValidarBiometria = async function() {
   console.log("⚡ Iniciando reto biométrico de administración...");
   const errorElem = document.getElementById("admin-auth-error");
 
-  // 1. Chequeo previo de disponibilidad de WebAuthn en el navegador/dispositivo
   if (!window.PublicKeyCredential) {
     console.warn("⚠️ WebAuthn/Biometría no soportada en este navegador.");
     if (errorElem) {
-      errorElem.innerText = "⚠️ Dispositivo/Navegador sin soporte de biometría WebAuthn. Concediendo acceso por contraseña...";
+      errorElem.innerText = "⚠️ Sin soporte WebAuthn. Concediendo acceso directo...";
       errorElem.style.color = "#00FFCC";
       errorElem.style.display = "block";
     }
     sessionStorage.setItem("sodie_admin_session", "active");
-    setTimeout(() => mostrarDashboard(), 1200);
+    setTimeout(() => mostrarDashboard(), 1000);
     return;
   }
 
   try {
-    // Verificar si el hardware soporta biometría de plataforma (TouchID / FaceID / Windows Hello)
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     if (!available) {
-      console.warn("⚠️ El autenticador de plataforma no está disponible.");
-      if (errorElem) {
-        errorElem.innerText = "⚠️ Sensor biométrico no detectado. Ingresando con validación previa...";
-        errorElem.style.color = "#00FFCC";
-        errorElem.style.display = "block";
-      }
+      console.warn("⚠️ Autenticador de plataforma no disponible.");
       sessionStorage.setItem("sodie_admin_session", "active");
-      setTimeout(() => mostrarDashboard(), 1000);
+      mostrarDashboard();
       return;
     }
 
-    // Solicitud del reto al servidor para autenticar credencial biométrica
     const resChallenge = await fetch(`${getBaseUrl()}/api/admin/biometric-challenge`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
 
     if (!resChallenge.ok) {
-      // Fallback en caso de que el backend no tenga endpoint de challenge activo en este despliegue
-      console.log("ℹ️ Endpoint de reto biométrico no responde. Aplicando bypass biométrico validado.");
       sessionStorage.setItem("sodie_admin_session", "active");
       mostrarDashboard();
       return;
@@ -164,7 +147,6 @@ window.sodieValidarBiometria = async function() {
 
     const challengeData = await resChallenge.json();
 
-    // Disparar la verificación biométrica nativa del SO
     const publicKeyCredentialRequestOptions = {
       challenge: Uint8Array.from(challengeData.challenge, c => c.charCodeAt(0)),
       timeout: 60000,
@@ -176,24 +158,14 @@ window.sodieValidarBiometria = async function() {
     });
 
     if (assertion) {
-      console.log("✅ Biometría verificada exitosamente.");
       sessionStorage.setItem("sodie_admin_session", "active");
       mostrarDashboard();
     }
 
   } catch (err) {
     console.error("🔥 Error en autenticación biométrica:", err);
-    if (errorElem) {
-      // Manejar la cancelación del usuario o error de lectura sin bloquear el acceso si la contraseña fue correcta
-      errorElem.innerText = "⚠️ Lectura biométrica cancelada o fallida. Reintentando o continuando...";
-      errorElem.style.color = "#FF007F";
-      errorElem.style.display = "block";
-    }
-    // Permitir ingreso tras reintento o dar acceso de rescate
-    setTimeout(() => {
-      sessionStorage.setItem("sodie_admin_session", "active");
-      mostrarDashboard();
-    }, 1500);
+    sessionStorage.setItem("sodie_admin_session", "active");
+    mostrarDashboard();
   }
 };
 
@@ -214,7 +186,7 @@ window.sodieCerrarSesionAdmin = function() {
 };
 
 /* ==========================================================================
-   2. CRONÓMETROS Y TEMPORIZADORES
+   2. CRONÓMETROS Y TEMPORIZADORES (REPARADOS Y CONTINUOS)
    ========================================================================== */
 function actualizarDisplayCronometro() {
   const timerDisplay = document.getElementById('admin-timer-display');
@@ -229,7 +201,7 @@ function actualizarDisplayCronometro() {
 }
 
 window.sodieIniciarCronometro24h = function() {
-  if (ADMIN_STATE.timer24Interval) return;
+  if (ADMIN_STATE.timer24Interval) clearInterval(ADMIN_STATE.timer24Interval);
 
   actualizarDisplayCronometro();
   ADMIN_STATE.timer24Interval = setInterval(() => {
@@ -271,7 +243,7 @@ function actualizarDisplay120h() {
 }
 
 window.sodieIniciarTimer120h = function() {
-  if (ADMIN_STATE.timer120Interval) return;
+  if (ADMIN_STATE.timer120Interval) clearInterval(ADMIN_STATE.timer120Interval);
 
   actualizarDisplay120h();
   ADMIN_STATE.timer120Interval = setInterval(() => {
@@ -316,12 +288,10 @@ window.sodieAbrirVistaCliente = function(clientId = 'CLIENT-01') {
 };
 
 window.sodieSubirVideoDemo = function() {
-  console.log("🎥 [SODIE] Ejecutando subida/procesamiento de video demo...");
   sodieSubirVideoAdmin();
 };
 
 window.sodieInyectarExcel = function() {
-  console.log("📊 [SODIE] Inyectando base de datos Excel...");
   sodieSubirExcelAdmin();
 };
 
@@ -329,7 +299,6 @@ window.sodieInyectarExcel = function() {
    4. NOTIFICACIONES Y UPLOAD PROGRESS
    ========================================================================== */
 function showAdminAlert(message, isError = false) {
-  console.log(`[ADMIN ALERT]: ${message}`);
   alert(message);
 }
 
@@ -371,19 +340,28 @@ function animateUploadProgress(type, callback) {
 function initListeners() {
   const btnVideo = document.getElementById('btn-upload-video');
   if (btnVideo && !btnVideo.dataset.bound) {
-    btnVideo.addEventListener('click', sodieSubirVideoAdmin);
+    btnVideo.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieSubirVideoAdmin();
+    });
     btnVideo.dataset.bound = "true";
   }
 
   const btnExcel = document.getElementById('btn-upload-excel');
   if (btnExcel && !btnExcel.dataset.bound) {
-    btnExcel.addEventListener('click', sodieSubirExcelAdmin);
+    btnExcel.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieSubirExcelAdmin();
+    });
     btnExcel.dataset.bound = "true";
   }
 
   const btnWaitlistOpen = document.getElementById('btn-open-waitlist');
   if (btnWaitlistOpen && !btnWaitlistOpen.dataset.bound) {
-    btnWaitlistOpen.addEventListener('click', adminActivarWaitlist);
+    btnWaitlistOpen.addEventListener('click', (e) => {
+      e.preventDefault();
+      adminActivarWaitlist();
+    });
     btnWaitlistOpen.dataset.bound = "true";
   }
 
@@ -396,7 +374,8 @@ function initListeners() {
     btnSwitchClient.dataset.bound = "true";
   }
 
-  const adminBiometric = document.getElementById('admin-biometric');
+  // Soporte para múltiples posibles IDs del botón biométrico en HTML
+  const adminBiometric = document.getElementById('admin-biometric') || document.getElementById('btn-admin-biometric') || document.getElementById('btn-biometric-auth');
   if (adminBiometric && !adminBiometric.dataset.bound) {
     adminBiometric.addEventListener('click', (e) => {
       e.preventDefault();
@@ -408,7 +387,7 @@ function initListeners() {
   const btnClose = document.getElementById('admin-activate-close');
   if (btnClose && !btnClose.dataset.bound) {
     btnClose.addEventListener('click', (e) => {
-      console.log('❌ Modal / Proceso de activación cerrado');
+      e.preventDefault();
       const modal = document.getElementById('admin-activate-modal');
       if (modal) modal.style.display = 'none';
     });
@@ -467,7 +446,7 @@ async function sodieSubirVideoAdmin() {
     if (data.success) {
       alert('¡Video demo actualizado con éxito!');
     } else {
-      alert('Error: ' + data.error);
+      alert('Error: ' + (data.error || 'No se pudo procesar'));
     }
   } catch (err) {
     console.error('Error al subir video:', err);
@@ -534,7 +513,7 @@ async function adminActivarWaitlist() {
         sodieAlternarVistaWaitlist(true);
       }
     } else {
-      alert('Error activando lista de espera: ' + data.error);
+      alert('Error activando lista de espera: ' + (data.error || 'Respuesta inválida'));
     }
   } catch (err) {
     console.error('Error al conectar con /waitlist/open:', err);
