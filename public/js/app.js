@@ -666,3 +666,66 @@ function handleUrlRedirects() {
     if (logoIcon) logoIcon.addEventListener("pointerdown", window.sodieContarToquesAdmin);
   });
 })();
+
+/* ==========================================================
+   SODIE AI - MANEJADOR GLOBAL DE BINDING Y EJECUCIÓN DIRECTA
+   ========================================================== */
+
+// Garantiza que la función se pueda llamar desde el atributo onclick del HTML
+window.ejecutarBotonSODIE = async function(event, accion) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  console.log(`[SODIE UI] ⚡ Clic detectado en la acción: '${accion}'`);
+
+  try {
+    switch (accion) {
+      case 'biometria-login':
+        console.log('[SODIE UI] Iniciando flujo biométrico...');
+        if (typeof window.sodieValidarBiometria === 'function') {
+          await window.sodieValidarBiometria();
+        } else if (typeof window.autenticarBiometrico === 'function') {
+          await window.autenticarBiometrico();
+        } else {
+          alert('Función de biometría no encontrada en el script.');
+        }
+        break;
+
+      case 'biometria-registro':
+        console.log('[SODIE UI] Iniciando registro biométrico...');
+        if (typeof window.sodieRegistrarBiometria === 'function') {
+          await window.sodieRegistrarBiometria();
+        } else if (typeof window.registrarBiometrico === 'function') {
+          await window.registrarBiometrico();
+        }
+        break;
+
+      case 'cargar-excel':
+        console.log('[SODIE UI] Procesando carga de archivo Excel...');
+        if (typeof window.sodieFlujoInyeccionCliente === 'function') {
+          window.sodieFlujoInyeccionCliente();
+        } else if (typeof window.procesarExcel === 'function') {
+          window.procesarExcel();
+        }
+        break;
+
+      case 'activar-campana':
+        console.log('[SODIE UI] Activando campaña...');
+        if (typeof window.sodieConfirmarActivacionCliente === 'function') {
+          window.sodieConfirmarActivacionCliente();
+        } else if (typeof window.activarCampana === 'function') {
+          window.activarCampana();
+        }
+        break;
+
+      default:
+        console.warn(`[SODIE UI] Acción no mapeada: ${accion}`);
+    }
+  } catch (err) {
+    console.error(`[SODIE UI] Error al ejecutar la acción '${accion}':`, err);
+    alert(`Ocurrió un error al ejecutar la acción: ${err.message || err}`);
+  }
+};
+
