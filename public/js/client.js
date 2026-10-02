@@ -72,7 +72,7 @@ function getClientId() {
 const CLIENT_STATE = {
   clientId: null,
   isAuthenticated: false,
-  currentWeek: 1, // Semana activa de cobro (1, 2 o 3)
+  currentWeek: 1,
   excelUploaded: false,
   paymentConfirmed: false,
   campaignActivated: false,
@@ -107,13 +107,11 @@ function updateClientSessionUI() {
     clientIdBadge.textContent = `Cliente: ${CLIENT_STATE.clientId} ${CLIENT_STATE.isAuthenticated ? '🔒 (Biometría Activa)' : '⚠️ (Sin Biometría)'}`;
   }
 
-  // Actualizar vista global de autenticación si existe
   const authView = document.getElementById('client-auth-view');
   if (authView) {
     authView.style.display = CLIENT_STATE.isAuthenticated ? 'none' : 'block';
   }
 
-  // Actualizar estado visual de los botones biométricos
   const btnAuth = document.getElementById('btn-biometric-auth');
   if (btnAuth && CLIENT_STATE.isAuthenticated) {
     btnAuth.textContent = '✓ Sesión Biométrica Verificada';
@@ -142,9 +140,7 @@ function base64UrlToUint8Array(base64Url) {
   return outputArray;
 }
 
-// Funciones globales expuestas para atributos onclick en HTML
 window.sodieMostrarRegistroBiometrico = function() {
-  console.log("🧬 Desplegando registro biométrico...");
   const regBox = document.getElementById('client-register-box');
   const loginBox = document.getElementById('client-login-box');
   if (regBox) regBox.style.display = 'block';
@@ -152,7 +148,6 @@ window.sodieMostrarRegistroBiometrico = function() {
 };
 
 window.sodieOcultarRegistroBiometrico = function() {
-  console.log("🙈 Ocultando registro biométrico...");
   const regBox = document.getElementById('client-register-box');
   const loginBox = document.getElementById('client-login-box');
   if (regBox) regBox.style.display = 'none';
@@ -273,10 +268,9 @@ async function iniciarSesionBiometricaCliente() {
 }
 
 /* ==========================================================================
-   4. EVENT LISTENERS DE INTERFAZ Y BINDINGS DE SELECTORES (CORREGIDOS)
+   4. EVENT LISTENERS DE INTERFAZ Y BINDINGS DE SELECTORES
    ========================================================================== */
 function setupEventListeners() {
-  // Brand Header
   const brandTitle = document.getElementById('header-brand-title');
   if (brandTitle && !brandTitle.dataset.bound) {
     brandTitle.addEventListener('click', () => {
@@ -285,20 +279,24 @@ function setupEventListeners() {
     brandTitle.dataset.bound = "true";
   }
 
-  // Biometría (Registro y Login)
   const btnRegisterBio = document.getElementById('btn-client-biometric-reg') || document.getElementById('btn-biometric-register');
   if (btnRegisterBio && !btnRegisterBio.dataset.bound) {
-    btnRegisterBio.addEventListener('click', window.sodieRegistrarBiometriaCliente);
+    btnRegisterBio.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.sodieRegistrarBiometriaCliente();
+    });
     btnRegisterBio.dataset.bound = "true";
   }
 
   const btnLoginBio = document.getElementById('btn-client-biometric-login') || document.getElementById('btn-biometric-login') || document.getElementById('btn-biometric-auth');
   if (btnLoginBio && !btnLoginBio.dataset.bound) {
-    btnLoginBio.addEventListener('click', window.sodieLoginBiometricoCliente);
+    btnLoginBio.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.sodieLoginBiometricoCliente();
+    });
     btnLoginBio.dataset.bound = "true";
   }
 
-  // Input Email Registro
   const clientEmailReg = document.getElementById('client-email-reg');
   if (clientEmailReg && !clientEmailReg.dataset.bound) {
     clientEmailReg.addEventListener('input', (e) => {
@@ -307,31 +305,33 @@ function setupEventListeners() {
     clientEmailReg.dataset.bound = "true";
   }
 
-  // Subir Excel (Paso Diario cada 24 horas)
   const btnUpload = document.getElementById('btn-client-upload-excel');
   if (btnUpload && !btnUpload.dataset.bound) {
-    btnUpload.addEventListener('click', sodieFlujoInyeccionCliente);
+    btnUpload.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieFlujoInyeccionCliente();
+    });
     btnUpload.dataset.bound = "true";
   }
 
-  // Card Injection Flow
   const cardInjectionFlow = document.getElementById('card-injection-flow');
   if (cardInjectionFlow && !cardInjectionFlow.dataset.bound) {
     cardInjectionFlow.addEventListener('click', (e) => {
-      console.log('⚡ Clic en Card Injection Flow');
+      e.preventDefault();
       sodieFlujoInyeccionCliente();
     });
     cardInjectionFlow.dataset.bound = "true";
   }
 
-  // Activar Campaña en Meta Ads
   const btnActivate = document.getElementById('btn-client-activate-campaign');
   if (btnActivate && !btnActivate.dataset.bound) {
-    btnActivate.addEventListener('click', sodieConfirmarActivacionCliente);
+    btnActivate.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieConfirmarActivacionCliente();
+    });
     btnActivate.dataset.bound = "true";
   }
 
-  // Botones de Confirmación de Pago Semanal ($6,000 USDT)
   const btnPaySemana1 = document.getElementById('btn-pay-semana1');
   if (btnPaySemana1 && !btnPaySemana1.dataset.bound) {
     btnPaySemana1.addEventListener('click', (e) => sodieProcesarPagoSemanal(e, 1));
@@ -350,12 +350,10 @@ function setupEventListeners() {
     btnPaySemana3.dataset.bound = "true";
   }
 
-  // Slider e Indicadores de Métricas
   const metricsSlider = document.getElementById('metrics-slider');
   if (metricsSlider && !metricsSlider.dataset.bound) {
     metricsSlider.addEventListener('input', (e) => {
       const val = e.target.value;
-      console.log('🎚️ Nivel del slider de métricas:', val);
       const metricActivos = document.getElementById('metric-activos');
       if (metricActivos) metricActivos.textContent = `${val}% Proyectado`;
     });
@@ -539,7 +537,7 @@ function sodieProcesarPagoSemanal(event, weekNumber) {
 }
 
 /* ==========================================================================
-   9. PASO 3: REVISIÓN DE CALLBACK DE REDIRECCIÓN (SI APLICA)
+   9. PASO 3: REVISIÓN DE CALLBACK DE REDIRECCIÓN
    ========================================================================== */
 function checkCallbackStatus() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -621,8 +619,10 @@ function initGlobalAndWeeklyTimers() {
   if (CLIENT_STATE.timerInterval) clearInterval(CLIENT_STATE.timerInterval);
 
   const savedStartTime = localStorage.getItem(`sodie_timer_start_${CLIENT_STATE.clientId}`);
-  if (savedStartTime) {
-    CLIENT_STATE.startTimeStamp = parseInt(savedStartTime, 10);
+  const parsedStart = parseInt(savedStartTime, 10);
+
+  if (savedStartTime && !isNaN(parsedStart)) {
+    CLIENT_STATE.startTimeStamp = parsedStart;
   } else {
     CLIENT_STATE.startTimeStamp = Date.now();
     localStorage.setItem(`sodie_timer_start_${CLIENT_STATE.clientId}`, CLIENT_STATE.startTimeStamp.toString());
@@ -634,7 +634,7 @@ function initGlobalAndWeeklyTimers() {
 
   const updateTimerTick = () => {
     const now = Date.now();
-    CLIENT_STATE.elapsedSeconds = Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000);
+    CLIENT_STATE.elapsedSeconds = Math.max(0, Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000));
 
     if (CLIENT_STATE.elapsedSeconds >= MAX_GLOBAL_SECONDS) {
       CLIENT_STATE.elapsedSeconds = MAX_GLOBAL_SECONDS;
@@ -653,9 +653,11 @@ function initGlobalAndWeeklyTimers() {
     }
 
     const lastExcelTime = localStorage.getItem(`sodie_last_excel_time_${CLIENT_STATE.clientId}`);
+    const parsedExcelTime = parseInt(lastExcelTime, 10);
     let dailyElapsed = 0;
-    if (lastExcelTime) {
-      dailyElapsed = Math.floor((now - parseInt(lastExcelTime, 10)) / 1000);
+
+    if (lastExcelTime && !isNaN(parsedExcelTime)) {
+      dailyElapsed = Math.floor((now - parsedExcelTime) / 1000);
     } else {
       dailyElapsed = CLIENT_STATE.elapsedSeconds % SECONDS_24H;
     }
