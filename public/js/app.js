@@ -3,7 +3,6 @@
  * Versión Completa Restaurada & Estabilizada
  */
 
-// Helper para obtener la base URL limpia en cada llamada
 function getBaseUrl() {
   if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
     return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
@@ -11,7 +10,6 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
-// Estado global local para el flujo de pago inicial
 let currentPaymentState = {
   hours: 0,
   currentStep: 1,
@@ -32,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initWaitlistEvents();
   initVideoAndConfirm();
 
-  // Configurar la fuente del Video de Demostración
   const demoVideo = document.getElementById('sodie-demo-video');
   if (demoVideo) {
     const source = demoVideo.querySelector('source');
@@ -64,7 +61,7 @@ function showToast(title, body, isError = false) {
 }
 
 /* ==========================================================================
-   2. SPLASH SCREEN & SSE METRICS (/api/v1/metrics/live)
+   2. SPLASH SCREEN & SSE METRICS
    ========================================================================== */
 function initSplashGauges() {
   const pctNum = document.getElementById('splash-pct');
@@ -174,7 +171,7 @@ function actualizarInterfazCupos(slots) {
 }
 
 /* ==========================================================================
-   4. FACEBOOK METRICS EN INDEX (/api/facebook/metrics)
+   4. FACEBOOK METRICS EN INDEX
    ========================================================================== */
 async function initFacebookMetrics() {
   const elSpend = document.getElementById('metric-spend');
@@ -217,7 +214,7 @@ async function initFacebookMetrics() {
 }
 
 /* ==========================================================================
-   5. CHAT & ASISTENTE IA2 (/api/v1/chat/message)
+   5. CHAT & ASISTENTE IA2
    ========================================================================== */
 function initChatEngine() {
   const sendBtn = document.getElementById('chat-send');
@@ -321,7 +318,7 @@ async function sendChatMessage(messageText, payload = null) {
 }
 
 /* ==========================================================================
-   6. IA3 ANALYZER ENGINE (/api/ia3/analizar)
+   6. IA3 ANALYZER ENGINE
    ========================================================================== */
 function initIA3Engine() {
   const btnAnalizar = document.getElementById('btn-ia3-analizar');
@@ -377,7 +374,7 @@ function initIA3Engine() {
 }
 
 /* ==========================================================================
-   7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS (CORREGIDO Y CERRADO)
+   7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS
    ========================================================================== */
 function mostrarPasoConexion() {
   const introCard = document.getElementById('pf-intro-card');
@@ -415,16 +412,14 @@ function finalizarYConfirmar() {
 }
 
 function initPaymentFlowEvents() {
-  // 1. Manejo de selección de Card / Tarjeta
   const pfCard = document.getElementById('pf-card');
   if (pfCard) {
-    pfCard.addEventListener('click', (e) => {
+    pfCard.addEventListener('click', () => {
       document.querySelectorAll('.pf-card').forEach(c => c.classList.remove('active-card'));
       pfCard.classList.add('active-card');
     });
   }
 
-  // 2. Botón Iniciar Pago
   const btnIniciarPago = document.getElementById('btn-iniciar-pago');
   if (btnIniciarPago) {
     btnIniciarPago.addEventListener('click', (e) => {
@@ -433,7 +428,6 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // 3. Botón Procesar Pago Pasarela
   const btnProcesarPagoPasarela = document.getElementById('btn-procesar-pago-pasarela');
   if (btnProcesarPagoPasarela) {
     btnProcesarPagoPasarela.addEventListener('click', (e) => {
@@ -442,7 +436,6 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // 4. Botón Subir Archivo
   const btnClientUploadFile = document.getElementById('btn-client-upload-file');
   if (btnClientUploadFile) {
     btnClientUploadFile.addEventListener('click', (e) => {
@@ -451,14 +444,12 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // Mensajes entrantes del Iframe de Pasarela
   window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
       window.location.href = 'confirmacion.html?step=generar_id';
     }
   });
 
-  // Verificación de estado de contrato
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
     const introCard = document.getElementById('pf-intro-card');
@@ -667,15 +658,33 @@ function handleUrlRedirects() {
   });
 })();
 
-/* ==========================================================
-   SODIE AI - MANEJADOR GLOBAL DE BINDING Y EJECUCIÓN DIRECTA
-   ========================================================== */
+// ==========================================
+// 1. MANEJADORES GLOBALES DE ERRORES
+// ==========================================
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error(`❌ [SODIE Global Error Handler] ${message} en ${source}:${lineno}:${colno}`);
+  return false; // Permite la propagación estándar en consola sin romper el hilo
+};
 
-// Garantiza que la función se pueda llamar desde el atributo onclick del HTML
+window.addEventListener('unhandledrejection', function(event) {
+  console.error('❌ [SODIE Unhandled Promise Rejection]:', event.reason);
+});
+
+// ==========================================
+// 2. ORQUESTADOR CENTRAL DE BOTONES Y ACCIONES
+// ==========================================
 window.ejecutarBotonSODIE = async function(event, accion) {
+  // Prevenir comportamiento nativo si hay evento
   if (event) {
-    event.preventDefault();
-    event.stopPropagation();
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
+
+  // Identificar el botón que activó la acción para feedback visual
+  const elementoBoton = event?.currentTarget || event?.target || null;
+  
+  if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
+    elementoBoton.disabled = true;
   }
 
   console.log(`[SODIE UI] ⚡ Clic detectado en la acción: '${accion}'`);
@@ -686,37 +695,41 @@ window.ejecutarBotonSODIE = async function(event, accion) {
         console.log('[SODIE UI] Iniciando flujo biométrico...');
         if (typeof window.sodieValidarBiometria === 'function') {
           await window.sodieValidarBiometria();
-        } else if (typeof window.autenticarBiometrico === 'function') {
-          await window.autenticarBiometrico();
+        } else if (typeof window.sodieLoginBiometricoCliente === 'function') {
+          await window.sodieLoginBiometricoCliente();
         } else {
-          alert('Función de biometría no encontrada en el script.');
+          throw new Error('Función de biometría no encontrada en el entorno.');
         }
         break;
 
       case 'biometria-registro':
         console.log('[SODIE UI] Iniciando registro biométrico...');
-        if (typeof window.sodieRegistrarBiometria === 'function') {
-          await window.sodieRegistrarBiometria();
-        } else if (typeof window.registrarBiometrico === 'function') {
-          await window.registrarBiometrico();
+        if (typeof window.sodieRegistrarBiometriaCliente === 'function') {
+          await window.sodieRegistrarBiometriaCliente();
+        } else {
+          throw new Error('Función de registro biométrico no encontrada.');
         }
         break;
 
       case 'cargar-excel':
         console.log('[SODIE UI] Procesando carga de archivo Excel...');
         if (typeof window.sodieFlujoInyeccionCliente === 'function') {
-          window.sodieFlujoInyeccionCliente();
-        } else if (typeof window.procesarExcel === 'function') {
-          window.procesarExcel();
+          await window.sodieFlujoInyeccionCliente();
+        } else if (typeof window.sodieSubirExcelAdmin === 'function') {
+          await window.sodieSubirExcelAdmin();
+        } else {
+          throw new Error('Función de carga de Excel no encontrada.');
         }
         break;
 
       case 'activar-campana':
         console.log('[SODIE UI] Activando campaña...');
         if (typeof window.sodieConfirmarActivacionCliente === 'function') {
-          window.sodieConfirmarActivacionCliente();
-        } else if (typeof window.activarCampana === 'function') {
-          window.activarCampana();
+          await window.sodieConfirmarActivacionCliente();
+        } else if (typeof window.sodieConfirmarActivacion === 'function') {
+          await window.sodieConfirmarActivacion();
+        } else {
+          throw new Error('Función de activación de campaña no encontrada.');
         }
         break;
 
@@ -724,8 +737,12 @@ window.ejecutarBotonSODIE = async function(event, accion) {
         console.warn(`[SODIE UI] Acción no mapeada: ${accion}`);
     }
   } catch (err) {
-    console.error(`[SODIE UI] Error al ejecutar la acción '${accion}':`, err);
-    alert(`Ocurrió un error al ejecutar la acción: ${err.message || err}`);
+    console.error(`🚨 [SODIE ERROR ENGINE] Error al ejecutar '${accion}':`, err);
+    alert(`Ocurrió un error al ejecutar la acción '${accion}': ${err.message || err}`);
+  } finally {
+    // Rehabilitar el botón tras completar la operación o fallar
+    if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
+      elementoBoton.disabled = false;
+    }
   }
 };
-
