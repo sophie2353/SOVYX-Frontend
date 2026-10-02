@@ -1,6 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Actualizada: Integración IA3 Backend + Flujo de Pago Simplificado & Carga Excel
+ * Versión Completa Restaurada & Estabilizada
  */
 
 // Helper para obtener la base URL limpia en cada llamada
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTimer30d();
   initPaymentFlowEvents();
   initWaitlistEvents();
+  initVideoAndConfirm();
 
   // Configurar la fuente del Video de Demostración
   const demoVideo = document.getElementById('sodie-demo-video');
@@ -319,77 +320,6 @@ async function sendChatMessage(messageText, payload = null) {
   }
 }
 
-/* -----------
- CONFIRMACIÓN.HTML
- ----------------- */
-// ==========================================
-// Módulo: Manejo de Tarjeta Principal (#main-card)
-// Ubicación: public/js/app.js (confirmacion.html)
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  const mainCard = document.getElementById('main-card');
-
-  if (mainCard) {
-    mainCard.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      // Acción: Alternar clase activa o resaltar tarjeta
-      mainCard.classList.toggle('selected');
-      mainCard.classList.toggle('active-shadow');
-
-      console.log('⚡ [SOVYX/SODIE] Clic detectado en #main-card');
-
-      // Ejemplo de evento/feedback visual extra
-      const cardTitle = mainCard.querySelector('.card-title') || mainCard;
-      if (cardTitle) {
-        cardTitle.style.transition = 'transform 0.2s ease';
-        cardTitle.style.transform = 'scale(1.02)';
-        setTimeout(() => {
-          cardTitle.style.transform = 'scale(1)';
-        }, 200);
-      }
-    });
-  }
-});
-
-/* ----------
- CARD VIDEO DEMO 
- --------------- */
-// ==========================================
-// Módulo: Reproductor Video Demo (#card-demo-video)
-// Ubicación: public/js/app.js (o client.js / admin.js)
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  const cardDemoVideo = document.getElementById('card-demo-video');
-
-  if (cardDemoVideo) {
-    cardDemoVideo.addEventListener('click', (e) => {
-      // Si el elemento es directamente una etiqueta <video>
-      if (cardDemoVideo.tagName === 'VIDEO') {
-        if (cardDemoVideo.paused) {
-          cardDemoVideo.play();
-          console.log('▶️ [SODIE] Reproduciendo #card-demo-video');
-        } else {
-          cardDemoVideo.pause();
-          console.log('⏸️ [SODIE] Video pausado');
-        }
-      } else {
-        // Si es un contenedor de tarjeta que hospeda un video interno
-        const innerVideo = cardDemoVideo.querySelector('video');
-        if (innerVideo) {
-          if (innerVideo.paused) {
-            innerVideo.play();
-          } else {
-            innerVideo.pause();
-          }
-        } else {
-          console.warn('⚠️ [SODIE] No se encontró la etiqueta <video> dentro de #card-demo-video');
-        }
-      }
-    });
-  }
-});
-
 /* ==========================================================================
    6. IA3 ANALYZER ENGINE (/api/ia3/analizar)
    ========================================================================== */
@@ -447,72 +377,139 @@ function initIA3Engine() {
 }
 
 /* ==========================================================================
-   7. EVENTOS DE FLUJO DE PAGO Y CONEXIÓN META ADS
+   7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS (CORREGIDO Y CERRADO)
    ========================================================================== */
-    const pfCard = document.getElementById('pf-card');
-   if (pfCard) pfCard.addEventListener('click', (e)
-
 function mostrarPasoConexion() {
-      document.getElementById('pf-intro-card').classList.add('hidden');
-      document.getElementById('pf-step-billing').classList.remove('hidden');
-    }
+  const introCard = document.getElementById('pf-intro-card');
+  const stepBilling = document.getElementById('pf-step-billing');
+  if (introCard) introCard.classList.add('hidden');
+  if (stepBilling) stepBilling.classList.remove('hidden');
+}
 
-    // Valida FB User, carga el iframe de la pasarela y lo despliega
-    function desplegarIframePago() {
-      const fbUser = document.getElementById('fbUserId').value.trim();
-      if (!fbUser) {
-        alert('Por favor ingresa tu User de Facebook para continuar.');
-        return;
-      }
-      
-      localStorage.setItem('sodie_fb_user', fbUser);
+function desplegarIframePago() {
+  const fbUserInput = document.getElementById('fbUserId');
+  const fbUser = fbUserInput ? fbUserInput.value.trim() : '';
 
-      const btnIniciarPago = document.getElementById('btn-iniciar-pago');
-   if (btnIniciarPago) btnIniciarPago.addEventListener('click', (e) =>
-      
-      // Muestra la caja del iframe
-      document.getElementById('pf-step-billing').classList.add('hidden');
-      const iframeBox = document.getElementById('pf-step-iframe');
-      iframeBox.classList.remove('hidden');
+  if (!fbUser) {
+    alert('Por favor ingresa tu User de Facebook para continuar.');
+    return;
+  }
+  
+  localStorage.setItem('sodie_fb_user', fbUser);
 
-      const btnProcesarPagoPasarela = document.getElementById('btn-procesar-pago-pasarela');
-    if (btnProcesarPagoPasarela) btnProcesarPagoPasarela.addEventListener('click', (e) =>
+  const stepBilling = document.getElementById('pf-step-billing');
+  const iframeBox = document.getElementById('pf-step-iframe');
 
-    // Listener de mensajes postMessage si la pasarela notifica el pago desde adentro del iframe
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
-        window.location.href = 'confirmacion.html?step=generar_id';
-      }
+  if (stepBilling) stepBilling.classList.add('hidden');
+  if (iframeBox) iframeBox.classList.remove('hidden');
+}
+
+function finalizarYConfirmar() {
+  const fileInput = document.getElementById('client-file-input');
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert('Por favor selecciona tu archivo Excel antes de continuar.');
+    return;
+  }
+
+  window.location.href = 'confirmacion.html?step=excel_and_fb';
+}
+
+function initPaymentFlowEvents() {
+  // 1. Manejo de selección de Card / Tarjeta
+  const pfCard = document.getElementById('pf-card');
+  if (pfCard) {
+    pfCard.addEventListener('click', (e) => {
+      document.querySelectorAll('.pf-card').forEach(c => c.classList.remove('active-card'));
+      pfCard.classList.add('active-card');
     });
+  }
 
-
-    // Procesa la carga del Excel y redirige a la confirmación
-      const btnClientUploadFile = document.getElementById('btn-client-upload-file');
-   if (btnClientUploadFile) btnClientUploadFile.addEventListener('click', (e) => {
-     
-    function finalizarYConfirmar() {
-      const fileInput = document.getElementById('client-file-input');
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert('Por favor selecciona tu archivo Excel antes de continuar.');
-        return;
-      }
-
-      window.location.href = 'confirmacion.html?step=excel_and_fb';
-    }
-
-    // Detecta si el cliente viene de vuelta tras firmar/pagar en contrato.html
-    window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
-        document.getElementById('pf-intro-card').classList.add('hidden');
-        document.getElementById('pf-step-billing').classList.add('hidden');
-        document.getElementById('pf-step-iframe').classList.add('hidden');
-        document.getElementById('pf-step-excel').classList.remove('hidden');
-      }
+  // 2. Botón Iniciar Pago
+  const btnIniciarPago = document.getElementById('btn-iniciar-pago');
+  if (btnIniciarPago) {
+    btnIniciarPago.addEventListener('click', (e) => {
+      e.preventDefault();
+      mostrarPasoConexion();
     });
+  }
+
+  // 3. Botón Procesar Pago Pasarela
+  const btnProcesarPagoPasarela = document.getElementById('btn-procesar-pago-pasarela');
+  if (btnProcesarPagoPasarela) {
+    btnProcesarPagoPasarela.addEventListener('click', (e) => {
+      e.preventDefault();
+      desplegarIframePago();
+    });
+  }
+
+  // 4. Botón Subir Archivo
+  const btnClientUploadFile = document.getElementById('btn-client-upload-file');
+  if (btnClientUploadFile) {
+    btnClientUploadFile.addEventListener('click', (e) => {
+      e.preventDefault();
+      finalizarYConfirmar();
+    });
+  }
+
+  // Mensajes entrantes del Iframe de Pasarela
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
+      window.location.href = 'confirmacion.html?step=generar_id';
+    }
+  });
+
+  // Verificación de estado de contrato
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
+    const introCard = document.getElementById('pf-intro-card');
+    const stepBilling = document.getElementById('pf-step-billing');
+    const iframeBox = document.getElementById('pf-step-iframe');
+    const stepExcel = document.getElementById('pf-step-excel');
+
+    if (introCard) introCard.classList.add('hidden');
+    if (stepBilling) stepBilling.classList.add('hidden');
+    if (iframeBox) iframeBox.classList.add('hidden');
+    if (stepExcel) stepExcel.classList.remove('hidden');
+  }
+}
 
 /* ==========================================================================
-   8. LISTA DE ESPERA (REEMPLAZO DE PAGO AL AGOTAR CUPOS)
+   8. MANEJO DE VIDEO DE DEMOSTRACIÓN Y CONFIRMACIONES
+   ========================================================================== */
+function initVideoAndConfirm() {
+  const btnConfirmAction = document.getElementById('btn-confirm-action');
+  if (btnConfirmAction) {
+    btnConfirmAction.addEventListener('click', () => {
+      showToast('Confirmación', 'Procesando confirmación del sistema...');
+      setTimeout(() => {
+        window.location.href = 'client.html';
+      }, 1000);
+    });
+  }
+
+  const demoVideo = document.getElementById('sodie-demo-video');
+  const playOverlay = document.getElementById('video-play-overlay');
+
+  if (demoVideo && playOverlay) {
+    playOverlay.addEventListener('click', () => {
+      if (demoVideo.paused) {
+        demoVideo.play();
+        playOverlay.classList.add('hidden');
+      }
+    });
+
+    demoVideo.addEventListener('pause', () => {
+      playOverlay.classList.remove('hidden');
+    });
+
+    demoVideo.addEventListener('ended', () => {
+      playOverlay.classList.remove('hidden');
+    });
+  }
+}
+
+/* ==========================================================================
+   9. LISTA DE ESPERA
    ========================================================================== */
 function initWaitlistEvents() {
   const btnWaitlist = document.getElementById('btn-waitlist-access');
@@ -554,7 +551,7 @@ function initWaitlistEvents() {
 }
 
 /* ==========================================================================
-   9. CRONÓMETRO REGRESIVO DE APERTURA DE CUPOS (30 DÍAS)
+   10. CRONÓMETRO REGRESIVO DE APERTURA DE CUPOS (30 DÍAS)
    ========================================================================== */
 function initTimer30d() {
   const timerDisplay = document.getElementById('timer-main-display');
@@ -575,7 +572,7 @@ function initTimer30d() {
 }
 
 /* ==========================================================================
-   10. BIOMETRÍA Y REDIRECCIONES
+   11. BIOMETRÍA Y REDIRECCIONES
    ========================================================================== */
 function initWebAuthnBiometrics() {
   const bioBtn = document.getElementById('btn-register-biometrics');
@@ -643,7 +640,7 @@ function handleUrlRedirects() {
 }
 
 /* ==========================================================================
-   11. DISPARADOR SECRETO DE 5 CLICS (ADMIN)
+   12. DISPARADOR SECRETO DE 5 CLICS (ADMIN)
    ========================================================================== */
 (function initAdminTriggerDirect() {
   let adminToques = 0;
