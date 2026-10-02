@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    /* Estilos para el Login / Registro Biométrico del Cliente */
     .client-auth-overlay {
       min-height: 100vh;
       display: flex;
@@ -59,7 +58,6 @@
       cursor: pointer;
     }
 
-    /* Estilo para los botones de NOWPayments */
     .nowpayments-btn-container {
       display: block;
       text-align: center;
@@ -99,11 +97,11 @@
 
       <!-- PASO 1: ACCESO RÁPIDO CON BIOMETRÍA -->
       <div id="client-login-box">
-        <button type="button" id="btn-client-biometric-login" onclick="sodieLoginBiometricoCliente()" class="auth-btn-biometric">
+        <button type="button" id="btn-client-biometric-login" onclick="ejecutarBotonSODIE(event, 'biometria-login-cliente')" class="auth-btn-biometric">
           Ingresar con Biometría / Huella 👆
         </button>
         
-        <button type="button" onclick="sodieMostrarRegistroBiometrico()" class="auth-btn-secondary">
+        <button type="button" onclick="ejecutarBotonSODIE(event, 'mostrar-registro-biometrico')" class="auth-btn-secondary">
           ¿Primer ingreso? Registrar Biometría 🔑
         </button>
       </div>
@@ -115,11 +113,11 @@
         </label>
         <input type="email" id="client-email-reg" placeholder="cliente@empresa.com" style="width: 100%; padding: 12px; background: #0d0818; border: 1px solid #2a1c47; border-radius: 10px; color: #00ffcc; box-sizing: border-box; outline: none; margin-bottom: 12px;" />
 
-        <button type="button" id="btn-client-biometric-reg" onclick="sodieRegistrarBiometriaCliente()" class="auth-btn-biometric">
+        <button type="button" id="btn-client-biometric-reg" onclick="ejecutarBotonSODIE(event, 'biometria-registro-cliente')" class="auth-btn-biometric">
           Registrar Mi Dispositivo 📲
         </button>
 
-        <button type="button" onclick="sodieOcultarRegistroBiometrico()" class="auth-btn-secondary">
+        <button type="button" onclick="ejecutarBotonSODIE(event, 'ocultar-registro-biometrico')" class="auth-btn-secondary">
           Volver a Inicio
         </button>
       </div>
@@ -142,7 +140,7 @@
       </div>
     </header>
 
-    <!-- 1. MÉTRICAS CLIENTE (Inicializadas en 0) -->
+    <!-- 1. MÉTRICAS CLIENTE -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
@@ -175,19 +173,19 @@
       </div>
     </section>
 
-    <!-- 2. BLOQUE DE INYECCIÓN (TIMER 24 HORAS PARA EXCEL & TIMER DÍA 7 PAGO) -->
+    <!-- 2. BLOQUE DE INYECCIÓN -->
     <section id="card-injection-flow" class="glass-card-dash margin-v-sm">
       <h3 class="section-title mint-txt">Inyección de Audiencia (Cada 24h)</h3>
       <div id="timer-24h-display" class="timer-digits mint-txt">24:00:00</div>
       
       <div class="input-group-flow margin-v-sm">
         <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-        <button type="button" id="btn-client-upload-excel" class="btn-pf-action btn-mint-solid">
+        <button type="button" id="btn-client-upload-excel" onclick="ejecutarBotonSODIE(event, 'client-upload-excel')" class="btn-pf-action btn-mint-solid">
           Subir Excel (Paso Diario)
         </button>
       </div>
 
-      <button type="button" id="btn-client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
+      <button type="button" id="btn-client-activate-campaign" onclick="ejecutarBotonSODIE(event, 'client-activate-campaign')" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
         Activar Campaña
       </button>
 
@@ -198,7 +196,7 @@
       </div>
     </section>
 
-    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS (NOWPAYMENTS BUTTON EMBEDDED) -->
+    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS -->
     <section class="glass-card-dash margin-v-sm">
       <h3 class="section-title fuchsia-txt">Cronograma de Pagos Semanales Post-Resultados</h3>
       <div id="timer-weekly-pay-display" class="timer-digits fuchsia-txt">07d 00h 00m 00s</div>
@@ -248,15 +246,14 @@
       </button>
     </section>
 
-    <!-- DESGLOSE GLOBAL DE ESQUEMA DE PAGOS POR CUPO Y FASE -->
+    <!-- DESGLOSE GLOBAL -->
     <section class="glass-card-dash margin-v-sm" style="padding: 24px; border: 1px solid rgba(0, 255, 204, 0.2);">
-      <h3 class="section-title mint-txt" style="font-size: 1.2rem; margin-bottom: 12px;">Estructura de Cuotas y Modulo On-Chain</h3>
+      <h3 class="section-title mint-txt" style="font-size: 1.2rem; margin-bottom: 12px;">Estructura de Cuotas y Módulo On-Chain</h3>
       <p class="step-desc" style="margin-bottom: 18px; line-height: 1.5;">
         Cobros programados por semanas (28% inicial en Hora 0 y 72% restante diferido en 3 cuotas semanales de $6,000 USD):
       </p>
 
       <div class="timeline-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-        <!-- ESTRUCTURA GENERAL DE PAGOS -->
         <div class="time-step active" style="flex: 1; min-width: 220px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid rgba(0,255,204,0.15);">
           <span class="step-hours mint-txt" style="font-weight: bold; display: block; margin-bottom: 6px;">Desglose por Etapas</span>
           <span class="step-desc" style="font-size: 0.85rem; line-height: 1.4; display: block;">
@@ -270,7 +267,7 @@
       </div>
     </section>
 
-    <!-- TEMPORIZADOR GLOBAL DE CICLO (4 SEMANAS / 28 DÍAS) -->
+    <!-- TEMPORIZADOR GLOBAL DE CICLO -->
     <section class="glass-card-dash timer-section" style="margin-top: 20px;">
       <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO (4 SEMANAS)</span>
       <div id="global-timer-display" class="timer-digits">28d 00h 00m 00s</div>
@@ -282,7 +279,6 @@
     <footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem;">
       <p>© SODIE v3.5. 2026</p>
     </footer>
-    
   </main>
   
   <script src="config.js"></script>
