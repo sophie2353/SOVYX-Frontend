@@ -1,11 +1,8 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Flujo Secuencial: Biometría (Registro/Login WebAuthn) -> Subida de Excel (24h) -> Verificación de Cuota Semanal ($6,000 USDT) -> Activación de Campaña
+ * Flujo Secuencial: Biometría -> Subida de Excel (24h) -> Verificación de Cuota Semanal -> Activación de Campaña
  */
 
-/* ==========================================================================
-   1. HELPERS Y CONFIGURACIÓN INICIAL
-   ========================================================================== */
 function getBaseUrl() {
   if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
     return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
@@ -16,12 +13,10 @@ function getBaseUrl() {
 function initClientPersistAndNotifications() {
   const clientId = getClientId();
 
-  // Guardar en localStorage para visitas futuras
   if (clientId) {
     localStorage.setItem('sodie_client_id', clientId);
   }
 
-  // Lanzar Notificación Push / Guardado de PWA
   solicitarPermisoNotificacionesYAccesoDirecto(clientId);
 }
 
@@ -44,16 +39,13 @@ function solicitarPermisoNotificacionesYAccesoDirecto(clientId) {
 }
 
 function getClientId() {
-  // Prioridad 1: Sesión autenticada mediante WebAuthn
   const sessionClientId = sessionStorage.getItem('sodie_authenticated_client_id');
   if (sessionClientId) return sessionClientId;
 
-  // Prioridad 2: Parámetro URL
   const urlParams = new URLSearchParams(window.location.search);
   const paramId = urlParams.get('clientId') || urlParams.get('client_id') || urlParams.get('id');
   if (paramId) return paramId;
 
-  // Prioridad 3: Configuración global o dataset
   if (window.SODIE_CONFIG && window.SODIE_CONFIG.CLIENT_ID) {
     return window.SODIE_CONFIG.CLIENT_ID;
   }
@@ -67,7 +59,7 @@ function getClientId() {
 }
 
 /* ==========================================================================
-   2. ESTADO GLOBAL
+   2. ESTADO GLOBAL DE CLIENTE
    ========================================================================== */
 const CLIENT_STATE = {
   clientId: null,
@@ -88,8 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initClientDashboard() {
   CLIENT_STATE.clientId = getClientId();
-  
-  // Verificar si hay sesión activa por biometría
+
   if (sessionStorage.getItem('sodie_authenticated_client_id') === CLIENT_STATE.clientId) {
     CLIENT_STATE.isAuthenticated = true;
   }
@@ -520,7 +511,7 @@ function sodieProcesarPagoSemanal(event, weekNumber) {
   showToast('Pago Registrado', `Cuota de $6,000 USDT registrada correctamente para ${CLIENT_STATE.clientId} (Semana ${weekNumber}).`);
 
   const lockWarning = document.getElementById('weekly-payment-lock-warning');
-  if (lockWarning) lockWarning.classList.add('hidden');
+  if (lockWarning) lockWarning.classList.remove('hidden');
 
   const btnWeek = document.getElementById(`btn-pay-semana${weekNumber}`);
   if (btnWeek) {
@@ -676,7 +667,7 @@ function initGlobalAndWeeklyTimers() {
 
     const wDays = Math.floor(remainingWeek / 86400).toString().padStart(2, '0');
     const wHours = Math.floor((remainingWeek % 86400) / 3600).toString().padStart(2, '0');
-    const wMins = Math.floor((remainingWeek % 3600) / 60).toString().padStart(2, '0');
+    const wMins = Math.floor((remainingWeek % 86400) / 60).toString().padStart(2, '0');
     const wSecs = (remainingWeek % 60).toString().padStart(2, '0');
 
     if (timerWeeklyPayDisplay) {
@@ -690,67 +681,5 @@ function initGlobalAndWeeklyTimers() {
   };
 
   updateTimerTick();
-  CLIENT_STATE.timerInterval = setInterval(updateTibtnRegisterBio.data
-/* ==========================================================
-   SODIE AI - MANEJADOR GLOBAL DE BINDING Y EJECUCIÓN DIRECTA
-   ========================================================== */
-
-// Garantiza que la función se pueda llamar desde el atributo onclick del HTML
-window.ejecutarBotonSODIE = async function(event, accion) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  console.log(`[SODIE UI] ⚡ Clic detectado en la acción: '${accion}'`);
-
-  try {
-    switch (accion) {
-      case 'biometria-login':
-        console.log('[SODIE UI] Iniciando flujo biométrico...');
-        if (typeof window.sodieValidarBiometria === 'function') {
-          await window.sodieValidarBiometria();
-        } else if (typeof window.autenticarBiometrico === 'function') {
-          await window.autenticarBiometrico();
-        } else {
-          alert('Función de biometría no encontrada en el script.');
-        }
-        break;
-
-      case 'biometria-registro':
-        console.log('[SODIE UI] Iniciando registro biométrico...');
-        if (typeof window.sodieRegistrarBiometria === 'function') {
-          await window.sodieRegistrarBiometria();
-        } else if (typeof window.registrarBiometrico === 'function') {
-          await window.registrarBiometrico();
-        }
-        break;
-
-      case 'cargar-excel':
-        console.log('[SODIE UI] Procesando carga de archivo Excel...');
-        if (typeof window.sodieFlujoInyeccionCliente === 'function') {
-          window.sodieFlujoInyeccionCliente();
-        } else if (typeof window.procesarExcel === 'function') {
-          window.procesarExcel();
-        }
-        break;
-
-      case 'activar-campana':
-        console.log('[SODIE UI] Activando campaña...');
-        if (typeof window.sodieConfirmarActivacionCliente === 'function') {
-          window.sodieConfirmarActivacionCliente();
-        } else if (typeof window.activarCampana === 'function') {
-          window.activarCampana();
-        }
-        break;
-
-      default:
-        console.warn(`[SODIE UI] Acción no mapeada: ${accion}`);
-    }
-  } catch (err) {
-    console.error(`[SODIE UI] Error al ejecutar la acción '${accion}':`, err);
-    alert(`Ocurrió un error al ejecutar la acción: ${err.message || err}`);
-  }
-};
-
-                                           
+  CLIENT_STATE.timerInterval = setInterval(updateTimerTick, 1000);
+}
