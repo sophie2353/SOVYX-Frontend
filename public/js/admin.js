@@ -1,6 +1,6 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Versión Dinámica Sincronizada con Gestión de Vistas Multi-Cliente (client.html)
+ * Versión Dinámica Sincronizada con Gestión de Vistas Multi-Cliente
  */
 
 function getBaseUrl() {
@@ -20,16 +20,13 @@ const ADMIN_STATE = {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🟢 SODIE Admin Engine Inicializado");
 
-  // Iniciar siempre las estructuras de temporizadores
   sodieIniciarCronometro24h();
   sodieIniciarTimer120h();
 
-  // Verificar sesión persistente local
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
   }
 
-  // Bindear eventos de autenticación
   const btnPass = document.getElementById("btn-admin-login-pass");
   if (btnPass) {
     btnPass.addEventListener("click", (e) => {
@@ -186,7 +183,7 @@ window.sodieCerrarSesionAdmin = function() {
 };
 
 /* ==========================================================================
-   2. CRONÓMETROS Y TEMPORIZADORES (REPARADOS Y CONTINUOS)
+   2. CRONÓMETROS Y TEMPORIZADORES
    ========================================================================== */
 function actualizarDisplayCronometro() {
   const timerDisplay = document.getElementById('admin-timer-display');
@@ -374,7 +371,6 @@ function initListeners() {
     btnSwitchClient.dataset.bound = "true";
   }
 
-  // Soporte para múltiples posibles IDs del botón biométrico en HTML
   const adminBiometric = document.getElementById('admin-biometric') || document.getElementById('btn-admin-biometric') || document.getElementById('btn-biometric-auth');
   if (adminBiometric && !adminBiometric.dataset.bound) {
     adminBiometric.addEventListener('click', (e) => {
@@ -538,65 +534,3 @@ async function sodieCerrarListaEspera() {
     if (btn) btn.textContent = '✓ Temporizador V4 Activado';
   }
 }
-
-/* ==========================================================
-   SODIE AI - MANEJADOR GLOBAL DE BINDING Y EJECUCIÓN DIRECTA
-   ========================================================== */
-
-// Garantiza que la función se pueda llamar desde el atributo onclick del HTML
-window.ejecutarBotonSODIE = async function(event, accion) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  console.log(`[SODIE UI] ⚡ Clic detectado en la acción: '${accion}'`);
-
-  try {
-    switch (accion) {
-      case 'biometria-login':
-        console.log('[SODIE UI] Iniciando flujo biométrico...');
-        if (typeof window.sodieValidarBiometria === 'function') {
-          await window.sodieValidarBiometria();
-        } else if (typeof window.autenticarBiometrico === 'function') {
-          await window.autenticarBiometrico();
-        } else {
-          alert('Función de biometría no encontrada en el script.');
-        }
-        break;
-
-      case 'biometria-registro':
-        console.log('[SODIE UI] Iniciando registro biométrico...');
-        if (typeof window.sodieRegistrarBiometria === 'function') {
-          await window.sodieRegistrarBiometria();
-        } else if (typeof window.registrarBiometrico === 'function') {
-          await window.registrarBiometrico();
-        }
-        break;
-
-      case 'cargar-excel':
-        console.log('[SODIE UI] Procesando carga de archivo Excel...');
-        if (typeof window.sodieFlujoInyeccionCliente === 'function') {
-          window.sodieFlujoInyeccionCliente();
-        } else if (typeof window.procesarExcel === 'function') {
-          window.procesarExcel();
-        }
-        break;
-
-      case 'activar-campana':
-        console.log('[SODIE UI] Activando campaña...');
-        if (typeof window.sodieConfirmarActivacionCliente === 'function') {
-          window.sodieConfirmarActivacionCliente();
-        } else if (typeof window.activarCampana === 'function') {
-          window.activarCampana();
-        }
-        break;
-
-      default:
-        console.warn(`[SODIE UI] Acción no mapeada: ${accion}`);
-    }
-  } catch (err) {
-    console.error(`[SODIE UI] Error al ejecutar la acción '${accion}':`, err);
-    alert(`Ocurrió un error al ejecutar la acción: ${err.message || err}`);
-  }
-};
