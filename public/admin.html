@@ -148,14 +148,14 @@
             <label for="admin-pass" style="color: #00FFCC; font-size: 0.8rem; display: block; margin-bottom: 6px;">Paso 1: Contraseña</label>
             <input type="password" id="admin-pass" placeholder="••••••••••••" style="width: 100%; padding: 12px; background: #0D0818; border: 1px solid #2A1C47; border-radius: 10px; color: #00FFCC; box-sizing: border-box; outline: none;" />
           </div>
-          <button type="button" id="btn-admin-login-pass" onclick="ejecutarBotonSODIE(event, 'admin-login-pass')" class="btn-action" style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-size: 0.95rem;">
+          <button type="button" id="btn-admin-login-pass" data-sodie-event="admin-login-pass" class="btn-action" style="width: 100%; padding: 12px; background: #00FFCC; color: #0B0813; font-size: 0.95rem;">
             Continuar a Biometría
           </button>
         </div>
 
         <div id="step-biometric" style="display: none;">
           <p style="color: #00FFCC; font-size: 0.9rem; margin-bottom: 16px;">Paso 2: Validación Biométrica (WebAuthn)</p>
-          <button type="button" id="admin-biometric" onclick="ejecutarBotonSODIE(event, 'admin-biometric-login')" class="btn-action" style="width: 100%; padding: 14px; background: linear-gradient(90deg, #00FFCC, #9D00FF); color: #FFFFFF; font-size: 0.95rem; border: none;">
+          <button type="button" id="admin-biometric" data-sodie-event="admin-biometric-login" class="btn-action" style="width: 100%; padding: 14px; background: linear-gradient(90deg, #00FFCC, #9D00FF); color: #FFFFFF; font-size: 0.95rem; border: none;">
             Verificar Biometría
           </button>
         </div>
@@ -172,7 +172,7 @@
         <h2 style="margin: 0; font-size: 1.4rem; color: #FFFFFF;">Panel de Control Admin</h2>
         <p style="margin: 4px 0 0 0; color: #A098B5; font-size: 0.85rem;">Gestión central de SODIE, archivos y estado del sistema</p>
       </div>
-      <button type="button" onclick="ejecutarBotonSODIE(event, 'admin-logout')" class="btn-action fuchsia">
+      <button type="button" data-sodie-event="admin-logout" class="btn-action fuchsia">
         Cerrar Sesión
       </button>
     </header>
@@ -183,8 +183,8 @@
         <h3 class="admin-card-title">Vista Rápida</h3>
         <p style="color: #A098B5; font-size: 0.8rem; margin-bottom: 14px;">Accede a las vistas públicas del sistema para verificar cambios.</p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" onclick="window.location.href='/'" class="btn-action">Ver Principal</button>
-          <button type="button" onclick="window.location.href='/client.html'" class="btn-action">Ver Cliente</button>
+          <button type="button" data-sodie-event="nav-principal" class="btn-action">Ver Principal</button>
+          <button type="button" data-sodie-event="nav-cliente" class="btn-action">Ver Cliente</button>
         </div>
       </div>
 
@@ -194,9 +194,9 @@
           <div id="admin-timer-display" class="timer-display">24:00:00</div>
         </div>
         <div class="btn-group-3">
-          <button type="button" onclick="ejecutarBotonSODIE(event, 'admin-timer-start')" class="btn-action">Iniciar</button>
-          <button type="button" onclick="ejecutarBotonSODIE(event, 'admin-timer-pause')" class="btn-action fuchsia">Pausar</button>
-          <button type="button" onclick="ejecutarBotonSODIE(event, 'admin-timer-reset')" class="btn-action fuchsia">Reset</button>
+          <button type="button" data-sodie-event="admin-timer-start" class="btn-action">Iniciar</button>
+          <button type="button" data-sodie-event="admin-timer-pause" class="btn-action fuchsia">Pausar</button>
+          <button type="button" data-sodie-event="admin-timer-reset" class="btn-action fuchsia">Reset</button>
         </div>
       </div>
 
@@ -205,7 +205,7 @@
         <div class="file-drop-zone">
           <input type="file" id="admin-video-file" accept="video/mp4,video/*" />
         </div>
-        <button type="button" id="btn-upload-video" onclick="ejecutarBotonSODIE(event, 'admin-upload-video')" class="btn-action" style="width: 100%;">
+        <button type="button" id="btn-upload-video" data-sodie-event="admin-upload-video" class="btn-action" style="width: 100%;">
           Subir Video Demo
         </button>
       </div>
@@ -215,7 +215,7 @@
         <div class="file-drop-zone">
           <input type="file" id="admin-excel-file" accept=".csv, .xlsx, .xls" />
         </div>
-        <button type="button" id="btn-upload-excel" onclick="ejecutarBotonSODIE(event, 'admin-upload-excel')" class="btn-action" style="width: 100%;">
+        <button type="button" id="btn-upload-excel" data-sodie-event="admin-upload-excel" class="btn-action" style="width: 100%;">
           Inyectar Base de Datos
         </button>
       </div>
@@ -225,11 +225,11 @@
         <p style="color: #A098B5; font-size: 0.85rem; margin-bottom: 16px;">Controles directos para cambiar el estado global de la app.</p>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
-          <button type="button" id="btn-admin-activate-campaign" onclick="ejecutarBotonSODIE(event, 'admin-activate-campaign')" class="btn-action" style="background: linear-gradient(90deg, #00FFCC, #FF007F); color: #FFFFFF; border: none; padding: 14px; font-size: 0.95rem;">
+          <button type="button" id="btn-admin-activate-campaign" data-sodie-event="admin-activate-campaign" class="btn-action" style="background: linear-gradient(90deg, #00FFCC, #FF007F); color: #FFFFFF; border: none; padding: 14px; font-size: 0.95rem;">
             Activar Campaña Directa
           </button>
           
-          <button type="button" id="btn-close-waitlist" onclick="ejecutarBotonSODIE(event, 'admin-close-waitlist')" class="btn-action fuchsia" style="padding: 14px; font-size: 0.95rem;">
+          <button type="button" id="btn-close-waitlist" data-sodie-event="admin-close-waitlist" class="btn-action fuchsia" style="padding: 14px; font-size: 0.95rem;">
             Cerrar Lista y Disparar V4 (14 días)
           </button>
         </div>
