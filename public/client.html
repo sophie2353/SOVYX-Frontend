@@ -97,11 +97,11 @@
 
       <!-- PASO 1: ACCESO RÁPIDO CON BIOMETRÍA -->
       <div id="client-login-box">
-        <button type="button" id="btn-client-biometric-login" onclick="ejecutarBotonSODIE(event, 'biometria-login-cliente')" class="auth-btn-biometric">
+        <button type="button" id="btn-client-biometric-login" data-sodie-event="biometria-login-cliente" class="auth-btn-biometric">
           Ingresar con Biometría / Huella 👆
         </button>
         
-        <button type="button" onclick="ejecutarBotonSODIE(event, 'mostrar-registro-biometrico')" class="auth-btn-secondary">
+        <button type="button" data-sodie-event="mostrar-registro-biometrico" class="auth-btn-secondary">
           ¿Primer ingreso? Registrar Biometría 🔑
         </button>
       </div>
@@ -113,11 +113,11 @@
         </label>
         <input type="email" id="client-email-reg" placeholder="cliente@empresa.com" style="width: 100%; padding: 12px; background: #0d0818; border: 1px solid #2a1c47; border-radius: 10px; color: #00ffcc; box-sizing: border-box; outline: none; margin-bottom: 12px;" />
 
-        <button type="button" id="btn-client-biometric-reg" onclick="ejecutarBotonSODIE(event, 'biometria-registro-cliente')" class="auth-btn-biometric">
+        <button type="button" id="btn-client-biometric-reg" data-sodie-event="biometria-registro-cliente" class="auth-btn-biometric">
           Registrar Mi Dispositivo 📲
         </button>
 
-        <button type="button" onclick="ejecutarBotonSODIE(event, 'ocultar-registro-biometrico')" class="auth-btn-secondary">
+        <button type="button" data-sodie-event="ocultar-registro-biometrico" class="auth-btn-secondary">
           Volver a Inicio
         </button>
       </div>
@@ -136,7 +136,7 @@
         <span id="client-id-badge" class="badge-client badge-mint-border">Cliente Activo</span>
       </div>
       <div class="dash-header-right">
-        <button type="button" class="btn-icon" onclick="window.location.href='admin.html'" title="Acceso Admin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer;">🔐</button>
+        <button type="button" class="btn-icon" data-sodie-event="nav-admin" title="Acceso Admin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer;">🔐</button>
       </div>
     </header>
 
@@ -180,12 +180,12 @@
       
       <div class="input-group-flow margin-v-sm">
         <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-        <button type="button" id="btn-client-upload-excel" onclick="ejecutarBotonSODIE(event, 'client-upload-excel')" class="btn-pf-action btn-mint-solid">
+        <button type="button" id="btn-client-upload-excel" data-sodie-event="client-upload-excel" class="btn-pf-action btn-mint-solid">
           Subir Excel (Paso Diario)
         </button>
       </div>
 
-      <button type="button" id="btn-client-activate-campaign" onclick="ejecutarBotonSODIE(event, 'client-activate-campaign')" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
+      <button type="button" id="btn-client-activate-campaign" data-sodie-event="client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
         Activar Campaña
       </button>
 
@@ -241,7 +241,7 @@
     <section id="section-week-4-complete" class="glass-card-dash hidden text-center margin-v-sm">
       <h3 class="section-title mint-txt">¡Ciclo de 4 Semanas Completado!</h3>
       <p class="step-desc">Has finalizado satisfactoriamente las 4 semanas de ejecución, optimización de audiencia y liquidación de cuotas.</p>
-      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" onclick="window.location.href='index.html'">
+      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" data-sodie-event="renovar-cupo">
         Unirse a Lista de Espera / Renovar Cupo
       </button>
     </section>
