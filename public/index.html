@@ -96,7 +96,7 @@
   <main id="app-dashboard" class="dashboard-container">
     <header class="dash-header flex-header">
       <div class="dash-header-left">
-        <div id="sodie-logo-trigger" onclick="ejecutarBotonSODIE(event, 'toques-admin')" class="clickable-node">
+        <div id="sodie-logo-trigger" data-sodie-event="toques-admin" class="clickable-node">
           <h1 class="logo-title header-logo logo-no-transform">
             <span class="brand-s brand-s-fuchsia">S</span>ODIE
           </h1>
@@ -106,7 +106,7 @@
         <a href="admin.html" class="admin-btn-link">
           Admin
         </a>
-        <button type="button" class="btn-icon btn-admin-trigger" id="btn-sodie-logo-trigger" onclick="ejecutarBotonSODIE(event, 'toques-admin')"></button>
+        <button type="button" class="btn-icon btn-admin-trigger" id="btn-sodie-logo-trigger" data-sodie-event="toques-admin"></button>
       </div>
     </header>
 
@@ -252,7 +252,7 @@
         </div>
       </div>
 
-      <button type="button" id="btn-ia3-analizar" class="btn-pf-action btn-pay-gradient full-width btn-analyze" onclick="ejecutarBotonSODIE(event, 'calculater_metrics')">
+      <button type="button" id="btn-ia3-analizar" class="btn-pf-action btn-pay-gradient full-width btn-analyze" data-sodie-event="calculater_metrics">
         ANALIZAR CON IA3
       </button>
 
@@ -280,10 +280,10 @@
         </div>
 
         <div class="flex-wrap-gap">
-          <button type="button" onclick="document.getElementById('chat-section-anchor').scrollIntoView({behavior: 'smooth'})" class="btn-pf-action flex-equal-btn">
+          <button type="button" data-sodie-event="scroll-chat" class="btn-pf-action flex-equal-btn">
             Ir a Chat Web
           </button>
-          <button type="button" onclick="document.getElementById('pf-card').scrollIntoView({behavior: 'smooth'})" class="btn-pf-action btn-pay-gradient flex-equal-btn font-bold">
+          <button type="button" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient flex-equal-btn font-bold">
             Ir a Pago Final
           </button>
         </div>
@@ -324,7 +324,7 @@
 
       <div class="chat-input-bar">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
-        <button type="button" id="chat-send" class="chat-send-btn" onclick="ejecutarBotonSODIE(event, 'enviar-chat')">➤</button>
+        <button type="button" id="chat-send" class="chat-send-btn" data-sodie-event="enviar-chat">➤</button>
       </div>
     </section>
 
@@ -334,7 +334,7 @@
           <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 255, 204, 0.15); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
             <h3 id="pf-main-title" class="section-title mint-txt pf-title-size" style="margin-bottom: 10px;">Reserva de Slot e Inyección Automatizada</h3>
             <p class="step-desc pf-description" style="margin: 0; line-height: 1.5;">
-              El pago se financiará en un <strong>Inicial del 28% ($7.000 USDC)</strong> + 3 cuotas semanales de $6.000 USDC, donde las siguientes semanas se pagarán directamente de los resultados obtenidos directamente de SODIE.
+              El pago se financiará en un <strong>Inicial del 28% ($7.000 USDC)</strong> + 3 cuotas semanal de $6.000 USDC, donde las siguientes semanas se pagarán directamente de los resultados obtenidos directamente de SODIE.
             </p>
           </div>
 
@@ -365,7 +365,7 @@
               </ul>
             </div>
 
-            <button type="button" id="btn-iniciar-pago" class="btn-pf-action btn-pay-gradient btn-main-pay full-width" onclick="ejecutarBotonSODIE(event, 'Activate_PAY')">
+            <button type="button" id="btn-iniciar-pago" class="btn-pf-action btn-pay-gradient btn-main-pay full-width" data-sodie-event="Activate_PAY">
               PAGAR
             </button>
           </div>
@@ -388,7 +388,7 @@
             />
           </div>
 
-          <button type="button" id="btn-procesar-pago-pasarela" onclick="ejecutarBotonSODIE(event, 'desplegar_iframe')" class="btn-pf-action btn-pay-gradient full-width btn-continue-pay">
+          <button type="button" id="btn-procesar-pago-pasarela" data-sodie-event="desplegar_iframe" class="btn-pf-action btn-pay-gradient full-width btn-continue-pay">
             CONTINUAR AL PAGO
           </button>
         </div>
@@ -413,7 +413,7 @@
           </p>
           <div class="input-group-flow flex-col-gap">
             <input type="file" id="client-file-input" class="file-input-custom full-width" accept=".csv,.xlsx,.xls" />
-            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient btn-upload-finish" onclick="ejecutarBotonSODIE(event, 'Excel_Upload')">
+            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient btn-upload-finish" data-sodie-event="Excel_Upload">
               Finalizar Registro (Ir a Confirmación)
             </button>
           </div>
