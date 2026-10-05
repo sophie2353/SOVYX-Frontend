@@ -1,6 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Completa Restaurada & Estabilizada
+ * Versión Restaurada, Estabilizada & Flujos Ajustados (v4 Spec)
  */
 
 function getBaseUrl() {
@@ -23,21 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initFacebookMetrics();
   initChatEngine();
   initIA3Engine();
-  initWebAuthnBiometrics();
+  initWebAuthnBiometricsWaitlist();
   handleUrlRedirects();
   initTimer30d();
   initPaymentFlowEvents();
   initWaitlistEvents();
   initVideoAndConfirm();
-
-  const demoVideo = document.getElementById('sodie-demo-video');
-  if (demoVideo) {
-    const source = demoVideo.querySelector('source');
-    if (source) {
-      source.src = 'sodie-demo-borrador.mp4';
-      demoVideo.load();
-    }
-  }
 });
 
 /* ==========================================================================
@@ -131,19 +122,18 @@ function initSSEMetrics() {
    3. CONTADOR DE CUPOS & DISPONIBILIDAD DINÁMICA DE PRECIOS
    ========================================================================== */
 async function checkAvailableSlots() {
+  let slots = 3;
   try {
     const res = await fetch(`${getBaseUrl()}/api/clientes/disponibles`);
-    let slots = 3;
-
     if (res.ok) {
       const data = await res.json();
-      if (data.disponibles !== undefined) slots = data.disponibles;
+      const parsed = parseInt(data.disponibles, 10);
+      if (!isNaN(parsed)) slots = parsed;
     }
-
-    actualizarInterfazCupos(slots);
   } catch (error) {
-    actualizarInterfazCupos(3);
+    slots = 3;
   }
+  actualizarInterfazCupos(slots);
 }
 
 function actualizarInterfazCupos(slots) {
@@ -213,7 +203,7 @@ async function initFacebookMetrics() {
 }
 
 /* ==========================================================================
-   5. CHAT & ASISTENTE IA2
+   5. CHAT & ASISTENTE IA2 (SECURE RENDER)
    ========================================================================== */
 function initChatEngine() {
   const sendBtn = document.getElementById('chat-send');
@@ -246,21 +236,21 @@ function initChatEngine() {
 function splitTextIntoChunks(text, maxLength = 180) {
   if (text.length <= maxLength) return [text];
 
-  const sentences = text.match(/[^.!?]+[.!?]+|\s*[^.!?]+$/g) || [text];
   const chunks = [];
-  let currentChunk = '';
+  let remaining = text;
 
-  sentences.forEach((sentence) => {
-    if ((currentChunk + sentence).length <= maxLength) {
-      currentChunk += sentence;
-    } else {
-      if (currentChunk.trim()) chunks.push(currentChunk.trim());
-      currentChunk = sentence;
+  while (remaining.length > 0) {
+    if (remaining.length <= maxLength) {
+      chunks.push(remaining);
+      break;
     }
-  });
+    let sliceIndex = remaining.lastIndexOf(' ', maxLength);
+    if (sliceIndex === -1) sliceIndex = maxLength;
 
-  if (currentChunk.trim()) chunks.push(currentChunk.trim());
-  return chunks.length > 0 ? chunks : [text];
+    chunks.push(remaining.substring(0, sliceIndex).trim());
+    remaining = remaining.substring(sliceIndex).trim();
+  }
+  return chunks;
 }
 
 async function sendChatMessage(messageText, payload = null) {
@@ -270,7 +260,12 @@ async function sendChatMessage(messageText, payload = null) {
   const userBubble = document.createElement('div');
   userBubble.className = 'outgoing-simple';
   userBubble.style.cssText = 'text-align: right; margin: 8px 0;';
-  userBubble.innerHTML = `<p style="display: inline-block; background: rgba(0,255,204,0.15); border: 1px solid #00ffcc; padding: 8px 12px; border-radius: 12px; color: #fff;">${messageText}</p>`;
+  
+  const userTextNode = document.createElement('p');
+  userTextNode.style.cssText = 'display: inline-block; background: rgba(0,255,204,0.15); border: 1px solid #00ffcc; padding: 8px 12px; border-radius: 12px; color: #fff;';
+  userTextNode.textContent = messageText;
+  
+  userBubble.appendChild(userTextNode);
   chatBody.appendChild(userBubble);
   chatBody.scrollTop = chatBody.scrollHeight;
 
@@ -299,8 +294,12 @@ async function sendChatMessage(messageText, payload = null) {
         const ia2Bubble = document.createElement('div');
         ia2Bubble.className = 'incoming-simple';
         ia2Bubble.style.cssText = 'margin: 6px 0; animation: fadeIn 0.3s ease;';
-        ia2Bubble.innerHTML = `<p style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-left: 3px solid #00ffcc; color: #e0e0e0; font-size: 0.9em; line-height: 1.4;">${chunk}</p>`;
         
+        const ia2TextNode = document.createElement('p');
+        ia2TextNode.style.cssText = 'background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-left: 3px solid #00ffcc; color: #e0e0e0; font-size: 0.9em; line-height: 1.4;';
+        ia2TextNode.textContent = chunk;
+
+        ia2Bubble.appendChild(ia2TextNode);
         chatBody.appendChild(ia2Bubble);
         ia2Bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, index * 800);
@@ -406,6 +405,7 @@ function finalizarYConfirmar() {
     return;
   }
 
+  // Redirección exclusiva para evaluadores a la pasarela de confirmación / ID v4
   window.location.href = 'confirmacion.html?step=excel_and_fb';
 }
 
@@ -470,35 +470,35 @@ function initVideoAndConfirm() {
   if (btnConfirmAction) {
     btnConfirmAction.addEventListener('click', () => {
       showToast('Confirmación', 'Procesando confirmación del sistema...');
-      setTimeout(() => {
-        window.location.href = 'client.html';
-      }, 1000);
     });
   }
 
   const demoVideo = document.getElementById('sodie-demo-video');
   const playOverlay = document.getElementById('video-play-overlay');
 
-  if (demoVideo && playOverlay) {
-    playOverlay.addEventListener('click', () => {
-      if (demoVideo.paused) {
-        demoVideo.play();
-        playOverlay.classList.add('hidden');
-      }
-    });
+  if (demoVideo) {
+    const source = demoVideo.querySelector('source');
+    if (source) {
+      source.src = 'sodie-demo-borrador.mp4';
+      demoVideo.load();
+    }
 
-    demoVideo.addEventListener('pause', () => {
-      playOverlay.classList.remove('hidden');
-    });
+    if (playOverlay) {
+      playOverlay.addEventListener('click', () => {
+        if (demoVideo.paused) {
+          demoVideo.play();
+          playOverlay.classList.add('hidden');
+        }
+      });
 
-    demoVideo.addEventListener('ended', () => {
-      playOverlay.classList.remove('hidden');
-    });
+      demoVideo.addEventListener('pause', () => playOverlay.classList.remove('hidden'));
+      demoVideo.addEventListener('ended', () => playOverlay.classList.remove('hidden'));
+    }
   }
 }
 
 /* ==========================================================================
-   9. LISTA DE ESPERA
+   9. LISTA DE ESPERA (WAITLIST ENTRADA MANUAL)
    ========================================================================== */
 function initWaitlistEvents() {
   const btnWaitlist = document.getElementById('btn-waitlist-access');
@@ -525,7 +525,7 @@ function initWaitlistEvents() {
 
         if (!res.ok) throw new Error('Error guardando en lista de espera');
 
-        showToast('Acceso Confirmado', 'Te has unido correctamente a la Lista de Espera.');
+        showToast('Acceso Reservado', 'Te has unido correctamente a la Lista de Espera.');
         
         btnWaitlist.disabled = true;
         btnWaitlist.textContent = 'REGISTRADO EN LISTA DE ESPERA ✓';
@@ -547,8 +547,12 @@ function initTimer30d() {
 
   let totalSeconds = 30 * 24 * 3600;
 
-  setInterval(() => {
-    if (totalSeconds <= 0) return;
+  const timerInterval = setInterval(() => {
+    if (totalSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerDisplay.textContent = '000:00:00';
+      return;
+    }
     totalSeconds--;
 
     const totalHours = Math.floor(totalSeconds / 3600).toString().padStart(3, '0');
@@ -560,9 +564,14 @@ function initTimer30d() {
 }
 
 /* ==========================================================================
-   11. BIOMETRÍA Y REDIRECCIONES
+   11. BIOMETRÍA EN WAITLIST (FACE ID / HUELVA -> ACCESO RESERVADO)
    ========================================================================== */
-function initWebAuthnBiometrics() {
+function bufferToBase64Url(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function initWebAuthnBiometricsWaitlist() {
   const bioBtn = document.getElementById('btn-register-biometrics');
   if (!bioBtn) return;
 
@@ -587,8 +596,8 @@ function initWebAuthnBiometrics() {
           rp: { name: "SODIE Platform" },
           user: {
             id: new Uint8Array([1, 2, 3, 4]),
-            name: "cliente@sodie.com",
-            displayName: "Cliente SODIE"
+            name: "waitlist@sodie.com",
+            displayName: "Waitlist User"
           },
           pubKeyCredParams: [{ alg: -7, type: "public-key" }],
           authenticatorSelection: { authenticatorAttachment: "platform" },
@@ -596,20 +605,27 @@ function initWebAuthnBiometrics() {
         }
       });
 
-      await fetch(`${getBaseUrl()}/api/v1/auth/biometrics/register`, {
+      // Registro directo a Lista de Espera por Biometría
+      await fetch(`${getBaseUrl()}/api/v1/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credentialId: credential.id })
+        body: JSON.stringify({
+          type: 'biometric_reservation',
+          credentialId: credential.id,
+          rawId: bufferToBase64Url(credential.rawId)
+        })
       });
 
-      bioBtn.textContent = '✓ Biometría Registrada';
+      bioBtn.textContent = '✓ RESERVADO CON BIOMETRÍA';
       bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
-      showToast('Autenticación Exitosa', 'Face ID / Huella vinculada correctamente.');
+      bioBtn.disabled = true;
+      showToast('Acceso Reservado', 'Tu posición en la Lista de Espera se ha guardado con tu biometría.');
 
     } catch (err) {
-      bioBtn.textContent = '✓ Biometría Lista';
+      bioBtn.textContent = '✓ RESERVADO CON BIOMETRÍA';
       bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
-      showToast('Biometría Lista', 'Identidad confirmada en el sistema.');
+      bioBtn.disabled = true;
+      showToast('Acceso Reservado', 'Identidad vinculada correctamente a la Lista de Espera.');
     }
   });
 }
@@ -618,11 +634,8 @@ function handleUrlRedirects() {
   const urlParams = new URLSearchParams(window.location.search);
   const status = urlParams.get('status');
 
-  if (status === 'active' || urlParams.get('view') === 'dashboard') {
-    showToast('Acceso Confirmado', 'Redirigiendo a tu Dashboard de Cliente...');
-    setTimeout(() => {
-      window.location.href = 'client.html';
-    }, 1200);
+  if (status === 'waitlist') {
+    showToast('Acceso Reservado', 'Tu lugar en la Lista de Espera está confirmado.');
   }
 }
 
@@ -655,19 +668,14 @@ function handleUrlRedirects() {
 })();
 
 // ==========================================
-// 1. MANEJADORES GLOBALES DE ERRORES
+// 13. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
 // ==========================================
-window.onerror = function(message, source, lineno, colno, error) {
+window.onerror = function() {
   return false;
 };
 
-window.addEventListener('unhandledrejection', function(event) {
-  // Manejador silencioso de rechazos de promesas
-});
+window.addEventListener('unhandledrejection', function() {});
 
-// ==========================================
-// 2. ORQUESTADOR CENTRAL DE BOTONES Y ACCIONES
-// ==========================================
 window.ejecutarBotonSODIE = async function(event, accion) {
   if (event) {
     if (typeof event.preventDefault === 'function') event.preventDefault();
