@@ -31,6 +31,7 @@ body {
   background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,7 +116,7 @@ button:disabled,
 }
 
 .toast-icon {
-  width: 10px;
+  width: 100%;
   height: 10px;
   border-radius: 50%;
   background: var(--neon-mint);
@@ -140,7 +141,8 @@ button:disabled,
 .full-screen {
   position: fixed;
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  width: 100%; height: 100vh;
+  height: 100dvh;
   z-index: 9999;
   background: radial-gradient(circle at 50% 35%, #38075c 0%, #0f0221 65%, #030007 100%);
   display: flex;
@@ -150,7 +152,8 @@ button:disabled,
   padding: 16px;
 }
 
-.full-screen.hidden {
+.full-screen.hidden,
+.full-screen.fade-out {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -422,7 +425,7 @@ button:disabled,
 .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
 /* ========================================================= */
-/* 3. PANEL ADMIN Y BIOMETRÍA (v4)                           */
+/* 3. PANEL ADMIN Y BIOMETRÍA                                */
 /* ========================================================= */
 
 .admin-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
@@ -448,7 +451,8 @@ button:disabled,
 .modal-overlay {
   position: fixed;
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  width: 100%; height: 100vh;
+  height: 100dvh;
   background: rgba(5, 1, 10, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -543,6 +547,13 @@ button:disabled,
 .demo-video-player {
   width: 100%;
   display: block;
+  border-radius: 12px;
+}
+
+#sodie-demo-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   border-radius: 12px;
 }
 
@@ -695,7 +706,7 @@ button:disabled,
 }
 
 /* ========================================================= */
-/* 7. ALINEACIÓN PRECISA DE PRECIOS ($1.000 Y $9.000)        */
+/* 7. ALINEACIÓN PRECISA DE PRECIOS                          */
 /* ========================================================= */
 
 .pf-summary-list { 
@@ -719,7 +730,6 @@ button:disabled,
   line-height: 1.3;
 }
 
-/* ALINEACIÓN PERFECTA EN LA MISMA COLUMNA DERECHA */
 .price-value {
   display: flex;
   flex-direction: column;
@@ -811,7 +821,6 @@ button:disabled,
   transform: translateY(-1px); 
 }
 
-/* GRADIENTE PRINCIPAL DE PAGO */
 .btn-pay-gradient {
   background: linear-gradient(135deg, #00ffcc 0%, #00a884 100%) !important;
   color: #05010a !important;
@@ -825,7 +834,6 @@ button:disabled,
   box-shadow: 0 0 25px rgba(0, 255, 204, 0.8) !important;
 }
 
-/* SÓLIDOS DE COLOR */
 .btn-mint-solid {
   background: var(--neon-mint) !important;
   color: #05010a !important;
@@ -854,7 +862,6 @@ button:disabled,
   font-weight: 800 !important;
 }
 
-/* GRADIENTES ESPECIALES DE ACCIÓN */
 .btn-green-gradient {
   background: linear-gradient(135deg, #00ffcc 0%, #009955 100%) !important;
   color: #05010a !important;
@@ -883,7 +890,6 @@ button:disabled,
   font-weight: 800 !important;
 }
 
-/* BOTÓN DE BIOMETRÍA */
 .btn-biometric, 
 .btn-biometric-auth {
   background: rgba(0, 255, 204, 0.1) !important;
@@ -898,7 +904,6 @@ button:disabled,
   box-shadow: 0 0 16px var(--neon-mint) !important;
 }
 
-/* BOTÓN PELIGRO / CANCELAR */
 .btn-danger { 
   border-color: var(--neon-fuchsia) !important; 
   color: var(--neon-fuchsia) !important; 
@@ -909,7 +914,6 @@ button:disabled,
   box-shadow: 0 0 18px rgba(255, 0, 122, 0.6) !important;
 }
 
-/* BOTÓN META / FACEBOOK */
 .btn-fb { 
   background: rgba(24, 119, 242, 0.18) !important; 
   border: 1.5px solid #1877f2 !important; 
@@ -923,6 +927,12 @@ button:disabled,
 
 .btn-full-width {
   width: 100%;
+}
+
+#sodie-logo-trigger, #btn-sodie-logo-trigger {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ========================================================= */
@@ -971,7 +981,7 @@ button:disabled,
 }
 
 /* ========================================================= */
-/* 11. ADAPTACIÓN RESPONSIVE                                 */
+/* 11. ADAPTACIÓN RESPONSIVE (LAPTOPS & DESKTOP CORREGIDO)   */
 /* ========================================================= */
 
 @media (min-width: 900px) {
@@ -979,23 +989,26 @@ button:disabled,
     max-width: 1100px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 20px;
+    gap: 20px;
     align-items: start;
     padding: 30px;
   }
 
   .dash-header,
   .metrics-section,
-  .timer-section {
+  .timer-section,
+  .full-width-card {
     grid-column: 1 / -1;
   }
 
   .metrics-slider {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .metrics-slider .metric-square {
-    flex: 1 1 0px;
+    flex: 1 1 180px;
+    max-width: 240px;
   }
 }
 
@@ -1021,17 +1034,4 @@ button:disabled,
   .logo-title .serif-s {
     font-size: 3rem !important;
   }
-}
-
-#sodie-demo-video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* o 'contain' si quieres ver la pantalla completa sin recortes */
-  border-radius: 12px;
-}
-
-#sodie-logo-trigger, #btn-sodie-logo-trigger {
-  touch-action: manipulation; /* Inhabilita el zoom por doble toque */
-  user-select: none;
-  -webkit-user-select: none;
 }
