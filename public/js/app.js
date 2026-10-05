@@ -475,14 +475,13 @@ function initVideoAndConfirm() {
   }
 
   const demoVideo = document.getElementById('sodie-demo-video');
+  const videoSource = document.getElementById('video-source-mp4');
   const playOverlay = document.getElementById('video-play-overlay');
 
-  if (demoVideo) {
-    const source = demoVideo.querySelector('source');
-    if (source) {
-      source.src = 'sodie-demo-borrador.mp4';
-      demoVideo.load();
-    }
+  if (demoVideo && videoSource) {
+    const backendUrl = getBaseUrl();
+    videoSource.src = `${backendUrl}/public/video/video.mp4`;
+    demoVideo.load();
 
     if (playOverlay) {
       playOverlay.addEventListener('click', () => {
