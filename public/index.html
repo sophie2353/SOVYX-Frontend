@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SODIE</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/css/styles.css">
   
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -25,6 +25,31 @@
   /></noscript>
 </head>
 <body>
+
+  <!-- Modal Aviso Dispositivos Móviles -->
+  <div id="mobile-notice-modal" class="modal-overlay">
+    <div class="modal-content glass-card-dash text-center">
+      <h4 class="fuchsia-txt mb-small" style="font-size: 1.1rem; font-weight: bold;">Optimización de Dispositivo</h4>
+      <p class="step-desc" style="font-size: 0.88rem; margin-bottom: 16px;">
+        Esta versión es apta únicamente para dispositivos móviles. Próximos dispositivos adaptados en la V4.
+      </p>
+      <button type="button" id="btn-close-mobile-notice" class="btn-pf-action btn-pay-gradient full-width">
+        ENTENDIDO
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner Cookie Consent -->
+  <div id="cookie-consent-banner" class="cookie-banner-glass hidden">
+    <div class="cookie-content">
+      <p style="font-size: 0.8rem; line-height: 1.4; margin-bottom: 10px;">
+        Utilizamos cookies y tecnologías de rastreo para optimizar la inyección de segmentación e integrar las métricas de Meta Ads.
+      </p>
+      <button type="button" id="btn-accept-cookies" class="btn-pf-action btn-pay-gradient full-width" style="padding: 8px 12px; font-size: 0.85rem;">
+        Aceptar y Continuar
+      </button>
+    </div>
+  </div>
 
   <div id="toast-notification" class="toast-bubble hidden">
     <div class="toast-content">
@@ -110,50 +135,47 @@
       </div>
     </header>
 
+    <!-- METRICAS LIMPIAS (SIN PIE DE TEXTO INTERNO) -->
     <section class="metrics-section">
       <h3 class="section-title">Métricas en Tiempo Real</h3>
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Inversión</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-spend">$11.890,52</div>
+          <div class="card-value" id="metric-spend">$0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Estado Meta</span><span id="metric-spend-status" class="fuchsia-txt">Conectado</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Alcance</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-reach">41.209</div>
+          <div class="card-value" id="metric-reach">0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Impresiones</span><span id="metric-reach-status" class="mint-txt">58.410</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-visitors">3.820</div>
+          <div class="card-value" id="metric-visitors">0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Tráfico Web</span><span class="mint-txt">Activo</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Activos</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-activos">1</div>
+          <div class="card-value" id="metric-activos">0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Campañas</span><span class="fuchsia-txt">1 activa</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
           <div class="card-head"><span>Clics "Ir a Pagar"</span><span class="dots"></span></div>
-          <div class="card-value" id="metric-pay-clicks">842</div>
+          <div class="card-value" id="metric-pay-clicks">0</div>
           <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,40 Q50,10 100,30 T200,10" fill="none" stroke="#d946ef" stroke-width="2" /></svg>
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#d946ef" stroke-width="2" /></svg>
           </div>
         </article>
 
@@ -163,7 +185,6 @@
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,10 Q50,30 100,20 T200,50" fill="none" stroke="#d946ef" stroke-width="3" /></svg>
           </div>
-          <div class="card-foot"><span id="metric-cupos-label"></span><span id="metric-cupos-sub" class="fuchsia-txt"></span></div>
         </article>
       </div>
 
@@ -220,6 +241,7 @@
       </div>
     </section>
 
+    <!-- VIDEO DEMOSTRACIÓN: La fuente del video se inyecta dinámicamente desde el backend -->
     <section id="card-demo-video" class="glass-card-dash video-section">
       <div class="chat-header" style="margin-bottom: 12px;">
         <h3 class="section-title mint-txt">Demostración en Vivo</h3>
@@ -229,14 +251,14 @@
         Observa cómo subimos la lista de compradores desde SODIE, se crea automáticamente la campaña con borrador sin segmentación manual y se publica en Meta Ads.
       </p>
       <div class="video-container-glass">
-        <video id="sodie-demo-video" controls poster="https://api.sodie.app/poster-demo.jpg" class="demo-video-player">
-          <source src="https://api.sodie.app/video/video.mp4" type="video/mp4">
-          <source src="/video/video.mp4" type="video/mp4">
+        <video id="sodie-demo-video" controls poster="/poster-demo.jpg" class="demo-video-player">
+          <source id="video-source-mp4" src="" type="video/mp4">
         </video>
       </div>
     </section>
 
-    <section id="ia3-calculator-analyzer" class="glass-card-dash metrics-analyzer-section mb-space">
+    <!-- ANALIZADOR IA3 CON BURBUJA FLOTANTE POPUP -->
+    <section id="ia3-calculator-analyzer" class="glass-card-dash metrics-analyzer-section mb-space" style="position: relative;">
       <h3 class="section-title mint-txt section-title-md">Analiza Tus Métricas Actuales</h3>
       <p class="step-desc step-desc-sm" style="margin-bottom: 16px;">
         Ingresa tus datos de rendimiento actuales en Meta Ads para generar una auditoría inmediata impulsada por IA3.
@@ -257,8 +279,12 @@
         ANALIZAR CON IA3
       </button>
 
+      <!-- Burbuja Flotante Emergente de Resultados -->
       <div id="ia3-modal-result" class="ia3-float-card hidden">
-        <h4 class="fuchsia-txt ia3-modal-title">Diagnóstico de Rendimiento IA3</h4>
+        <div class="flex-between-center mb-small">
+          <h4 class="fuchsia-txt ia3-modal-title" style="margin:0;">Diagnóstico IA3</h4>
+          <button type="button" id="btn-close-ia3-modal" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
         
         <div class="ia3-res-block">
           <strong class="mint-txt label-sm">Métricas Actuales:</strong>
@@ -281,10 +307,10 @@
         </div>
 
         <div class="flex-wrap-gap">
-          <button type="button" data-sodie-event="scroll-chat" class="btn-pf-action flex-equal-btn">
+          <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action flex-equal-btn">
             Ir a Chat Web
           </button>
-          <button type="button" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient flex-equal-btn font-bold">
+          <button type="button" id="btn-scroll-pago-ia3" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient flex-equal-btn font-bold">
             Ir a Pago Final
           </button>
         </div>
@@ -474,7 +500,7 @@
       <p>© SODIE v3.5. 2026. TODOS LOS DERECHOS RESERVADOS</p>
     </footer>
   </main>
-  
+
   <script src="/js/config.js"></script>
   <script src="/js/app.js"></script>
 </body>
