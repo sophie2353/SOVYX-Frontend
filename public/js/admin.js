@@ -18,8 +18,6 @@ const ADMIN_STATE = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("🟢 SODIE Admin Engine Inicializado");
-
   sodieIniciarCronometro24h();
   sodieIniciarTimer120h();
 
@@ -51,8 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
    1. AUTENTICACIÓN Y SESIÓN SEGURA
    ========================================================================== */
 window.sodieValidarPasswordDirecta = async function() {
-  console.log("👉 Validando contraseña admin con el servidor...");
-
   const inputPass = document.getElementById("admin-pass");
   const errorElem = document.getElementById("admin-auth-error");
   const password = inputPass ? inputPass.value.trim() : "";
@@ -76,7 +72,6 @@ window.sodieValidarPasswordDirecta = async function() {
     const data = await response.json();
 
     if (data.success) {
-      console.log("✅ Contraseña correcta. Avanzando a Paso 2 (Biometría)...");
       if (errorElem) {
         errorElem.innerText = "✅ Contraseña verificada. Complete la biometría.";
         errorElem.style.color = "#00FFCC";
@@ -89,7 +84,6 @@ window.sodieValidarPasswordDirecta = async function() {
       if (step2) step2.style.display = "block";
 
     } else {
-      console.log("❌ Clave incorrecta");
       if (errorElem) {
         errorElem.innerText = `❌ ${data.message || 'Contraseña incorrecta'}`;
         errorElem.style.color = "#FF007F";
@@ -97,7 +91,6 @@ window.sodieValidarPasswordDirecta = async function() {
       }
     }
   } catch (err) {
-    console.error("🔥 Error de conexión al validar clave:", err);
     if (errorElem) {
       errorElem.innerText = "❌ Error de conexión con el servidor";
       errorElem.style.color = "#FF007F";
@@ -107,11 +100,9 @@ window.sodieValidarPasswordDirecta = async function() {
 };
 
 window.sodieValidarBiometria = async function() {
-  console.log("⚡ Iniciando reto biométrico de administración...");
   const errorElem = document.getElementById("admin-auth-error");
 
   if (!window.PublicKeyCredential) {
-    console.warn("⚠️ WebAuthn/Biometría no soportada en este navegador.");
     if (errorElem) {
       errorElem.innerText = "⚠️ Sin soporte WebAuthn. Concediendo acceso directo...";
       errorElem.style.color = "#00FFCC";
@@ -125,7 +116,6 @@ window.sodieValidarBiometria = async function() {
   try {
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     if (!available) {
-      console.warn("⚠️ Autenticador de plataforma no disponible.");
       sessionStorage.setItem("sodie_admin_session", "active");
       mostrarDashboard();
       return;
@@ -160,7 +150,6 @@ window.sodieValidarBiometria = async function() {
     }
 
   } catch (err) {
-    console.error("🔥 Error en autenticación biométrica:", err);
     sessionStorage.setItem("sodie_admin_session", "active");
     mostrarDashboard();
   }
@@ -445,7 +434,6 @@ async function sodieSubirVideoAdmin() {
       alert('Error: ' + (data.error || 'No se pudo procesar'));
     }
   } catch (err) {
-    console.error('Error al subir video:', err);
     alert('Error al conectar con el servidor.');
   }
 }
@@ -512,7 +500,6 @@ async function adminActivarWaitlist() {
       alert('Error activando lista de espera: ' + (data.error || 'Respuesta inválida'));
     }
   } catch (err) {
-    console.error('Error al conectar con /waitlist/open:', err);
     alert('Error de conexión con el servidor');
   }
 }
