@@ -199,7 +199,6 @@ async function registrarBiometriaCliente() {
       showToast('Registro Exitoso', `Acceso biométrico registrado correctamente para ${clientId}.`);
     }
   } catch (error) {
-    console.error('Error al registrar biometría:', error);
     const authError = document.getElementById('client-auth-error');
     if (authError) {
       authError.textContent = '❌ Error al completar registro biométrico.';
@@ -248,7 +247,6 @@ async function iniciarSesionBiometricaCliente() {
       showToast('Sesión Iniciada', `Autenticación biométrica exitosa. Bienvenido, ${clientId}.`);
     }
   } catch (error) {
-    console.error('Error al iniciar sesión biométrica:', error);
     const authError = document.getElementById('client-auth-error');
     if (authError) {
       authError.textContent = '❌ Verificación biométrica fallida.';
@@ -291,7 +289,7 @@ function setupEventListeners() {
   const clientEmailReg = document.getElementById('client-email-reg');
   if (clientEmailReg && !clientEmailReg.dataset.bound) {
     clientEmailReg.addEventListener('input', (e) => {
-      console.log('📧 Email ingresado:', e.target.value);
+      // Listener de entrada limpio
     });
     clientEmailReg.dataset.bound = "true";
   }
@@ -470,7 +468,6 @@ async function sodieFlujoInyeccionCliente() {
     }
 
   } catch (error) {
-    console.error('Error subiendo audiencia:', error);
     showToast('Error de Carga', 'No se pudo subir el archivo al servidor.', true);
     if (btnUpload) {
       btnUpload.textContent = 'Subir Excel (Paso Diario)';
@@ -590,7 +587,6 @@ async function sodieConfirmarActivacionCliente() {
     fetchClientMetrics();
 
   } catch (error) {
-    console.error('Error activando campaña:', error);
     showToast('Error', 'No se pudo activar la campaña en el servidor.', true);
     if (btnActivate) {
       btnActivate.textContent = 'Activar Campaña';
@@ -600,7 +596,7 @@ async function sodieConfirmarActivacionCliente() {
 }
 
 /* ==========================================================================
-   11. TEMPORIZADORES EN TIEMPO REAL (DIARIO 24H Y GLOBAL 28 DÍAS)
+   11. TEMPORIZADORES EN TIEMPO REAL CON NOTIFICACIÓN BACKEND (24H / 7 DÍAS)
    ========================================================================== */
 function initGlobalAndWeeklyTimers() {
   const globalTimerDisplay = document.getElementById('global-timer-display');
@@ -623,7 +619,7 @@ function initGlobalAndWeeklyTimers() {
   const SECONDS_24H = 24 * 3600;
   const SECONDS_WEEK = 7 * 86400;
 
-  const updateTimerTick = () => {
+  const updateTimerTick = async () => {
     const now = Date.now();
     CLIENT_STATE.elapsedSeconds = Math.max(0, Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000));
 
@@ -662,6 +658,15 @@ function initGlobalAndWeeklyTimers() {
       timer24hDisplay.textContent = `${dHours}:${dMins}:${dSecs}`;
     }
 
+    // Disparador de Notificación de backend cada 24 Horas / Ciclo Cumplido
+    if (remaining24h === 0) {
+      const lastNotify24 = localStorage.getItem(`sodie_notify_24h_${CLIENT_STATE.clientId}`);
+      if (!lastNotify24 || (now - parseInt(lastNotify24, 10)) > 60000) {
+        localStorage.setItem(`sodie_notify_24h_${CLIENT_STATE.clientId}`, now.toString());
+        notificarTriggerBackend('24H_CYCLE', { elapsedDays: gDays });
+      }
+    }
+
     const weekElapsed = CLIENT_STATE.elapsedSeconds % SECONDS_WEEK;
     const remainingWeek = SECONDS_WEEK - weekElapsed;
 
@@ -674,6 +679,15 @@ function initGlobalAndWeeklyTimers() {
       timerWeeklyPayDisplay.textContent = `${wDays}d ${wHours}h ${wMins}m ${wSecs}s`;
     }
 
+    // Disparador de Notificación de backend al cumplir ciclo de 7 Días
+    if (remainingWeek === 0) {
+      const lastNotify7d = localStorage.getItem(`sodie_notify_7d_${CLIENT_STATE.clientId}`);
+      if (!lastNotify7d || (now - parseInt(lastNotify7d, 10)) > 60000) {
+        localStorage.setItem(`sodie_notify_7d_${CLIENT_STATE.clientId}`, now.toString());
+        notificarTriggerBackend('WEEKLY_CYCLE', { currentWeek: CLIENT_STATE.currentWeek });
+      }
+    }
+
     if (gDays >= 7 && !CLIENT_STATE.paymentConfirmed) {
       const lockWarning = document.getElementById('weekly-payment-lock-warning');
       if (lockWarning) lockWarning.classList.remove('hidden');
@@ -682,4 +696,21 @@ function initGlobalAndWeeklyTimers() {
 
   updateTimerTick();
   CLIENT_STATE.timerInterval = setInterval(updateTimerTick, 1000);
+}
+
+async function notificarTriggerBackend(type, details = {}) {
+  try {
+    await fetch(`${getBaseUrl()}/api/v1/notifications/timer-client`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: CLIENT_STATE.clientId,
+        type: type,
+        timestamp: Date.now(),
+        details: details
+      })
+    });
+  } catch (err) {
+    // Manejo de error silencioso
+  }
 }
