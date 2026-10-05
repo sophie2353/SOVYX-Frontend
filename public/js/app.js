@@ -739,3 +739,111 @@ window.ejecutarBotonSODIE = async function(event, accion) {
     }
   }
 };
+
+  if (btnScrollChat) {
+    btnScrollChat.addEventListener('click', () => {
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        console.warn('No se encontró el elemento objetivo para el chat (#chat-section).');
+      }
+    });
+  }
+
+  if (btnScrollPago) {
+    btnScrollPago.addEventListener('click', () => {
+      if (pagoSection) {
+        pagoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        console.warn('No se encontró el elemento objetivo para el pago (#pago-section).');
+      }
+    });
+  }
+
+});
+
+  /* ==========================================================================
+     1. LÓGICA PARA EL MODAL DE AVISO DE DISPOSITIVOS MÓVILES
+     ========================================================================== */
+  const mobileNoticeModal = document.getElementById('mobile-notice-modal');
+  const btnCloseMobileNotice = document.getElementById('btn-close-mobile-notice');
+
+  // Detectar si el dispositivo NO es móvil (ancho de pantalla mayor a 768px, por ejemplo)
+  const isDesktopOrTablet = window.innerWidth > 768;
+
+  if (mobileNoticeModal) {
+    if (isDesktopOrTablet) {
+      // Mostrar el modal en pantallas grandes/escritorio
+      mobileNoticeModal.classList.add('active'); // O remueve 'hidden' según cómo manejes tus modales
+    } else {
+      mobileNoticeModal.classList.remove('active');
+    }
+  }
+
+  // Cerrar el modal al hacer clic en "ENTENDIDO"
+  if (btnCloseMobileNotice && mobileNoticeModal) {
+    btnCloseMobileNotice.addEventListener('click', () => {
+      mobileNoticeModal.classList.remove('active');
+      // Si usas display none/flex por clase o directo:
+      mobileNoticeModal.style.display = 'none';
+    });
+  }
+
+
+  /* ==========================================================================
+     2. LÓGICA PARA EL BANNER DE COOKIE CONSENT
+     ========================================================================== */
+  const cookieBanner = document.getElementById('cookie-consent-banner');
+  const btnAcceptCookies = document.getElementById('btn-accept-cookies');
+
+  if (cookieBanner) {
+    // Verificar si el usuario ya aceptó las cookies previamente
+    const cookiesAccepted = localStorage.getItem('cookiesAccepted');
+
+    if (!cookiesAccepted) {
+      // Mostrar el banner si no ha sido aceptado
+      cookieBanner.classList.remove('hidden');
+    }
+
+    if (btnAcceptCookies) {
+      btnAcceptCookies.addEventListener('click', () => {
+        // Guardar preferencia en localStorage
+        localStorage.setItem('cookiesAccepted', 'true');
+        // Ocultar banner
+        cookieBanner.classList.add('hidden');
+      });
+    }
+  }
+
+
+  /* ==========================================================================
+     3. LÓGICA DE DESPLAZAMIENTO SUAVE (SCROLL) DESDE LA IA3
+     ========================================================================== */
+  const btnScrollChat = document.getElementById('btn-scroll-chat-ia3');
+  const btnScrollPago = document.getElementById('btn-scroll-pago-ia3');
+
+  // Asegúrate de que las secciones de destino tengan los IDs correspondientes en tu HTML (ej. #chat-section y #pago-section)
+  const chatSection = document.getElementById('chat-section-anchor'); // Cambia el ID según tu HTML
+  const pagoSection = document.getElementById('pf-card'); // Cambia el ID según tu HTML
+
+  if (btnScrollChat) {
+    btnScrollChat.addEventListener('click', () => {
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        console.warn('No se encontró el elemento objetivo para el chat (#chat-section).');
+      }
+    });
+  }
+
+  if (btnScrollPago) {
+    btnScrollPago.addEventListener('click', () => {
+      if (pagoSection) {
+        pagoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        console.warn('No se encontró el elemento objetivo para el pago (#pago-section).');
+      }
+    });
+  }
+
+});
