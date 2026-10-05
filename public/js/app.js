@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPaymentFlowEvents();
   initWaitlistEvents();
   initVideoAndConfirm();
+  initNuevosComponentesV4();
 });
 
 /* ==========================================================================
@@ -667,81 +668,9 @@ function handleUrlRedirects() {
   });
 })();
 
-// ==========================================
-// 13. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
-// ==========================================
-window.onerror = function() {
-  return false;
-};
-
-window.addEventListener('unhandledrejection', function() {});
-
-window.ejecutarBotonSODIE = async function(event, accion) {
-  if (event) {
-    if (typeof event.preventDefault === 'function') event.preventDefault();
-    if (typeof event.stopPropagation === 'function') event.stopPropagation();
-  }
-
-  const elementoBoton = event?.currentTarget || event?.target || null;
-  
-  if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
-    elementoBoton.disabled = true;
-  }
-
-  try {
-    switch (accion) {
-      case 'biometria-login':
-        if (typeof window.sodieValidarBiometria === 'function') {
-          await window.sodieValidarBiometria();
-        } else if (typeof window.sodieLoginBiometricoCliente === 'function') {
-          await window.sodieLoginBiometricoCliente();
-        } else {
-          throw new Error('Función de biometría no encontrada en el entorno.');
-        }
-        break;
-
-      case 'biometria-registro':
-        if (typeof window.sodieRegistrarBiometriaCliente === 'function') {
-          await window.sodieRegistrarBiometriaCliente();
-        } else {
-          throw new Error('Función de registro biométrico no encontrada.');
-        }
-        break;
-
-      case 'cargar-excel':
-        if (typeof window.sodieFlujoInyeccionCliente === 'function') {
-          await window.sodieFlujoInyeccionCliente();
-        } else if (typeof window.sodieSubirExcelAdmin === 'function') {
-          await window.sodieSubirExcelAdmin();
-        } else {
-          throw new Error('Función de carga de Excel no encontrada.');
-        }
-        break;
-
-      case 'activar-campana':
-        if (typeof window.sodieConfirmarActivacionCliente === 'function') {
-          await window.sodieConfirmarActivacionCliente();
-        } else if (typeof window.sodieConfirmarActivacion === 'function') {
-          await window.sodieConfirmarActivacion();
-        } else {
-          throw new Error('Función de activación de campaña no encontrada.');
-        }
-        break;
-
-      default:
-        break;
-    }
-  } catch (err) {
-    alert(`Ocurrió un error al ejecutar la acción '${accion}': ${err.message || err}`);
-  } finally {
-    if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
-      elementoBoton.disabled = false;
-    }
-  }
-
-  // ==========================================
-// 13. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
-// ==========================================
+/* ==========================================================================
+   13. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
+   ========================================================================== */
 window.onerror = function() {
   return false;
 };
@@ -819,18 +748,20 @@ function initNuevosComponentesV4() {
   // --- 1. Modal Aviso Dispositivos Móviles ---
   const mobileNoticeModal = document.getElementById('mobile-notice-modal');
   const btnCloseMobileNotice = document.getElementById('btn-close-mobile-notice');
-  const isDesktopOrTablet = window.innerWidth > 768;
 
-  if (mobileNoticeModal) {
-    if (isDesktopOrTablet) {
+  if (mobileNoticeModal && btnCloseMobileNotice) {
+    // Si la pantalla es escritorio/tablet (>768px), mostrar el modal de aviso
+    if (window.innerWidth > 768) {
       mobileNoticeModal.classList.add('active');
+      mobileNoticeModal.style.display = 'flex';
     } else {
       mobileNoticeModal.classList.remove('active');
+      mobileNoticeModal.style.display = 'none';
     }
-  }
 
-  if (btnCloseMobileNotice && mobileNoticeModal) {
-    btnCloseMobileNotice.addEventListener('click', () => {
+    btnCloseMobileNotice.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       mobileNoticeModal.classList.remove('active');
       mobileNoticeModal.style.display = 'none';
     });
@@ -840,34 +771,36 @@ function initNuevosComponentesV4() {
   const cookieBanner = document.getElementById('cookie-consent-banner');
   const btnAcceptCookies = document.getElementById('btn-accept-cookies');
 
-  if (cookieBanner) {
+  if (cookieBanner && btnAcceptCookies) {
     const cookiesAccepted = localStorage.getItem('cookiesAccepted');
     if (!cookiesAccepted) {
       cookieBanner.classList.remove('hidden');
+      cookieBanner.style.display = 'block';
+    } else {
+      cookieBanner.classList.add('hidden');
+      cookieBanner.style.display = 'none';
     }
 
-    if (btnAcceptCookies) {
-      btnAcceptCookies.addEventListener('click', () => {
-        localStorage.setItem('cookiesAccepted', 'true');
-        cookieBanner.classList.add('hidden');
-      });
-    }
+    btnAcceptCookies.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      localStorage.setItem('cookiesAccepted', 'true');
+      cookieBanner.classList.add('hidden');
+      cookieBanner.style.display = 'none';
+    });
   }
 
-  // --- 3. Scroll Suave IA3 (Hacia Chat o Pago) ---
+  // --- 3. Scroll Suave IA3 ---
   const btnScrollChat = document.getElementById('btn-scroll-chat-ia3');
   const btnScrollPago = document.getElementById('btn-scroll-pago-ia3');
 
-  // Ajusta los seletores según los IDs reales en tu HTML
-  const chatSection = document.getElementById('chat-section-anchor') || document.getElementById('view-chat');
-  const pagoSection = document.getElementById('pf-card') || document.getElementById('sec-pago');
+  const chatSection = document.getElementById('chat-section-anchor');
+  const pagoSection = document.getElementById('pf-card');
 
   if (btnScrollChat) {
     btnScrollChat.addEventListener('click', () => {
       if (chatSection) {
         chatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        console.warn('No se encontró el elemento objetivo para el chat.');
       }
     });
   }
@@ -876,16 +809,7 @@ function initNuevosComponentesV4() {
     btnScrollPago.addEventListener('click', () => {
       if (pagoSection) {
         pagoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        console.warn('No se encontró el elemento objetivo para el pago.');
       }
     });
   }
-}
-
-// Inicialización de componentes V4 cuando el DOM esté listo
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initNuevosComponentesV4);
-} else {
-  initNuevosComponentesV4();
 }
