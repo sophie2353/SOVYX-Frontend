@@ -123,7 +123,7 @@ function initSSEMetrics() {
       evtSource.close();
     };
   } catch (err) {
-    console.warn('SSE desactivado, fallback a estático.');
+    // SSE fallback silencioso
   }
 }
 
@@ -142,7 +142,6 @@ async function checkAvailableSlots() {
 
     actualizarInterfazCupos(slots);
   } catch (error) {
-    console.warn('Error obteniendo cupos del servidor. Usando valor por defecto.', error);
     actualizarInterfazCupos(3);
   }
 }
@@ -366,7 +365,6 @@ function initIA3Engine() {
       showToast('Análisis IA3 Listo', 'El diagnóstico del backend se ha generado correctamente.');
 
     } catch (error) {
-      console.error('Error IA3:', error);
       if (valSolution) valSolution.innerText = "Error en el servidor al generar diagnóstico IA3.";
       showToast('Error IA3', 'No se pudo obtener la respuesta del backend de IA3.', true);
     }
@@ -534,7 +532,6 @@ function initWaitlistEvents() {
         btnWaitlist.style.background = 'rgba(0, 255, 204, 0.2)';
 
       } catch (error) {
-        console.error('Error lista de espera:', error);
         showToast('Error', 'No se pudo completar el registro.', true);
       }
     });
@@ -577,7 +574,7 @@ function initWebAuthnBiometrics() {
 
     try {
       bioBtn.style.borderColor = '#00ffcc';
-      bioBtn.textContent = '⚡ Solicitando Face ID / Huella...';
+      bioBtn.textContent = 'Solicitando Face ID / Huella...';
 
       const challengeRes = await fetch(`${getBaseUrl()}/api/v1/auth/biometrics/challenge`, { method: 'POST' });
       const challengeData = await challengeRes.json();
@@ -610,7 +607,6 @@ function initWebAuthnBiometrics() {
       showToast('Autenticación Exitosa', 'Face ID / Huella vinculada correctamente.');
 
     } catch (err) {
-      console.warn('Biometría simulada / Cancelada:', err);
       bioBtn.textContent = '✓ Biometría Lista';
       bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
       showToast('Biometría Lista', 'Identidad confirmada en el sistema.');
@@ -662,37 +658,31 @@ function handleUrlRedirects() {
 // 1. MANEJADORES GLOBALES DE ERRORES
 // ==========================================
 window.onerror = function(message, source, lineno, colno, error) {
-  console.error(`❌ [SODIE Global Error Handler] ${message} en ${source}:${lineno}:${colno}`);
-  return false; // Permite la propagación estándar en consola sin romper el hilo
+  return false;
 };
 
 window.addEventListener('unhandledrejection', function(event) {
-  console.error('❌ [SODIE Unhandled Promise Rejection]:', event.reason);
+  // Manejador silencioso de rechazos de promesas
 });
 
 // ==========================================
 // 2. ORQUESTADOR CENTRAL DE BOTONES Y ACCIONES
 // ==========================================
 window.ejecutarBotonSODIE = async function(event, accion) {
-  // Prevenir comportamiento nativo si hay evento
   if (event) {
     if (typeof event.preventDefault === 'function') event.preventDefault();
     if (typeof event.stopPropagation === 'function') event.stopPropagation();
   }
 
-  // Identificar el botón que activó la acción para feedback visual
   const elementoBoton = event?.currentTarget || event?.target || null;
   
   if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
     elementoBoton.disabled = true;
   }
 
-  console.log(`[SODIE UI] ⚡ Clic detectado en la acción: '${accion}'`);
-
   try {
     switch (accion) {
       case 'biometria-login':
-        console.log('[SODIE UI] Iniciando flujo biométrico...');
         if (typeof window.sodieValidarBiometria === 'function') {
           await window.sodieValidarBiometria();
         } else if (typeof window.sodieLoginBiometricoCliente === 'function') {
@@ -703,7 +693,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
         break;
 
       case 'biometria-registro':
-        console.log('[SODIE UI] Iniciando registro biométrico...');
         if (typeof window.sodieRegistrarBiometriaCliente === 'function') {
           await window.sodieRegistrarBiometriaCliente();
         } else {
@@ -712,7 +701,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
         break;
 
       case 'cargar-excel':
-        console.log('[SODIE UI] Procesando carga de archivo Excel...');
         if (typeof window.sodieFlujoInyeccionCliente === 'function') {
           await window.sodieFlujoInyeccionCliente();
         } else if (typeof window.sodieSubirExcelAdmin === 'function') {
@@ -723,7 +711,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
         break;
 
       case 'activar-campana':
-        console.log('[SODIE UI] Activando campaña...');
         if (typeof window.sodieConfirmarActivacionCliente === 'function') {
           await window.sodieConfirmarActivacionCliente();
         } else if (typeof window.sodieConfirmarActivacion === 'function') {
@@ -734,13 +721,11 @@ window.ejecutarBotonSODIE = async function(event, accion) {
         break;
 
       default:
-        console.warn(`[SODIE UI] Acción no mapeada: ${accion}`);
+        break;
     }
   } catch (err) {
-    console.error(`🚨 [SODIE ERROR ENGINE] Error al ejecutar '${accion}':`, err);
     alert(`Ocurrió un error al ejecutar la acción '${accion}': ${err.message || err}`);
   } finally {
-    // Rehabilitar el botón tras completar la operación o fallar
     if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
       elementoBoton.disabled = false;
     }
