@@ -479,7 +479,7 @@ function initVideoAndConfirm() {
   const playOverlay = document.getElementById('video-play-overlay');
 
   if (demoVideo && videoSource) {
-    const backendUrl = getBaseUrl();
+    const backendUrl = getBaseUrl(); // Ahora devolverá "https://api.sodie.app"
     videoSource.src = `${backendUrl}/public/video/video.mp4`;
     demoVideo.load();
 
