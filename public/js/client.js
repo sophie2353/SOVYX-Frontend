@@ -698,13 +698,19 @@ function initGlobalAndWeeklyTimers() {
   CLIENT_STATE.timerInterval = setInterval(updateTimerTick, 1000);
 }
 
+// NUEVA FUNCIÓN CONECTADA A /api/webhook-client
 async function notificarTriggerBackend(type, details = {}) {
   try {
-    await fetch(`${getBaseUrl()}/api/v1/notifications/timer-client`, {
+    const endpoint = type === '24H_CYCLE' 
+      ? '/api/webhook-client/timer/push-24h' 
+      : '/api/webhook-client/timer/push-day7';
+
+    await fetch(`${getBaseUrl()}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        clientId: CLIENT_STATE.clientId,
+        userId: CLIENT_STATE.clientId,
+        timerId: `TIMER-${CLIENT_STATE.clientId}`,
         type: type,
         timestamp: Date.now(),
         details: details
