@@ -7,7 +7,7 @@ window.SODIE_CONFIG = {
 // Guardamos la promesa de carga para que otros scripts puedan esperarla si lo necesitan
 window.SODIE_CONFIG_READY = (async function sodieCargarConfiguracion() {
   try {
-    const res = await fetch('/api/config');
+    const res = await fetch('/api/v1/config');
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     
     const data = await res.json();
