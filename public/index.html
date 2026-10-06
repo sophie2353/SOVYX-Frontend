@@ -258,64 +258,66 @@
 </section>
 
     <!-- ANALIZADOR IA3 CON BURBUJA FLOTANTE POPUP -->
-    <section id="ia3-calculator-analyzer" class="glass-card-dash metrics-analyzer-section mb-space" style="position: relative;">
-      <h3 class="section-title mint-txt section-title-md">Analiza Tus Métricas Actuales</h3>
-      <p class="step-desc step-desc-sm" style="margin-bottom: 16px;">
-        Ingresa tus datos de rendimiento actuales en Meta Ads para generar una auditoría inmediata impulsada por IA3.
-      </p>
-      
-      <div class="form-stack-compact analyzer-grid" style="margin-bottom: 16px;">
-        <div>
-          <label class="form-label-compact">Inversión Actual en ADS ($ USDC)</label>
-          <input type="number" id="ia3-ad-spend" placeholder="ej. 2500" class="input-dark-custom" />
-        </div>
-        <div>
-          <label class="form-label-compact">ROAS Mensual Actual</label>
-          <input type="number" step="0.1" id="ia3-roas" placeholder="ej. 2.1" class="input-dark-custom" />
-        </div>
-      </div>
+<!-- Tu sección queda limpia sin la burbuja dentro -->
+<section id="ia3-calculator-analyzer" class="glass-card-dash metrics-analyzer-section mb-space">
+  <h3 class="section-title mint-txt section-title-md">Analiza Tus Métricas Actuales</h3>
+  <p class="step-desc step-desc-sm" style="margin-bottom: 16px;">
+    Ingresa tus datos de rendimiento actuales en Meta Ads para generar una auditoría inmediata impulsada por IA3.
+  </p>
+  
+  <div class="form-stack-compact analyzer-grid" style="margin-bottom: 16px;">
+    <div>
+      <label class="form-label-compact">Inversión Actual en ADS ($ USDC)</label>
+      <input type="number" id="ia3-ad-spend" placeholder="ej. 2500" class="input-dark-custom" />
+    </div>
+    <div>
+      <label class="form-label-compact">ROAS Mensual Actual</label>
+      <input type="number" step="0.1" id="ia3-roas" placeholder="ej. 2.1" class="input-dark-custom" />
+    </div>
+  </div>
 
-      <button type="button" id="btn-ia3-analizar" class="btn-pf-action btn-pay-gradient full-width btn-analyze" data-sodie-event="calculater_metrics">
-        ANALIZAR CON IA3
-      </button>
+  <button type="button" id="btn-ia3-analizar" class="btn-pf-action btn-pay-gradient full-width btn-analyze" data-sodie-event="calculater_metrics">
+    ANALIZAR CON IA3
+  </button>
+</section>
 
-      <!-- Burbuja Flotante Emergente de Resultados -->
-      <div id="ia3-modal-result" class="ia3-float-card hidden">
-        <div class="flex-between-center mb-small">
-          <h4 class="fuchsia-txt ia3-modal-title" style="margin:0;">Diagnóstico IA3</h4>
-          <button type="button" id="btn-close-ia3-modal" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
-        </div>
-        
-        <div class="ia3-res-block">
-          <strong class="mint-txt label-sm">Métricas Actuales:</strong>
-          <p id="ia3-val-user" class="ia3-val-text"></p>
-        </div>
+<!-- Burbuja Flotante Emergente de Resultados -->
+<div id="ia3-modal-result" class="ia3-float-card hidden">
+  <div class="flex-between-center mb-small">
+    <h4 class="fuchsia-txt ia3-modal-title" style="margin:0;">Diagnóstico IA3</h4>
+    <button type="button" id="btn-close-ia3-modal" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+  </div>
+  
+  <div class="ia3-res-block">
+    <strong class="mint-txt label-sm">Métricas Actuales:</strong>
+    <p id="ia3-val-user" class="ia3-val-text"></p>
+  </div>
 
-        <div class="ia3-res-block">
-          <strong class="fuchsia-txt label-sm">Problemas Detectados:</strong>
-          <p id="ia3-val-problems" class="ia3-val-text"></p>
-        </div>
+  <div class="ia3-res-block">
+    <strong class="fuchsia-txt label-sm">Problemas Detectados:</strong>
+    <p id="ia3-val-problems" class="ia3-val-text"></p>
+  </div>
 
-        <div class="ia3-res-block">
-          <strong class="mint-txt label-sm">Solución con SODIE:</strong>
-          <p id="ia3-val-solution" class="ia3-val-text"></p>
-        </div>
+  <div class="ia3-res-block">
+    <strong class="mint-txt label-sm">Solución con SODIE:</strong>
+    <p id="ia3-val-solution" class="ia3-val-text"></p>
+  </div>
 
-        <div class="ia3-res-block mb-space">
-          <strong class="sky-txt label-sm">Ahorro Estimado con SODIE:</strong>
-          <p id="ia3-val-savings" class="ia3-savings-text"></p>
-        </div>
+  <div class="ia3-res-block mb-space">
+    <strong class="sky-txt label-sm">Ahorro Estimado con SODIE:</strong>
+    <p id="ia3-val-savings" class="ia3-savings-text"></p>
+  </div>
 
-        <div class="flex-wrap-gap">
-          <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action flex-equal-btn">
-            Ir a Chat Web
-          </button>
-          <button type="button" id="btn-scroll-pago-ia3" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient flex-equal-btn font-bold">
-            Ir a Pago Final
-          </button>
-        </div>
-      </div>
-    </section>
+  <!-- Botones de Acción dentro del modal -->
+  <div class="flex-wrap-gap mt-small">
+    <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action flex-equal-btn">
+      Ir a Chat Web
+    </button>
+    <button type="button" id="btn-scroll-pago-ia3" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient flex-equal-btn font-bold">
+      Ir a Pago Final
+    </button>
+  </div>
+</div>
 
     <section id="chat-section-anchor" class="glass-card-dash chat-section">
       <div class="chat-header" style="margin-bottom: 12px;">
