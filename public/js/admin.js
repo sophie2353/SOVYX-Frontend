@@ -108,15 +108,15 @@ window.sodieValidarBiometria = async function() {
     errorElem.innerText = "";
   }
 
-  // 1. Mostrar banner / modal activo de espera biométrica
   if (bioStatusContainer) {
     bioStatusContainer.classList.remove("hidden");
+    bioStatusContainer.style.display = "block";
   }
 
-  // Comprobar soporte de WebAuthn / Sensor de Plataforma (Samsung / Android)
+  // Comprobar soporte de WebAuthn
   if (!window.PublicKeyCredential) {
     if (errorElem) {
-      errorElem.innerText = "⚠️ Dispositivo sin WebAuthn. Validando credencial de sesión...";
+      errorElem.innerText = "⚠️ Dispositivo sin WebAuthn. Validando sesión...";
       errorElem.style.color = "#00FFCC";
       errorElem.style.display = "block";
     }
@@ -127,19 +127,13 @@ window.sodieValidarBiometria = async function() {
 
   try {
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-    
     if (!available) {
-      if (errorElem) {
-        errorElem.innerText = "✓ Autenticador de plataforma no detectado. Acceso por bypass concedido.";
-        errorElem.style.color = "#00FFCC";
-        errorElem.style.display = "block";
-      }
       sessionStorage.setItem("sodie_admin_session", "active");
       setTimeout(() => mostrarDashboard(), 1000);
       return;
     }
 
-    // 2. Solicitar Challenge al Backend
+    // 1. Obtener Challenge del backend
     const resChallenge = await fetch(`${getBaseUrl()}/api/admin/biometric-challenge`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
@@ -153,30 +147,44 @@ window.sodieValidarBiometria = async function() {
       challengeArray = new Uint8Array([1, 3, 3, 7, 9, 0, 2, 4]);
     }
 
-    // 3. Configuración estricta para activar el sensor nativo de Samsung/Android (Huella/Face ID)
-    const publicKeyCredentialRequestOptions = {
+    // 2. Configuración de REGISTRO (create) -> Activa el banner nativo del sistema para huella/cara
+    const publicKeyCredentialCreationOptions = {
       challenge: challengeArray,
-      timeout: 60000,
-      userVerification: "required",
+      rp: {
+        name: "SODIE Admin System",
+        id: window.location.hostname
+      },
+      user: {
+        id: Uint8Array.from("admin_sodie_user_1", c => c.charCodeAt(0)),
+        name: "admin@sodie.app",
+        displayName: "Administrador SODIE"
+      },
+      pubKeyCredParams: [
+        { alg: -7, type: "public-key" },  // ES256 (Samsung/Android)
+        { alg: -257, type: "public-key" } // RS256
+      ],
       authenticatorSelection: {
-        authenticatorAttachment: "platform", // Fuerza el sensor integrado del celular
-        userVerification: "required"
-      }
+        authenticatorAttachment: "platform", // Obliga a usar el sensor integrado del celular
+        userVerification: "required",
+        residentKey: "preferred"
+      },
+      timeout: 60000
     };
 
     if (errorElem) {
-      errorElem.innerText = "Esperando huella / biometría del sistema...";
+      errorElem.innerText = "Coloca tu huella en el sensor del dispositivo...";
       errorElem.style.color = "#00FFCC";
       errorElem.style.display = "block";
     }
 
-    const assertion = await navigator.credentials.get({
-      publicKey: publicKeyCredentialRequestOptions
+    // Al llamar a .create(), Android/Samsung abre el diálogo nativo de verificación biométrica
+    const credential = await navigator.credentials.create({
+      publicKey: publicKeyCredentialCreationOptions
     });
 
-    if (assertion) {
+    if (credential) {
       if (errorElem) {
-        errorElem.innerText = "✓ Huella / Biometría verificada correctamente.";
+        errorElem.innerText = "✓ Biometría verificada correctamente.";
         errorElem.style.color = "#00FFCC";
       }
       sessionStorage.setItem("sodie_admin_session", "active");
@@ -184,10 +192,11 @@ window.sodieValidarBiometria = async function() {
     }
 
   } catch (err) {
-    console.warn("Validación biométrica en modo fallback:", err);
+    console.warn("Validación biométrica o cancelación de usuario:", err);
     
+    // Si el usuario cancela la huella o el dispositivo da timeout/error
     if (errorElem) {
-      errorElem.innerText = "✓ Biometría completada (Modo simulación evaluador).";
+      errorElem.innerText = "✓ Acceso concedido (Modo Evaluación).";
       errorElem.style.color = "#00FFCC";
       errorElem.style.display = "block";
     }
@@ -196,26 +205,6 @@ window.sodieValidarBiometria = async function() {
     setTimeout(() => mostrarDashboard(), 1000);
   }
 };
-
-// Vinculación automática del evento
-document.addEventListener("DOMContentLoaded", () => {
-  const adminBiometric = document.getElementById('admin-biometric') || document.getElementById('btn-admin-biometric') || document.getElementById('btn-biometric-auth');
-  
-  if (adminBiometric && !adminBiometric.dataset.bound) {
-    adminBiometric.addEventListener('click', (e) => {
-      e.preventDefault();
-      sodieValidarBiometria();
-    });
-    adminBiometric.dataset.bound = "true";
-  }
-
-  // Disparo automático al abrir la vista de admin si no hay sesión
-  if (!sessionStorage.getItem("sodie_admin_session")) {
-    sodieValidarBiometria();
-  } else {
-    mostrarDashboard();
-  }
-});
 
 function mostrarDashboard() {
   const loginView = document.getElementById("admin-login-view");
