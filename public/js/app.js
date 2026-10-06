@@ -60,19 +60,51 @@ function initSplashGauges() {
   const welcomeFill = document.getElementById('welcome-fill');
   const splashScreen = document.getElementById('view-splash');
   const capsules = document.querySelectorAll('#capsules-track .capsule');
+  
+  const gauge1Circle = document.getElementById('gauge-circle-1');
+  const gauge1Val = document.getElementById('gauge-val-1');
+  const gauge2Circle = document.getElementById('gauge-circle-2');
+  const gauge2Val = document.getElementById('gauge-val-2');
 
   let progress = 0;
+  const totalCaps = capsules.length;
+
   const interval = setInterval(() => {
     progress += 2;
+    if (progress > 100) progress = 100;
+
+    // 1. Sincronización del Porcentaje y Barra de Bienvenido
     if (pctNum) pctNum.textContent = `${progress}%`;
     if (welcomeFill) welcomeFill.style.width = `${progress}%`;
 
-    const capIndex = Math.floor((progress / 100) * capsules.length);
-    if (capsules[capIndex]) {
-      capsules[capIndex].classList.remove('cap-dark');
-      capsules[capIndex].classList.add('cap-lit');
+    // 2. Sincronización Simultánea de los Gauges
+    if (gauge1Val) gauge1Val.textContent = `${progress}%`;
+    if (gauge1Circle) gauge1Circle.setAttribute('stroke-dasharray', `${progress}, 100`);
+
+    if (gauge2Val) gauge2Val.textContent = `${progress}%`;
+    if (gauge2Circle) gauge2Circle.setAttribute('stroke-dasharray', `${progress}, 100`);
+
+    // 3. Iluminación de Cápsulas con Degradado Fucsia -> Menta
+    const capIndex = Math.floor((progress / 100) * totalCaps);
+    for (let i = 0; i < capIndex && i < totalCaps; i++) {
+      if (capsules[i] && !capsules[i].classList.contains('cap-lit')) {
+        capsules[i].classList.remove('cap-dark');
+        capsules[i].classList.add('cap-lit');
+
+        // Color progresivo de fucsia (#ff007f) a verde menta (#00ffcc)
+        const ratio = i / Math.max(totalCaps - 1, 1);
+        const r = Math.round(255 * (1 - ratio) + 0 * ratio);
+        const g = Math.round(0 * (1 - ratio) + 255 * ratio);
+        const b = Math.round(127 * (1 - ratio) + 204 * ratio);
+        const colorRgb = `rgb(${r}, ${g}, ${b})`;
+
+        capsules[i].style.background = colorRgb;
+        capsules[i].style.boxShadow = `0 0 10px ${colorRgb}, 0 0 18px ${colorRgb}`;
+        capsules[i].style.borderColor = colorRgb;
+      }
     }
 
+    // 4. Ocultar Intro al completar el 100%
     if (progress >= 100) {
       clearInterval(interval);
       setTimeout(() => {
@@ -84,39 +116,6 @@ function initSplashGauges() {
       }, 300);
     }
   }, 30);
-}
-
-function initSSEMetrics() {
-  const gauge1Circle = document.getElementById('gauge-circle-1');
-  const gauge1Val = document.getElementById('gauge-val-1');
-  const gauge2Circle = document.getElementById('gauge-circle-2');
-  const gauge2Val = document.getElementById('gauge-val-2');
-
-  try {
-    const evtSource = new EventSource(`${getBaseUrl()}/api/v1/metrics/live`);
-
-    evtSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.datosProcesados !== undefined && gauge1Val && gauge1Circle) {
-        gauge1Val.textContent = `${data.datosProcesados}%`;
-        gauge1Circle.setAttribute('stroke-dasharray', `${data.datosProcesados}, 100`);
-      }
-      if (data.analisisMercado !== undefined && gauge2Val && gauge2Circle) {
-        gauge2Val.textContent = `${data.analisisMercado}%`;
-        gauge2Circle.setAttribute('stroke-dasharray', `${data.analisisMercado}, 100`);
-      }
-    };
-
-    evtSource.onerror = () => {
-      if (gauge1Val) gauge1Val.textContent = '100%';
-      if (gauge1Circle) gauge1Circle.setAttribute('stroke-dasharray', '100, 100');
-      if (gauge2Val) gauge2Val.textContent = '100%';
-      if (gauge2Circle) gauge2Circle.setAttribute('stroke-dasharray', '100, 100');
-      evtSource.close();
-    };
-  } catch (err) {
-    // SSE fallback silencioso
-  }
 }
 
 /* ==========================================================================
