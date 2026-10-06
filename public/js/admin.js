@@ -421,6 +421,7 @@ function initListeners() {
     });
     btnSwitchClient.dataset.bound = "true";
   }
+}
 
 function uploadFileWithProgress(endpoint, file, type, onComplete, onError) {
   const xhr = new XMLHttpRequest();
