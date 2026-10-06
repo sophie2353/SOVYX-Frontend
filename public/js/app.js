@@ -479,8 +479,40 @@ function initPaymentFlowEvents() {
 /* ==========================================================================
    8. MANEJO DE VIDEO DE DEMOSTRACIÓN Y CONFIRMACIONES
    ========================================================================== */
+function initVideoAndConfirm() {
+  const btnConfirmAction = document.getElementById('btn-confirm-action');
+  if (btnConfirmAction) {
+    btnConfirmAction.addEventListener('click', () => {
+      showToast('Confirmación', 'Procesando confirmación del sistema...');
+    });
+  }
 
+  const demoVideo = document.getElementById('sodie-demo-video');
+  const videoSource = document.getElementById('video-source-mp4');
+  const playOverlay = document.getElementById('video-play-overlay');
 
+  if (demoVideo && videoSource) {
+    const backendUrl = getBaseUrl(); // Devuelve "https://api.sodie.app"
+    const videoUrl = `${backendUrl}/video/video.mp4`;
+
+    // Asignación tanto al source como directamente al elemento video para mayor compatibilidad
+    videoSource.src = videoUrl;
+    demoVideo.src = videoUrl;
+    demoVideo.load();
+
+    if (playOverlay) {
+      playOverlay.addEventListener('click', () => {
+        if (demoVideo.paused) {
+          demoVideo.play();
+          playOverlay.classList.add('hidden');
+        }
+      });
+
+      demoVideo.addEventListener('pause', () => playOverlay.classList.remove('hidden'));
+      demoVideo.addEventListener('ended', () => playOverlay.classList.remove('hidden'));
+    }
+  }
+}
 /* ==========================================================================
    9. LISTA DE ESPERA (WAITLIST ENTRADA MANUAL)
    ========================================================================== */
