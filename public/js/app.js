@@ -335,19 +335,28 @@ function initIA3Engine() {
       return;
     }
 
+    // Elementos ya maquetados en tu HTML
     const modal = document.getElementById('ia3-modal-result');
     const valUser = document.getElementById('ia3-val-user');
     const valProblems = document.getElementById('ia3-val-problems');
     const valSolution = document.getElementById('ia3-val-solution');
     const valSavings = document.getElementById('ia3-val-savings');
 
-    if (modal) modal.classList.remove('hidden');
+    // 1. Mostrar la tarjeta flotante en estado de carga
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     if (valUser) valUser.innerText = `$${spend} USD / ROAS ${roas}`;
-    if (valProblems) valProblems.innerText = "Analizando fuga de capital...";
+    if (valProblems) valProblems.innerText = "Analizando fuga de capital en Meta Ads...";
     if (valSolution) valSolution.innerText = "IA3 procesando solución algorítmica...";
     if (valSavings) valSavings.innerText = "Calculando optimización...";
 
+    showToast('Procesando IA3', 'Analizando métricas con el backend...', false);
+
     try {
+      // 2. Conectar al backend
       const res = await fetch(`${getBaseUrl()}/api/ia3/analizar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -358,13 +367,17 @@ function initIA3Engine() {
 
       const data = await res.json();
 
+      // 3. Inyectar respuestas en los contenedores de la tarjeta flotante
       if (valProblems) valProblems.innerText = data.problemas || data.problems || "Fuga identificada en segmentación amplia.";
       if (valSolution) valSolution.innerText = data.solucion || data.solution || "Inyección directa a audiencia optimizada por IA3.";
       if (valSavings) valSavings.innerText = data.ahorro || data.savings || "Ahorro potencial recalculado con éxito.";
 
+      // 4. Notificación flotante de éxito y re-asegurar enfoque suave
       showToast('Análisis IA3 Listo', 'El diagnóstico del backend se ha generado correctamente.');
+      if (modal) modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     } catch (error) {
+      console.error(error);
       if (valSolution) valSolution.innerText = "Error en el servidor al generar diagnóstico IA3.";
       showToast('Error IA3', 'No se pudo obtener la respuesta del backend de IA3.', true);
     }
@@ -466,36 +479,7 @@ function initPaymentFlowEvents() {
 /* ==========================================================================
    8. MANEJO DE VIDEO DE DEMOSTRACIÓN Y CONFIRMACIONES
    ========================================================================== */
-function initVideoAndConfirm() {
-  const btnConfirmAction = document.getElementById('btn-confirm-action');
-  if (btnConfirmAction) {
-    btnConfirmAction.addEventListener('click', () => {
-      showToast('Confirmación', 'Procesando confirmación del sistema...');
-    });
-  }
 
-  const demoVideo = document.getElementById('sodie-demo-video');
-  const videoSource = document.getElementById('video-source-mp4');
-  const playOverlay = document.getElementById('video-play-overlay');
-
-  if (demoVideo && videoSource) {
-    const backendUrl = getBaseUrl(); // Ahora devolverá "https://api.sodie.app"
-    videoSource.src = `${backendUrl}/public/video/video.mp4`;
-    demoVideo.load();
-
-    if (playOverlay) {
-      playOverlay.addEventListener('click', () => {
-        if (demoVideo.paused) {
-          demoVideo.play();
-          playOverlay.classList.add('hidden');
-        }
-      });
-
-      demoVideo.addEventListener('pause', () => playOverlay.classList.remove('hidden'));
-      demoVideo.addEventListener('ended', () => playOverlay.classList.remove('hidden'));
-    }
-  }
-}
 
 /* ==========================================================================
    9. LISTA DE ESPERA (WAITLIST ENTRADA MANUAL)
