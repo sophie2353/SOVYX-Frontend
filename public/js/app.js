@@ -827,3 +827,35 @@ function initNuevosComponentesV4() {
     });
   }
 }
+
+/* ==========================================================================
+   SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
+   ========================================================================== */
+function initSSEMetrics() {
+  if (!window.EventSource) {
+    console.warn('SSE no es soportado por este navegador.');
+    return;
+  }
+
+  try {
+    const eventSource = new EventSource(`${getBaseUrl()}/api/v1/metrics/sse`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.disponibles !== undefined) {
+          actualizarInterfazCupos(data.disponibles);
+        }
+      } catch (err) {
+        console.error('Error parseando métricas SSE:', err);
+      }
+    };
+
+    eventSource.onerror = () => {
+      // Si la conexión falla o el backend no soporta SSE, se cierra silenciosamente
+      eventSource.close();
+    };
+  } catch (error) {
+    console.warn('No se pudo inicializar la conexión SSE:', error);
+  }
+}
