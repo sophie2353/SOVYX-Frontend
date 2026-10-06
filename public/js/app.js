@@ -334,17 +334,19 @@ function initIA3Engine() {
       return;
     }
 
-    // Elementos ya maquetados en tu HTML
+    // Elementos maquetados en tu HTML para la tarjeta/burbuja flotante
     const modal = document.getElementById('ia3-modal-result');
     const valUser = document.getElementById('ia3-val-user');
     const valProblems = document.getElementById('ia3-val-problems');
     const valSolution = document.getElementById('ia3-val-solution');
     const valSavings = document.getElementById('ia3-val-savings');
 
-    // 1. Mostrar la tarjeta flotante en estado de carga
+    // 1. Mostrar y desplegar la burbuja flotante sobre la interfaz
     if (modal) {
       modal.classList.remove('hidden');
-      modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      modal.style.display = 'block';
+      modal.style.position = 'fixed'; // Asegura comportamiento flotante
+      modal.style.zIndex = '9999';
     }
 
     if (valUser) valUser.innerText = `$${spend} USD / ROAS ${roas}`;
@@ -355,7 +357,7 @@ function initIA3Engine() {
     showToast('Procesando IA3', 'Analizando métricas con el backend...', false);
 
     try {
-      // 2. Conectar al backend
+      // 2. Petición al backend
       const res = await fetch(`${getBaseUrl()}/api/ia3/analizar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -366,14 +368,13 @@ function initIA3Engine() {
 
       const data = await res.json();
 
-      // 3. Inyectar respuestas en los contenedores de la tarjeta flotante
+      // 3. Inyectar respuestas dentro de la burbuja flotante
       if (valProblems) valProblems.innerText = data.problemas || data.problems || "Fuga identificada en segmentación amplia.";
       if (valSolution) valSolution.innerText = data.solucion || data.solution || "Inyección directa a audiencia optimizada por IA3.";
       if (valSavings) valSavings.innerText = data.ahorro || data.savings || "Ahorro potencial recalculado con éxito.";
 
-      // 4. Notificación flotante de éxito y re-asegurar enfoque suave
-      showToast('Análisis IA3 Listo', 'El diagnóstico del backend se ha generado correctamente.');
-      if (modal) modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 4. Notificación de éxito
+      showToast('Análisis IA3 Listo', 'El diagnóstico se ha generado correctamente en la burbuja flotante.');
 
     } catch (error) {
       console.error(error);
@@ -381,8 +382,19 @@ function initIA3Engine() {
       showToast('Error IA3', 'No se pudo obtener la respuesta del backend de IA3.', true);
     }
   });
-}
 
+  // Listener para cerrar la burbuja flotante al hacer clic en el botón (X)
+  const closeBtn = document.querySelector('#ia3-modal-result .close-btn') || document.querySelector('#ia3-modal-result [data-close]');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      const modal = document.getElementById('ia3-modal-result');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    });
+  }
+}
 /* ==========================================================================
    7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS
    ========================================================================== */
