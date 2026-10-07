@@ -334,19 +334,15 @@ function initIA3Engine() {
       return;
     }
 
-    // Elementos maquetados en tu HTML para la tarjeta/burbuja flotante
     const modal = document.getElementById('ia3-modal-result');
     const valUser = document.getElementById('ia3-val-user');
     const valProblems = document.getElementById('ia3-val-problems');
     const valSolution = document.getElementById('ia3-val-solution');
     const valSavings = document.getElementById('ia3-val-savings');
 
-    // 1. Mostrar y desplegar la burbuja flotante sobre la interfaz
+    // 1. Desplegar la burbuja emergente
     if (modal) {
       modal.classList.remove('hidden');
-      modal.style.display = 'block';
-      modal.style.position = 'fixed'; // Asegura comportamiento flotante
-      modal.style.zIndex = '9999';
     }
 
     if (valUser) valUser.innerText = `$${spend} USD / ROAS ${roas}`;
@@ -357,7 +353,6 @@ function initIA3Engine() {
     showToast('Procesando IA3', 'Analizando métricas con el backend...', false);
 
     try {
-      // 2. Petición al backend
       const res = await fetch(`${getBaseUrl()}/api/ia3/analizar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -368,13 +363,11 @@ function initIA3Engine() {
 
       const data = await res.json();
 
-      // 3. Inyectar respuestas dentro de la burbuja flotante
       if (valProblems) valProblems.innerText = data.problemas || data.problems || "Fuga identificada en segmentación amplia.";
       if (valSolution) valSolution.innerText = data.solucion || data.solution || "Inyección directa a audiencia optimizada por IA3.";
       if (valSavings) valSavings.innerText = data.ahorro || data.savings || "Ahorro potencial recalculado con éxito.";
 
-      // 4. Notificación de éxito
-      showToast('Análisis IA3 Listo', 'El diagnóstico se ha generado correctamente en la burbuja flotante.');
+      showToast('Análisis IA3 Listo', 'El diagnóstico se ha generado correctamente.');
 
     } catch (error) {
       console.error(error);
@@ -383,18 +376,44 @@ function initIA3Engine() {
     }
   });
 
-  // Listener para cerrar la burbuja flotante al hacer clic en el botón (X)
-  const closeBtn = document.querySelector('#ia3-modal-result .close-btn') || document.querySelector('#ia3-modal-result [data-close]');
+  // Listener del botón de cerrar modal (X)
+  const closeBtn = document.getElementById('btn-close-ia3-modal');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
       const modal = document.getElementById('ia3-modal-result');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
+      if (modal) modal.classList.add('hidden');
+    });
+  }
+
+  // Listener: Ir a Chat Web (#chat-section-anchor)
+  const btnChat = document.getElementById('btn-scroll-chat-ia3');
+  if (btnChat) {
+    btnChat.addEventListener('click', () => {
+      const modal = document.getElementById('ia3-modal-result');
+      if (modal) modal.classList.add('hidden'); // Ocultar burbuja al navegar
+
+      const chatSection = document.getElementById('chat-section-anchor');
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  // Listener: Ir a Pago Final (#pf-card)
+  const btnPago = document.getElementById('btn-scroll-pago-ia3');
+  if (btnPago) {
+    btnPago.addEventListener('click', () => {
+      const modal = document.getElementById('ia3-modal-result');
+      if (modal) modal.classList.add('hidden'); // Ocultar burbuja al navegar
+
+      const pfCard = document.getElementById('pf-card');
+      if (pfCard) {
+        pfCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
   }
 }
+
 /* ==========================================================================
    7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS
    ========================================================================== */
@@ -667,34 +686,6 @@ function handleUrlRedirects() {
 }
 
 /* ==========================================================================
-   12. DISPARADOR SECRETO DE 5 CLICS (ADMIN)
-   ========================================================================== */
-(function initAdminTriggerDirect() {
-  let adminToques = 0;
-  let adminTimer = null;
-
-  window.sodieContarToquesAdmin = function() {
-    adminToques++;
-    clearTimeout(adminTimer);
-    adminTimer = setTimeout(() => { adminToques = 0; }, 2000);
-
-    if (adminToques >= 5) {
-      adminToques = 0;
-      clearTimeout(adminTimer);
-      window.location.href = "admin.html";
-    }
-  };
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const logoTxt = document.getElementById("sodie-logo-trigger");
-    const logoIcon = document.getElementById("btn-sodie-logo-trigger");
-
-    if (logoTxt) logoTxt.addEventListener("pointerdown", window.sodieContarToquesAdmin);
-    if (logoIcon) logoIcon.addEventListener("pointerdown", window.sodieContarToquesAdmin);
-  });
-})();
-
-/* ==========================================================================
    13. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
    ========================================================================== */
 window.onerror = function() {
@@ -815,30 +806,6 @@ function initNuevosComponentesV4() {
       cookieBanner.style.display = 'none';
     });
   }
-
-  // --- 3. Scroll Suave IA3 ---
-  const btnScrollChat = document.getElementById('btn-scroll-chat-ia3');
-  const btnScrollPago = document.getElementById('btn-scroll-pago-ia3');
-
-  const chatSection = document.getElementById('chat-section-anchor');
-  const pagoSection = document.getElementById('pf-card');
-
-  if (btnScrollChat) {
-    btnScrollChat.addEventListener('click', () => {
-      if (chatSection) {
-        chatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  }
-
-  if (btnScrollPago) {
-    btnScrollPago.addEventListener('click', () => {
-      if (pagoSection) {
-        pagoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  }
-}
 
 /* ==========================================================================
    SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
