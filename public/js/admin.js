@@ -169,6 +169,35 @@ function setupAdminEventListeners() {
   }
 }
 
+// Función para abrir la vista cliente saltándose bloqueos
+function sodieAbrirVistaCliente(clientId = null) {
+  localStorage.setItem('sodie_admin_bypass', 'true');
+  
+  if (clientId) {
+    window.open(`client.html?clientId=${encodeURIComponent(clientId)}&admin=true`, '_blank');
+  } else {
+    window.open('client.html?view=general&admin=true', '_blank');
+  }
+}
+
+// Agregar esto dentro de setupAdminEventListeners() en admin.js:
+const btnViewClient = document.getElementById('btn-view-client');
+if (btnViewClient && !btnViewClient.dataset.bound) {
+  btnViewClient.addEventListener('click', (e) => {
+    e.preventDefault();
+    sodieAbrirVistaCliente();
+  });
+  btnViewClient.dataset.bound = "true";
+}
+
+const btnViewMain = document.getElementById('btn-view-main');
+if (btnViewMain && !btnViewMain.dataset.bound) {
+  btnViewMain.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.open('/', '_blank');
+  });
+  btnViewMain.dataset.bound = "true";
+}
 /* ==========================================================================
    3. CRONÓMETRO 24H
    ========================================================================== */
