@@ -193,15 +193,35 @@ window.sodieReiniciarTimer120h = function() {
 /* ==========================================================================
    3. NAVEGACIÓN VISTA CLIENTE Y MÉTODOS DE MEDIA/EXCEL
    ========================================================================== */
-window.sodieAbrirVistaCliente = function(clientId = 'CLIENT-01') {
+/**
+ * Abre la vista del cliente desde el Panel de Admin.
+ * Permite ver clientes específicos, múltiples clientes o la vista general sin ID.
+ * 
+ * @param {string} clientId - ID del cliente, 'ALL' para todos, o vacío/null para vista general.
+ */
+window.sodieAbrirVistaCliente = function(clientId = null) {
+  // 1. Marcar el bypass de admin en el storage local
+  localStorage.setItem('sodie_admin_bypass', 'true');
+
+  // 2. Si se solicita abrir todos los clientes registrados
   if (clientId === 'ALL') {
+    // Puedes reemplazar esta lista estática por tus clientes reales dinámicos si los tienes
     const clientes = ['CLIENT-01', 'CLIENT-02', 'CLIENT-03'];
+    
     clientes.forEach(id => {
-      window.open(`client.html?clientId=${id}`, `_blank_${id}`);
+      window.open(`client.html?clientId=${encodeURIComponent(id)}&admin=true`, `_blank_${id}`);
     });
-  } else {
-    window.open(`client.html?clientId=${clientId}`, '_blank');
+    return;
   }
+
+  // 3. Si se especifica un ID concreto de cliente
+  if (clientId && clientId.trim() !== '') {
+    window.open(`client.html?clientId=${encodeURIComponent(clientId)}&admin=true`, '_blank');
+    return;
+  }
+
+  // 4. Si NO hay clientId (vista general / predeterminada para el Admin)
+  window.open('client.html?view=general&admin=true', '_blank');
 };
 
 window.sodieSubirVideoDemo = function() {
