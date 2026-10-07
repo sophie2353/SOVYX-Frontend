@@ -340,9 +340,10 @@ function initIA3Engine() {
     const valSolution = document.getElementById('ia3-val-solution');
     const valSavings = document.getElementById('ia3-val-savings');
 
-    // 1. Desplegar la burbuja emergente
+    // Desplegar modal y resetear scroll
     if (modal) {
       modal.classList.remove('hidden');
+      modal.scrollTop = 0;
     }
 
     if (valUser) valUser.innerText = `$${spend} USD / ROAS ${roas}`;
@@ -363,9 +364,10 @@ function initIA3Engine() {
 
       const data = await res.json();
 
-      if (valProblems) valProblems.innerText = data.problemas || data.problems || "Fuga identificada en segmentación amplia.";
-      if (valSolution) valSolution.innerText = data.solucion || data.solution || "Inyección directa a audiencia optimizada por IA3.";
-      if (valSavings) valSavings.innerText = data.ahorro || data.savings || "Ahorro potencial recalculado con éxito.";
+      // Pinta la respuesta cruda enviada desde Express
+      if (valProblems) valProblems.innerText = data.problemas || data.problems;
+      if (valSolution) valSolution.innerHTML = data.solucion || data.solution; // innerHTML para las viñetas HTML
+      if (valSavings) valSavings.innerText = data.ahorro || data.savings;
 
       showToast('Análisis IA3 Listo', 'El diagnóstico se ha generado correctamente.');
 
@@ -376,7 +378,7 @@ function initIA3Engine() {
     }
   });
 
-  // Listener del botón de cerrar modal (X)
+  // Cerrar modal con la X
   const closeBtn = document.getElementById('btn-close-ia3-modal');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
@@ -385,31 +387,21 @@ function initIA3Engine() {
     });
   }
 
-  // Listener: Ir a Chat Web (#chat-section-anchor)
+  // Scroll a Chat Web
   const btnChat = document.getElementById('btn-scroll-chat-ia3');
   if (btnChat) {
     btnChat.addEventListener('click', () => {
-      const modal = document.getElementById('ia3-modal-result');
-      if (modal) modal.classList.add('hidden'); // Ocultar burbuja al navegar
-
-      const chatSection = document.getElementById('chat-section-anchor');
-      if (chatSection) {
-        chatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      document.getElementById('ia3-modal-result')?.classList.add('hidden');
+      document.getElementById('chat-section-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
 
-  // Listener: Ir a Pago Final (#pf-card)
+  // Scroll a Pago Final
   const btnPago = document.getElementById('btn-scroll-pago-ia3');
   if (btnPago) {
     btnPago.addEventListener('click', () => {
-      const modal = document.getElementById('ia3-modal-result');
-      if (modal) modal.classList.add('hidden'); // Ocultar burbuja al navegar
-
-      const pfCard = document.getElementById('pf-card');
-      if (pfCard) {
-        pfCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      document.getElementById('ia3-modal-result')?.classList.add('hidden');
+      document.getElementById('pf-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   }
 }
