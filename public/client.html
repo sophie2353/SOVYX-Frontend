@@ -6,76 +6,8 @@
   <title>Cliente | SODIE</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <style>
-    .client-auth-overlay {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: #0b0813;
-    }
-
-    .client-auth-card {
-      background: rgba(21, 15, 36, 0.85);
-      border: 1px solid rgba(0, 255, 204, 0.3);
-      border-radius: 20px;
-      padding: 32px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(12px);
-    }
-
-    .auth-btn-biometric {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      background: linear-gradient(90deg, #00ffcc, #9d00ff);
-      color: #ffffff;
-      font-weight: 700;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .auth-btn-biometric:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 16px rgba(0, 255, 204, 0.4);
-    }
-
-    .auth-btn-secondary {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #00ffcc;
-      border: 1px solid rgba(0, 255, 204, 0.3);
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .nowpayments-btn-container {
-      display: block;
-      text-align: center;
-      margin-top: 10px;
-    }
-    
-    .nowpayments-btn-container img {
-      max-width: 100%;
-      height: auto;
-      transition: transform 0.2s;
-    }
-
-    .nowpayments-btn-container img:hover {
-      transform: scale(1.02);
-    }
-  </style>
 </head>
-<body style="background: #0b0813; color: #ffffff; margin: 0; font-family: system-ui, -apple-system, sans-serif;">
+<body class="client-body">
 
   <!-- TOAST NOTIFICACIÓN CLIENTE -->
   <div id="toast-notification" class="toast-bubble hidden">
@@ -88,55 +20,44 @@
     </div>
   </div>
 
-  <!-- VISTA DE AUTENTICACIÓN Y REGISTRO BIOMÉTRICO CLIENTE -->
+  <!-- VISTA DE AUTENTICACIÓN POR CONTRASEÑA E ID DE CLIENTE -->
   <main id="client-auth-view" class="client-auth-overlay">
     <div class="client-auth-card">
-      <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
-      <h2 style="margin: 0 0 8px 0; font-size: 1.4rem; color: #fff;">Acceso Cliente SODIE</h2>
-      <p style="color: #a098b5; font-size: 0.85rem; margin-bottom: 24px;">Autenticación segura vía WebAuthn / Passkey</p>
+      <div class="auth-icon">✅</div>
+      <h2 class="auth-title">Acceso Cliente SODIE</h2>
+      <p class="auth-subtitle">Ingresa tu ID de cliente y contraseña de acceso</p>
 
-      <!-- PASO 1: ACCESO RÁPIDO CON BIOMETRÍA -->
-      <div id="client-login-box">
-        <button type="button" id="btn-client-biometric-login" data-sodie-event="biometria-login-cliente" class="auth-btn-biometric">
-          Ingresar con Biometría / Huella 👆
-        </button>
-        
-        <button type="button" data-sodie-event="mostrar-registro-biometrico" class="auth-btn-secondary">
-          ¿Primer ingreso? Registrar Biometría 🔑
-        </button>
-      </div>
+      <div id="client-login-box" class="auth-form-group">
+        <div class="form-field margin-v-sm">
+          <label for="client-id-input" class="label-mint">ID de Cliente</label>
+          <input type="text" id="client-id-input" placeholder="Ej. CLIENT-01" class="input-custom" />
+        </div>
 
-      <!-- PASO 2: REGISTRO DE NUEVA BIOMETRÍA -->
-      <div id="client-register-box" style="display: none; text-align: left; margin-top: 15px;">
-        <label for="client-email-reg" style="color: #00ffcc; font-size: 0.8rem; display: block; margin-bottom: 6px;">
-          Correo del Cliente
-        </label>
-        <input type="email" id="client-email-reg" placeholder="cliente@empresa.com" style="width: 100%; padding: 12px; background: #0d0818; border: 1px solid #2a1c47; border-radius: 10px; color: #00ffcc; box-sizing: border-box; outline: none; margin-bottom: 12px;" />
+        <div class="form-field margin-v-sm">
+          <label for="client-pass-input" class="label-mint">Contraseña de Acceso</label>
+          <input type="password" id="client-pass-input" placeholder="••••••••" class="input-custom" />
+        </div>
 
-        <button type="button" id="btn-client-biometric-reg" data-sodie-event="biometria-registro-cliente" class="auth-btn-biometric">
-          Registrar Mi Dispositivo 📲
-        </button>
-
-        <button type="button" data-sodie-event="ocultar-registro-biometrico" class="auth-btn-secondary">
-          Volver a Inicio
+        <button type="button" id="btn-client-pass-login" class="btn-pf-action btn-mint-solid margin-v-sm">
+          Ingresar al Panel
         </button>
       </div>
 
-      <div id="client-auth-error" style="display: none; margin-top: 14px; font-size: 0.85rem; color: #ff007a;"></div>
+      <div id="client-auth-error" class="auth-error-msg hidden"></div>
     </div>
   </main>
 
-  <!-- DASHBOARD CLIENTE (OCULTO HASTA AUTENTICAR) -->
-  <main id="app-dashboard" class="dashboard-container" style="display: none;">
-    <header class="dash-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+  <!-- DASHBOARD CLIENTE (OCULTO HASTA AUTENTICAR O BYPASS ADMIN) -->
+  <main id="app-dashboard" class="dashboard-container hidden">
+    <header class="dash-header">
       <div class="dash-header-left">
-        <span id="header-brand-title" class="brand-text" style="font-size: 1.8rem; font-weight: 800; color: #fff;">
-          <span style="color: #ff007a;">S</span>ODIE
+        <span id="header-brand-title" class="brand-text">
+          <span class="brand-pink">S</span>ODIE
         </span>
         <span id="client-id-badge" class="badge-client badge-mint-border">Cliente Activo</span>
       </div>
       <div class="dash-header-right">
-        <button type="button" class="btn-icon" data-sodie-event="nav-admin" title="Acceso Admin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer;">🔐</button>
+        <button type="button" class="btn-icon" data-sodie-event="nav-admin" title="Acceso Admin">🔐</button>
       </div>
     </header>
 
@@ -190,9 +111,9 @@
       </button>
 
       <!-- ALERTA DE DÍA 7 DE PAGO OBLIGATORIO -->
-      <div id="weekly-payment-lock-warning" class="hidden margin-v-sm" style="padding: 12px; border-radius: 8px; background: rgba(255, 0, 122, 0.15); border: 1px solid #ff007a;">
-        <span class="fuchsia-txt" style="font-weight: bold; display: block; margin-bottom: 4px;">⚠️ Día 7 de Ciclo Alcanzado</span>
-        <p style="font-size: 0.85rem; color: #e0e0e0; margin: 0;">Es necesario liquidar la cuota semanal pendiente ($6,000 USDT) para desbloquear la inyección del siguiente ciclo y continuar ejecutando la campaña.</p>
+      <div id="weekly-payment-lock-warning" class="hidden margin-v-sm payment-lock-box">
+        <span class="fuchsia-txt warning-title">⚠️ Día 7 de Ciclo Alcanzado</span>
+        <p class="warning-desc">Es necesario liquidar la cuota semanal pendiente ($6,000 USDT) para desbloquear la inyección del siguiente ciclo y continuar ejecutando la campaña.</p>
       </div>
     </section>
 
@@ -203,9 +124,9 @@
 
       <div id="payment-options-container" class="margin-v-sm">
         <!-- SEMANA 1 (DÍA 7) -->
-        <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(0, 255, 204, 0.2); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Semana 1 ($6,000 USDT)</h4>
-          <p id="desc-semana-1" class="step-desc" style="margin-bottom: 10px;">Liquidación del 72% restante del ciclo tras los primeros 7 días de resultados.</p>
+        <div class="payment-option-block margin-v-sm">
+          <h4 class="mint-txt">Cuota Semana 1 ($6,000 USDT)</h4>
+          <p id="desc-semana-1" class="step-desc">Liquidación del 72% restante del ciclo tras los primeros 7 días de resultados.</p>
           <div class="nowpayments-btn-container">
             <a id="btn-pay-semana1" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
               <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
@@ -214,9 +135,9 @@
         </div>
 
         <!-- SEMANA 2 (DÍA 14) -->
-        <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="mint-txt" style="margin-bottom: 5px;">Cuota Semana 2 ($6,000 USDT)</h4>
-          <p id="desc-semana-2" class="step-desc" style="margin-bottom: 10px;">Segunda cuota de mantenimiento y escalabilidad de ROAS On-Chain.</p>
+        <div class="payment-option-block margin-v-sm">
+          <h4 class="mint-txt">Cuota Semana 2 ($6,000 USDT)</h4>
+          <p id="desc-semana-2" class="step-desc">Segunda cuota de mantenimiento y escalabilidad de ROAS On-Chain.</p>
           <div class="nowpayments-btn-container">
             <a id="btn-pay-semana2" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
               <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
@@ -225,9 +146,9 @@
         </div>
 
         <!-- SEMANA 3 (DÍA 21) -->
-        <div class="payment-option-block margin-v-sm" style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2);">
-          <h4 class="fuchsia-txt" style="margin-bottom: 5px;">Cuota Semana 3 ($6,000 USDT)</h4>
-          <p id="desc-semana-3" class="step-desc" style="margin-bottom: 10px;">Cuota previa al cierre de la cuarta semana de optimización continua.</p>
+        <div class="payment-option-block margin-v-sm">
+          <h4 class="fuchsia-txt">Cuota Semana 3 ($6,000 USDT)</h4>
+          <p id="desc-semana-3" class="step-desc">Cuota previa al cierre de la cuarta semana de optimización continua.</p>
           <div class="nowpayments-btn-container">
             <a id="btn-pay-semana3" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
               <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
@@ -247,16 +168,16 @@
     </section>
 
     <!-- DESGLOSE GLOBAL -->
-    <section class="glass-card-dash margin-v-sm" style="padding: 24px; border: 1px solid rgba(0, 255, 204, 0.2);">
-      <h3 class="section-title mint-txt" style="font-size: 1.2rem; margin-bottom: 12px;">Estructura de Cuotas y Módulo On-Chain</h3>
-      <p class="step-desc" style="margin-bottom: 18px; line-height: 1.5;">
+    <section class="glass-card-dash margin-v-sm structure-card">
+      <h3 class="section-title mint-txt">Estructura de Cuotas y Módulo On-Chain</h3>
+      <p class="step-desc">
         Cobros programados por semanas (28% inicial en Hora 0 y 72% restante diferido en 3 cuotas semanales de $6,000 USD):
       </p>
 
-      <div class="timeline-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-        <div class="time-step active" style="flex: 1; min-width: 220px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid rgba(0,255,204,0.15);">
-          <span class="step-hours mint-txt" style="font-weight: bold; display: block; margin-bottom: 6px;">Desglose por Etapas</span>
-          <span class="step-desc" style="font-size: 0.85rem; line-height: 1.4; display: block;">
+      <div class="timeline-container">
+        <div class="time-step active">
+          <span class="step-hours mint-txt">Desglose por Etapas</span>
+          <span class="step-desc">
             • Hora 0: $7,000 USDT (Pago Inicial - 28%)<br>
             • Semana 1 (Día 7): $6,000 USDT<br>
             • Semana 2 (Día 14): $6,000 USDT<br>
@@ -268,19 +189,19 @@
     </section>
 
     <!-- TEMPORIZADOR GLOBAL DE CICLO -->
-    <section class="glass-card-dash timer-section" style="margin-top: 20px;">
+    <section class="glass-card-dash timer-section">
       <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO (4 SEMANAS)</span>
       <div id="global-timer-display" class="timer-digits">28d 00h 00m 00s</div>
-      <span class="timer-sub" style="margin-top: 8px; display: block; font-weight: bold; letter-spacing: 1px;">
+      <span class="timer-sub">
         TIEMPO TOTAL DE OPTIMIZACIÓN Y EJECUCIÓN
       </span>
     </section>
     
-    <footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem;">
+    <footer class="dash-footer text-center margin-v-md">
       <p>© SODIE v3.5. 2026</p>
     </footer>
   </main>
-  
+
   <script src="/js/config.js"></script>
   <script src="/js/client.js"></script>
 </body>
