@@ -15,11 +15,17 @@ function getBaseUrl() {
    ========================================================================== */
 function esAccesoAdmin() {
   const urlParams = new URLSearchParams(window.location.search);
-  const isAdminParam = urlParams.get('admin') === 'true';
-  const isAdminStorage = localStorage.getItem('sodie_admin_bypass') === 'true';
+  const isAdmin = urlParams.get('admin') === 'true' || localStorage.getItem('sodie_admin_bypass') === 'true';
 
-  return isAdminParam || isAdminStorage;
-}
+  // Si viene desde admin, mostramos directamente la vista del cliente sin trabas de autenticación
+  if (isAdmin) {
+    const mainContainer = document.getElementById('client-app-container') || document.querySelector('main');
+    if (mainContainer) {
+      mainContainer.style.display = 'block';
+      mainContainer.classList.remove('hidden');
+    }
+  }
+});
 
 function getClientId() {
   const sessionClientId = sessionStorage.getItem('sodie_authenticated_client_id');
