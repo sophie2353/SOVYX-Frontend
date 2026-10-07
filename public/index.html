@@ -283,9 +283,9 @@
 
 <!-- Burbuja Flotante Emergente de Resultados -->
 <div id="ia3-modal-result" class="ia3-float-card hidden">
-  <div class="flex-between-center mb-small">
+  <div class="ia3-modal-header mb-small">
     <h4 class="fuchsia-txt ia3-modal-title" style="margin:0;">Diagnóstico IA3</h4>
-    <button type="button" id="btn-close-ia3-modal" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+    <button type="button" id="btn-close-ia3-modal" class="ia3-close-btn">✕</button>
   </div>
   
   <div class="ia3-res-block">
@@ -300,7 +300,7 @@
 
   <div class="ia3-res-block">
     <strong class="mint-txt label-sm">Solución con SODIE:</strong>
-    <p id="ia3-val-solution" class="ia3-val-text"></p>
+    <div id="ia3-val-solution" class="ia3-val-text"></div>
   </div>
 
   <div class="ia3-res-block mb-space">
@@ -308,7 +308,6 @@
     <p id="ia3-val-savings" class="ia3-savings-text"></p>
   </div>
 
-  <!-- Botones de Acción dentro del modal -->
   <div class="flex-wrap-gap mt-small">
     <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action flex-equal-btn">
       Ir a Chat Web
