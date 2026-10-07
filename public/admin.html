@@ -3,104 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SODIE - Panel Administrador</title>
+  <title>Admin Panel | SODIE</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="admin-body">
 
-  <main id="admin-login-view">
-    <div class="admin-login-container">
-      <div class="admin-login-card">
-        <h2>Acceso Administrativo</h2>
-        <p class="admin-subtitle">Panel de control SODIE</p>
-
-        <div id="step-password">
-          <div class="form-group">
-            <label for="admin-pass">Contraseña</label>
-            <input type="password" id="admin-pass" placeholder="••••••••••••" />
-          </div>
-          <button type="button" id="btn-admin-login-pass" data-sodie-event="admin-login-pass" class="btn-action full-btn">
-            Ingresar al Panel
-          </button>
-        </div>
-
-        <div id="admin-auth-error" class="error-message"></div>
+  <!-- TOAST NOTIFICACIÓN ADMIN -->
+  <div id="toast-notification" class="toast-bubble hidden">
+    <div class="toast-content">
+      <span class="toast-icon"></span>
+      <div class="toast-text">
+        <strong id="toast-title">Estatus Admin</strong>
+        <p id="toast-body">Actualizado</p>
       </div>
     </div>
-  </main>
+  </div>
 
-  <main id="admin-dashboard-view" class="admin-container">
-    
-    <header class="admin-header-card">
-      <div>
-        <h2>Panel de Control Admin</h2>
-        <p class="admin-subtitle">Gestión central de SODIE, archivos y estado del sistema</p>
+  <main class="dashboard-container">
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <span id="header-brand-title" class="brand-text">
+          <span class="brand-pink">S</span>ODIE ADMIN
+        </span>
+        <span class="badge-client badge-mint-border">Panel Control</span>
       </div>
-      <button type="button" data-sodie-event="admin-logout" class="btn-action fuchsia">
-        Cerrar Sesión
-      </button>
     </header>
 
-    <div class="admin-grid-layout">
+    <!-- ACCESO ADMINISTRATIVO -->
+    <section id="admin-auth-card" class="glass-card-dash margin-v-sm">
+      <h2 class="section-title fuchsia-txt">Acceso Administrativo</h2>
+      <p class="step-desc">Panel de control central SODIE</p>
 
-      <div class="admin-card">
-        <h3 class="admin-card-title">Vista Rápida</h3>
-        <p class="card-description">Accede a las vistas públicas del sistema para verificar cambios.</p>
-        <div class="nav-buttons-grid">
-          <button type="button" data-sodie-event="nav-principal" class="btn-action">Ver Principal</button>
-          <button type="button" data-sodie-event="nav-cliente" class="btn-action">Ver Cliente</button>
-        </div>
+      <div class="form-field margin-v-sm">
+        <label for="admin-pass-input" class="label-mint">Contraseña Master</label>
+        <input type="password" id="admin-pass-input" placeholder="••••••••" class="input-custom" />
       </div>
 
-      <div class="admin-card">
-        <h3 class="admin-card-title">Timer de Lanzamiento (24h)</h3>
-        <div class="timer-box">
-          <div id="admin-timer-display" class="timer-display">24:00:00</div>
-        </div>
-        <div class="btn-group-3">
-          <button type="button" data-sodie-event="admin-timer-start" class="btn-action">Iniciar</button>
-          <button type="button" data-sodie-event="admin-timer-pause" class="btn-action fuchsia">Pausar</button>
-          <button type="button" data-sodie-event="admin-timer-reset" class="btn-action fuchsia">Reset</button>
-        </div>
-      </div>
+      <button type="button" id="btn-admin-login" class="btn-pf-action btn-fuchsia-solid margin-v-sm">
+        Ingresar al Panel
+      </button>
+      <div id="admin-auth-error" class="auth-error-msg hidden"></div>
+    </section>
 
-      <div id="dashboard-video" class="admin-card">
-        <h3 class="admin-card-title">Video Demo Principal</h3>
-        <div class="file-drop-zone">
-          <input type="file" id="admin-video-file" accept="video/mp4,video/*" />
+    <!-- PANEL DE CONTROL ADMIN (OCULTO HASTA LOGIN) -->
+    <div id="admin-dashboard-content" class="hidden">
+      
+      <!-- CABECERA Y CERRAR SESIÓN -->
+      <section class="glass-card-dash margin-v-sm flex-between">
+        <div>
+          <h2 class="section-title mint-txt">Panel de Control Admin</h2>
+          <p class="step-desc">Gestión central de SODIE, archivos y estado del sistema</p>
         </div>
-        <button type="button" id="btn-upload-video" data-sodie-event="admin-upload-video" class="btn-action full-btn">
-          Subir Video Demo
+        <button type="button" id="btn-admin-logout" class="btn-pf-action btn-outline-pink">
+          Cerrar Sesión
         </button>
-      </div>
+      </section>
 
-      <div id="admin-excel-id" class="admin-card">
-        <h3 class="admin-card-title">Audiencia Excel / CSV</h3>
-        <div class="file-drop-zone">
-          <input type="file" id="admin-excel-file" accept=".csv, .xlsx, .xls" />
+      <!-- VISTA RÁPIDA -->
+      <section class="glass-card-dash margin-v-sm">
+        <h3 class="section-title">Vista Rápida</h3>
+        <p class="step-desc">Accede a las vistas públicas del sistema para verificar cambios.</p>
+        <div class="input-group-flow margin-v-sm">
+          <a href="/" target="_blank" class="btn-pf-action btn-mint-solid text-center">Ver Principal</a>
+          <a href="/client.html?admin=true" target="_blank" class="btn-pf-action btn-fuchsia-solid text-center">Ver Cliente</a>
         </div>
-        <button type="button" id="btn-upload-excel" data-sodie-event="admin-upload-excel" class="btn-action full-btn">
-          Inyectar Base de Datos
-        </button>
-      </div>
+      </section>
 
-      <div id="admin-activate-close" class="admin-card full-width danger-card">
-        <h3 class="admin-card-title danger">Disparadores de Campaña y V4</h3>
-        <p class="card-description">Controles directos para cambiar el estado global de la app.</p>
-        
-        <div class="trigger-buttons-grid">
-          <button type="button" id="btn-admin-activate-campaign" data-sodie-event="admin-activate-campaign" class="btn-action btn-gradient">
+      <!-- TIMER DE LANZAMIENTO -->
+      <section class="glass-card-dash margin-v-sm">
+        <h3 class="section-title mint-txt">Timer de Lanzamiento (24h)</h3>
+        <div id="timer-admin-display" class="timer-digits mint-txt">24:00:00</div>
+        <div class="input-group-flow margin-v-sm">
+          <button type="button" id="btn-timer-start" class="btn-pf-action btn-mint-solid">Iniciar</button>
+          <button type="button" id="btn-timer-pause" class="btn-pf-action btn-outline-mint">Pausar</button>
+          <button type="button" id="btn-timer-reset" class="btn-pf-action btn-outline-pink">Reset</button>
+        </div>
+      </section>
+
+      <!-- VIDEO DEMO PRINCIPAL -->
+      <section class="glass-card-dash margin-v-sm">
+        <h3 class="section-title">Video Demo Principal</h3>
+        <div class="input-group-flow margin-v-sm">
+          <input type="file" id="admin-video-input" class="file-input-custom" accept="video/*" />
+          <button type="button" id="btn-upload-demo-video" class="btn-pf-action btn-mint-solid">
+            Subir Video Demo
+          </button>
+        </div>
+      </section>
+
+      <!-- AUDIENCIA EXCEL / CSV -->
+      <section class="glass-card-dash margin-v-sm">
+        <h3 class="section-title mint-txt">Audiencia Excel / CSV</h3>
+        <div class="input-group-flow margin-v-sm">
+          <input type="file" id="admin-excel-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
+          <button type="button" id="btn-inject-database" class="btn-pf-action btn-fuchsia-solid">
+            Inyectar Base de Datos
+          </button>
+        </div>
+      </section>
+
+      <!-- DISPARADORES DE CAMPAÑA Y V4 -->
+      <section class="glass-card-dash margin-v-sm">
+        <h3 class="section-title fuchsia-txt">Disparadores de Campaña y V4</h3>
+        <p class="step-desc">Controles directos para cambiar el estado global de la app.</p>
+        <div class="input-group-flow margin-v-sm">
+          <button type="button" id="btn-trigger-active-campaign" class="btn-pf-action btn-mint-solid">
             Activar Campaña Directa
           </button>
-          
-          <button type="button" id="btn-close-waitlist" data-sodie-event="admin-close-waitlist" class="btn-action fuchsia btn-large">
+          <button type="button" id="btn-trigger-v4-14days" class="btn-pf-action btn-fuchsia-solid">
             Cerrar Lista y Disparar V4 (14 días)
           </button>
         </div>
-      </div>
+      </section>
 
     </div>
+
+    <footer class="dash-footer text-center margin-v-md">
+      <p>© SODIE Admin v3.5. 2026</p>
+    </footer>
   </main>
 
   <script src="/js/config.js"></script>
