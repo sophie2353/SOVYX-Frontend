@@ -1,6 +1,6 @@
 /**
  * SODIE - Admin Panel Engine (admin.js)
- * Versión Dinámica Sincronizada con Gestión de Vistas Multi-Cliente
+ * Versión Dinámica Sincronizada - Autenticación Directa por Contraseña
  */
 
 function getBaseUrl() {
@@ -18,9 +18,6 @@ const ADMIN_STATE = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  sodieIniciarCronometro24h();
-  sodieIniciarTimer120h();
-
   if (sessionStorage.getItem("sodie_admin_session") === "active") {
     mostrarDashboard();
   }
@@ -258,16 +255,6 @@ function animateUploadProgress(type, callback) {
    5. LISTENERS Y ACCIONES BACKEND
    ========================================================================== */
 function initListeners() {
-  // Listener de Biometría (Búsqueda multi-ID)
-  const btnBio = document.getElementById('btn-biometric-auth') || document.getElementById('btn-admin-login-bio') || document.getElementById('btn-biometric');
-  if (btnBio && !btnBio.dataset.bound) {
-    btnBio.addEventListener('click', (e) => {
-      e.preventDefault();
-      sodieValidarBiometria();
-    });
-    btnBio.dataset.bound = "true";
-  }
-
   const btnVideo = document.getElementById('btn-upload-video');
   if (btnVideo && !btnVideo.dataset.bound) {
     btnVideo.addEventListener('click', (e) => {
