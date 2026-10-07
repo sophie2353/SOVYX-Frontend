@@ -602,83 +602,7 @@ function initTimer30d() {
 }
 
 /* ==========================================================================
-   11. BIOMETRÍA EN WAITLIST (FACE ID / HUELVA -> ACCESO RESERVADO)
-   ========================================================================== */
-function bufferToBase64Url(buffer) {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-function initWebAuthnBiometricsWaitlist() {
-  const bioBtn = document.getElementById('btn-register-biometrics');
-  if (!bioBtn) return;
-
-  bioBtn.addEventListener('click', async () => {
-    if (!window.PublicKeyCredential) {
-      showToast('Biometría No Disponible', 'Este dispositivo no soporta Face ID / Touch ID.', true);
-      return;
-    }
-
-    try {
-      bioBtn.style.borderColor = '#00ffcc';
-      bioBtn.textContent = 'Solicitando Face ID / Huella...';
-
-      const challengeRes = await fetch(`${getBaseUrl()}/api/v1/auth/biometrics/challenge`, { method: 'POST' });
-      const challengeData = await challengeRes.json();
-      
-      const challengeBuffer = new Uint8Array(challengeData.challenge || [1, 2, 3, 4, 5, 6, 7, 8]);
-
-      const credential = await navigator.credentials.create({
-        publicKey: {
-          challenge: challengeBuffer,
-          rp: { name: "SODIE Platform" },
-          user: {
-            id: new Uint8Array([1, 2, 3, 4]),
-            name: "waitlist@sodie.com",
-            displayName: "Waitlist User"
-          },
-          pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-          authenticatorSelection: { authenticatorAttachment: "platform" },
-          timeout: 60000
-        }
-      });
-
-      // Registro directo a Lista de Espera por Biometría
-      await fetch(`${getBaseUrl()}/api/v1/waitlist`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'biometric_reservation',
-          credentialId: credential.id,
-          rawId: bufferToBase64Url(credential.rawId)
-        })
-      });
-
-      bioBtn.textContent = '✓ RESERVADO CON BIOMETRÍA';
-      bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
-      bioBtn.disabled = true;
-      showToast('Acceso Reservado', 'Tu posición en la Lista de Espera se ha guardado con tu biometría.');
-
-    } catch (err) {
-      bioBtn.textContent = '✓ RESERVADO CON BIOMETRÍA';
-      bioBtn.style.background = 'rgba(0, 255, 204, 0.2)';
-      bioBtn.disabled = true;
-      showToast('Acceso Reservado', 'Identidad vinculada correctamente a la Lista de Espera.');
-    }
-  });
-}
-
-function handleUrlRedirects() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const status = urlParams.get('status');
-
-  if (status === 'waitlist') {
-    showToast('Acceso Reservado', 'Tu lugar en la Lista de Espera está confirmado.');
-  }
-}
-
-/* ==========================================================================
-   13. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
+   11. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
    ========================================================================== */
 window.onerror = function() {
   return false;
@@ -697,26 +621,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
   if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
     elementoBoton.disabled = true;
   }
-
-  try {
-    switch (accion) {
-      case 'biometria-login':
-        if (typeof window.sodieValidarBiometria === 'function') {
-          await window.sodieValidarBiometria();
-        } else if (typeof window.sodieLoginBiometricoCliente === 'function') {
-          await window.sodieLoginBiometricoCliente();
-        } else {
-          throw new Error('Función de biometría no encontrada en el entorno.');
-        }
-        break;
-
-      case 'biometria-registro':
-        if (typeof window.sodieRegistrarBiometriaCliente === 'function') {
-          await window.sodieRegistrarBiometriaCliente();
-        } else {
-          throw new Error('Función de registro biométrico no encontrada.');
-        }
-        break;
 
       case 'cargar-excel':
         if (typeof window.sodieFlujoInyeccionCliente === 'function') {
@@ -751,7 +655,7 @@ window.ejecutarBotonSODIE = async function(event, accion) {
 };
 
 /* ==========================================================================
-   14. COMPONENTES V4: MODAL AVISO, COOKIES & SCROLL IA3
+   12. COMPONENTES V4: MODAL AVISO, COOKIES & SCROLL IA3
    ========================================================================== */
 function initNuevosComponentesV4() {
   // --- 1. Modal Aviso Dispositivos Móviles ---
@@ -801,7 +705,7 @@ function initNuevosComponentesV4() {
 } // <--- ¡AQUÍ FALTABA ESTA LLAVE DE CIERRE!
 
 /* ==========================================================================
-   SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
+   13. SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
    ========================================================================== */
 function initSSEMetrics() {
   if (!window.EventSource) {
