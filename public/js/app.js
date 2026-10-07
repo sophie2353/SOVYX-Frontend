@@ -798,6 +798,7 @@ function initNuevosComponentesV4() {
       cookieBanner.style.display = 'none';
     });
   }
+} // <--- ¡AQUÍ FALTABA ESTA LLAVE DE CIERRE!
 
 /* ==========================================================================
    SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
@@ -829,4 +830,4 @@ function initSSEMetrics() {
   } catch (error) {
     console.warn('No se pudo inicializar la conexión SSE:', error);
   }
-}
+} // <--- Cierre correcto de initSSEMetrics
