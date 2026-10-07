@@ -1,6 +1,6 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Flujo Simplificado: Autenticación por Contraseña + Selección de ID de Cliente
+ * Flujo Simplificado: Autenticación por Contraseña + Selección de ID de Cliente + Bypass de Admin
  */
 
 function getBaseUrl() {
@@ -8,6 +8,37 @@ function getBaseUrl() {
     return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
   }
   return window.location.origin;
+}
+
+/* ==========================================================================
+   0. DETECCIÓN Y ACCESO DE ADMINISTRADOR
+   ========================================================================== */
+function esAccesoAdmin() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdminParam = urlParams.get('admin') === 'true';
+  const isAdminStorage = localStorage.getItem('sodie_admin_bypass') === 'true';
+
+  return isAdminParam || isAdminStorage;
+}
+
+function getClientId() {
+  const sessionClientId = sessionStorage.getItem('sodie_authenticated_client_id');
+  if (sessionClientId) return sessionClientId;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramId = urlParams.get('clientId') || urlParams.get('client_id') || urlParams.get('id');
+  if (paramId) return paramId;
+
+  if (window.SODIE_CONFIG && window.SODIE_CONFIG.CLIENT_ID) {
+    return window.SODIE_CONFIG.CLIENT_ID;
+  }
+
+  const container = document.getElementById('app-dashboard') || document.body;
+  if (container && container.dataset.clientId) {
+    return container.dataset.clientId;
+  }
+
+  return localStorage.getItem('sodie_client_id') || 'CLIENT-01';
 }
 
 function initClientPersistAndNotifications() {
@@ -38,32 +69,14 @@ function solicitarPermisoNotificacionesYAccesoDirecto(clientId) {
   );
 }
 
-function getClientId() {
-  const sessionClientId = sessionStorage.getItem('sodie_authenticated_client_id');
-  if (sessionClientId) return sessionClientId;
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const paramId = urlParams.get('clientId') || urlParams.get('client_id') || urlParams.get('id');
-  if (paramId) return paramId;
-
-  if (window.SODIE_CONFIG && window.SODIE_CONFIG.CLIENT_ID) {
-    return window.SODIE_CONFIG.CLIENT_ID;
-  }
-
-  const container = document.getElementById('app-dashboard') || document.body;
-  if (container && container.dataset.clientId) {
-    return container.dataset.clientId;
-  }
-
-  return localStorage.getItem('sodie_client_id') || 'CLIENT-01';
-}
-
 /* ==========================================================================
    2. ESTADO GLOBAL DE CLIENTE
    ========================================================================== */
 const CLIENT_STATE = {
   clientId: null,
   isAuthenticated: false,
+  isAdminView: false,
+  isGeneralView: false,
   currentWeek: 1,
   excelUploaded: false,
   paymentConfirmed: false,
@@ -79,11 +92,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initClientDashboard() {
-  CLIENT_STATE.clientId = getClientId();
+  const urlParams = new URLSearchParams(window.location.search);
+  CLIENT_STATE.isAdminView = esAccesoAdmin();
+  CLIENT_STATE.isGeneralView = urlParams.get('view') === 'general';
 
-  if (sessionStorage.getItem('sodie_authenticated_client_id')) {
+  // Si se accede en modo Administrador, omitimos autenticación
+  if (CLIENT_STATE.isAdminView) {
     CLIENT_STATE.isAuthenticated = true;
-    CLIENT_STATE.clientId = sessionStorage.getItem('sodie_authenticated_client_id');
+    CLIENT_STATE.clientId = getClientId();
+    
+    if (CLIENT_STATE.isGeneralView) {
+      CLIENT_STATE.clientId = 'VISTA-GENERAL-ADMIN';
+    }
+
+    showToast('Modo Admin Activo', `Inspeccionando vista: ${CLIENT_STATE.clientId}`);
+  } else {
+    CLIENT_STATE.clientId = getClientId();
+
+    if (sessionStorage.getItem('sodie_authenticated_client_id')) {
+      CLIENT_STATE.isAuthenticated = true;
+      CLIENT_STATE.clientId = sessionStorage.getItem('sodie_authenticated_client_id');
+    }
   }
 
   updateClientSessionUI();
@@ -96,7 +125,12 @@ function initClientDashboard() {
 function updateClientSessionUI() {
   const clientIdBadge = document.getElementById('client-id-badge');
   if (clientIdBadge) {
-    clientIdBadge.textContent = `Cliente: ${CLIENT_STATE.clientId} ${CLIENT_STATE.isAuthenticated ? '🔒 (Sesión Activa)' : '⚠️ (Sin Autenticar)'}`;
+    if (CLIENT_STATE.isAdminView) {
+      clientIdBadge.textContent = `Modo Admin | Vista: ${CLIENT_STATE.clientId} 🔓`;
+      clientIdBadge.style.color = '#00FFCC';
+    } else {
+      clientIdBadge.textContent = `Cliente: ${CLIENT_STATE.clientId} ${CLIENT_STATE.isAuthenticated ? '🔒 (Sesión Activa)' : '⚠️ (Sin Autenticar)'}`;
+    }
   }
 
   const authView = document.getElementById('client-auth-view');
@@ -164,7 +198,7 @@ window.sodieValidarPasswordCliente = async function() {
       showToast('Error de Autenticación', 'Contraseña incorrecta.', true);
     }
   } catch (err) {
-    // Fallback de desarrollo para evaluadores si la API no está respondiendo
+    // Fallback de desarrollo
     sessionStorage.setItem('sodie_authenticated_client_id', selectedClientId);
     CLIENT_STATE.isAuthenticated = true;
     CLIENT_STATE.clientId = selectedClientId;
@@ -179,7 +213,9 @@ window.sodieValidarPasswordCliente = async function() {
 
 window.sodieCerrarSesionCliente = function() {
   sessionStorage.removeItem('sodie_authenticated_client_id');
+  localStorage.removeItem('sodie_admin_bypass');
   CLIENT_STATE.isAuthenticated = false;
+  CLIENT_STATE.isAdminView = false;
   window.location.reload();
 };
 
@@ -338,7 +374,7 @@ async function sodieFlujoInyeccionCliente() {
   const btnUpload = document.getElementById('btn-client-upload-excel');
 
   if (!CLIENT_STATE.isAuthenticated) {
-    showToast('Autenticación Requerida', 'Debes iniciar sesión con tu contraseña e ID de cliente para subir audiencias.', true);
+    showToast('Autenticación Requerida', 'Debes iniciar sesión para subir audiencias.', true);
     return;
   }
 
@@ -348,8 +384,8 @@ async function sodieFlujoInyeccionCliente() {
   }
 
   const elapsedDays = Math.floor(CLIENT_STATE.elapsedSeconds / 86400);
-  if (elapsedDays >= 7 && !CLIENT_STATE.paymentConfirmed) {
-    showToast('Pago Requerido', 'Debes liquidar la cuota semanal ($6,000 USDT) para habilitar la inyección del siguiente ciclo.', true);
+  if (elapsedDays >= 7 && !CLIENT_STATE.paymentConfirmed && !CLIENT_STATE.isAdminView) {
+    showToast('Pago Requerido', 'Debes liquidar la cuota semanal ($6,000 USDT) para habilitar la inyección.', true);
     const lockWarning = document.getElementById('weekly-payment-lock-warning');
     if (lockWarning) lockWarning.classList.remove('hidden');
     return;
@@ -578,7 +614,7 @@ function initGlobalAndWeeklyTimers() {
       timer24hDisplay.textContent = `${dHours}:${dMins}:${dSecs}`;
     }
 
-    // Disparador de Notificación de backend cada 24 Horas / Ciclo Cumplido
+    // Notificación al backend cada 24 horas
     if (remaining24h === 0) {
       const lastNotify24 = localStorage.getItem(`sodie_notify_24h_${CLIENT_STATE.clientId}`);
       if (!lastNotify24 || (now - parseInt(lastNotify24, 10)) > 60000) {
@@ -599,7 +635,7 @@ function initGlobalAndWeeklyTimers() {
       timerWeeklyPayDisplay.textContent = `${wDays}d ${wHours}h ${wMins}m ${wSecs}s`;
     }
 
-    // Disparador de Notificación de backend al cumplir ciclo de 7 Días
+    // Notificación al backend al cumplir ciclo de 7 Días
     if (remainingWeek === 0) {
       const lastNotify7d = localStorage.getItem(`sodie_notify_7d_${CLIENT_STATE.clientId}`);
       if (!lastNotify7d || (now - parseInt(lastNotify7d, 10)) > 60000) {
@@ -608,7 +644,7 @@ function initGlobalAndWeeklyTimers() {
       }
     }
 
-    if (gDays >= 7 && !CLIENT_STATE.paymentConfirmed) {
+    if (gDays >= 7 && !CLIENT_STATE.paymentConfirmed && !CLIENT_STATE.isAdminView) {
       const lockWarning = document.getElementById('weekly-payment-lock-warning');
       if (lockWarning) lockWarning.classList.remove('hidden');
     }
@@ -636,6 +672,6 @@ async function notificarTriggerBackend(type, details = {}) {
       })
     });
   } catch (err) {
-    // Manejo de error silencioso
+    // Error silencioso
   }
 }
