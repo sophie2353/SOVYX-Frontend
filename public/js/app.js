@@ -23,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initFacebookMetrics();
   initChatEngine();
   initIA3Engine();
-  initWebAuthnBiometricsWaitlist();
-  handleUrlRedirects();
   initTimer30d();
   initPaymentFlowEvents();
   initWaitlistEvents();
@@ -73,25 +71,21 @@ function initSplashGauges() {
     progress += 2;
     if (progress > 100) progress = 100;
 
-    // 1. Sincronización del Porcentaje y Barra de Bienvenido
     if (pctNum) pctNum.textContent = `${progress}%`;
     if (welcomeFill) welcomeFill.style.width = `${progress}%`;
 
-    // 2. Sincronización Simultánea de los Gauges
     if (gauge1Val) gauge1Val.textContent = `${progress}%`;
     if (gauge1Circle) gauge1Circle.setAttribute('stroke-dasharray', `${progress}, 100`);
 
     if (gauge2Val) gauge2Val.textContent = `${progress}%`;
     if (gauge2Circle) gauge2Circle.setAttribute('stroke-dasharray', `${progress}, 100`);
 
-    // 3. Iluminación de Cápsulas con Degradado Fucsia -> Menta
     const capIndex = Math.floor((progress / 100) * totalCaps);
     for (let i = 0; i < capIndex && i < totalCaps; i++) {
       if (capsules[i] && !capsules[i].classList.contains('cap-lit')) {
         capsules[i].classList.remove('cap-dark');
         capsules[i].classList.add('cap-lit');
 
-        // Color progresivo de fucsia (#ff007f) a verde menta (#00ffcc)
         const ratio = i / Math.max(totalCaps - 1, 1);
         const r = Math.round(255 * (1 - ratio) + 0 * ratio);
         const g = Math.round(0 * (1 - ratio) + 255 * ratio);
@@ -104,7 +98,6 @@ function initSplashGauges() {
       }
     }
 
-    // 4. Ocultar Intro al completar el 100%
     if (progress >= 100) {
       clearInterval(interval);
       setTimeout(() => {
@@ -203,7 +196,7 @@ async function initFacebookMetrics() {
 }
 
 /* ==========================================================================
-   5. CHAT & ASISTENTE IA2 (SECURE RENDER)
+   5. CHAT & ASISTENTE IA2
    ========================================================================== */
 function initChatEngine() {
   const sendBtn = document.getElementById('chat-send');
@@ -340,7 +333,6 @@ function initIA3Engine() {
     const valSolution = document.getElementById('ia3-val-solution');
     const valSavings = document.getElementById('ia3-val-savings');
 
-    // Desplegar modal y resetear scroll
     if (modal) {
       modal.classList.remove('hidden');
       modal.scrollTop = 0;
@@ -364,9 +356,8 @@ function initIA3Engine() {
 
       const data = await res.json();
 
-      // Pinta la respuesta cruda enviada desde Express
       if (valProblems) valProblems.innerText = data.problemas || data.problems;
-      if (valSolution) valSolution.innerHTML = data.solucion || data.solution; // innerHTML para las viñetas HTML
+      if (valSolution) valSolution.innerHTML = data.solucion || data.solution;
       if (valSavings) valSavings.innerText = data.ahorro || data.savings;
 
       showToast('Análisis IA3 Listo', 'El diagnóstico se ha generado correctamente.');
@@ -378,7 +369,6 @@ function initIA3Engine() {
     }
   });
 
-  // Cerrar modal con la X
   const closeBtn = document.getElementById('btn-close-ia3-modal');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
@@ -387,7 +377,6 @@ function initIA3Engine() {
     });
   }
 
-  // Scroll a Chat Web
   const btnChat = document.getElementById('btn-scroll-chat-ia3');
   if (btnChat) {
     btnChat.addEventListener('click', () => {
@@ -396,7 +385,6 @@ function initIA3Engine() {
     });
   }
 
-  // Scroll a Pago Final
   const btnPago = document.getElementById('btn-scroll-pago-ia3');
   if (btnPago) {
     btnPago.addEventListener('click', () => {
@@ -441,7 +429,6 @@ function finalizarYConfirmar() {
     return;
   }
 
-  // Redirección exclusiva para evaluadores a la pasarela de confirmación / ID v4
   window.location.href = 'confirmacion.html?step=excel_and_fb';
 }
 
@@ -514,10 +501,9 @@ function initVideoAndConfirm() {
   const playOverlay = document.getElementById('video-play-overlay');
 
   if (demoVideo && videoSource) {
-    const backendUrl = getBaseUrl(); // Devuelve "https://api.sodie.app"
+    const backendUrl = getBaseUrl();
     const videoUrl = `${backendUrl}/video/video.mp4`;
 
-    // Asignación tanto al source como directamente al elemento video para mayor compatibilidad
     videoSource.src = videoUrl;
     demoVideo.src = videoUrl;
     demoVideo.load();
@@ -535,6 +521,7 @@ function initVideoAndConfirm() {
     }
   }
 }
+
 /* ==========================================================================
    9. LISTA DE ESPERA (WAITLIST ENTRADA MANUAL)
    ========================================================================== */
@@ -622,6 +609,8 @@ window.ejecutarBotonSODIE = async function(event, accion) {
     elementoBoton.disabled = true;
   }
 
+  try {
+    switch (accion) {
       case 'cargar-excel':
         if (typeof window.sodieFlujoInyeccionCliente === 'function') {
           await window.sodieFlujoInyeccionCliente();
@@ -658,12 +647,10 @@ window.ejecutarBotonSODIE = async function(event, accion) {
    12. COMPONENTES V4: MODAL AVISO, COOKIES & SCROLL IA3
    ========================================================================== */
 function initNuevosComponentesV4() {
-  // --- 1. Modal Aviso Dispositivos Móviles ---
   const mobileNoticeModal = document.getElementById('mobile-notice-modal');
   const btnCloseMobileNotice = document.getElementById('btn-close-mobile-notice');
 
   if (mobileNoticeModal && btnCloseMobileNotice) {
-    // Si la pantalla es escritorio/tablet (>768px), mostrar el modal de aviso
     if (window.innerWidth > 768) {
       mobileNoticeModal.classList.add('active');
       mobileNoticeModal.style.display = 'flex';
@@ -680,7 +667,6 @@ function initNuevosComponentesV4() {
     });
   }
 
-  // --- 2. Banner Cookie Consent ---
   const cookieBanner = document.getElementById('cookie-consent-banner');
   const btnAcceptCookies = document.getElementById('btn-accept-cookies');
 
@@ -702,7 +688,7 @@ function initNuevosComponentesV4() {
       cookieBanner.style.display = 'none';
     });
   }
-} // <--- ¡AQUÍ FALTABA ESTA LLAVE DE CIERRE!
+}
 
 /* ==========================================================================
    13. SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
@@ -728,10 +714,9 @@ function initSSEMetrics() {
     };
 
     eventSource.onerror = () => {
-      // Si la conexión falla o el backend no soporta SSE, se cierra silenciosamente
       eventSource.close();
     };
   } catch (error) {
     console.warn('No se pudo inicializar la conexión SSE:', error);
   }
-} // <--- Cierre correcto de initSSEMetrics
+}
