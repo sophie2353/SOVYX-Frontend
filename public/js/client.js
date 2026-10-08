@@ -76,11 +76,6 @@ function getClientId() {
   return localStorage.getItem('sodie_client_id') || 'CLIENT-01';
 }
 
-function esAccesoAdmin() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('role') === 'admin' || localStorage.getItem('sodie_admin_bypass') === 'true';
-}
-
 function initClientPersistAndNotifications() {
   const clientId = getClientId();
 
