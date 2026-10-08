@@ -426,36 +426,21 @@ async function fetchClientMetrics() {
 /* ==========================================================================
    7. PASO 1: SUBIDA DIARIA DE EXCEL DE AUDIENCIA (24 HOURS)
    ========================================================================== */
-async function sodieFlujoInyeccionCliente() {
-  const fileInput = document.getElementById('client-file-input');
+async function sodieFlujoInyeccionCliente(overrideClientId = null) {
+  const fileInput = document.getElementById('client-excel-input');
   const btnUpload = document.getElementById('btn-client-upload-excel');
 
-  if (!CLIENT_STATE.isAuthenticated) {
-    showToast('Autenticación Requerida', 'Debes iniciar sesión para subir audiencias.', true);
-    return;
-  }
-
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    showToast('Archivo Requerido', 'Por favor selecciona un archivo de audiencia (.csv, .xlsx, .xls).', true);
+    alert('Selecciona tu archivo de audiencia primero.');
     return;
   }
 
-  const elapsedDays = Math.floor(CLIENT_STATE.elapsedSeconds / 86400);
-  if (elapsedDays >= 7 && !CLIENT_STATE.paymentConfirmed && !CLIENT_STATE.isAdminView) {
-    showToast('Pago Requerido', 'Debes liquidar la cuota semanal ($6,000 USDT) para habilitar la inyección.', true);
-    const lockWarning = document.getElementById('weekly-payment-lock-warning');
-    if (lockWarning) lockWarning.classList.remove('hidden');
-    return;
-  }
+  const clientId = overrideClientId || window.CLIENT_STATE?.clientId || 'CLIENT-#01';
 
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
-  formData.append('clientId', CLIENT_STATE.clientId);
-
-  if (btnUpload) {
-    btnUpload.textContent = 'Procesando Excel...';
-    btnUpload.disabled = true;
-  }
+  formData.append('clientId', clientId);
+  formData.append('sessionId', `sess_${clientId.toLowerCase()}_${Date.now()}`);
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, {
@@ -463,17 +448,29 @@ async function sodieFlujoInyeccionCliente() {
       body: formData
     });
 
-    if (!res.ok) throw new Error('Fallo al subir el archivo');
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Fallo al subir el archivo');
 
-    CLIENT_STATE.excelUploaded = true;
-    showToast('Audiencia Inyectada', `Excel cargado exitosamente para ${CLIENT_STATE.clientId}. Recargando ciclo de 24h.`);
+    if (window.CLIENT_STATE) {
+      window.CLIENT_STATE.excelUploaded = true;
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('Audiencia Inyectada', `Excel cargado exitosamente para ${clientId}. Recargando ciclo de 24h.`);
+    }
 
     if (btnUpload) {
       btnUpload.textContent = '✓ Excel Cargado Hoy';
       btnUpload.style.background = 'rgba(0, 255, 204, 0.2)';
     }
 
-    localStorage.setItem(`sodie_last_excel_time_${CLIENT_STATE.clientId}`, Date.now().toString());
+    localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
+
+  } catch (err) {
+    console.error('❌ Error en sodieFlujoInyeccionCliente:', err);
+    alert(`Error al inyectar audiencia: ${err.message}`);
+  }
+}
 
     const btnActivate = document.getElementById('btn-client-activate-campaign');
     if (btnActivate) {
