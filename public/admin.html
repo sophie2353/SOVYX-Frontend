@@ -104,18 +104,32 @@
       </section>
 
       <!-- DISPARADORES DE CAMPAÑA Y V4 -->
-      <section class="glass-card-dash margin-v-sm">
-        <h3 class="section-title fuchsia-txt">Disparadores de Campaña y V4</h3>
-        <p class="step-desc">Controles directos para cambiar el estado global de la app.</p>
-        <div class="input-group-flow margin-v-sm">
-          <button type="button" id="btn-trigger-active-campaign" class="btn-pf-action btn-mint-solid">
-            Activar Campaña Directa
-          </button>
-          <button type="button" id="btn-trigger-v4-14days" class="btn-pf-action btn-fuchsia-solid">
-            Cerrar Lista y Disparar V4 (14 días)
-          </button>
-        </div>
-      </section>
+     <!-- SECCIÓN: AUTENTICACIÓN META Y DISPARADORES DE CAMPAÑA -->
+<section class="glass-card-dash margin-v-sm">
+  <h3 class="section-title fuchsia-txt">Disparadores de Campaña y Meta V4</h3>
+  <p class="step-desc">Inicia sesión con Facebook para sincronizar el Token de larga duración e inyectar el borrador en Meta Ads.</p>
+  
+  <div class="input-group-flow margin-v-sm" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <!-- Botón de Login Facebook SDK -->
+    <button type="button" id="btn-fb-login" class="btn-pf-action" style="background: #1877F2; color: #fff;">
+      Iniciar Sesión en Facebook
+    </button>
+    
+    <!-- Botón para activar campaña e inyectar segmentación -->
+    <button type="button" id="btn-trigger-active-campaign" class="btn-pf-action btn-mint-solid">
+      Activar Campaña Directa
+    </button>
+    <button type="button" id="btn-trigger-v4-14days" class="btn-pf-action btn-fuchsia-solid">
+        Cerrar Lista y Disparar V4 (14 días)
+      </button>
+      </div>
+    </section>
+  </div>
+
+  <div id="fb-status-badge" class="margin-v-sm" style="font-size: 0.85rem; color: #888;">
+    Estado FB: <span id="fb-token-state">Sin autenticar ⚪</span>
+  </div>
+</section>
 
     </div>
 
