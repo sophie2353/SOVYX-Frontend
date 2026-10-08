@@ -148,16 +148,6 @@ function setupAdminEventListeners() {
     btnExcel.dataset.bound = "true";
   }
 
-  // Activar Campaña Directa
-  const btnActivate = document.getElementById('btn-trigger-active-campaign');
-  if (btnActivate && !btnActivate.dataset.bound) {
-    btnActivate.addEventListener('click', (e) => {
-      e.preventDefault();
-      sodieConfirmarActivacion();
-    });
-    btnActivate.dataset.bound = "true";
-  }
-
   // Cerrar Lista y Disparar V4
   const btnV4 = document.getElementById('btn-trigger-v4-14days');
   if (btnV4 && !btnV4.dataset.bound) {
@@ -243,6 +233,111 @@ function sodieReiniciarCronometro() {
 }
 
 /* ==========================================================================
+   ADMIN FRONTEND CONTROLLER (Sin lógica sensible ni credenciales)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  // Bind Botón 1: Iniciar Sesión en FB y generar Token 90 días
+  const btnFbLogin = document.getElementById('btn-fb-login');
+  if (btnFbLogin && !btnFbLogin.dataset.bound) {
+    btnFbLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieIniciarSesionFB();
+    });
+    btnFbLogin.dataset.bound = "true";
+  }
+
+  // Bind Botón 2: Activar Campaña en Meta
+  const btnActivate = document.getElementById('btn-trigger-active-campaign');
+  if (btnActivate && !btnActivate.dataset.bound) {
+    btnActivate.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieConfirmarActivacion();
+    });
+    btnActivate.dataset.bound = "true";
+  }
+});
+
+/* 1. Inicia sesión con FB SDK y le manda el shortToken al Backend */
+function sodieIniciarSesionFB() {
+  if (typeof FB === 'undefined') {
+    return alert('⚠️ El SDK de Facebook aún se está cargando. Intenta en un segundo.');
+  }
+
+  FB.login(function(response) {
+    if (response.authResponse) {
+      const shortToken = response.authResponse.accessToken;
+
+      // El backend se encarga de convertirlo a 90 días
+      fetch(`${getBaseUrl()}/api/v1/admin/fb-exchange-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shortLivedToken: shortToken })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.longLivedToken) {
+          // Guardamos únicamente el token de 90 días en la sesión local
+          localStorage.setItem('sodie_fb_access_token', data.longLivedToken);
+          
+          const badge = document.getElementById('fb-token-state');
+          if (badge) badge.textContent = 'Autenticado (Token 90 días activo) 🟢';
+          
+          alert('✅ Sesión iniciada. Token de 90 días generado y vinculado correctamente.');
+        } else {
+          alert('❌ Error al convertir el token a 90 días: ' + (data.error || 'Desconocido'));
+        }
+      })
+      .catch(err => console.error('💥 Error en exchange token:', err));
+    } else {
+      alert('⚠️ Cancelado por el usuario.');
+    }
+  }, { scope: 'ads_management,ads_read,business_management' });
+}
+
+/* 2. Dispara la activación: el backend pone el act_id y llama a metaServices */
+async function sodieConfirmarActivacion() {
+  const btn = document.getElementById('btn-trigger-active-campaign');
+  if (btn) btn.textContent = 'Inyectando borrador en Meta... ⏳';
+
+  const token = localStorage.getItem('sodie_fb_access_token');
+  if (!token) {
+    if (btn) btn.textContent = '🚀 Activar Campaña Directa';
+    return alert('⚠️ Primero debes iniciar sesión en Facebook para vincular el token de 90 días.');
+  }
+
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/v1/admin/campaigns/activate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: token,
+        triggeredBy: 'ADMIN',
+        timestamp: Date.now()
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert('🚀 ¡Borrador inyectado en Meta con éxito! Segmentación cargada desde Excel.');
+      if (btn) btn.textContent = '✓ Campaña Activa / Borrador Listo';
+
+      // Redirección hacia confirmación con los datos devueltos por el backend
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      }
+    } else {
+      alert(`❌ Error al activar en Meta: ${data.error || 'Error en el servidor'}`);
+      if (btn) btn.textContent = '🚀 Activar Campaña Directa';
+    }
+  } catch (error) {
+    console.error('💥 Error enviando activación:', error);
+    alert('⚠️ Ocurrió un error al procesar la solicitud.');
+    if (btn) btn.textContent = '🚀 Activar Campaña Directa';
+  }
+}
+
+/* ==========================================================================
    4. ACCIONES BACKEND Y CARGA DE ARCHIVOS
    ========================================================================== */
 async function sodieSubirVideoAdmin() {
@@ -307,25 +402,6 @@ async function sodieSubirExcelAdmin() {
   } catch (err) {
     alert('📊 Base de datos Excel inyectada con éxito.');
     if (btn) btn.textContent = '✓ Excel Inyectado';
-  }
-}
-
-async function sodieConfirmarActivacion() {
-  const btn = document.getElementById('btn-trigger-active-campaign');
-  if (btn) btn.textContent = 'Activando en Meta...';
-
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/campaigns/activate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'ACTIVE', triggeredBy: 'ADMIN', timestamp: Date.now() })
-    });
-    
-    alert('🚀 Campaña activada desde el Panel de Admin.');
-    if (btn) btn.textContent = '✓ Campaña Activa';
-  } catch (error) {
-    alert('🚀 Orden de activación enviada correctamente.');
-    if (btn) btn.textContent = '✓ Campaña Activa';
   }
 }
 
