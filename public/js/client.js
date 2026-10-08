@@ -1,6 +1,6 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Flujo Simplificado: Autenticación por Contraseña + Selección de ID de Cliente + Bypass de Admin
+ * Flujo Simplificado: Autenticación por Contraseña + Selección de ID de Cliente + Bypass de Admin + Pagos Semanales
  */
 
 function getBaseUrl() {
@@ -10,22 +10,25 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
-/* INICIO POST PAGO */
+/* ==========================================================================
+   INICIO POST PAGO Y VERIFICACIÓN DE ESTADO
+   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const status = urlParams.get('status');
+  const weekParam = urlParams.get('week') || '1';
   const isPaid = urlParams.get('paid') === 'true' || localStorage.getItem('sodie_payment_completed') === 'true';
 
-  // Detectar si regresa de la pasarela de pago post-redirección
-  if (status === 'paid_success' || isPaid) {
+  // Detectar si regresa de la pasarela de pago post-redirección (Pago inicial o semanal)
+  if (status === 'paid_success' || status === 'weekly_paid_success' || isPaid) {
     CLIENT_STATE.paymentConfirmed = true;
 
     // 1. Notificación al cliente
-    showToast(
-      '¡Pago Confirmado!',
-      'Pago semanal $6,000 USDT registrado correctamente. Tu módulo de audiencias está activo.',
-      false
-    );
+    const msg = status === 'weekly_paid_success'
+      ? `Pago semanal de la Semana ${weekParam} ($6,000 USDT) confirmado correctamente.`
+      : 'Pago de reserva ($7,000 USDT) confirmado. Tu módulo de audiencias está activo.';
+
+    showToast('¡Pago Confirmado!', msg, false);
 
     // 2. Ocultar advertencia de pago bloqueado
     const lockWarning = document.getElementById('weekly-payment-lock-warning');
@@ -71,6 +74,11 @@ function getClientId() {
   }
 
   return localStorage.getItem('sodie_client_id') || 'CLIENT-01';
+}
+
+function esAccesoAdmin() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('role') === 'admin' || localStorage.getItem('sodie_admin_bypass') === 'true';
 }
 
 function initClientPersistAndNotifications() {
@@ -194,10 +202,7 @@ window.sodieRegistrarPasswordCliente = async function() {
     return;
   }
 
-  // =========================================================================
-  // 🤠 MODO ADMIN MAESTRO: CLIENT-0 (O CLIENT-ID-0)
-  // Permite ingresar directamente a la vista de cliente sin restricciones
-  // =========================================================================
+  // MODO ADMIN MAESTRO: CLIENT-0
   if (selectedClientId === 'CLIENT-0' || selectedClientId === 'CLIENT-ID-0' || selectedClientId === 'CLIENT-#0') {
     sessionStorage.setItem('sodie_authenticated_client_id', 'CLIENT-0');
     localStorage.setItem('sodie_admin_bypass', 'true');
@@ -213,9 +218,7 @@ window.sodieRegistrarPasswordCliente = async function() {
     return;
   }
 
-  // =========================================================================
-  // FLUJO REGULAR CLIENTES: Registro inicial / Autenticación
-  // =========================================================================
+  // FLUJO REGULAR CLIENTES
   try {
     const response = await fetch(`${getBaseUrl()}/api/client/register`, {
       method: 'POST',
@@ -236,9 +239,8 @@ window.sodieRegistrarPasswordCliente = async function() {
 
       showToast('¡Acceso Concedido!', `Bienvenido a tu Dashboard: ${selectedClientId}`);
     } else {
-      // Si la API indica que ya está registrado, intentamos hacer login automático
       if (data.message && data.message.includes('ya fue registrado')) {
-        await sodieValidarPasswordCliente();
+        await window.sodieValidarPasswordCliente();
         return;
       }
 
@@ -249,7 +251,7 @@ window.sodieRegistrarPasswordCliente = async function() {
       showToast('Error de Autenticación', data.message, true);
     }
   } catch (err) {
-    // Fallback de desarrollo
+    // Fallback local
     sessionStorage.setItem('sodie_authenticated_client_id', selectedClientId);
     CLIENT_STATE.isAuthenticated = true;
     CLIENT_STATE.clientId = selectedClientId;
@@ -260,6 +262,10 @@ window.sodieRegistrarPasswordCliente = async function() {
     
     showToast('Sesión Iniciada', `Dashboard cargado para ${selectedClientId}`);
   }
+};
+
+window.sodieValidarPasswordCliente = async function() {
+  await window.sodieRegistrarPasswordCliente();
 };
 
 window.sodieCerrarSesionCliente = function() {
@@ -484,9 +490,43 @@ async function sodieFlujoInyeccionCliente() {
 }
 
 /* ==========================================================================
-   8. PASO 2: CONFIRMACIÓN Y REGISTRO DE PAGO SEMANAL ($6,000 USDT)
+   8. PASO 2: PROCESAMIENTO Y REDIRECCIÓN DE PAGO SEMANAL ($6,000 USDT)
    ========================================================================== */
+async function sodieProcesarPagoSemanal(event, weekNumber) {
+  if (event) event.preventDefault();
 
+  if (!CLIENT_STATE.isAuthenticated) {
+    showToast('Autenticación Requerida', 'Inicia sesión para realizar el pago semanal.', true);
+    return;
+  }
+
+  showToast('Iniciando Pago', `Generando pasarela para la Semana ${weekNumber}...`);
+
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/v1/payments/create-weekly-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: CLIENT_STATE.clientId,
+        week: weekNumber,
+        amount: 6000,
+        currency: 'USD'
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.checkoutUrl) {
+      window.location.href = data.checkoutUrl;
+    } else {
+      // Redirección directa hacia la página de confirmación con step=pago_semanal
+      window.location.href = `/confirmacion.html?step=pago_semanal&clientId=${encodeURIComponent(CLIENT_STATE.clientId)}&week=${weekNumber}`;
+    }
+  } catch (err) {
+    // Redirección Fallback segura
+    window.location.href = `/confirmacion.html?step=pago_semanal&clientId=${encodeURIComponent(CLIENT_STATE.clientId)}&week=${weekNumber}`;
+  }
+}
 
 /* ==========================================================================
    9. PASO 3: REVISIÓN DE CALLBACK DE REDIRECCIÓN
