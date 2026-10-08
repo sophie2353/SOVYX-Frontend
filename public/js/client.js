@@ -427,20 +427,25 @@ async function fetchClientMetrics() {
    7. PASO 1: SUBIDA DIARIA DE EXCEL DE AUDIENCIA (24 HOURS)
    ========================================================================== */
 async function sodieFlujoInyeccionCliente(overrideClientId = null) {
-  const fileInput = document.getElementById('client-excel-input');
-  const btnUpload = document.getElementById('btn-client-upload-excel');
+  const fileInput = document.getElementById('client-excel-input') || document.getElementById('excel-input');
+  const btnUpload = document.getElementById('btn-client-upload-excel') || document.getElementById('btn-upload');
 
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
     alert('Selecciona tu archivo de audiencia primero.');
     return;
   }
 
-  const clientId = overrideClientId || window.CLIENT_STATE?.clientId || 'CLIENT-#01';
+  const clientId = overrideClientId || window.CLIENT_STATE?.clientId || getClientId() || 'CLIENT-#01';
 
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
   formData.append('clientId', clientId);
   formData.append('sessionId', `sess_${clientId.toLowerCase()}_${Date.now()}`);
+
+  if (btnUpload) {
+    btnUpload.disabled = true;
+    btnUpload.textContent = 'Procesando en IA1...';
+  }
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, {
@@ -460,32 +465,32 @@ async function sodieFlujoInyeccionCliente(overrideClientId = null) {
     }
 
     if (btnUpload) {
+      btnUpload.disabled = false;
       btnUpload.textContent = '✓ Excel Cargado Hoy';
       btnUpload.style.background = 'rgba(0, 255, 204, 0.2)';
     }
-
-    localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
-
-  } catch (err) {
-    console.error('❌ Error en sodieFlujoInyeccionCliente:', err);
-    alert(`Error al inyectar audiencia: ${err.message}`);
-  }
-}
 
     const btnActivate = document.getElementById('btn-client-activate-campaign');
     if (btnActivate) {
       btnActivate.classList.remove('hidden');
     }
 
-  } catch (error) {
-    showToast('Error de Carga', 'No se pudo subir el archivo al servidor.', true);
+    localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
+
+  } catch (err) {
+    console.error('❌ Error en sodieFlujoInyeccionCliente:', err);
+    if (typeof showToast === 'function') {
+      showToast('Error de Carga', 'No se pudo subir el archivo al servidor.', true);
+    } else {
+      alert(`Error al inyectar audiencia: ${err.message}`);
+    }
+
     if (btnUpload) {
-      btnUpload.textContent = 'Subir Excel (Paso Diario)';
       btnUpload.disabled = false;
+      btnUpload.textContent = 'Subir Excel (Paso Diario)';
     }
   }
 }
-
 /* ==========================================================================
    8. PASO 2: PROCESAMIENTO Y REDIRECCIÓN DE PAGO SEMANAL ($6,000 USDT)
    ========================================================================== */
