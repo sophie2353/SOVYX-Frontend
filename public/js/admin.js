@@ -373,7 +373,7 @@ async function sodieSubirVideoAdmin() {
   }
 }
 
-async function sodieSubirExcelAdmin() {
+async function sodieSubirExcelAdmin(targetClientId = 'ADMIN') {
   const fileInput = document.getElementById('admin-excel-input');
   const btn = document.getElementById('btn-inject-database');
 
@@ -382,10 +382,13 @@ async function sodieSubirExcelAdmin() {
     return;
   }
 
-  if (btn) btn.textContent = 'Procesando Excel...';
+  if (btn) btn.textContent = 'Procesando Excel con IA1...';
 
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
+  formData.append('clientId', targetClientId);
+  formData.append('sessionId', `sess_${targetClientId.toLowerCase()}_${Date.now()}`);
+  formData.append('nicho', 'infoproductos');
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, {
@@ -393,15 +396,21 @@ async function sodieSubirExcelAdmin() {
       body: formData
     });
 
-    if (res.ok) {
-      alert('📊 Base de datos Excel inyectada con éxito.');
-      if (btn) btn.textContent = '✓ Excel Inyectado';
-    } else {
-      throw new Error('Fallo servidor');
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Fallo al subir el archivo');
+
+    if (btn) {
+      btn.textContent = '✓ Base de Datos Inyectada';
+      btn.style.background = 'rgba(0, 255, 204, 0.2)';
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('Éxito Admin', `Excel procesado para ${targetClientId}. Registros: ${data.totalRegistros}`);
     }
   } catch (err) {
-    alert('📊 Base de datos Excel inyectada con éxito.');
-    if (btn) btn.textContent = '✓ Excel Inyectado';
+    console.error('❌ Error en sodieSubirExcelAdmin:', err);
+    if (btn) btn.textContent = 'Error al Cargar';
+    alert(`Error: ${err.message}`);
   }
 }
 
