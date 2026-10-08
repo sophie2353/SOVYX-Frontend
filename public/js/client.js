@@ -13,20 +13,6 @@ function getBaseUrl() {
 /* ==========================================================================
    0. DETECCIÓN Y ACCESO DE ADMINISTRADOR
    ========================================================================== */
-function esAccesoAdmin() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const isAdmin = urlParams.get('admin') === 'true' || localStorage.getItem('sodie_admin_bypass') === 'true';
-
-  // Si viene desde admin, mostramos directamente la vista del cliente sin trabas de autenticación
-  if (isAdmin) {
-    const mainContainer = document.getElementById('client-app-container') || document.querySelector('main');
-    if (mainContainer) {
-      mainContainer.style.display = 'block';
-      mainContainer.classList.remove('hidden');
-    }
-  }
-});
-
 function getClientId() {
   const sessionClientId = sessionStorage.getItem('sodie_authenticated_client_id');
   if (sessionClientId) return sessionClientId;
@@ -153,34 +139,48 @@ function updateClientSessionUI() {
 /* ==========================================================================
    3. AUTENTICACIÓN POR CONTRASEÑA E ID DE CLIENTE
    ========================================================================== */
-
-window.sodieValidarPasswordCliente = async function() {
-  const passInput = document.getElementById('client-pass-input') || document.getElementById('client-pass');
+window.sodieRegistrarPasswordCliente = async function() {
   const idInput = document.getElementById('client-id-input') || document.getElementById('client-id-select');
+  const passInput = document.getElementById('client-register-pass') || document.getElementById('client-pass-input');
   const errorElem = document.getElementById('client-auth-error');
 
   const password = passInput ? passInput.value.trim() : '';
-  let selectedClientId = idInput ? idInput.value.trim() : getClientId();
+  let selectedClientId = idInput ? idInput.value.trim().toUpperCase() : getClientId();
 
-  if (!selectedClientId) {
-    selectedClientId = 'CLIENT-01';
-  }
+  if (!selectedClientId) selectedClientId = 'CLIENT-01';
 
   if (!password) {
-    if (errorElem) {
-      errorElem.textContent = '❌ Por favor ingresa tu contraseña de acceso.';
-      errorElem.style.display = 'block';
-      errorElem.style.color = '#FF007F';
-    }
-    showToast('Campos Incompletos', 'Ingresa la contraseña de cliente.', true);
+    showToast('Campo Requerido', 'Ingresa una contraseña para ingresar.', true);
     return;
   }
 
+  // =========================================================================
+  // 🤠 MODO ADMIN MAESTRO: CLIENT-0 (O CLIENT-ID-0)
+  // Permite ingresar directamente a la vista de cliente sin restricciones
+  // =========================================================================
+  if (selectedClientId === 'CLIENT-0' || selectedClientId === 'CLIENT-ID-0' || selectedClientId === 'CLIENT-#0') {
+    sessionStorage.setItem('sodie_authenticated_client_id', 'CLIENT-0');
+    localStorage.setItem('sodie_admin_bypass', 'true');
+    
+    CLIENT_STATE.isAuthenticated = true;
+    CLIENT_STATE.clientId = 'CLIENT-0';
+
+    updateClientSessionUI();
+    fetchClientMetrics();
+    initGlobalAndWeeklyTimers();
+
+    showToast('Acceso Admin Maestro', 'Iniciaste sesión como CLIENT-0 👑');
+    return;
+  }
+
+  // =========================================================================
+  // FLUJO REGULAR CLIENTES: Registro inicial / Autenticación
+  // =========================================================================
   try {
-    const response = await fetch(`${getBaseUrl()}/api/client/login`, {
+    const response = await fetch(`${getBaseUrl()}/api/client/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, clientId: selectedClientId })
+      body: JSON.stringify({ clientId: selectedClientId, password })
     });
 
     const data = await response.json();
@@ -194,26 +194,31 @@ window.sodieValidarPasswordCliente = async function() {
       fetchClientMetrics();
       initGlobalAndWeeklyTimers();
 
-      showToast('Sesión Iniciada', `Bienvenido al Dashboard del cliente: ${selectedClientId}`);
+      showToast('¡Acceso Concedido!', `Bienvenido a tu Dashboard: ${selectedClientId}`);
     } else {
-      if (errorElem) {
-        errorElem.textContent = `❌ ${data.message || 'Contraseña incorrecta'}`;
-        errorElem.style.display = 'block';
-        errorElem.style.color = '#FF007F';
+      // Si la API indica que ya está registrado, intentamos hacer login automático
+      if (data.message && data.message.includes('ya fue registrado')) {
+        await sodieValidarPasswordCliente();
+        return;
       }
-      showToast('Error de Autenticación', 'Contraseña incorrecta.', true);
+
+      if (errorElem) {
+        errorElem.textContent = `❌ ${data.message}`;
+        errorElem.style.display = 'block';
+      }
+      showToast('Error de Autenticación', data.message, true);
     }
   } catch (err) {
     // Fallback de desarrollo
     sessionStorage.setItem('sodie_authenticated_client_id', selectedClientId);
     CLIENT_STATE.isAuthenticated = true;
     CLIENT_STATE.clientId = selectedClientId;
-
+    
     updateClientSessionUI();
     fetchClientMetrics();
     initGlobalAndWeeklyTimers();
-
-    showToast('Sesión Iniciada', `Bienvenido al Dashboard del cliente: ${selectedClientId}`);
+    
+    showToast('Sesión Iniciada', `Dashboard cargado para ${selectedClientId}`);
   }
 };
 
@@ -441,50 +446,7 @@ async function sodieFlujoInyeccionCliente() {
 /* ==========================================================================
    8. PASO 2: CONFIRMACIÓN Y REGISTRO DE PAGO SEMANAL ($6,000 USDT)
    ========================================================================== */
-function sodieProcesarPagoSemanal(event, weekNumber) {
-  if (event) event.preventDefault();
 
-  if (!CLIENT_STATE.isAuthenticated) {
-    showToast('Autenticación Requerida', 'Verifica tu sesión de cliente antes de registrar tu cuota.', true);
-    return;
-  }
-
-  CLIENT_STATE.currentWeek = weekNumber;
-
-  const txHash = prompt(`Ingresa el Hash de Transacción (txHash) de Polygon para verificar el pago de $6,000 USDT (Semana ${weekNumber}):`);
-
-  if (!txHash || !txHash.trim()) {
-    showToast('Verificación Cancelada', 'Se requiere el Hash de la transacción para confirmar el pago.', true);
-    return;
-  }
-
-  const cleanTxHash = txHash.trim();
-
-  CLIENT_STATE.paymentConfirmed = true;
-  localStorage.setItem(`sodie_payment_week_${weekNumber}_${CLIENT_STATE.clientId}`, JSON.stringify({
-    txHash: cleanTxHash,
-    timestamp: Date.now(),
-    amount: 6000
-  }));
-
-  showToast('Pago Registrado', `Cuota de $6,000 USDT registrada correctamente para ${CLIENT_STATE.clientId} (Semana ${weekNumber}).`);
-
-  const lockWarning = document.getElementById('weekly-payment-lock-warning');
-  if (lockWarning) lockWarning.classList.remove('hidden');
-
-  const btnWeek = document.getElementById(`btn-pay-semana${weekNumber}`);
-  if (btnWeek) {
-    btnWeek.textContent = `✓ Cuota Semana ${weekNumber} Validada ($6,000 USDT)`;
-    btnWeek.style.background = 'rgba(0, 255, 204, 0.25)';
-    btnWeek.onclick = null;
-  }
-
-  const btnActivate = document.getElementById('btn-client-activate-campaign');
-  if (btnActivate) {
-    btnActivate.classList.remove('hidden');
-    btnActivate.style.display = 'block';
-  }
-}
 
 /* ==========================================================================
    9. PASO 3: REVISIÓN DE CALLBACK DE REDIRECCIÓN
