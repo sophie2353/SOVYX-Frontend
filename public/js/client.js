@@ -10,6 +10,46 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
+/* INICIO POST PAGO */
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get('status');
+  const isPaid = urlParams.get('paid') === 'true' || localStorage.getItem('sodie_payment_completed') === 'true';
+
+  // Detectar si regresa de la pasarela de pago post-redirección
+  if (status === 'paid_success' || isPaid) {
+    CLIENT_STATE.paymentConfirmed = true;
+
+    // 1. Notificación al cliente
+    showToast(
+      '¡Pago Confirmado!',
+      'Pago semanal $6,000 USDT registrado correctamente. Tu módulo de audiencias está activo.',
+      false
+    );
+
+    // 2. Ocultar advertencia de pago bloqueado
+    const lockWarning = document.getElementById('weekly-payment-lock-warning');
+    if (lockWarning) lockWarning.classList.add('hidden');
+
+    // 3. Activar el botón para subir el Excel
+    const btnExcel = document.getElementById('btn-client-upload-excel');
+    if (btnExcel) {
+      btnExcel.disabled = false;
+      btnExcel.classList.remove('disabled');
+    }
+
+    // 4. Activar el botón de despliegue de campaña
+    const btnActivate = document.getElementById('btn-client-activate-campaign');
+    if (btnActivate) {
+      btnActivate.classList.remove('hidden');
+      btnActivate.style.display = 'block';
+    }
+
+    // Limpiar flag temporal de la URL para evitar ejecuciones duplicadas en reload
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
+
 /* ==========================================================================
    0. DETECCIÓN Y ACCESO DE ADMINISTRADOR
    ========================================================================== */
