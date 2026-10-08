@@ -20,32 +20,36 @@
     </div>
   </div>
 
-  <!-- VISTA DE AUTENTICACIÓN POR CONTRASEÑA E ID DE CLIENTE -->
+  <!-- INICIAR SESIÓN -->
   <main id="client-auth-view" class="client-auth-overlay">
-    <div class="client-auth-card">
-      <div class="auth-icon">✅</div>
-      <h2 class="auth-title">Acceso Cliente SODIE</h2>
-      <p class="auth-subtitle">Ingresa tu ID de cliente y contraseña de acceso</p>
+  <div class="client-auth-card">
+    <h2 class="auth-title">Acceso Cliente SODIE</h2>
+    <p class="auth-subtitle">Ingresa tu ID de cliente y tu contraseña para acceder al panel</p>
 
-      <div id="client-login-box" class="auth-form-group">
-        <div class="form-field margin-v-sm">
-          <label for="client-id-input" class="label-mint">ID de Cliente</label>
-          <input type="text" id="client-id-input" placeholder="Ej. CLIENT-01" class="input-custom" />
-        </div>
-
-        <div class="form-field margin-v-sm">
-          <label for="client-pass-input" class="label-mint">Contraseña de Acceso</label>
-          <input type="password" id="client-pass-input" placeholder="••••••••" class="input-custom" />
-        </div>
-
-        <button type="button" id="btn-client-pass-login" class="btn-pf-action btn-mint-solid margin-v-sm">
-          Ingresar al Panel
-        </button>
+    <div id="client-login-box" class="auth-form-group">
+      <div class="form-field margin-v-sm">
+        <label for="client-id-input" class="label-mint">ID de Cliente</label>
+        <input type="text" id="client-id-input" placeholder="Ej. CLIENT-01 o CLIENT-0" class="input-custom" />
       </div>
 
-      <div id="client-auth-error" class="auth-error-msg hidden"></div>
+      <div class="form-field margin-v-sm">
+        <label for="client-pass-input" class="label-mint">Contraseña de Acceso</label>
+        <input type="password" id="client-pass-input" placeholder="••••••••" class="input-custom" />
+      </div>
+
+      <div class="auth-actions-group margin-v-sm">
+        <button type="button" id="btn-client-pass-login" onclick="sodieValidarPasswordCliente()" class="btn-pf-action btn-mint-solid">
+          Ingresar al Panel
+        </button>
+        <button type="button" id="btn-client-register" onclick="sodieRegistrarPasswordCliente()" class="btn-pf-action btn-fuchsia-solid margin-v-xs">
+          Registrar por Primera Vez
+        </button>
+      </div>
     </div>
-  </main>
+
+    <div id="client-auth-error" class="auth-error-msg hidden"></div>
+  </div>
+</main>
 
   <!-- DASHBOARD CLIENTE (OCULTO HASTA AUTENTICAR O BYPASS ADMIN) -->
   <main id="app-dashboard" class="dashboard-container hidden">
