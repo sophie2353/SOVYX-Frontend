@@ -666,7 +666,8 @@ window.ejecutarBotonSODIE = async function(event, accion) {
       localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
       console.log('✅ [APP] Excel procesado correctamente:', data);
       break;
-
+    }
+ 
       case 'activar-campana': {
   try {
     // 1. Obtener el clientId del estado global (post-pago)
