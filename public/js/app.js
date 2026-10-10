@@ -765,11 +765,16 @@ window.ejecutarBotonSODIE = async function(event, accion) {
    12. COMPONENTES V4: MODAL AVISO, COOKIES & SCROLL IA3
    ========================================================================== */
 function initNuevosComponentesV4() {
+  console.log('🔍 [SODIE V4] Inicializando componentes de UI (Modal y Cookies)...');
+
+  // 1. Modal de Aviso / Notificación
   const mobileNoticeModal = document.getElementById('mobile-notice-modal');
   const btnCloseMobileNotice = document.getElementById('btn-close-mobile-notice');
 
-  if (mobileNoticeModal && btnCloseMobileNotice) {
+  if (mobileNoticeModal) {
+    // Lógica de visualización según pantalla
     if (window.innerWidth > 768) {
+      // Ojo: Si es desktop y se llama "mobile-notice", revisa si querías ocultarlo o mostrarlo
       mobileNoticeModal.classList.add('active');
       mobileNoticeModal.style.display = 'flex';
     } else {
@@ -777,18 +782,23 @@ function initNuevosComponentesV4() {
       mobileNoticeModal.style.display = 'none';
     }
 
-    btnCloseMobileNotice.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      mobileNoticeModal.classList.remove('active');
-      mobileNoticeModal.style.display = 'none';
-    });
+    if (btnCloseMobileNotice && !btnCloseMobileNotice.dataset.bound) {
+      btnCloseMobileNotice.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        mobileNoticeModal.classList.remove('active');
+        mobileNoticeModal.style.display = 'none';
+        console.log('✅ Modal cerrado por el usuario.');
+      });
+      btnCloseMobileNotice.dataset.bound = "true";
+    }
   }
 
+  // 2. Banner de Cookies
   const cookieBanner = document.getElementById('cookie-consent-banner');
   const btnAcceptCookies = document.getElementById('btn-accept-cookies');
 
-  if (cookieBanner && btnAcceptCookies) {
+  if (cookieBanner) {
     const cookiesAccepted = localStorage.getItem('cookiesAccepted');
     if (!cookiesAccepted) {
       cookieBanner.classList.remove('hidden');
@@ -798,15 +808,20 @@ function initNuevosComponentesV4() {
       cookieBanner.style.display = 'none';
     }
 
-    btnAcceptCookies.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      localStorage.setItem('cookiesAccepted', 'true');
-      cookieBanner.classList.add('hidden');
-      cookieBanner.style.display = 'none';
-    });
+    if (btnAcceptCookies && !btnAcceptCookies.dataset.bound) {
+      btnAcceptCookies.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        localStorage.setItem('cookiesAccepted', 'true');
+        cookieBanner.classList.add('hidden');
+        cookieBanner.style.display = 'none';
+        console.log('✅ Cookies aceptadas y guardadas en localStorage.');
+      });
+      btnAcceptCookies.dataset.bound = "true";
+    }
   }
 }
+
 
 /* ==========================================================================
    13. SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
