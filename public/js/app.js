@@ -591,6 +591,9 @@ function initTimer30d() {
 /* ==========================================================================
    11. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
    ========================================================================== */
+/* ==========================================================================
+   11. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
+   ========================================================================== */
 window.onerror = function() {
   return false;
 };
@@ -610,150 +613,139 @@ window.ejecutarBotonSODIE = async function(event, accion) {
   }
 
   try {
-  switch (accion) {
-    case 'cargar-excel': {
-      // 1. Obtener el archivo desde el input del cliente
-      const fileInput = document.getElementById('client-excel-input') || document.getElementById('excel-input');
-      
-      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        alert('Por favor, selecciona un archivo Excel (.xlsx, .csv) antes de continuar.');
+    switch (accion) {
+      case 'cargar-excel': {
+        // 1. Obtener el archivo desde el input
+        const fileInput = document.getElementById('client-file-input') || document.getElementById('excel-input');
+        
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+          alert('Por favor, selecciona un archivo Excel (.xlsx, .csv) antes de continuar.');
+          break;
+        }
+
+        // 2. Extraer ID del cliente activo
+        const clientId = window.CLIENT_STATE?.clientId || 'CLIENT-#01';
+        const file = fileInput.files[0];
+
+        // 3. Preparar el FormData para /api/v1/media/upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('clientId', clientId);
+        formData.append('sessionId', `sess_${clientId.toLowerCase()}_${Date.now()}`);
+        formData.append('nicho', 'infoproductos');
+
+        // 4. Mostrar estado de carga en la interfaz
+        const btn = document.getElementById('btn-client-upload-excel') || document.getElementById('btn-upload');
+        if (btn) btn.textContent = 'Procesando con IA1 y Meta...';
+
+        // 5. Petición POST directa al backend
+        const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+        const response = await fetch(`${baseUrl}/api/v1/media/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || 'Error al procesar la audiencia en el servidor.');
+        }
+
+        // 6. Actualizar estado y feedback visual tras éxito
+        if (window.CLIENT_STATE) {
+          window.CLIENT_STATE.excelUploaded = true;
+          window.CLIENT_STATE.campaignId = data.campaignId;
+        }
+
+        if (btn) {
+          btn.textContent = '✓ Excel Cargado Hoy';
+          btn.style.background = 'rgba(0, 255, 204, 0.2)';
+        }
+
+        if (typeof showToast === 'function') {
+          showToast('Audiencia Inyectada', `Excel cargado exitosamente para ${clientId}. Ciclo de 24h activado.`);
+        }
+
+        localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
+        console.log('✅ [APP] Excel procesado correctamente:', data);
         break;
       }
 
-      // 2. Extraer ID del cliente activo
-      const clientId = window.CLIENT_STATE?.clientId || 'CLIENT-#01';
-      const file = fileInput.files[0];
-
-      // 3. Preparar el FormData para /api/v1/media/upload
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('clientId', clientId);
-      formData.append('sessionId', `sess_${clientId.toLowerCase()}_${Date.now()}`);
-      formData.append('nicho', 'infoproductos');
-
-      // 4. Mostrar estado de carga en la interfaz
-      const btn = document.getElementById('btn-client-upload-excel') || document.getElementById('btn-upload');
-      if (btn) btn.textContent = 'Procesando con IA1 y Meta...';
-
-      // 5. Petición POST directa al backend
-      const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
-      const response = await fetch(`${baseUrl}/api/v1/media/upload`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || 'Error al procesar la audiencia en el servidor.');
-      }
-
-      // 6. Actualizar estado y feedback visual tras éxito
-      if (window.CLIENT_STATE) {
-        window.CLIENT_STATE.excelUploaded = true;
-        window.CLIENT_STATE.campaignId = data.campaignId;
-      }
-
-      if (btn) {
-        btn.textContent = '✓ Excel Cargado Hoy';
-        btn.style.background = 'rgba(0, 255, 204, 0.2)';
-      }
-
-      if (typeof showToast === 'function') {
-        showToast('Audiencia Inyectada', `Excel cargado exitosamente para ${clientId}. Ciclo de 24h activado.`);
-      }
-
-      localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
-      console.log('✅ [APP] Excel procesado correctamente:', data);
-      break;
-    }
- 
       case 'activar-campana': {
-  try {
-    // 1. Obtener el clientId del estado global (post-pago)
-    const clientId = window.CLIENT_STATE?.clientId || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01';
+        // 1. Obtener el clientId del estado global (post-pago)
+        const clientId = window.CLIENT_STATE?.clientId || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01';
 
-    // 2. Preparar el payload con el ID requerido y parámetros de autenticación/conexión
-    const payload = {
-      clientId: clientId,
-      sessionId: `sess_${clientId.toLowerCase()}_${Date.now()}`,
-      action: 'activate_campaign',
-      timestamp: Date.now()
-    };
+        // 2. Preparar el payload
+        const payload = {
+          clientId: clientId,
+          sessionId: `sess_${clientId.toLowerCase()}_${Date.now()}`,
+          action: 'activate_campaign',
+          timestamp: Date.now()
+        };
 
-    // 3. Feedback visual en el botón de activación
-    const btnActivar = document.getElementById('btn-activar-campana') || document.getElementById('btn-activate');
-    if (btnActivar) {
-      btnActivar.disabled = true;
-      btnActivar.textContent = 'Conectando con Meta Ads...';
-    }
+        // 3. Feedback visual en el botón de activación
+        const btnActivar = document.getElementById('btn-activar-campana') || document.getElementById('btn-activate');
+        if (btnActivar) {
+          btnActivar.disabled = true;
+          btnActivar.textContent = 'Conectando con Meta Ads...';
+        }
 
-    const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+        const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
 
-    // 4. Intentar autenticar / conectar con el backend (endpoint primario /connect, fallback a /auth/login)
-    let response = await fetch(`${baseUrl}/api/v1/connect`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('sodie_token') || ''}`
-      },
-      body: JSON.stringify(payload)
-    });
+        // 4. Intentar autenticar / conectar con el backend
+        let response = await fetch(`${baseUrl}/api/v1/connect`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('sodie_token') || ''}`
+          },
+          body: JSON.stringify(payload)
+        });
 
-    // Fallback a /auth/login si /connect requiere re-autenticación post-pago
-    if (response.status === 401 || response.status === 404) {
-      console.warn('⚠️ [APP] Ruta /api/v1/connect no disponible o no autorizada, intentando /api/v1/auth/login...');
-      response = await fetch(`${baseUrl}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    }
+        if (response.status === 401 || response.status === 404) {
+          console.warn('⚠️ [APP] Ruta /api/v1/connect no disponible, intentando /api/v1/auth/login...');
+          response = await fetch(`${baseUrl}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || data.message || 'No se pudo verificar la conexión o el estado de pago del cliente.');
-    }
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || data.message || 'No se pudo verificar la conexión.');
+        }
 
-    // 5. Guardar token/sesión si el backend devuelve uno nuevo
-    if (data.token) {
-      localStorage.setItem('sodie_token', data.token);
-    }
+        if (data.token) {
+          localStorage.setItem('sodie_token', data.token);
+        }
 
-    // 6. Actualizar el estado del cliente tras éxito
-    if (window.CLIENT_STATE) {
-      window.CLIENT_STATE.connected = true;
-      window.CLIENT_STATE.status = 'ACTIVE';
-    }
+        if (window.CLIENT_STATE) {
+          window.CLIENT_STATE.connected = true;
+          window.CLIENT_STATE.status = 'ACTIVE';
+        }
 
-    if (btnActivar) {
-      btnActivar.disabled = false;
-      btnActivar.textContent = '✓ Campaña Activada';
-      btnActivar.style.background = 'rgba(0, 255, 204, 0.2)';
-    }
+        if (btnActivar) {
+          btnActivar.disabled = false;
+          btnActivar.textContent = '✓ Campaña Activada';
+          btnActivar.style.background = 'rgba(0, 255, 204, 0.2)';
+        }
 
-    if (typeof showToast === 'function') {
-      showToast('Campaña Conectada', `Conexión verificada exitosamente para ${clientId}.`);
-    }
+        if (typeof showToast === 'function') {
+          showToast('Campaña Conectada', `Conexión verificada exitosamente para ${clientId}.`);
+        }
 
-    console.log('✅ [APP] Activación/Conexión exitosa:', data);
-
-  } catch (err) {
-    console.error('❌ [APP] Error en activar-campana:', err);
-    const btnActivar = document.getElementById('btn-activar-campana') || document.getElementById('btn-activate');
-    if (btnActivar) {
-      btnActivar.disabled = false;
-      btnActivar.textContent = 'Reintentar Activación';
-    }
-    alert(`Error al activar campaña: ${err.message}`);
-  }
-  break;
+        console.log('✅ [APP] Activación/Conexión exitosa:', data);
+        break;
+      }
 
       default:
+        console.warn(`Acción no reconocida: ${accion}`);
         break;
     }
   } catch (err) {
+    console.error(`❌ Error en acción '${accion}':`, err);
     alert(`Ocurrió un error al ejecutar la acción '${accion}': ${err.message || err}`);
   } finally {
     if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
