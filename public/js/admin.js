@@ -258,41 +258,56 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* 1. Inicia sesión con FB SDK y le manda el shortToken al Backend */
+
+/* ==========================================================================
+   1. INICIAR SESIÓN META ADS VÍA OAUTH (SIN SDK)
+   ========================================================================== */
 function sodieIniciarSesionFB() {
-  if (typeof FB === 'undefined') {
-    return alert('⚠️ El SDK de Facebook aún se está cargando. Intenta en un segundo.');
-  }
+  const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : window.location.origin;
+  
+  // Parámetros de la app de Meta
+  const appId = '1754371812277932'; // Reemplaza si usas otra App ID
+  const redirectUri = `${baseUrl}/api/v1/facebook/auth/callback`;
+  
+  // State indicando que es el Admin iniciando sesión
+  const statePayload = Buffer ? Buffer.from(JSON.stringify({ isAdmin: true, clientId: 'CLIENT-0' })).toString('base64') : btoa(JSON.stringify({ isAdmin: true, clientId: 'CLIENT-0' }));
+  const scope = 'ads_management,ads_read,business_management';
 
-  FB.login(function(response) {
-    if (response.authResponse) {
-      const shortToken = response.authResponse.accessToken;
+  // Construir la URL oficial de Login de Meta Ads
+  const fbAuthUrl = `https://www.facebook.com/v26.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${statePayload}&scope=${encodeURIComponent(scope)}&response_type=code`;
 
-      // El backend se encarga de convertirlo a 90 días
-      fetch(`${getBaseUrl()}/api/v1/admin/fb-exchange-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shortLivedToken: shortToken })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.longLivedToken) {
-          // Guardamos únicamente el token de 90 días en la sesión local
-          localStorage.setItem('sodie_fb_access_token', data.longLivedToken);
-          
-          const badge = document.getElementById('fb-token-state');
-          if (badge) badge.textContent = 'Autenticado (Token 90 días activo) 🟢';
-          
-          alert('✅ Sesión iniciada. Token de 90 días generado y vinculado correctamente.');
-        } else {
-          alert('❌ Error al convertir el token a 90 días: ' + (data.error || 'Desconocido'));
-        }
-      })
-      .catch(err => console.error('💥 Error en exchange token:', err));
-    } else {
-      alert('⚠️ Cancelado por el usuario.');
-    }
-  }, { scope: 'ads_management,ads_read,business_management' });
+  // Redirigir al usuario al flujo oficial de Meta
+  window.location.href = fbAuthUrl;
 }
+
+// 2. CAPTURAR LA NOTIFICACIÓN DE ÉXITO CUANDO EL BACKEND REGRESE A ADMIN.HTML
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get('status');
+  const readyToActivate = urlParams.get('readyToActivate');
+  const token = urlParams.get('longLivedToken');
+
+  if (status === 'fb_auth_success' || readyToActivate === 'true') {
+    if (token) {
+      localStorage.setItem('sodie_fb_access_token', token);
+    }
+
+    const badge = document.getElementById('fb-token-state');
+    if (badge) {
+      badge.textContent = 'Autenticado (Token 90 días activo - Listo para Activar) 🟢';
+      badge.style.color = '#00FFCC';
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('Meta Ads Conectado', 'Token de 90 días extendido exitosamente. Listo para activar.');
+    } else {
+      alert('✅ Autenticación OAuth completada con éxito. Token de 90 días activo.');
+    }
+
+    // Limpia la URL para dejar el panel impoluto
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
 
 /* 2. Dispara la activación: el backend pone el act_id y llama a metaServices */
 async function sodieConfirmarActivacion() {
