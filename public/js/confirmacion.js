@@ -50,254 +50,145 @@ document.addEventListener('DOMContentLoaded', async () => {
     return fallbackId;
   }
 
+    // =========================================================================
+  // PASO 0: CONFIRMAR PAGO, ASIGNAR ID Y SALTAR A CONTRATO.HTML (SIN EVALUADOR)
   // =========================================================================
-  // PASO 0: ASIGNAR ID Y SALTAR A CONTRATO.HTML
-  // =========================================================================
-  if (step === 'generar_id' || step === 'aceptar_rol' || paymentType === 'hora0') {
+  if (step === 'confirmar_pago' || step === 'generar_id' || step === 'aceptar_rol' || paymentType === 'hora0') {
     loaderEl.style.display = 'none';
     
     const activeClientId = await resolveClientId();
-    const activeFbUser = fbUserParam || 'Evaluador Meta';
+
+    // Registrar evento de compra en Pixel/CAPI si aplica
+    localStorage.setItem('sodie_payment_completed', 'true');
+    if (typeof fbq === 'function') {
+      fbq('track', 'Purchase', { value: 7000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
+    }
 
     badgeEl.textContent = `Paso 1 de 3 • Cliente ${activeClientId}`;
     titleEl.textContent = '¡Pago Registrado con Éxito!';
-    bodyEl.textContent = `Se ha asignado el ID ${activeClientId} para el perfil de Facebook @${activeFbUser}. Acepta la solicitud como evaluador en Meta y firma el contrato digital para continuar.`;
+    bodyEl.textContent = `Se ha asignado el ID ${activeClientId} a tu perfil. Firma el contrato legal de prestación de servicios para activar formalmente tu cupo en el sistema.`;
 
     stepsContainer.innerHTML = `
       <ul class="steps-list">
         <li>
           <span class="step-number">1</span>
-          <div>Acepta la invitación de evaluador enviado al usuario <strong>${activeFbUser}</strong> en Meta.</div>
+          <div>Identificador de cliente asignado: <strong>${activeClientId}</strong></div>
         </li>
         <li>
           <span class="step-number">2</span>
-          <div>Firma el contrato legal de prestación de servicios para activar tu cupo.</div>
+          <div>Firma del contrato digital de prestación de servicios.</div>
+        </li>
+      </ul>
+    `;
+
+    // Ocultar botón secundario innecesario
+    actionBtn.style.display = 'none';
+
+    // Botón directo a la firma de contrato
+    verifyBtn.style.display = 'inline-flex';
+    verifyBtn.textContent = 'Firmar Contrato Digital ➔';
+    verifyBtn.onclick = () => {
+      verifyBtn.textContent = 'Redirigiendo a contrato.html...';
+      const targetUrl = role === 'admin'
+        ? `/admin.html?sessionId=${sessionId || ''}&status=paid_success`
+        : `/contrato.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=paid_success`;
+      window.location.href = targetUrl;
+    };
+  }
+  // =========================================================================
+  // PASO 1: REGRESO DESDE EL EXCEL -> INICIAR CICLO DE META
+  // =========================================================================
+  // =========================================================================
+  // PASO 1: CONEXIÓN OAUTH CON META (ÚNICA ENTRADA POST-EXCEL)
+  // =========================================================================
+  else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta') {
+    loaderEl.style.display = 'none';
+    const activeClientId = await resolveClientId();
+
+    badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
+    titleEl.textContent = 'Excel Recibido • Vinculación Meta Ads';
+    bodyEl.textContent = `Hemos vinculado tu base de datos procesada por IA1 para el cliente ${activeClientId}. Inicia sesión con Facebook para sincronizar la cuenta publicitaria.`;
+
+    stepsContainer.innerHTML = `
+      <ul class="steps-list">
+        <li>
+          <span class="step-number">1</span>
+          <div>Cliente activo: <strong>${activeClientId}</strong></div>
+        </li>
+        <li>
+          <span class="step-number">2</span>
+          <div>Autoriza el acceso para generar el token de 90 días e inyectar borradores.</div>
+        </li>
+      </ul>
+    `;
+
+    verifyBtn.style.display = 'inline-flex';
+    verifyBtn.textContent = 'Iniciar Sesión con Meta Ads 🚀';
+    verifyBtn.onclick = async () => {
+      verifyBtn.textContent = 'Conectando con Meta...';
+      try {
+        const res = await fetch('/api/v1/facebook/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, clientId: activeClientId })
+        });
+        const data = await res.json();
+        
+        if (data.redirectUrl) {
+          // Va a Meta OAuth -> El callback en backend procesa y redirige a step=procesar_excel o step=activar_campana
+          window.location.href = data.redirectUrl;
+        } else {
+          alert('⚠️ Error obteniendo la URL de autenticación de Meta.');
+        }
+      } catch (err) {
+        alert('💥 Error de conexión con el servidor.');
+      } finally {
+        verifyBtn.textContent = 'Iniciar Sesión con Meta Ads 🚀';
+      }
+    };
+  }
+
+  // =========================================================================
+  // PASO 2: ACTIVACIÓN Y PUBLICACIÓN DE CAMPAÑA (REGRESO DEL CALLBACK)
+  // =========================================================================
+  else if (step === 'procesar_excel' || step === 'activar_campana') {
+    loaderEl.style.display = 'none';
+    const activeClientId = await resolveClientId();
+
+    badgeEl.textContent = `Paso 3 de 3 • Cliente ${activeClientId}`;
+    titleEl.textContent = '¡Borrador Generado en Meta Ads!';
+    bodyEl.textContent = 'Tu campaña y segmentación de 24 horas han sido inyectadas exitosamente. Abre Ads Manager para confirmar presupuesto y publicar los visuales.';
+
+    stepsContainer.innerHTML = `
+      <ul class="steps-list">
+        <li>
+          <span class="step-number">1</span>
+          <div>Ingresa a Meta Ads Manager para asignar presupuesto/imagen y activar.</div>
+        </li>
+        <li>
+          <span class="step-number">2</span>
+          <div>Pasa a tu Dashboard mientras Meta aprueba la verificación.</div>
         </li>
       </ul>
     `;
 
     actionBtn.style.display = 'inline-flex';
-    actionBtn.textContent = '1. Aceptar Evaluador en Meta ↗';
+    actionBtn.textContent = '1. Abrir Meta Ads Manager ↗';
     actionBtn.onclick = () => {
-      window.open('https://developers.facebook.com/requests/', '_blank');
+      const webUrl = `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${actId || ''}`;
+      window.open(webUrl, '_blank');
     };
 
     verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = '2. Ir a Firma de Contrato Digital ➔';
+    verifyBtn.textContent = '2. Ir a mi Dashboard';
     verifyBtn.onclick = () => {
-      verifyBtn.textContent = 'Redirigiendo a contrato.html...';
-      window.location.href = `contrato.html?clientId=${encodeURIComponent(activeClientId)}&fbUser=${encodeURIComponent(activeFbUser)}`;
+      window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=verifying`;
     };
-  }
-
-  // =========================================================================
-  // PASO 1: REGRESO DESDE EL EXCEL -> INICIAR CICLO DE META
-  // =========================================================================
-  else if (step === 'excel_and_fb' || step === 'excel_uploaded') {
-    loaderEl.style.display = 'none';
-    const activeClientId = await resolveClientId();
-    const activeFbUser = fbUserParam || 'Evaluador Meta';
-
-    badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
-    titleEl.textContent = 'Excel Recibido • Inyectando Audiencias';
-    bodyEl.textContent = `Hemos vinculado la base de datos de compradores para el usuario @${activeFbUser}. Conecta tu cuenta publicitaria para compilar y generar los borradores.`;
-
-    stepsContainer.innerHTML = `
-      <ul class="steps-list">
-        <li>
-          <span class="step-number">1</span>
-          <div>Evaluador asignado: <strong>${activeFbUser}</strong></div>
-        </li>
-        <li>
-          <span class="step-number">2</span>
-          <div>Iniciando compilación de audiencias similares en Meta Ads.</div>
-        </li>
-      </ul>
-    `;
-
-    verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = 'Iniciar Ciclo en Meta Ads 🚀';
-    verifyBtn.onclick = async () => {
-      verifyBtn.textContent = 'Conectando con Meta API...';
-      try {
-        const res = await fetch('/api/facebook/connect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, clientId: activeClientId, fbUser: activeFbUser })
-        });
-        const data = await res.json();
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        } else {
-          window.location.href = `index.html?clientId=${encodeURIComponent(activeClientId)}&status=ready_meta#app-dashboard`;
-        }
-      } catch (err) {
-        window.location.href = `index.html?clientId=${encodeURIComponent(activeClientId)}&status=ready_meta#app-dashboard`;
-      }
-    };
-  }
-
-  // =========================================================================
-  // PASO 2: CONEXIÓN OAUTH CON META
-  // =========================================================================
-  else if (step === 'conectar_meta') {
-    loaderEl.style.display = 'none';
-    badgeEl.textContent = 'Paso 2 de 3 • Vinculación Meta';
-    titleEl.textContent = 'Archivos Cargados Exitosamente';
-    bodyEl.textContent = 'Tu segmentación en Excel está lista. Conecta tu cuenta corporativa de Facebook para inyectar los conjuntos de anuncios.';
-
-    verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = 'Conectar con Facebook Ads';
-    verifyBtn.onclick = async () => {
-      verifyBtn.textContent = 'Iniciando conexión con Meta...';
-      try {
-        const res = await fetch('/api/facebook/connect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId })
-        });
-        const data = await res.json();
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        } else {
-          alert('Error obteniendo la URL de autenticación de Meta.');
-        }
-      } catch (err) {
-        alert('Error de conexión con el servidor.');
-      } finally {
-        verifyBtn.textContent = 'Conectar con Facebook Ads';
-      }
-    };
-  }
-
-  // =========================================================================
-  // PASO 3: ACTIVACIÓN DE CAMPAÑA (CLIENTE VS ADMIN)
-  // =========================================================================
-  else if (step === 'activar_campana' || paymentType === 'recurring') {
-    loaderEl.style.display = 'none';
-
-    if (role === 'admin') {
-      badgeEl.textContent = 'Panel Administrador • Verificación';
-      titleEl.textContent = 'Gestión Admin: Campaña Generada';
-      bodyEl.textContent = 'Se ha inyectado el borrador de la campaña para el cliente. Puedes revisarlo en Meta Ads Manager y confirmar la activación en el panel general.';
-
-      stepsContainer.innerHTML = `
-        <ul class="steps-list">
-          <li>
-            <span class="step-number">1</span>
-            <div>Verifica o edita la campaña generada en Meta Ads Manager.</div>
-          </li>
-          <li>
-            <span class="step-number">2</span>
-            <div>Confirma la verificación para regresar a la gestión en Admin.</div>
-          </li>
-        </ul>
-      `;
-
-      actionBtn.style.display = 'inline-flex';
-      actionBtn.textContent = '1. Revisar en Meta Ads Manager ↗';
-      actionBtn.onclick = () => {
-        const webUrl = `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${actId}&selected_campaign_ids=${campaignId}`;
-        window.open(webUrl, '_blank');
-      };
-
-      verifyBtn.style.display = 'inline-flex';
-      verifyBtn.textContent = '2. Confirmar y Volver a Admin.html';
-      verifyBtn.onclick = async () => {
-        verifyBtn.textContent = 'Confirmando cambios...';
-        try {
-          await fetch('/api/facebook/activar-campana', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId, campaignId, role: 'admin' })
-          });
-        } catch (err) {
-          console.warn("Redirigiendo a admin...");
-        }
-        window.location.href = `/admin.html?sessionId=${sessionId || ''}&status=verified_by_admin`;
-      };
-
-    } else {
-      // Flujo Normal para Clientes
-      const activeClientId = await resolveClientId();
-
-      badgeEl.textContent = `Paso Final • ${activeClientId}`;
-      titleEl.textContent = 'Borrador Generado en Meta';
-      bodyEl.textContent = 'El borrador de tu campaña ha sido preparado. Abre Meta Ads Manager para publicar presupuesto/creativos y pasa a tu Dashboard.';
-
-      stepsContainer.innerHTML = `
-        <ul class="steps-list">
-          <li>
-            <span class="step-number">1</span>
-            <div>Abre Meta Ads Manager para publicar el borrador generado.</div>
-          </li>
-          <li>
-            <span class="step-number">2</span>
-            <div>Accede a tu Dashboard. La campaña pasará al estado de verificación.</div>
-          </li>
-        </ul>
-      `;
-
-      actionBtn.style.display = 'inline-flex';
-      actionBtn.textContent = '1. Abrir Meta Ads Manager ↗';
-      actionBtn.onclick = () => {
-        const webUrl = `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${actId}&selected_campaign_ids=${campaignId}`;
-        const appUrl = `fb://adsmanager/campaign?act=${actId}&campaign_id=${campaignId}`;
-
-        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          const start = Date.now();
-          window.location.href = appUrl;
-          setTimeout(() => {
-            if (Date.now() - start < 3000) window.location.href = webUrl;
-          }, 2500);
-        } else {
-          window.open(webUrl, '_blank');
-        }
-      };
-
-      verifyBtn.style.display = 'inline-flex';
-      verifyBtn.textContent = '2. Ir a mi Dashboard (En Verificación) 📊';
-      verifyBtn.onclick = async () => {
-        verifyBtn.textContent = 'Confirmando en servidor...';
-        try {
-          await fetch('/api/facebook/activar-campana', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId, campaignId, clientId: activeClientId })
-          });
-        } catch (err) {
-          console.warn("Navegando hacia el dashboard...");
-        }
-
-        window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&campaignId=${campaignId || ''}&status=verifying`;
-      };
-    }
   }
 
   // =========================================================================
   // PASO 4: CONFIRMAR PAGO INICIAL / EVENTO CAPI
   // =========================================================================
-  else if (step === 'confirmar_pago') {
-    loaderEl.style.display = 'none';
-    const activeClientId = await resolveClientId();
-
-    localStorage.setItem('sodie_payment_completed', 'true');
-
-    if (typeof fbq === 'function') {
-      fbq('track', 'Purchase', { value: 7000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
-    }
-
-    badgeEl.textContent = `Pago Exitoso • ${activeClientId}`;
-    titleEl.textContent = '¡Pago Registrado!';
-    bodyEl.textContent = 'Registrando evento CAPI y redirigiendo a tu panel...';
-    
-    setTimeout(() => {
-      const targetUrl = role === 'admin' 
-        ? `/admin.html?sessionId=${sessionId || ''}&status=paid_success` 
-        : `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=paid_success`;
-      window.location.href = targetUrl;
-    }, 2000);
-  }
 
   // =========================================================================
   // PASO 5: NUEVA REDIRECCIÓN POST-PAGO SEMANAL -> CLIENT.HTML
