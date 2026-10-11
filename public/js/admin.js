@@ -266,8 +266,8 @@ function sodieIniciarSesionFB() {
   const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : window.location.origin;
   
   // Parámetros de la app de Meta
-  const appId = '1754371812277932'; // Reemplaza si usas otra App ID
-  const redirectUri = `${baseUrl}/api/v1/facebook/auth/callback`;
+  const appId = '1605370484367920'; // Reemplaza si usas otra App ID
+  const redirectUri = `${baseUrl}/api/facebook/auth/callback`;
   
   // State indicando que es el Admin iniciando sesión
   const statePayload = Buffer ? Buffer.from(JSON.stringify({ isAdmin: true, clientId: 'CLIENT-0' })).toString('base64') : btoa(JSON.stringify({ isAdmin: true, clientId: 'CLIENT-0' }));
