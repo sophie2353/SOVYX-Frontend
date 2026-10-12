@@ -8,12 +8,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const role = urlParams.get('role'); // 'admin' | null (cliente)
   const weekNumber = urlParams.get('week') || '1';
   let clientIdParam = urlParams.get('clientId');
-  let fbUserParam = urlParams.get('fbUser') || localStorage.getItem('sodie_fb_user');
-
-  // Guardar el fbUser en almacenamiento local para persistencia
-  if (fbUserParam) {
-    localStorage.setItem('sodie_fb_user', fbUserParam);
-  }
 
   const titleEl = document.getElementById('conf-title');
   const bodyEl = document.getElementById('conf-body');
@@ -50,15 +44,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     return fallbackId;
   }
 
-    // =========================================================================
-  // PASO 0: CONFIRMAR PAGO, ASIGNAR ID Y SALTAR A CONTRATO.HTML (SIN EVALUADOR)
+  // =========================================================================
+  // PASO 0: CONFIRMAR PAGO, ASIGNAR ID Y SALTAR A CONTRATO.HTML
   // =========================================================================
   if (step === 'confirmar_pago' || step === 'generar_id' || step === 'aceptar_rol' || paymentType === 'hora0') {
     loaderEl.style.display = 'none';
     
     const activeClientId = await resolveClientId();
 
-    // Registrar evento de compra en Pixel/CAPI si aplica
     localStorage.setItem('sodie_payment_completed', 'true');
     if (typeof fbq === 'function') {
       fbq('track', 'Purchase', { value: 7000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
@@ -66,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     badgeEl.textContent = `Paso 1 de 3 • Cliente ${activeClientId}`;
     titleEl.textContent = '¡Pago Registrado con Éxito!';
-    bodyEl.textContent = `Se ha asignado el ID ${activeClientId} a tu perfil. Firma el contrato legal de prestación de servicios para activar formalmente tu cupo en el sistema.`;
+    bodyEl.textContent = `Se ha asignado el ID ${activeClientId} a tu perfil. Firma el contrato legal de prestación de servicios para activar formalmente tu cupo.`;
 
     stepsContainer.innerHTML = `
       <ul class="steps-list">
@@ -81,10 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </ul>
     `;
 
-    // Ocultar botón secundario innecesario
     actionBtn.style.display = 'none';
-
-    // Botón directo a la firma de contrato
     verifyBtn.style.display = 'inline-flex';
     verifyBtn.textContent = 'Firmar Contrato Digital ➔';
     verifyBtn.onclick = () => {
@@ -95,61 +85,73 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = targetUrl;
     };
   }
+
   // =========================================================================
-  // PASO 1: REGRESO DESDE EL EXCEL -> INICIAR CICLO DE META
+  // PASO 1: CONFIGURACIÓN POST-PAGO DE CREDENCIALES (ACT_ID & PIXEL_ID)
   // =========================================================================
-  // =========================================================================
-  // PASO 1: CONEXIÓN OAUTH CON META (ÚNICA ENTRADA POST-EXCEL)
-  // =========================================================================
-  else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta') {
+  else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
 
     badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
-    titleEl.textContent = 'Excel Recibido • Vinculación Meta Ads';
-    bodyEl.textContent = `Hemos vinculado tu base de datos procesada por IA1 para el cliente ${activeClientId}. Inicia sesión con Facebook para sincronizar la cuenta publicitaria.`;
+    titleEl.textContent = 'Configuración de Cuenta Publicitaria';
+    bodyEl.textContent = `Ingresa los datos de tu cuenta publicitaria de Meta para vincular la automatización de IA1 con el cliente ${activeClientId}. Solo se requiere una vez.`;
 
+    // Inyectar el formulario limpio de configuración en lugar del botón de OAuth
     stepsContainer.innerHTML = `
-      <ul class="steps-list">
-        <li>
-          <span class="step-number">1</span>
-          <div>Cliente activo: <strong>${activeClientId}</strong></div>
-        </li>
-        <li>
-          <span class="step-number">2</span>
-          <div>Autoriza el acceso para generar el token de 90 días e inyectar borradores.</div>
-        </li>
-      </ul>
+      <div class="credentials-form">
+        <div class="form-group">
+          <label for="input-act-id">ID de Cuenta Publicitaria (act_id)</label>
+          <input type="text" id="input-act-id" placeholder="Ej: act_123456789 o 123456789" value="${actId || ''}">
+        </div>
+        <div class="form-group" style="margin-top: 14px;">
+          <label for="input-pixel-id">ID del Píxel de Meta (pixel_id - Opcional)</label>
+          <input type="text" id="input-pixel-id" placeholder="Ej: 987654321012345">
+        </div>
+      </div>
     `;
 
     verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = 'Iniciar Sesión con Meta Ads 🚀';
+    verifyBtn.textContent = 'Guardar y Vincular Credenciales 🚀';
     verifyBtn.onclick = async () => {
-      verifyBtn.textContent = 'Conectando con Meta...';
+      const actInput = document.getElementById('input-act-id').value.trim();
+      const pixelInput = document.getElementById('input-pixel-id').value.trim();
+
+      if (!actInput) {
+        alert('⚠️ Por favor ingresa el ID de tu cuenta publicitaria.');
+        return;
+      }
+
+      verifyBtn.textContent = 'Guardando en Base de Datos...';
       try {
-        const res = await fetch('/api/v1/facebook/connect', {
+        const res = await fetch('/api/v1/facebook/configurar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, clientId: activeClientId })
+          body: JSON.stringify({
+            clientId: activeClientId,
+            actId: actInput,
+            pixelId: pixelInput || null
+          })
         });
+
         const data = await res.json();
         
-        if (data.redirectUrl) {
-          // Va a Meta OAuth -> El callback en backend procesa y redirige a step=procesar_excel o step=activar_campana
-          window.location.href = data.redirectUrl;
+        if (data.success) {
+          window.location.href = `/confirmacion.html?step=procesar_excel&clientId=${encodeURIComponent(activeClientId)}&actId=${encodeURIComponent(data.act_id)}&sessionId=${sessionId || ''}`;
         } else {
-          alert('⚠️ Error obteniendo la URL de autenticación de Meta.');
+          alert(`⚠️ Error: ${data.error || 'No se pudieron guardar las credenciales.'}`);
+          verifyBtn.textContent = 'Guardar y Vincular Credenciales 🚀';
         }
       } catch (err) {
+        console.error('💥 Error de conexión:', err);
         alert('💥 Error de conexión con el servidor.');
-      } finally {
-        verifyBtn.textContent = 'Iniciar Sesión con Meta Ads 🚀';
+        verifyBtn.textContent = 'Guardar y Vincular Credenciales 🚀';
       }
     };
   }
 
   // =========================================================================
-  // PASO 2: ACTIVACIÓN Y PUBLICACIÓN DE CAMPAÑA (REGRESO DEL CALLBACK)
+  // PASO 2: ACTIVACIÓN Y PUBLICACIÓN DE CAMPAÑA (POST-CONFIGURACIÓN)
   // =========================================================================
   else if (step === 'procesar_excel' || step === 'activar_campana') {
     loaderEl.style.display = 'none';
@@ -157,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     badgeEl.textContent = `Paso 3 de 3 • Cliente ${activeClientId}`;
     titleEl.textContent = '¡Borrador Generado en Meta Ads!';
-    bodyEl.textContent = 'Tu campaña y segmentación de 24 horas han sido inyectadas exitosamente. Abre Ads Manager para confirmar presupuesto y publicar los visuales.';
+    bodyEl.textContent = 'Tu campaña y segmentación de 24 horas han sido inyectadas exitosamente en tu cuenta. Abre Ads Manager para confirmar presupuesto y publicar tus visuales.';
 
     stepsContainer.innerHTML = `
       <ul class="steps-list">
@@ -167,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </li>
         <li>
           <span class="step-number">2</span>
-          <div>Pasa a tu Dashboard mientras Meta aprueba la verificación.</div>
+          <div>Pasa a tu Dashboard mientras el sistema verifica las métricas.</div>
         </li>
       </ul>
     `;
@@ -175,7 +177,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     actionBtn.style.display = 'inline-flex';
     actionBtn.textContent = '1. Abrir Meta Ads Manager ↗';
     actionBtn.onclick = () => {
-      const webUrl = `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${actId || ''}`;
+      const cleanAct = actId ? actId.replace(/^act_/, '') : '';
+      const webUrl = cleanAct 
+        ? `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${cleanAct}${campaignId ? `&selected_campaign_ids=${campaignId}` : ''}`
+        : 'https://adsmanager.facebook.com/adsmanager/manage/campaigns';
       window.open(webUrl, '_blank');
     };
 
@@ -187,11 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // =========================================================================
-  // PASO 4: CONFIRMAR PAGO INICIAL / EVENTO CAPI
-  // =========================================================================
-
-  // =========================================================================
-  // PASO 5: NUEVA REDIRECCIÓN POST-PAGO SEMANAL -> CLIENT.HTML
+  // PASO 3: REDIRECCIÓN POST-PAGO SEMANAL -> CLIENT.HTML
   // =========================================================================
   else if (step === 'pago_semanal') {
     loaderEl.style.display = 'none';
