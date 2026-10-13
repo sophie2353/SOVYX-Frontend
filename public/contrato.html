@@ -5,93 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contrato de Prestación de Servicios - SODIE</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+      body.contract-body {
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .contract-wrapper {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .glass-card-dash {
+        margin-bottom: 24px;
+      }
+      .clause {
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text-sub);
+      }
+      .clause strong {
+        color: var(--text-main);
+      }
+      .clause-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1rem;
+        color: var(--neon-mint);
+        margin-bottom: 8px;
+        font-weight: 700;
+      }
+      .meta-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin: 16px 0 24px 0;
+      }
+      .meta-item-box {
+        background: rgba(0, 255, 204, 0.05);
+        border: 1px solid rgba(0, 255, 204, 0.2);
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+      }
+      .meta-item-box span {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-sub);
+        margin-bottom: 2px;
+      }
+      .meta-item-box strong {
+        font-size: 0.9rem;
+        color: var(--neon-mint);
+      }
+      .audit-box {
+        margin-top: 30px;
+        border-top: 1px solid rgba(0, 255, 204, 0.3);
+        padding-top: 20px;
+      }
+      .audit-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.05rem;
+        color: var(--neon-mint);
+        margin-bottom: 16px;
+      }
+      .audit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+      @media (max-width: 600px) {
+        .audit-grid { grid-template-columns: 1fr; }
+      }
+      .audit-field label {
+        display: block;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        margin-bottom: 6px;
+      }
+      .accept-section {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 16px 0 20px 0;
+        font-size: 0.88rem;
+        color: var(--text-sub);
+        line-height: 1.4;
+      }
+      .accept-section input[type="checkbox"] {
+        margin-top: 3px;
+        accent-color: var(--neon-mint);
+        width: 18px;
+        height: 18px;
+      }
+      .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--neon-mint) 0%, #00a884 100%);
+        border: none;
+        border-radius: 12px;
+        color: var(--bg-dark);
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+        transition: all 0.25s ease;
+      }
+      .btn-submit:hover {
+        box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+        transform: translateY(-2px);
+      }
+    </style>
 </head>
-<body>
+<body class="contract-body">
 
-<div class="contract-container">
-    <div class="header">
-        <div class="logo">SODIE</div>
-        <div class="subtitle">Software exclusivo High Ticket de Segmentación ultra precisa en Anuncios Digitales</div>
-        <h1 class="doc-title">CONTRATO DE PRESTACIÓN DE SERVICIOS DE EVALUACIÓN TÉCNICA, VALIDACIÓN LEGAL Y LICENCIAMIENTO DE SOFTWARE</h1>
+<div class="contract-wrapper">
+  <!-- TARJETA PRINCIPAL ENCAPSULADA -->
+  <div class="glass-card-dash">
+    <div class="dash-header" style="margin-bottom: 16px;">
+      <span class="brand-text mint-txt">SODIE</span>
+      <span class="badge-client">Versión 3.5.0</span>
     </div>
 
-    <div class="meta-info">
-        <div class="meta-item">
-            <span>Nombre del Software</span>
-            SODIE
-        </div>
-        <div class="meta-item">
-            <span>Versión</span>
-            3.5.0
-        </div>
-        <div class="meta-item">
-            <span>Fecha de Creación</span>
-            02 de Abril del 2025
-        </div>
-        <div class="meta-item">
-            <span>Fecha de Lanzamiento</span>
-            Septiembre 2026
-        </div>
-    </div>
+    <h1 class="section-title mint-txt" style="font-size: 1.4rem; justify-content: center; text-align: center; margin-bottom: 14px;">
+      CONTRATO DE PRESTACIÓN DE SERVICIOS Y LICENCIAMIENTO
+    </h1>
+    <p class="step-desc text-center" style="margin-bottom: 20px;">Software exclusivo High Ticket de Segmentación precisa en Anuncios Digitales</p>
 
-    <div class="clause">
-        <p>Conste por el presente documento el contrato de servicios de evaluación, validación y licencia de uso de software, que celebran de una parte <strong>SODIE</strong>, en adelante denominado <strong>EL LICENCIANTE</strong>, y de la otra la persona natural o jurídica que adquiere el servicio, en adelante denominado <strong>EL USUARIO</strong>, bajo los términos y condiciones contenidos en las siguientes cláusulas:</p>
-    </div>
-
-    <div class="clause">
-        <div class="clause-title">PRIMERA: DEL OBJETO DEL CONTRATO</div>
-        <p>El presente contrato tiene como objeto principal regular la prestación de servicios profesionales de evaluación técnica y validación legal de la existencia, operatividad y características de un sistema informático (en adelante, EL SOFTWARE), bajo la modalidad de evaluador por parte de EL USUARIO, estableciendo los hitos de verificación y las opciones de licenciamiento comercial que se detallan más adelante.</p>
+    <div class="meta-info-grid">
+      <div class="meta-item-box">
+        <span>Software</span>
+        <strong>SODIE</strong>
+      </div>
+      <div class="meta-item-box">
+        <span>Versión</span>
+        <strong>3.5.0</strong>
+      </div>
+      <div class="meta-item-box">
+        <span>Lanzamiento</span>
+        <strong>Octubre 2026</strong>
+      </div>
+      <div class="meta-item-box">
+        <span>Modalidad</span>
+        <strong>Evaluador</strong>
+      </div>
     </div>
 
     <div class="clause">
-        <div class="clause-title">SEGUNDA: DEL PERÍODO DE EVALUACIÓN, VALIDACIÓN LEGAL Y ESQUEMA DE PAGOS</div>
-        <p>Las partes acuerdan expresamente que la relación contractual se regirá por las siguientes fases de pago, plazos y condiciones:</p>
-        <ul>
-            <li><strong>Pago Inicial y Cuotas Restantes:</strong> El USUARIO se compromete a realizar la liquidación de sus obligaciones bajo el esquema de 1 pago inicial de $7,000.00 USD (Siete Mil Dólares USDC) correspondientes a la Hora 0. Posteriormente, el saldo restante del ciclo será diferido en tres (3) cuotas semanales de $6,000.00 USD (Seis Mil Dólares USDC) ejecutadas al término de los Días 7, 14 y 21 respectivamente.</li>
-            <li><strong>Condición por incumplimiento de Pagos:</strong> En caso de que EL USUARIO no efectúe los pagos en los plazos y fechas acordadas, quedará obligado a pagar los montos correspondientes con un recargo adicional como penalización por retraso, independientemente de los resultados obtenidos en la comparativa técnica.</li>
-        </ul>
+      <p>Conste por el presente documento el contrato de servicios de evaluación, validación y licencia de uso de software, que celebran de una parte <strong>SODIE</strong>, en adelante denominado <strong>EL LICENCIANTE</strong>, y de la otra la persona natural o jurídica que adquiere el servicio, en adelante denominado <strong>EL USUARIO</strong>, bajo los términos y condiciones contenidos en las siguientes cláusulas:</p>
     </div>
 
     <div class="clause">
-        <div class="clause-title">TERCERA: NUEVA ETAPA OPCIONAL (LISTA DE ESPERA)</div>
-        <ul>
-            <li><strong>Activación y Plazos:</strong> La lista de espera se activará para los evaluadores la semana 4 y finaliza como máximo la lista de espera la semana 4. Para formalizar esta etapa, se firmará un nuevo contrato como acceso oficial tras haber probado el SOFTWARE anteriormente.</li>
-            <li><strong>Plataforma y Requisito de Acceso:</strong> Consistirá en una aplicación WEB instalada en el dispositivo. Al activar el nuevo acceso, se creará un perfil de usuario registrando junto al ID previo (si es evaluador), Nombre, Correo, Compañía y Credenciales (CONTRASEÑA Y BIOMETRÍA), permitiendo iniciar sesión mediante autenticación biométrica o contraseña.</li>
-            <li><strong>Modelo Comercial:</strong> El acceso al finalizar la lista de espera tendrá un costo de 5,000 dólares americanos al mes y mayor inversión para acceso.</li>
-            <li><strong>Integración y Activación:</strong> El sistema se conectará a Shopify y / o a la plataforma del producto comercializado para exportar los datos directamente desde API e inyectarlos en el borrador correspondiente. Los nuevos borradores se activarán cada 72 a 96 horas para mantener actualizado EL SOFTWARE Y NUEVAS CAMPAÑAS.</li>
-        </ul>
+      <div class="clause-title">PRIMERA: DEL OBJETO DEL CONTRATO</div>
+      <p>El presente contrato tiene como objeto principal regular la prestación de servicios profesionales de evaluación técnica y validación legal de la existencia, operatividad y características de un sistema informático (en adelante, EL SOFTWARE), bajo la modalidad de evaluador por parte de EL USUARIO, estableciendo los hitos de verificación y las opciones de licenciamiento comercial.</p>
     </div>
 
     <div class="clause">
-        <div class="clause-title">CUARTA: DE LA ACEPTACIÓN DIGITAL Y VALIDEZ LEGAL</div>
-        <p>El presente contrato se perfecciona y adquiere plena validez jurídica en el momento en que EL USUARIO realiza el pago inicial correspondiente y/o manifiesta su aceptación mediante la firma electrónica, marcas de verificación en plataformas digitales o confirmación escrita. Esta acción constituye un acuerdo vinculante que sustituye cualquier firma autógrafa.</p>
+      <div class="clause-title">SEGUNDA: DEL PERÍODO DE EVALUACIÓN Y ESQUEMA DE PAGOS</div>
+      <p>Las partes acuerdan expresamente que la relación contractual se regirá por las siguientes fases:</p>
+      <ul style="margin-left: 20px; margin-top: 6px;">
+        <li><strong>Pago Inicial:</strong> El USUARIO realiza un pago inicial de $7,000.00 USDC correspondientes a la Hora 0.</li>
+        <li><strong>Cuotas Restantes:</strong> Diferido en tres (3) cuotas semanales de $6,000.00 USDC ejecutadas al término de los Días 7, 14 y 21.</li>
+      </ul>
     </div>
 
     <div class="clause">
-        <div class="clause-title">QUINTA: DE LAS CONDICIONES DE USO Y RESTRICCIONES</div>
-        <p>Durante el período de evaluación, la extensión temporal o el licenciamiento final, EL USUARIO se compromete a cumplir estrictamente con lo siguiente:</p>
-        <ul>
-            <li>Utilizar EL SOFTWARE exclusivamente para los fines de prueba, verificación y operación autorizados.</li>
-            <li>Queda prohibido copiar, modificar, descompilar, realizar ingeniería inversa o extraer el código fuente de EL SOFTWARE.</li>
-            <li>No está permitida la cesión, reventa, alquiler o transferencia de los accesos provistos a terceros ajenos a este contrato.</li>
-        </ul>
+      <div class="clause-title">TERCERA: NUEVA ETAPA OPCIONAL (LISTA DE ESPERA)</div>
+      <p>La lista de espera se habilitará en la semana 4 con un costo operativo de $5,000.00 USD mensuales, integrándose directamente mediante API con Shopify y plataformas de comercio electrónico.</p>
     </div>
 
     <div class="clause">
-        <div class="clause-title">SÉPTIMA: DE LA LIMITACIÓN DE RESPONSABILIDAD E INCUMPLIMIENTO</div>
-        <p>EL SOFTWARE se proporciona bajo los estándares técnicos probatorios estipulados para su validación. EL LICENCIANTE no asumirá responsabilidad por daños indirectos derivados del uso indebido del sistema fuera de los parámetros establecidos. El incumplimiento de los pagos subsecuentes en las fechas acordadas (como el saldo de $9,000 tras las 48 horas o la extensión de 30 días) invalidará de forma inmediata el contrato y acarreará la revocación automática de los accesos a EL SOFTWARE.</p>
-    </div>
-
-    <div class="clause">
-        <div class="clause-title">OCTAVA: DE LA JURISDICCIÓN Y LEY APLICABLE</div>
-        <p>Para la resolución de cualquier controversia, desacuerdo o interpretación derivada de la ejecución del presente contrato, las partes acuerdan someterse expresamente a las leyes y a la jurisdicción de los tribunales competentes del domicilio de EL LICENCIANTE.</p>
-        <p style="margin-top: 10px;">En señal de conformidad y aceptación de todas las cláusulas precedentes, las partes perfeccionan el presente contrato mediante la aceptación digital y el pago correspondiente.</p>
+      <div class="clause-title">CUARTA: DE LA ACEPTACIÓN DIGITAL</div>
+      <p>El presente contrato se perfecciona y adquiere plena validez jurídica en el momento en que EL USUARIO realiza el pago inicial y manifiesta su aceptación mediante la firma electrónica en la plataforma.</p>
     </div>
 
     <!-- REGISTRO DE AUDITORÍA Y FIRMA DIGITAL -->
     <div id="signature-box" class="audit-box">
         <div class="audit-title">
-            <span></span> Registro de Aceptación Digital y Firma Electrónica
+         Registro de Aceptación Digital y Firma Electrónica
         </div>
         <form id="contract-form">
             <div class="audit-grid">
@@ -116,18 +209,19 @@
             <div class="accept-section">
                 <input type="checkbox" id="accept_terms" required>
                 <label for="accept_terms">
-                    Declaro que he leído, comprendido y acepto íntegramente las cláusulas de este Contrato de Prestación de Servicios de Evaluación y Licenciamiento. Reconozco que esta aceptación digital vincula jurídicamente a mi persona/empresa bajo la Dirección IP y registro provisto.
+                    Declaro que he leído, comprendido y acepto íntegramente las cláusulas de este Contrato de Prestación de Servicios de Evaluación y Licenciamiento.
                 </label>
             </div>
 
             <button type="submit" class="btn-submit">Aceptar, Firmar y Continuar ➔</button>
         </form>
     </div>
+  </div>
 </div>
     
-<footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem;">
-      <p>© SODIE v3.5. 2026</p>
-    </footer>
+<footer class="dash-footer text-center margin-v-md" style="opacity: 0.6; font-size: 0.85rem; margin-top: 20px;">
+  <p>© SODIE v3.5. 2026</p>
+</footer>
     
 <script src="/js/config.js"></script>
 <script src="/js/contrato.js"></script>
