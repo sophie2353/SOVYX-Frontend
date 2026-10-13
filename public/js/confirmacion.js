@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
 
     verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = 'Guardar y Vincular Credenciales 🚀';
+    verifyBtn.textContent = 'Guardar y Vincular Credenciales';
     verifyBtn.onclick = async () => {
       const actInput = document.getElementById('input-act-id').value.trim();
       const pixelInput = document.getElementById('input-pixel-id').value.trim();
@@ -140,12 +140,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.location.href = `/confirmacion.html?step=procesar_excel&clientId=${encodeURIComponent(activeClientId)}&actId=${encodeURIComponent(data.act_id)}&sessionId=${sessionId || ''}`;
         } else {
           alert(`⚠️ Error: ${data.error || 'No se pudieron guardar las credenciales.'}`);
-          verifyBtn.textContent = 'Guardar y Vincular Credenciales 🚀';
+          verifyBtn.textContent = 'Guardar y Vincular Credenciales';
         }
       } catch (err) {
         console.error('💥 Error de conexión:', err);
         alert('💥 Error de conexión con el servidor.');
-        verifyBtn.textContent = 'Guardar y Vincular Credenciales 🚀';
+        verifyBtn.textContent = 'Guardar y Vincular Credenciales';
       }
     };
   }
