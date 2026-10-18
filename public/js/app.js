@@ -115,7 +115,7 @@ function initSplashGauges() {
    3. CONTADOR DE CUPOS & DISPONIBILIDAD DINÁMICA DE PRECIOS
    ========================================================================== */
 async function checkAvailableSlots() {
-  let slots = 3;
+  let slots = 10;
   try {
     const res = await fetch(`${getBaseUrl()}/api/clientes/disponibles`);
     if (res.ok) {
@@ -124,7 +124,7 @@ async function checkAvailableSlots() {
       if (!isNaN(parsed)) slots = parsed;
     }
   } catch (error) {
-    slots = 3;
+    slots = 10;
   }
   actualizarInterfazCupos(slots);
 }
