@@ -477,7 +477,7 @@ async function sodieConfirmarActivacionCliente() {
 function initGlobalAndWeeklyTimers() {
   try {
     const globalTimerDisplay = document.getElementById('global-timer-display');
-    const timer24hDisplay = document.getElementById('timer-24h-display');
+    const timer72hDisplay = document.getElementById('timer-24h-display');
     
     if (CLIENT_STATE.timerInterval) clearInterval(CLIENT_STATE.timerInterval);
 
@@ -486,15 +486,16 @@ function initGlobalAndWeeklyTimers() {
     CLIENT_STATE.timerInterval = setInterval(() => {
       const now = Date.now();
       const elapsed = Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000);
-      const remaining24h = Math.max(0, (24 * 3600) - (elapsed % (24 * 3600)));
+      const remaining24h = Math.max(0, (72 * 3600) - (elapsed % (72 * 3600)));
 
       const h = String(Math.floor(remaining24h / 3600)).padStart(2, '0');
       const m = String(Math.floor((remaining24h % 3600) / 60)).padStart(2, '0');
       const s = String(remaining24h % 60).padStart(2, '0');
 
-      if (timer24hDisplay) timer24hDisplay.textContent = `${h}:${m}:${s}`;
+      if (timer72hDisplay) timer24hDisplay.textContent = `${h}:${m}:${s}`;
     }, 1000);
   } catch (e) {
     console.warn('Error en temporizadores:', e);
   }
 }
+
