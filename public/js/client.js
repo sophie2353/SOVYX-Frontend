@@ -477,7 +477,7 @@ async function sodieConfirmarActivacionCliente() {
 function initGlobalAndWeeklyTimers() {
   try {
     const globalTimerDisplay = document.getElementById('global-timer-display');
-    const timer72hDisplay = document.getElementById('timer-24h-display');
+    const timer72hDisplay = document.getElementById('timer-72h-display');
     
     if (CLIENT_STATE.timerInterval) clearInterval(CLIENT_STATE.timerInterval);
 
@@ -486,16 +486,105 @@ function initGlobalAndWeeklyTimers() {
     CLIENT_STATE.timerInterval = setInterval(() => {
       const now = Date.now();
       const elapsed = Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000);
-      const remaining24h = Math.max(0, (72 * 3600) - (elapsed % (72 * 3600)));
+      const remaining72h = Math.max(0, (72 * 3600) - (elapsed % (72 * 3600)));
 
       const h = String(Math.floor(remaining24h / 3600)).padStart(2, '0');
       const m = String(Math.floor((remaining24h % 3600) / 60)).padStart(2, '0');
-      const s = String(remaining24h % 60).padStart(2, '0');
+      const s = String(remaining72h % 60).padStart(2, '0');
 
-      if (timer72hDisplay) timer24hDisplay.textContent = `${h}:${m}:${s}`;
+      if (timer72hDisplay) timer72hDisplay.textContent = `${h}:${m}:${s}`;
     }, 1000);
   } catch (e) {
     console.warn('Error en temporizadores:', e);
+  }
+}
+
+// ------- 10. NOTIFICACIONES PUSH ------ 
+async function activarNotificacionesPush(clientIdOverride = null) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('Este navegador no soporta notificaciones Push nativas');
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('Permiso de notificaciones denegado por el usuario.');
+      return;
+    }
+
+    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
+
+    // 1. Obtener la clave pública del backend
+    const resKey = await fetch(`${getBaseUrl()}/api/webhook-client/vapid-public-key`);
+    if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
+    const { publicKey } = await resKey.json();
+
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: publicKey
+    });
+
+    // 2. Guardar la suscripción en la base de datos vinculada al cliente (asociada a push_CLIENT-#XX)
+    const responseSave = await fetch(`${getBaseUrl()}/api/webhook-client/save-subscription`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, subscription })
+    });
+
+    const dataSave = await responseSave.json();
+    if (!responseSave.ok || !dataSave.success) throw new Error(dataSave.error || 'Error al guardar suscripción.');
+
+    console.log('✅ Notificaciones nativas activadas con éxito para:', clientId);
+    if (typeof showToast === 'function') {
+      showToast('Push Activado', `Notificaciones vinculadas para ${clientId}.`);
+    }
+
+  } catch (error) {
+    console.error('💥 Error activando notificaciones Push:', error.message);
+  }
+}
+
+// 3. Notificar cada 72 horas para actualizar segmentación
+async function dispararNotificacion72h(clientIdOverride = null) {
+  try {
+    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
+    
+    const res = await fetch(`${getBaseUrl()}/api/webhook-client/timer/push-72h`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId,
+        timerId: `timer_72h_${clientId}_${Date.now()}`
+      })
+    });
+
+    const data = await res.json();
+    console.log('📡 Respuesta Push 72h:', data);
+  } catch (err) {
+    console.error('💥 Error en llamada Push 72h:', err.message);
+  }
+}
+
+// 4. Notificar cada 7 días para renovación/pago semanal
+async function dispararNotificacionDay7(clientIdOverride = null) {
+  try {
+    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
+    
+    const res = await fetch(`${getBaseUrl()}/api/webhook-client/timer/push-day7`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId,
+        timerId: `timer_day7_${clientId}_${Date.now()}`
+      })
+    });
+
+    const data = await res.json();
+    console.log('📡 Respuesta Push Día 7:', data);
+  } catch (err) {
+    console.error('💥 Error en llamada Push Día 7:', err.message);
   }
 }
 
