@@ -372,41 +372,47 @@ async function fetchClientMetrics() {
    7. SUBIDA DE EXCEL
    ========================================================================== */
 async function sodieFlujoInyeccionCliente(overrideClientId = null) {
-  const fileInput = document.getElementById('client-file-input') || document.getElementById('client-excel-input');
   const btnUpload = document.getElementById('btn-client-upload-excel');
 
-  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    alert('Selecciona tu archivo de audiencia primero.');
-    return;
-  }
+  const paises = document.getElementById('client-paises')?.value || 'US';
+  const nicho = document.getElementById('client-nicho')?.value || 'infoproductos';
+  const value = document.getElementById('client-value')?.value || '1000';
+  const edadMin = document.getElementById('client-edad-min')?.value || '22';
+  const edadMax = document.getElementById('client-edad-max')?.value || '55';
 
-  const clientId = overrideClientId || CLIENT_STATE.clientId || 'CLIENT-01';
-
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
-  formData.append('clientId', clientId);
-  formData.append('sessionId', `sess_${clientId.toLowerCase()}_${Date.now()}`);
+  const clientId = overrideClientId || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
 
   if (btnUpload) {
     btnUpload.disabled = true;
-    btnUpload.textContent = 'Procesando en IA1...';
+    btnUpload.textContent = 'Enviando Segmentación...';
   }
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, {
+    const res = await fetch(`${getBaseUrl()}/api/v1/segmentacion/procesar`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId,
+        paises,
+        nicho,
+        value: parseFloat(value),
+        edadMin: parseInt(edadMin),
+        edadMax: parseInt(edadMax)
+      })
     });
 
     const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || 'Fallo al subir el archivo');
+    if (!res.ok || !data.success) throw new Error(data.error || 'Fallo al procesar la segmentación');
 
-    CLIENT_STATE.excelUploaded = true;
-    showToast('Audiencia Inyectada', `Excel cargado exitosamente para ${clientId}.`);
+    if (typeof CLIENT_STATE !== 'undefined') CLIENT_STATE.excelUploaded = true;
+
+    if (typeof showToast === 'function') {
+      showToast('Segmentación Inyectada', `200 registros listos para ${clientId}.`);
+    }
 
     if (btnUpload) {
       btnUpload.disabled = false;
-      btnUpload.textContent = '✓ Excel Cargado Hoy';
+      btnUpload.textContent = '✓ Segmentación Activa (72h)';
       btnUpload.style.background = 'rgba(0, 255, 204, 0.2)';
     }
 
@@ -416,11 +422,11 @@ async function sodieFlujoInyeccionCliente(overrideClientId = null) {
     localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
 
   } catch (err) {
-    console.error('❌ Error en subida:', err);
-    showToast('Error de Carga', err.message, true);
+    console.error('❌ Error en segmentación cliente:', err);
+    if (typeof showToast === 'function') showToast('Error', err.message, true);
     if (btnUpload) {
       btnUpload.disabled = false;
-      btnUpload.textContent = 'Subir Excel (Paso Diario)';
+      btnUpload.textContent = 'Actualizar Segmentación';
     }
   }
 }
