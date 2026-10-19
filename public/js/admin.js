@@ -140,14 +140,13 @@ function setupAdminEventListeners() {
 
   // Inyectar Excel / CSV
   const btnExcel = document.getElementById('btn-inject-database');
-  if (btnExcel && !btnExcel.dataset.bound) {
-    btnExcel.addEventListener('click', (e) => {
-      e.preventDefault();
-      sodieSubirExcelAdmin();
-    });
-    btnExcel.dataset.bound = "true";
-  }
-
+if (btnExcel && !btnExcel.dataset.bound) {
+  btnExcel.addEventListener('click', (e) => {
+    e.preventDefault();
+    sodieSubirSegmentacionAdmin('ADMIN');
+  });
+  btnExcel.dataset.bound = "true";
+}
   // Activar Campaña Directa (Usa Token Maestro)
   const btnActivate = document.getElementById('btn-trigger-active-campaign');
   if (btnActivate && !btnActivate.dataset.bound) {
@@ -311,42 +310,44 @@ async function sodieSubirVideoAdmin() {
   }
 }
 
-async function sodieSubirExcelAdmin(targetClientId = 'ADMIN') {
-  const fileInput = document.getElementById('admin-excel-input');
+async function sodieSubirSegmentacionAdmin(targetClientId = 'ADMIN') {
   const btn = document.getElementById('btn-inject-database');
 
-  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    alert('Selecciona un archivo (.csv, .xlsx, .xls) primero.');
-    return;
-  }
+  const paises = document.getElementById('admin-paises')?.value || 'MX, CO, AR';
+  const nicho = document.getElementById('admin-nicho')?.value || 'infoproductos';
+  const value = document.getElementById('admin-value')?.value || '1500';
+  const edadMin = document.getElementById('admin-edad-min')?.value || '18';
+  const edadMax = document.getElementById('admin-edad-max')?.value || '65';
 
-  if (btn) btn.textContent = 'Procesando Excel con IA1...';
-
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
-  formData.append('clientId', targetClientId);
-  formData.append('sessionId', `sess_${targetClientId.toLowerCase()}_${Date.now()}`);
-  formData.append('nicho', 'infoproductos');
+  if (btn) btn.textContent = 'Procesando 200 Registros Admin...';
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/media/upload`, {
+    const res = await fetch(`${getBaseUrl()}/api/v1/segmentacion/procesar`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: targetClientId,
+        paises,
+        nicho,
+        value: parseFloat(value),
+        edadMin: parseInt(edadMin),
+        edadMax: parseInt(edadMax)
+      })
     });
 
     const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || 'Fallo al subir el archivo');
+    if (!res.ok || !data.success) throw new Error(data.error || 'Fallo al procesar segmentación admin');
 
     if (btn) {
-      btn.textContent = '✓ Base de Datos Inyectada';
+      btn.textContent = '✓ Base de Datos ADMIN Inyectada';
       btn.style.background = 'rgba(0, 255, 204, 0.2)';
     }
 
     if (typeof showToast === 'function') {
-      showToast('Éxito Admin', `Excel procesado para ${targetClientId}. Registros: ${data.totalRegistros}`);
+      showToast('Éxito Admin', `Segmentación de 200 filas procesada para ${targetClientId}.`);
     }
   } catch (err) {
-    console.error('❌ Error en sodieSubirExcelAdmin:', err);
+    console.error('❌ Error en sodieSubirSegmentacionAdmin:', err);
     if (btn) btn.textContent = 'Error al Cargar';
     alert(`Error: ${err.message}`);
   }
