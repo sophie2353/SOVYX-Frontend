@@ -594,10 +594,7 @@ function initTimer30d() {
 /* ==========================================================================
    11. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
    ========================================================================== */
-window.onerror = function() {
-  return false;
-};
-
+window.onerror = function() { return false; };
 window.addEventListener('unhandledrejection', function() {});
 
 window.ejecutarBotonSODIE = async function(event, accion) {
@@ -607,7 +604,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
   }
 
   const elementoBoton = event?.currentTarget || event?.target || null;
-  
   if (elementoBoton && elementoBoton.tagName === 'BUTTON') {
     elementoBoton.disabled = true;
   }
@@ -615,59 +611,56 @@ window.ejecutarBotonSODIE = async function(event, accion) {
   try {
     switch (accion) {
       case 'cargar-excel': {
-        // 1. Obtener el archivo desde el input
-        const fileInput = document.getElementById('client-file-input') || document.getElementById('excel-input');
-        
-        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-          alert('Por favor, selecciona un archivo Excel (.xlsx, .csv) antes de continuar.');
-          break;
-        }
+        // 1. Obtener valores de los 4 campos
+        const paises = document.getElementById('sodie-paises')?.value || 'MX, CO';
+        const nicho = document.getElementById('sodie-nicho')?.value || 'infoproductos';
+        const value = document.getElementById('sodie-value')?.value || '1000';
+        const edadMin = document.getElementById('sodie-edad-min')?.value || '22';
+        const edadMax = document.getElementById('sodie-edad-max')?.value || '55';
 
-        // 2. Extraer ID del cliente activo
+        // 2. Extraer ID del cliente
         const clientId = window.CLIENT_STATE?.clientId || 'CLIENT-#01';
-        const file = fileInput.files[0];
+        const btn = document.getElementById('btn-client-upload-file') || document.getElementById('btn-client-upload-excel');
 
-        // 3. Preparar el FormData para /api/v1/media/upload
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('clientId', clientId);
-        formData.append('sessionId', `sess_${clientId.toLowerCase()}_${Date.now()}`);
-        formData.append('nicho', 'infoproductos');
+        if (btn) btn.textContent = 'Generando Segmentación (72h)...';
 
-        // 4. Mostrar estado de carga en la interfaz
-        const btn = document.getElementById('btn-client-upload-excel') || document.getElementById('btn-upload');
-        if (btn) btn.textContent = 'Procesando con IA1 y Meta...';
-
-        // 5. Petición POST directa al backend
+        // 3. Petición POST a segmentacionRoutes
         const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
-        const response = await fetch(`${baseUrl}/api/v1/media/upload`, {
+        const response = await fetch(`${baseUrl}/api/v1/segmentacion/procesar`, {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId,
+            paises,
+            nicho,
+            value: parseFloat(value),
+            edadMin: parseInt(edadMin),
+            edadMax: parseInt(edadMax)
+          })
         });
 
         const data = await response.json();
 
-        if (!response.ok || !data.ok) {
-          throw new Error(data.error || 'Error al procesar la audiencia en el servidor.');
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Error al procesar la segmentación.');
         }
 
-        // 6. Actualizar estado y feedback visual tras éxito
+        // 4. Actualizar interfaz y estado
         if (window.CLIENT_STATE) {
           window.CLIENT_STATE.excelUploaded = true;
-          window.CLIENT_STATE.campaignId = data.campaignId;
         }
 
         if (btn) {
-          btn.textContent = '✓ Excel Cargado Hoy';
+          btn.textContent = '✓ Segmentación Activa (72h)';
           btn.style.background = 'rgba(0, 255, 204, 0.2)';
         }
 
         if (typeof showToast === 'function') {
-          showToast('Audiencia Inyectada', `Excel cargado exitosamente para ${clientId}. Ciclo de 24h activado.`);
+          showToast('Segmentación Procesada', `Dataset de 200 filas enviado para ${clientId}.`);
         }
 
         localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
-        console.log('✅ [APP] Excel procesado correctamente:', data);
+        console.log('✅ [APP] Segmentación procesada correctamente:', data);
         break;
       }
 
