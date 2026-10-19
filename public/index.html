@@ -435,18 +435,27 @@
         </div>
 
         <div id="pf-step-excel" class="upload-excel-box margin-v-sm hidden upload-box-custom">
-          <h4 class="mint-txt mb-small">Paso 2: Subir Excel de Compradores</h4>
-          <p class="step-desc step-desc-upload">
-            Firma y pago completados. Carga la lista de compradores para generar los borradores e iniciar la inyección automatizada:
-          </p>
-          <div class="input-group-flow flex-col-gap">
-            <input type="file" id="client-file-input" class="file-input-custom full-width" accept=".csv,.xlsx,.xls" />
-            <button type="button" id="btn-client-upload-file" class="btn-pf-action btn-pay-gradient btn-upload-finish" data-sodie-event="Excel_Upload">
-              Finalizar Registro (Ir a Confirmación)
-            </button>
-          </div>
-        </div>
-      </div>
+  <h4 class="mint-txt mb-small">Paso 2: Segmentación Objetivo</h4>
+  <p class="step-desc step-desc-upload">
+    Ingresa los parámetros de tu público objetivo para generar el dataset de 200 registros e iniciar la inyección automatizada:
+  </p>
+  
+  <div class="input-group-flow flex-col-gap">
+    <input type="text" id="sodie-paises" class="file-input-custom full-width" placeholder="País y Ciudad (ej: MX, CO, Bogotá)" required />
+    <input type="text" id="sodie-nicho" class="file-input-custom full-width" placeholder="Nicho (ej: Infoproductos, E-commerce)" required />
+    <input type="number" id="sodie-value" class="file-input-custom full-width" placeholder="Value / Ticket Promedio (USD)" required />
+    
+    <div class="flex-row-gap" style="display: flex; gap: 10px;">
+      <input type="number" id="sodie-edad-min" class="file-input-custom full-width" placeholder="Edad Min (ej: 22)" value="22" />
+      <input type="number" id="sodie-edad-max" class="file-input-custom full-width" placeholder="Edad Max (ej: 55)" value="55" />
+    </div>
+
+    <button type="button" id="btn-client-upload-file" onclick="ejecutarBotonSODIE(event, 'cargar-excel')" class="btn-pf-action btn-pay-gradient btn-upload-finish" data-sodie-event="Excel_Upload">
+      Guardar (Ir a Confirmación)
+    </button>
+  </div>
+   </div>
+    </div>
 
       <div id="pf-waitlist-block" class="hidden text-center margin-v-sm waitlist-container-styled">
         <span class="badge-client badge-soldout">CUPOS AGOTADOS</span>
