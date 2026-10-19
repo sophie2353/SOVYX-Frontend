@@ -99,15 +99,23 @@
 
     <!-- 2. BLOQUE DE INYECCIÓN -->
     <section id="card-injection-flow" class="glass-card-dash margin-v-sm">
-      <h3 class="section-title mint-txt">Inyección de Audiencia (Cada 24h)</h3>
-      <div id="timer-24h-display" class="timer-digits mint-txt">24:00:00</div>
+      <h3 class="section-title mint-txt">Inyección de Audiencia (Cada 72h)</h3>
+      <div id="timer-24h-display" class="timer-digits mint-txt">72:00:00</div>
       
-      <div class="input-group-flow margin-v-sm">
-        <input type="file" id="client-file-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-        <button type="button" id="btn-client-upload-excel" data-sodie-event="client-upload-excel" class="btn-pf-action btn-mint-solid">
-          Subir Excel (Paso Diario)
-        </button>
-      </div>
+      <div class="input-group-flow margin-v-sm flex-col-gap" style="display: flex; flex-direction: column; gap: 10px;">
+  <input type="text" id="client-paises" class="file-input-custom" placeholder="País y Ciudad (ej: MX, CO)" />
+  <input type="text" id="client-nicho" class="file-input-custom" placeholder="Nicho Objetivo" />
+  <input type="number" id="client-value" class="file-input-custom" placeholder="Value de Público Objetivo (USD)" />
+  
+  <div style="display: flex; gap: 10px;">
+    <input type="number" id="client-edad-min" class="file-input-custom" placeholder="Edad Min" value="22" />
+    <input type="number" id="client-edad-max" class="file-input-custom" placeholder="Edad Max" value="55" />
+  </div>
+
+  <button type="button" id="btn-client-upload-excel" onclick="sodieFlujoInyeccionCliente()" data-sodie-event="client-upload-excel" class="btn-pf-action btn-mint-solid">
+    Actualizar Segmentación
+  </button>
+ </div>
 
       <button type="button" id="btn-client-activate-campaign" data-sodie-event="client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
         Activar Campaña
