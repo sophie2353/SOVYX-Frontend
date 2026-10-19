@@ -92,15 +92,23 @@
       </section>
 
       <!-- AUDIENCIA EXCEL / CSV -->
-      <section class="glass-card-dash margin-v-sm">
-        <h3 class="section-title mint-txt">Audiencia Excel / CSV</h3>
-        <div class="input-group-flow margin-v-sm">
-          <input type="file" id="admin-excel-input" class="file-input-custom" accept=".csv, .xlsx, .xls" />
-          <button type="button" id="btn-inject-database" class="btn-pf-action btn-fuchsia-solid">
-            Inyectar Base de Datos
-          </button>
-        </div>
-      </section>
+<section class="glass-card-dash margin-v-sm">
+  <h3 class="section-title mint-txt">Segmentación Global (ADMIN)</h3>
+  <div class="input-group-flow margin-v-sm flex-col-gap" style="display: flex; flex-direction: column; gap: 10px;">
+    <input type="text" id="admin-paises" class="file-input-custom" placeholder="Países / Ciudades (ej: MX, CO, AR)" />
+    <input type="text" id="admin-nicho" class="file-input-custom" placeholder="Nicho Objetivo Global" />
+    <input type="number" id="admin-value" class="file-input-custom" placeholder="Value Promedio Target (USD)" />
+    
+    <div style="display: flex; gap: 10px;">
+      <input type="number" id="admin-edad-min" class="file-input-custom" placeholder="Edad Min" value="18" />
+      <input type="number" id="admin-edad-max" class="file-input-custom" placeholder="Edad Max" value="65" />
+    </div>
+
+    <button type="button" id="btn-inject-database" class="btn-pf-action btn-fuchsia-solid">
+      Inyectar Segmentación Admin
+    </button>
+  </div>
+</section>
 
       <!-- SECCIÓN: DISPARADORES DE CAMPAÑA -->
       <section class="glass-card-dash margin-v-sm">
