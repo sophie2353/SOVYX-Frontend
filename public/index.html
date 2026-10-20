@@ -23,6 +23,24 @@
   <noscript><img height="1" width="1" class="hidden-pixel"
   src="https://www.facebook.com/tr?id=1754371812277932&ev=PageView&noscript=1"
   /></noscript>
+
+  <!-- En el <head> de tu index.html -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icono.png">
+<link rel="apple-touch-icon" href="/icono.png">
+<meta name="theme-color" content="#00ffcc">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/js/sw.js')
+        .then(reg => console.log('SODIE PWA Lista:', reg.scope))
+        .catch(err => console.error('Error registrando PWA:', err));
+    });
+  }
+</script>
 </head>
 <body>
 
