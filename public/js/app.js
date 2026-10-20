@@ -448,45 +448,40 @@ function initPaymentFlowEvents() {
       mostrarPasoConexion();
     });
   }
-
-  const btnProcesarPagoPasarela = document.getElementById('btn-procesar-pago-pasarela');
-  if (btnProcesarPagoPasarela) {
-    btnProcesarPagoPasarela.addEventListener('click', (e) => {
-      e.preventDefault();
-      desplegarIframePago();
-    });
-  }
-
-  const btnClientUploadFile = document.getElementById('btn-client-upload-file');
-  if (btnClientUploadFile) {
-    btnClientUploadFile.addEventListener('click', (e) => {
-      e.preventDefault();
-      finalizarYConfirmar();
-    });
-  }
   
- window.addEventListener('message', (event) => {
+// 1. Botón de finalizar y confirmar
+const btnClientUploadFile = document.getElementById('btn-client-upload-file');
+if (btnClientUploadFile) {
+  btnClientUploadFile.addEventListener('click', (e) => {
+    e.preventDefault();
+    finalizarYConfirmar();
+  });
+}
+
+// 2. Escuchar el pago desde NOWPayments
+window.addEventListener('message', (event) => {
   // Asegúrate de que el mensaje provenga de nowpayments por seguridad
   if (event.origin && event.origin.includes('nowpayments.io')) {
     // Si el evento indica que el pago finalizó o fue exitoso
     if (event.data && (event.data.status === 'finished' || event.data.paymentStatus === 'confirmed' || event.data.type === 'PAYMENT_SUCCESS')) {
       console.log('🎉 ¡Pago exitoso detectado desde el widget iframe!');
       window.location.href = 'confirmacion.html?step=generar_id';
+    }
   }
 });
 
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
-    const introCard = document.getElementById('pf-intro-card');
-    const stepBilling = document.getElementById('pf-step-billing');
-    const iframeBox = document.getElementById('pf-step-iframe');
-    const stepExcel = document.getElementById('pf-step-excel');
+// 3. Validar estado de contrato/firma
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
+  const introCard = document.getElementById('pf-intro-card');
+  const stepBilling = document.getElementById('pf-step-billing');
+  const iframeBox = document.getElementById('pf-step-iframe');
+  const stepExcel = document.getElementById('pf-step-excel');
 
-    if (introCard) introCard.classList.add('hidden');
-    if (stepBilling) stepBilling.classList.add('hidden');
-    if (iframeBox) iframeBox.classList.add('hidden');
-    if (stepExcel) stepExcel.classList.remove('hidden');
-  }
+  if (introCard) introCard.classList.add('hidden');
+  if (stepBilling) stepBilling.classList.add('hidden');
+  if (iframeBox) iframeBox.classList.add('hidden');
+  if (stepExcel) stepExcel.classList.remove('hidden');
 }
 
 /* ==========================================================================
