@@ -464,12 +464,16 @@ function initPaymentFlowEvents() {
       finalizarYConfirmar();
     });
   }
-
-  window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
+  
+ window.addEventListener('message', (event) => {
+  // Asegúrate de que el mensaje provenga de nowpayments por seguridad
+  if (event.origin && event.origin.includes('nowpayments.io')) {
+    // Si el evento indica que el pago finalizó o fue exitoso
+    if (event.data && (event.data.status === 'finished' || event.data.paymentStatus === 'confirmed' || event.data.type === 'PAYMENT_SUCCESS')) {
+      console.log('🎉 ¡Pago exitoso detectado desde el widget iframe!');
       window.location.href = 'confirmacion.html?step=generar_id';
-    }
-  });
+  }
+});
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
