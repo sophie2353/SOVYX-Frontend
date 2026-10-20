@@ -1,0 +1,17 @@
+{
+  "name": "SODIE",
+  "short_name": "SODIE",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#00ffcc",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icono.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
