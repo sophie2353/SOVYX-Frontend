@@ -50,6 +50,8 @@ function showToast(title, body, isError = false) {
   }, 4000);
 }
 
+navigator.serviceWorker.register('/sw.js')
+
 /* ==========================================================================
    2. SPLASH SCREEN & SSE METRICS
    ========================================================================== */
