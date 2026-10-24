@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // =========================================================================
   // PASO 1: CONFIGURACIÓN POST-PAGO DE CREDENCIALES (ACT_ID & PIXEL_ID)
   // =========================================================================
-  else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
+  // confirmacion.html (Sección JS de configuración y procesamiento)
+else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
 
@@ -97,8 +98,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     titleEl.textContent = 'Configuración de Cuenta Publicitaria';
     bodyEl.textContent = `Ingresa los datos de tu cuenta publicitaria de Meta para vincular la automatización de IA1 con el cliente ${activeClientId}. Solo se requiere una vez.`;
 
-    // Inyectar el formulario limpio de configuración en lugar del botón de OAuth
+    // Inyectar el formulario de configuración + Contenedor de Alerta para Error #100
     stepsContainer.innerHTML = `
+      <div id="ltv-warning-banner" style="display: none; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #fff;">
+        <h4 style="margin: 0 0 8px 0; color: #facc15; font-weight: 600;">Requisito de Meta Detectado (Error #100)</h4>
+        <p id="ltv-warning-text" style="margin: 0; font-size: 0.88rem; line-height: 1.4; color: #e2e8f0;"></p>
+        <div style="margin-top: 14px;">
+          <button id="btn-reintentar-ltv" type="button" style="background: #facc15; color: #000; font-weight: 600; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
+            Reintentar Vinculación
+          </button>
+        </div>
+      </div>
+
       <div class="credentials-form">
         <div class="form-group">
           <label for="input-act-id">ID de Cuenta Publicitaria (act_id)</label>
@@ -111,9 +122,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
     `;
 
-    verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = 'Guardar y Vincular Credenciales';
-    verifyBtn.onclick = async () => {
+    const ltvBanner = document.getElementById('ltv-warning-banner');
+    const ltvText = document.getElementById('ltv-warning-text');
+    const btnReintentarLtv = document.getElementById('btn-reintentar-ltv');
+
+    const submitCredentials = async () => {
       const actInput = document.getElementById('input-act-id').value.trim();
       const pixelInput = document.getElementById('input-pixel-id').value.trim();
 
@@ -122,7 +135,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      verifyBtn.textContent = 'Guardando en Base de Datos...';
+      // Ocultar banner previo si existía
+      if (ltvBanner) ltvBanner.style.display = 'none';
+
+      verifyBtn.textContent = 'Guardando y Validando en Meta...';
       try {
         const res = await fetch('/api/v1/facebook/configurar', {
           method: 'POST',
@@ -135,7 +151,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         const data = await res.json();
-        
+
+        // 1. Interceptar si devuelve el error de Value / LTV Terms Required
+        if (!data.success && (data.errorCode === 'VALUE_TERMS_REQUIRED' || data.error?.includes('Términos de Valor'))) {
+          ltvText.textContent = data.instructions || 'Debes activar la segmentación por Value subiendo un archivo CSV de prueba en tu panel de Meta y aceptar los términos.';
+          ltvBanner.style.display = 'block';
+          verifyBtn.textContent = 'Guardar y Vincular Credenciales';
+          return;
+        }
+
+        // 2. Éxito: Continuar al siguiente paso
         if (data.success) {
           window.location.href = `/confirmacion.html?step=procesar_excel&clientId=${encodeURIComponent(activeClientId)}&actId=${encodeURIComponent(data.act_id)}&sessionId=${sessionId || ''}`;
         } else {
@@ -148,7 +173,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         verifyBtn.textContent = 'Guardar y Vincular Credenciales';
       }
     };
-  }
 
   // =========================================================================
   // PASO 2: ACTIVACIÓN Y PUBLICACIÓN DE CAMPAÑA (POST-CONFIGURACIÓN)
