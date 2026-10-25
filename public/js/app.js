@@ -542,7 +542,7 @@ function initWaitlistEvents() {
       showToast('Enviando Registro', 'Guardando tu posición en la Lista de Espera...');
 
       try {
-        const res = await fetch(`${getBaseUrl()}/api/v1/waitlist`, {
+        const res = await fetch(`${getBaseUrl()}/api/v1/registro`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ company: brand, email, phone })
