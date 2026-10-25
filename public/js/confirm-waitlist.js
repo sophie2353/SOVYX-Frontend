@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : window.location.origin;
-    const response = await fetch(`${baseUrl}/api/waitlist/confirm-waitlist`, {
+    const response = await fetch(`${baseUrl}/api/v1/confirm-waitlist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, userId })
