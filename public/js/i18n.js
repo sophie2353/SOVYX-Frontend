@@ -2,14 +2,12 @@
 
 const dictionary = {
     en: {
-        btn_active: "Activate Campaign",
-        admin_title: "Admin Dashboard",
-        client_welcome: "Welcome back"
+        btn1: "Activate Campaign",
+        title1: "Control Panel"
     },
     pt: {
-        btn_active: "Ativar Campanha",
-        admin_title: "Painel do Admin",
-        client_welcome: "Bem-vindo de volta"
+        btn1: "Ativar Campanha",
+        title1: "Painel do Control"
     }
 };
 
