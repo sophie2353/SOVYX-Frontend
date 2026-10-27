@@ -1,3 +1,10 @@
+function getBaseUrl() {
+  if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
+    return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
+  }
+  return window.location.origin;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const step = urlParams.get('step');
