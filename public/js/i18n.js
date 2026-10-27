@@ -1,4 +1,5 @@
 // js/i18n.js
+
 const dictionary = {
     en: {
         btn_active: "Activate Campaign",
@@ -12,21 +13,43 @@ const dictionary = {
     }
 };
 
-// Función global que traduce toda la página automáticamente
+// 1. Función global para cambiar y aplicar el idioma en cualquier momento
 window.setLanguage = function(lang) {
+    // Seguridad por si pasan un idioma que no existe
+    if (!dictionary[lang]) lang = 'en';
+    
     localStorage.setItem('sodie_lang', lang);
     
-    // Traduce los elementos estáticos del HTML
+    // Traduce todos los elementos estáticos del HTML que tengan la etiqueta
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (dictionary[lang] && dictionary[lang][key]) {
+        if (dictionary[lang][key]) {
             el.innerText = dictionary[lang][key];
         }
     });
 };
 
-// Se ejecuta solo al cargar la página detectando el idioma guardado
-document.addEventListener("DOMContentLoaded", () => {
-    const savedLang = localStorage.getItem('sodie_lang') || 'en';
-    window.setLanguage(savedLang);
-});
+// 2. Función inteligente que detecta el navegador o el guardado previo
+function detectAndApplyLanguage() {
+    let lang = localStorage.getItem('sodie_lang');
+
+    // Si es la primera vez que entra, revisa el idioma del navegador
+    if (!lang) {
+        const browserLang = navigator.language || navigator.userLanguage || '';
+        
+        // Si el navegador es de Brasil/portugués, pone 'pt', de lo contrario 'en'
+        if (browserLang.toLowerCase().startsWith('pt')) {
+            lang = 'pt';
+        } else {
+            lang = 'en'; 
+        }
+        
+        localStorage.setItem('sodie_lang', lang);
+    }
+
+    // Aplica el idioma encontrado
+    window.setLanguage(lang);
+}
+
+// 3. ÚNICO disparador al cargar la página (limpio, sin duplicados)
+document.addEventListener("DOMContentLoaded", detectAndApplyLanguage);
