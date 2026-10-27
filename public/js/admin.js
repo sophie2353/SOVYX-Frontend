@@ -248,10 +248,12 @@ async function sodieConfirmarActivacion() {
   if (btn) btn.textContent = 'Inyectando borrador con Token Maestro... ⏳';
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/v1/admin/campaigns/activate`, {
+    // Apuntamos al endpoint oficial de creación de borrador pasando el clientId de ADMIN
+    const res = await fetch(`${getBaseUrl()}/api/v1/facebook/crear-borrador`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        clientId: 'ADMIN',
         triggeredBy: 'ADMIN',
         timestamp: Date.now()
       })
