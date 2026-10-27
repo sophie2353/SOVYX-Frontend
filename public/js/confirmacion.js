@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     localStorage.setItem('sodie_payment_completed', 'true');
     if (typeof fbq === 'function') {
-      fbq('track', 'Purchase', { value: 7000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
+      fbq('track', 'Purchase', { value: 25000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
     }
 
     badgeEl.textContent = `Paso 1 de 3 • Cliente ${activeClientId}`;
