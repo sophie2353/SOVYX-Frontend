@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // Asegurar resolución de API_URL antes de cualquier fetch
   if (window.SODIE_CONFIG_READY) {
     await window.SODIE_CONFIG_READY;
   }
