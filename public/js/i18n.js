@@ -1,13 +1,18 @@
 // js/i18n.js
-
 const dictionary = {
     en: {
-        btn1: "Activate Campaign",
-        title1: "Control Panel"
+        btn_activate: "Activate Campaign",
+        btn_confirm: "Confirm",
+        btn_save: "Save Changes",
+        title_admin: "Control Panel",
+        alert_success: "Operation successful!"
     },
     pt: {
-        btn1: "Ativar Campanha",
-        title1: "Painel do Control"
+        btn_activate: "Ativar Campanha",
+        btn_confirm: "Confirmar",
+        btn_save: "Salvar Alterações",
+        title_admin: "Painel de Controle",
+        alert_success: "Operação realizada com sucesso!"
     }
 };
 
