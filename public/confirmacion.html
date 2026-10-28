@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="/styles.css">
 
   <style>
-    /* Estilos Premium UI para Confirmación */
     :root {
       --bg-dark: #090a0f;
       --card-bg: rgba(18, 20, 29, 0.75);
@@ -92,7 +91,6 @@
       margin: 0 0 28px 0;
     }
 
-    /* Formulario Post-Pago de Credenciales */
     .credentials-form {
       text-align: left;
       background: rgba(0, 0, 0, 0.3);
@@ -125,7 +123,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       color: #ffffff;
-      font-size: 0.95px;
+      font-size: 0.95rem;
       box-sizing: border-box;
       outline: none;
       transition: all 0.2s ease;
@@ -136,7 +134,6 @@
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
-    /* Lista de Pasos UI */
     .steps-list {
       text-align: left;
       background: rgba(0, 0, 0, 0.25);
@@ -175,7 +172,6 @@
       margin-top: 2px;
     }
 
-    /* Contenedor de Botones de Acción */
     .action-grid {
       display: flex;
       flex-direction: column;
@@ -224,7 +220,6 @@
       border-color: rgba(255, 255, 255, 0.25);
     }
 
-    /* Spinner Animado */
     .loader-box {
       width: 48px;
       height: 48px;
@@ -264,9 +259,9 @@
 
   <div class="confirmation-container">
     <div class="card confirmation-card" id="main-card">
-      <div class="status-badge" id="conf-badge">SODIE Workflows</div>
-      <h2 class="conf-title" id="conf-title">Procesando...</h2>
-      <p class="conf-body" id="conf-body">Cargando estado de la operación...</p>
+      <div class="status-badge" id="conf-badge" data-i18n="badge_sodie_workflows">SODIE Workflows</div>
+      <h2 class="conf-title" id="conf-title" data-i18n="conf_title_processing">Procesando...</h2>
+      <p class="conf-body" id="conf-body" data-i18n="conf_body_loading">Cargando estado de la operación...</p>
       
       <div id="loader-box" class="loader-box"></div>
       <div id="steps-container"></div>
