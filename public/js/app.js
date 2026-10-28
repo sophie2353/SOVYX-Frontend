@@ -281,23 +281,31 @@ async function sendChatMessage(messageText, payload = null) {
     const data = await res.json();
     loadingBubble.remove();
 
-    const rawReply = data.reply || data.respuesta || 'Mensaje procesado correctamente.';
-    const messageChunks = splitTextIntoChunks(rawReply);
+    // Soportar tanto array de mensajes como string plano por retrocompatibilidad
+    const rawMessages = data.messages || [data.reply || data.respuesta || 'Mensaje procesado correctamente.'];
 
-    messageChunks.forEach((chunk, index) => {
-      setTimeout(() => {
-        const ia2Bubble = document.createElement('div');
-        ia2Bubble.className = 'incoming-simple';
-        ia2Bubble.style.cssText = 'margin: 6px 0; animation: fadeIn 0.3s ease;';
-        
-        const ia2TextNode = document.createElement('p');
-        ia2TextNode.style.cssText = 'background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-left: 3px solid #00ffcc; color: #e0e0e0; font-size: 0.9em; line-height: 1.4;';
-        ia2TextNode.textContent = chunk;
+    let totalDelay = 0;
+    rawMessages.forEach((msgBlock, msgIndex) => {
+      const messageChunks = splitTextIntoChunks(msgBlock);
 
-        ia2Bubble.appendChild(ia2TextNode);
-        chatBody.appendChild(ia2Bubble);
-        ia2Bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, index * 800);
+      messageChunks.forEach((chunk, chunkIndex) => {
+        const currentDelay = totalDelay;
+        setTimeout(() => {
+          const ia2Bubble = document.createElement('div');
+          ia2Bubble.className = 'incoming-simple';
+          ia2Bubble.style.cssText = 'margin: 6px 0; animation: fadeIn 0.3s ease;';
+          
+          const ia2TextNode = document.createElement('p');
+          ia2TextNode.style.cssText = 'background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-left: 3px solid #00ffcc; color: #e0e0e0; font-size: 0.9em; line-height: 1.4;';
+          ia2TextNode.textContent = chunk;
+
+          ia2Bubble.appendChild(ia2TextNode);
+          chatBody.appendChild(ia2Bubble);
+          ia2Bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, currentDelay);
+
+        totalDelay += 800; // Incrementa el intervalo entre bloques de texto
+      });
     });
 
   } catch (error) {
