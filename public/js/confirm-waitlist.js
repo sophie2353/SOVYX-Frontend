@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const actionBtn = document.getElementById('conf-action-btn');
 
   if (typeof fbq === 'function') {
-    fbq('track', 'Purchase', { value: 2000.00, currency: 'USD', content_name: 'Reserva Lista de Espera V4' });
+    fbq('track', 'Purchase', { value: 7000.00, currency: 'USD', content_name: 'Reserva Lista de Espera V4' });
   }
 
   try {
