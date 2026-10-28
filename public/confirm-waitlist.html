@@ -182,21 +182,21 @@
 
   <div class="confirmation-container">
     <div class="card confirmation-card" id="main-card">
-      <div class="status-badge" id="conf-badge">Lista de Espera V4 • SODIE</div>
-      <h2 class="conf-title" id="conf-title">Procesando Confirmación...</h2>
-      <p class="conf-body" id="conf-body">Verificando registro y asignando identificador prioritario...</p>
+      <div class="status-badge" id="conf-badge" data-i18n="badge_waitlist_v4">Lista de Espera V4 • SODIE</div>
+      <h2 class="conf-title" id="conf-title" data-i18n="conf_waitlist_title_loading">Procesando Confirmación...</h2>
+      <p class="conf-body" id="conf-body" data-i18n="conf_waitlist_desc_loading">Verificando registro y asignando identificador prioritario...</p>
       
       <div id="loader-box" class="loader-box"></div>
 
       <!-- RESULTADO ASIGNADO POR EL BACKEND -->
       <div id="result-box" class="result-box-waitlist d-none">
-        <span style="font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; font-weight: 600;">Identificador Asignado:</span>
+        <span style="font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; font-weight: 600;" data-i18n="assigned_identifier_label">Identificador Asignado:</span>
         <span id="generated-client-id" class="result-id-tag">CLIENT-V4-#</span>
         <p id="cupos-restantes-text" style="font-size: 0.88rem; color: #e5e7eb; margin: 12px 0 0 0;"></p>
       </div>
 
       <div class="action-grid">
-        <button id="conf-action-btn" class="btn-action btn-primary-glow d-none">
+        <button id="conf-action-btn" class="btn-action btn-primary-glow d-none" data-i18n="btn_sign_waitlist_contract">
           Ir a Firma de Contrato Digital (Waitlist) ➔
         </button>
       </div>
