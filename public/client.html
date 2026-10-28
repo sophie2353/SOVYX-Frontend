@@ -14,8 +14,8 @@
     <div class="toast-content">
       <span class="toast-icon"></span>
       <div class="toast-text">
-        <strong id="toast-title">Estatus Cliente</strong>
-        <p id="toast-body">Actualizado</p>
+        <strong id="toast-title" data-i18n="toast_status_client">Estatus Cliente</strong>
+        <p id="toast-body" data-i18n="toast_updated">Actualizado</p>
       </div>
     </div>
   </div>
@@ -23,25 +23,25 @@
   <!-- INICIAR SESIÓN -->
   <main id="client-auth-view" class="client-auth-overlay">
   <div class="client-auth-card">
-    <h2 class="auth-title">Acceso Cliente SODIE</h2>
-    <p class="auth-subtitle">Ingresa tu ID de cliente y tu contraseña para acceder al panel</p>
+    <h2 class="auth-title" data-i18n="auth_client_title">Acceso Cliente SODIE</h2>
+    <p class="auth-subtitle" data-i18n="auth_client_subtitle">Ingresa tu ID de cliente y tu contraseña para acceder al panel</p>
 
     <div id="client-login-box" class="auth-form-group">
       <div class="form-field margin-v-sm">
-        <label for="client-id-input" class="label-mint">ID de Cliente</label>
-        <input type="text" id="client-id-input" placeholder="Ej. CLIENT-01 o CLIENT-0" class="input-custom" />
+        <label for="client-id-input" class="label-mint" data-i18n="label_client_id">ID de Cliente</label>
+        <input type="text" id="client-id-input" placeholder="Ej. CLIENT-01 o CLIENT-0" data-i18n-placeholder="placeholder_client_id" class="input-custom" />
       </div>
 
       <div class="form-field margin-v-sm">
-        <label for="client-pass-input" class="label-mint">Contraseña de Acceso</label>
+        <label for="client-pass-input" class="label-mint" data-i18n="label_client_pass">Contraseña de Acceso</label>
         <input type="password" id="client-pass-input" placeholder="••••••••" class="input-custom" />
       </div>
 
       <div class="auth-actions-group margin-v-sm">
-        <button type="button" id="btn-client-pass-login" onclick="sodieValidarPasswordCliente()" class="btn-pf-action btn-mint-solid">
+        <button type="button" id="btn-client-pass-login" onclick="sodieValidarPasswordCliente()" class="btn-pf-action btn-mint-solid" data-i18n="btn_enter_panel">
           Ingresar al Panel
         </button>
-        <button type="button" id="btn-client-register" onclick="sodieRegistrarPasswordCliente()" class="btn-pf-action btn-fuchsia-solid margin-v-xs">
+        <button type="button" id="btn-client-register" onclick="sodieRegistrarPasswordCliente()" class="btn-pf-action btn-fuchsia-solid margin-v-xs" data-i18n="btn_register_first">
           Registrar por Primera Vez
         </button>
       </div>
@@ -58,7 +58,7 @@
         <span id="header-brand-title" class="brand-text">
           <span class="brand-pink">S</span>ODIE
         </span>
-        <span id="client-id-badge" class="badge-client badge-mint-border">Cliente Activo</span>
+        <span id="client-id-badge" class="badge-client badge-mint-border" data-i18n="badge_active_client">Cliente Activo</span>
       </div>
       <div class="dash-header-right">
         <button type="button" class="btn-icon" data-sodie-event="nav-admin" title="Acceso Admin"></button>
@@ -67,10 +67,10 @@
 
     <!-- 1. MÉTRICAS CLIENTE -->
     <section class="metrics-section">
-      <h3 class="section-title">Métricas de Rendimiento</h3>
+      <h3 class="section-title" data-i18n="title_performance_metrics">Métricas de Rendimiento</h3>
       <div class="metrics-slider" id="metrics-slider">
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Inversión</span><span class="dots">•••</span></div>
+          <div class="card-head"><span data-i18n="metric_spend">Inversión</span><span class="dots">•••</span></div>
           <div class="card-value" id="metric-spend">$0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
@@ -78,138 +78,92 @@
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Alcance</span><span class="dots">•••</span></div>
+          <div class="card-head"><span data-i18n="metric_reach">Alcance</span><span class="dots">•••</span></div>
           <div class="card-value" id="metric-reach">0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Impresiones</span><span id="metric-reach-status" class="mint-txt">0</span></div>
+          <div class="card-foot"><span data-i18n="metric_impressions">Impresiones</span><span id="metric-reach-status" class="mint-txt">0</span></div>
         </article>
 
         <article class="glass-card-dash metric-square">
-          <div class="card-head"><span>Visitas</span><span class="dots">•••</span></div>
+          <div class="card-head"><span data-i18n="metric_visitors">Visitas</span><span class="dots">•••</span></div>
           <div class="card-value" id="metric-visitors">0</div>
           <div class="card-chart">
             <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
           </div>
-          <div class="card-foot"><span>Tráfico Activo</span><span id="metric-activos" class="mint-txt">0</span></div>
+          <div class="card-foot"><span data-i18n="metric_active_traffic">Tráfico Activo</span><span id="metric-activos" class="mint-txt">0</span></div>
         </article>
       </div>
     </section>
 
     <!-- 2. BLOQUE DE INYECCIÓN -->
     <section id="card-injection-flow" class="glass-card-dash margin-v-sm">
-      <h3 class="section-title mint-txt">Inyección de Audiencia (Cada 72h)</h3>
+      <h3 class="section-title mint-txt" data-i18n="title_audience_injection">Inyección de Audiencia (Cada 72h)</h3>
       <div id="timer-24h-display" class="timer-digits mint-txt">72:00:00</div>
       
       <div class="input-group-flow margin-v-sm flex-col-gap" style="display: flex; flex-direction: column; gap: 10px;">
-  <input type="text" id="client-paises" class="file-input-custom" placeholder="País y Ciudad (ej: MX, CO)" />
-  <input type="text" id="client-nicho" class="file-input-custom" placeholder="Nicho Objetivo" />
-  <input type="number" id="client-value" class="file-input-custom" placeholder="Value de Público Objetivo (USD)" />
-  
-  <div style="display: flex; gap: 10px;">
-    <input type="number" id="client-edad-min" class="file-input-custom" placeholder="Edad Min" value="22" />
-    <input type="number" id="client-edad-max" class="file-input-custom" placeholder="Edad Max" value="55" />
-  </div>
+        <input type="text" id="client-paises" class="file-input-custom" placeholder="País y Ciudad (ej: MX, CO)" data-i18n-placeholder="placeholder_country_city" />
+        <input type="text" id="client-nicho" class="file-input-custom" placeholder="Nicho Objetivo" data-i18n-placeholder="placeholder_niche" />
+        <input type="number" id="client-value" class="file-input-custom" placeholder="Value de Público Objetivo (USD)" data-i18n-placeholder="placeholder_avg_ticket" />
+        
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="client-edad-min" class="file-input-custom" placeholder="Edad Min" data-i18n-placeholder="placeholder_min_age" value="22" />
+          <input type="number" id="client-edad-max" class="file-input-custom" placeholder="Edad Max" data-i18n-placeholder="placeholder_max_age" value="55" />
+        </div>
 
-  <button type="button" id="btn-client-upload-excel" onclick="sodieFlujoInyeccionCliente()" data-sodie-event="client-upload-excel" class="btn-pf-action btn-mint-solid">
-    Actualizar Segmentación
-  </button>
- </div>
+        <button type="button" id="btn-client-upload-excel" onclick="sodieFlujoInyeccionCliente()" data-sodie-event="client-upload-excel" class="btn-pf-action btn-mint-solid" data-i18n="btn_update_segmentation">
+          Actualizar Segmentación
+        </button>
+      </div>
 
-      <button type="button" id="btn-client-activate-campaign" data-sodie-event="client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm">
+      <button type="button" id="btn-client-activate-campaign" data-sodie-event="client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm" data-i18n="btn_activate_campaign">
         Activar Campaña
       </button>
-
-      <!-- ALERTA DE DÍA 7 DE PAGO OBLIGATORIO -->
-      <div id="weekly-payment-lock-warning" class="hidden margin-v-sm payment-lock-box">
-        <span class="fuchsia-txt warning-title">⚠️ Día 7 de Ciclo Alcanzado</span>
-        <p class="warning-desc">Es necesario liquidar la cuota semanal pendiente ($6,000 USDT) para desbloquear la inyección del siguiente ciclo y continuar ejecutando la campaña.</p>
-      </div>
     </section>
 
-    <!-- 3. BLOQUE DE PAGOS POST-RESULTADOS -->
-    <section class="glass-card-dash margin-v-sm">
-      <h3 class="section-title fuchsia-txt">Cronograma de Pagos Semanales Post-Resultados</h3>
-      <div id="timer-weekly-pay-display" class="timer-digits fuchsia-txt">07d 00h 00m 00s</div>
-
-      <div id="payment-options-container" class="margin-v-sm">
-        <!-- SEMANA 1 (DÍA 7) -->
-        <div class="payment-option-block margin-v-sm">
-          <h4 class="mint-txt">Cuota Semana 1 ($6,000 USDT)</h4>
-          <p id="desc-semana-1" class="step-desc">Liquidación del 72% restante del ciclo tras los primeros 7 días de resultados.</p>
-          <div class="nowpayments-btn-container">
-            <a id="btn-pay-semana1" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
-              <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
-            </a>
-          </div>
-        </div>
-
-        <!-- SEMANA 2 (DÍA 14) -->
-        <div class="payment-option-block margin-v-sm">
-          <h4 class="mint-txt">Cuota Semana 2 ($6,000 USDT)</h4>
-          <p id="desc-semana-2" class="step-desc">Segunda cuota de mantenimiento y escalabilidad de ROAS On-Chain.</p>
-          <div class="nowpayments-btn-container">
-            <a id="btn-pay-semana2" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
-              <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
-            </a>
-          </div>
-        </div>
-
-        <!-- SEMANA 3 (DÍA 21) -->
-        <div class="payment-option-block margin-v-sm">
-          <h4 class="fuchsia-txt">Cuota Semana 3 ($6,000 USDT)</h4>
-          <p id="desc-semana-3" class="step-desc">Cuota previa al cierre de la cuarta semana de optimización continua.</p>
-          <div class="nowpayments-btn-container">
-            <a id="btn-pay-semana3" href="https://nowpayments.io/payment/?iid=5853796599&source=button" target="_blank" rel="noreferrer noopener">
-              <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments">
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. CIERRE DE CICLO FINAL EN SEMANA 4 (DÍA 28) -->
+    <!-- 3. CIERRE DE CICLO FINAL EN SEMANA 4 (DÍA 28) -->
     <section id="section-week-4-complete" class="glass-card-dash hidden text-center margin-v-sm">
-      <h3 class="section-title mint-txt">¡Ciclo de 4 Semanas Completado!</h3>
-      <p class="step-desc">Has finalizado satisfactoriamente las 4 semanas de ejecución, optimización de audiencia y liquidación de cuotas.</p>
-      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" data-sodie-event="renovar-cupo">
+      <h3 class="section-title mint-txt" data-i18n="title_cycle_complete">¡Ciclo de 4 Semanas Completado!</h3>
+      <p class="step-desc" data-i18n="cycle_complete_desc">Has finalizado satisfactoriamente las 4 semanas de ejecución, optimización de audiencia y despliegue del sistema.</p>
+      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" data-sodie-event="renovar-cupo" data-i18n="btn_join_waitlist">
         Unirse a Lista de Espera / Renovar Cupo
       </button>
     </section>
 
-    <!-- DESGLOSE GLOBAL -->
+    <!-- DESGLOSE GLOBAL DE FUNCIONES V3.5 Y MENSAJE DE CIERRE -->
     <section class="glass-card-dash margin-v-sm structure-card">
-      <h3 class="section-title mint-txt">Estructura de Cuotas y Módulo On-Chain</h3>
-      <p class="step-desc">
-        Cobros programados por semanas (28% inicial en Hora 0 y 72% restante diferido en 3 cuotas semanales de $6,000 USD):
-      </p>
-
-      <div class="timeline-container">
-        <div class="time-step active">
-          <span class="step-hours mint-txt">Desglose por Etapas</span>
-          <span class="step-desc">
-            • Hora 0: $7,000 USDT (Pago Inicial - 28%)<br>
-            • Semana 1 (Día 7): $6,000 USDT<br>
-            • Semana 2 (Día 14): $6,000 USDT<br>
-            • Semana 3 (Día 21): $6,000 USDT<br>
-            • Semana 4 (Día 28): $0 USDT (Final de Ciclo)
+      <h3 class="section-title mint-txt" data-i18n="title_sodie_v35_features">SODIE V3.5: Especificaciones del Sistema</h3>
+      <div class="timeline-container" style="margin-top: 14px;">
+        <div class="time-step active" style="margin-bottom: 16px;">
+          <span class="step-desc" style="line-height: 1.6; display: block; color: var(--text-main);">
+            1. Acceso rápido<br>
+            2. Activar borrador mediante data en pocos minutos<br>
+            3. Control total en tu panel de ADS Manager<br>
+            4. Notificaciones para actualizar segmentación<br>
+            5. Hasta 5 países para registrar la segmentación preferida<br>
+            6. Actualización de Campañas cada 72 horas<br>
+            7. Aumento de ROAS cada semana<br>
+            8. Miles de dólares ahorrados con buena segmentación
           </span>
         </div>
       </div>
+      <p class="step-desc" style="line-height: 1.6; margin-top: 14px;" data-i18n="closing_message_sodie">
+        Se trabaja diariamente en mejorar el sistema y en siguientes versiones, activando la V4 en mínimo 28 días. Llegar a este panel fueron 18 meses de trabajo sin descanso y miles de horas invertidas en llegar. Gracias por cerrar esta V3.5 y empezar oficialmente la instalación de la V4.
+      </p>
     </section>
 
-    <!-- TEMPORIZADOR GLOBAL DE CICLO -->
+    <!-- TEMPORIZADOR GLOBAL DE CICLO (28 DÍAS) -->
     <section class="glass-card-dash timer-section">
-      <span class="timer-label">CRONOGRAMA GLOBAL DEL PROYECTO (4 SEMANAS)</span>
-      <div id="global-timer-display" class="timer-digits">28d 00h 00m 00s</div>
-      <span class="timer-sub">
-        TIEMPO TOTAL DE OPTIMIZACIÓN Y EJECUCIÓN
+      <span class="timer-label" data-i18n="timer_global_cycle_title">ACCESO ACTIVO • CICLO DE 4 SEMANAS (28 DÍAS)</span>
+      <div id="global-timer-display" class="timer-digits">672:00:00</div>
+      <span class="timer-sub" data-i18n="timer_global_cycle_sub">
+        TIEMPO TOTAL DE OPTIMIZACIÓN Y EJECUCIÓN V3.5
       </span>
     </section>
     
     <footer class="dash-footer text-center margin-v-md">
-      <p>© SODIE v3.5. 2026</p>
+      <p data-i18n="footer_rights">© SODIE v3.5. 2026</p>
     </footer>
   </main>
 
