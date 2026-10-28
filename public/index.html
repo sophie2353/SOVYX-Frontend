@@ -352,7 +352,7 @@
 
       <div id="quick-replies" class="chat-quick-options" style="margin-bottom: 12px;">
         <button type="button" class="opt-btn" data-payload="tres_cuotas" data-i18n="opt_installments">¿Cómo son las cuotas?</button>
-        <button type="button" class="opt-btn" data-payload="cupo_4" data-i18n="opt_slot_4">¿Qué ocurre en el Cupo 4?</button>
+        <button type="button" class="opt-btn" data-payload="cupo_10" data-i18n="opt_slot_4">¿Qué ocurre en el Cupo 11?</button>
         <button type="button" class="opt-btn" data-payload="como_funciona" data-i18n="opt_how_it_works">¿Cómo funciona?</button>
         <button type="button" class="opt-btn" data-payload="ecommerce" data-i18n="opt_ecommerce">Ecommerce</button>
         <button type="button" class="opt-btn" data-payload="metodos_pago" data-i18n="opt_payment_methods">Métodos de pago</button>
@@ -433,12 +433,12 @@
           </div>
           
           <div class="iframe-container iframe-wrapper-styled">
-            <!-- [......] AQUÍ ACTUALIZAS LOS IFRAMES O LINKS DE PAGOS -->
-            <iframe src="https://nowpayments.io/embeds/payment-widget?iid=4928691633" width="410" height="696" frameborder="0" scrolling="no" style="overflow-y: hidden;">
-    Can't load widget
-          </iframe>
-          </div>
+        <iframe src="https://nowpayments.io/embeds/payment-widget?iid=4928691633" width="410" height="696" frameborder="0" scrolling="no" style="overflow-y: hidden;">
+          No se puede cargar el widget
+         </iframe>
+         </div>
         </div>
+
 
         <div id="pf-step-excel" class="upload-excel-box margin-v-sm hidden upload-box-custom">
           <h4 class="mint-txt mb-small" data-i18n="title_step2_targeting">Paso 2: Segmentación Objetivo</h4>
@@ -497,12 +497,13 @@
           />
           
           <button type="submit" id="btn-waitlist-access" class="hidden"></button>
-          
-          <a href="https://nowpayments.io/payment/?iid=4841380641&source=button" target="_blank" rel="noreferrer noopener"
-             class="btn-pf-action btn-pay-gradient full-width btn-checkout-waitlist"
-             data-i18n="btn_pay_waitlist">
-            PAGAR RESERVA V4
-          </a>
+          <a href="https://nowpayments.io/payment/?iid=4841380641&source=button" 
+           target="_blank" 
+           rel="noreferrer noopener" 
+           class="btn-pf-action btn-pay-gradient full-width btn-checkout-waitlist"
+           data-i18n="btn_pay_waitlist">
+          <img src="https://nowpayments.io/images/embeds/payments-button-white.svg" alt="Botón de pagos en Bitcoin y otras criptomonedas, marca NOWPayments" style="max-height: 24px; vertical-align: middle;">
+         </a>
         </form>
       </div>
     </section>
