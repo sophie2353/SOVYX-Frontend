@@ -1,6 +1,6 @@
 /**
  * SODIE - Client Dashboard Engine (client.js)
- * Flujo Simplificado: Autenticación por Contraseña + Selección de ID de Cliente + Bypass de Admin + Pagos Semanales
+ * Flujo Simplificado: Autenticación por Contraseña + Selección de ID de Cliente + Bypass de Admin
  */
 
 function getBaseUrl() {
@@ -18,7 +18,6 @@ const CLIENT_STATE = {
   isAuthenticated: false,
   isAdminView: false,
   isGeneralView: false,
-  currentWeek: 1,
   excelUploaded: false,
   paymentConfirmed: false,
   campaignActivated: false,
@@ -34,21 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
-    const weekParam = urlParams.get('week') || '1';
     const isPaid = urlParams.get('paid') === 'true' || localStorage.getItem('sodie_payment_completed') === 'true';
 
     // Detectar si regresa de la pasarela de pago post-redirección
-    if (status === 'paid_success' || status === 'weekly_paid_success' || isPaid) {
+    if (status === 'paid_success' || isPaid) {
       CLIENT_STATE.paymentConfirmed = true;
 
-      const msg = status === 'weekly_paid_success'
-        ? `Pago semanal de la Semana ${weekParam} ($6,000 USDT) confirmado correctamente.`
-        : 'Pago de reserva ($7,000 USDT) confirmado. Tu módulo de audiencias está activo.';
+      const msg = 'Pago de reserva confirmado. Tu módulo de audiencias está activo.';
 
       showToast('¡Pago Confirmado!', msg, false);
-
-      const lockWarning = document.getElementById('weekly-payment-lock-warning');
-      if (lockWarning) lockWarning.classList.add('hidden');
 
       const btnExcel = document.getElementById('btn-client-upload-excel');
       if (btnExcel) {
@@ -242,7 +235,6 @@ window.sodieRegistrarPasswordCliente = async function() {
       showToast('Error de Autenticación', data.message || 'Contraseña incorrecta', true);
     }
   } catch (err) {
-    // Fallback local seguro para no bloquear al usuario si el servidor no responde de inmediato
     sessionStorage.setItem('sodie_authenticated_client_id', selectedClientId);
     CLIENT_STATE.isAuthenticated = true;
     CLIENT_STATE.clientId = selectedClientId;
@@ -347,9 +339,6 @@ async function fetchClientMetrics() {
   const elSpend = document.getElementById('metric-spend');
   const elReach = document.getElementById('metric-reach');
   const elVisitors = document.getElementById('metric-visitors');
-  const elSpendStatus = document.getElementById('metric-spend-status');
-  const elReachStatus = document.getElementById('metric-reach-status');
-  const elActivos = document.getElementById('metric-activos');
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?clientId=${encodeURIComponent(CLIENT_STATE.clientId)}`);
@@ -369,7 +358,7 @@ async function fetchClientMetrics() {
 }
 
 /* ==========================================================================
-   7. SUBIDA DE EXCEL
+   7. SUBIDA DE EXCEL / INYECCIÓN
    ========================================================================== */
 async function sodieFlujoInyeccionCliente(overrideClientId = null) {
   const btnUpload = document.getElementById('btn-client-upload-excel');
@@ -407,7 +396,7 @@ async function sodieFlujoInyeccionCliente(overrideClientId = null) {
     if (typeof CLIENT_STATE !== 'undefined') CLIENT_STATE.excelUploaded = true;
 
     if (typeof showToast === 'function') {
-      showToast('Segmentación Inyectada', `200 registros listos para ${clientId}.`);
+      showToast('Segmentación Inyectada', `Registros listos para ${clientId}.`);
     }
 
     if (btnUpload) {
@@ -431,14 +420,6 @@ async function sodieFlujoInyeccionCliente(overrideClientId = null) {
   }
 }
 
-/* ==========================================================================
-   8. PAGO SEMANAL Y ACTIVACIÓN
-   ========================================================================== */
-async function sodieProcesarPagoSemanal(event, weekNumber) {
-  if (event) event.preventDefault();
-  window.location.href = `/confirmacion.html?step=pago_semanal&clientId=${encodeURIComponent(CLIENT_STATE.clientId)}&week=${weekNumber}`;
-}
-
 function checkCallbackStatus() {}
 
 async function sodieConfirmarActivacionCliente() {
@@ -449,7 +430,7 @@ async function sodieConfirmarActivacionCliente() {
   }
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/facebook/activar-campana`, {
+    const res = await fetch(`${getBaseUrl()}/api/facebook/activar-borrador`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -472,34 +453,56 @@ async function sodieConfirmarActivacionCliente() {
 }
 
 /* ==========================================================================
-   9. TEMPORIZADORES
+   9. TEMPORIZADORES (72H Y CICLO GLOBAL 28 DÍAS)
    ========================================================================== */
 function initGlobalAndWeeklyTimers() {
   try {
     const globalTimerDisplay = document.getElementById('global-timer-display');
-    const timer72hDisplay = document.getElementById('timer-72h-display');
+    const timer72hDisplay = document.getElementById('timer-24h-display'); // Asumiendo el ID del DOM actual
     
     if (CLIENT_STATE.timerInterval) clearInterval(CLIENT_STATE.timerInterval);
 
     CLIENT_STATE.startTimeStamp = Date.now();
-    
+    const totalCycleTime = 28 * 24 * 3600; // 28 días en segundos
+
     CLIENT_STATE.timerInterval = setInterval(() => {
       const now = Date.now();
       const elapsed = Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000);
+      
+      // Temporizador 72h (reiniciable cada 72 horas)
       const remaining72h = Math.max(0, (72 * 3600) - (elapsed % (72 * 3600)));
+      const h72 = String(Math.floor(remaining72h / 3600)).padStart(2, '0');
+      const m72 = String(Math.floor((remaining72h % 3600) / 60)).padStart(2, '0');
+      const s72 = String(remaining72h % 60).padStart(2, '0');
 
-      const h = String(Math.floor(remaining24h / 3600)).padStart(2, '0');
-      const m = String(Math.floor((remaining24h % 3600) / 60)).padStart(2, '0');
-      const s = String(remaining72h % 60).padStart(2, '0');
+      if (timer72hDisplay) timer72hDisplay.textContent = `${h72}:${m72}:${s72}`;
 
-      if (timer72hDisplay) timer72hDisplay.textContent = `${h}:${m}:${s}`;
+      // Temporizador Global de 28 Días (Ciclo V3.5)
+      const remainingGlobal = Math.max(0, totalCycleTime - elapsed);
+      const daysGlobal = Math.floor(remainingGlobal / (3600 * 24));
+      const hoursGlobal = String(Math.floor((remainingGlobal % (3600 * 24)) / 3600)).padStart(2, '0');
+      const minsGlobal = String(Math.floor((remainingGlobal % 3600) / 60)).padStart(2, '0');
+      const secsGlobal = String(remainingGlobal % 60).padStart(2, '0');
+
+      if (globalTimerDisplay) {
+        globalTimerDisplay.textContent = `${daysGlobal}d ${hoursGlobal}h ${minsGlobal}m ${secsGlobal}s`;
+      }
+
+      // Si se completan los 28 días, mostrar sección final
+      if (remainingGlobal <= 0) {
+        const week4Section = document.getElementById('section-week-4-complete');
+        if (week4Section) week4Section.classList.remove('hidden');
+      }
+
     }, 1000);
   } catch (e) {
     console.warn('Error en temporizadores:', e);
   }
 }
 
-// ------- 10. NOTIFICACIONES PUSH ------ 
+/* ==========================================================================
+   10. NOTIFICACIONES PUSH
+   ========================================================================== */
 async function activarNotificacionesPush(clientIdOverride = null) {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.warn('Este navegador no soporta notificaciones Push nativas');
@@ -515,7 +518,6 @@ async function activarNotificacionesPush(clientIdOverride = null) {
 
     const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
 
-    // 1. Obtener la clave pública del backend
     const resKey = await fetch(`${getBaseUrl()}/api/webhook-client/vapid-public-key`);
     if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
     const { publicKey } = await resKey.json();
@@ -526,7 +528,6 @@ async function activarNotificacionesPush(clientIdOverride = null) {
       applicationServerKey: publicKey
     });
 
-    // 2. Guardar la suscripción en la base de datos vinculada al cliente (asociada a push_CLIENT-#XX)
     const responseSave = await fetch(`${getBaseUrl()}/api/webhook-client/save-subscription`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -546,7 +547,6 @@ async function activarNotificacionesPush(clientIdOverride = null) {
   }
 }
 
-// 3. Notificar cada 72 horas para actualizar segmentación
 async function dispararNotificacion72h(clientIdOverride = null) {
   try {
     const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
@@ -566,25 +566,3 @@ async function dispararNotificacion72h(clientIdOverride = null) {
     console.error('💥 Error en llamada Push 72h:', err.message);
   }
 }
-
-// 4. Notificar cada 7 días para renovación/pago semanal
-async function dispararNotificacionDay7(clientIdOverride = null) {
-  try {
-    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
-    
-    const res = await fetch(`${getBaseUrl()}/api/webhook-client/timer/push-day7`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clientId,
-        timerId: `timer_day7_${clientId}_${Date.now()}`
-      })
-    });
-
-    const data = await res.json();
-    console.log('📡 Respuesta Push Día 7:', data);
-  } catch (err) {
-    console.error('💥 Error en llamada Push Día 7:', err.message);
-  }
-}
-
