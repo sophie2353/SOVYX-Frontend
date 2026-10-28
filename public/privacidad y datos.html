@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Términos de Privacidad y Datos - SODIE</title>
+  <title>Términos de Privacidad y Manejo de Datos - SODIE</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -27,85 +27,85 @@
     <!-- CARD PRINCIPAL DE PRIVACIDAD Y TÉRMINOS -->
     <article class="glass-card-dash" style="padding: 2rem; display: block; height: auto;">
       
-      <h1 class="section-title mint-txt" style="font-size: 1.6rem; margin-bottom: 0.5rem;">
+      <h1 class="section-title mint-txt" style="font-size: 1.6rem; margin-bottom: 0.5rem;" data-i18n="privacy_main_title">
         TÉRMINOS DE PRIVACIDAD Y MANEJO DE DATOS
       </h1>
-      <p class="step-desc" style="margin-bottom: 2rem;">
+      <p class="step-desc" style="margin-bottom: 2rem;" data-i18n="privacy_subtitle">
         SODIE v3.5 — Especificaciones de Seguridad, Acceso y Datos Requeridos.
       </p>
 
       <!-- SECCIÓN 1 -->
       <section class="privacy-block" style="margin-bottom: 2rem;">
-        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;">1. NATURALEZA DEL SOFTWARE Y ACCESO DE EVALUADORES</h3>
-        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;">
-          SODIE funciona única y exclusivamente como software de segmentación de audiencia para Meta Ads donde accederán en primera fase después de la fase 0 (con 3 evaluadores) 50 personas.
+        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;" data-i18n="privacy_sec1_title">1. NATURALEZA DEL SOFTWARE Y ACCESO DE EVALUADORES</h3>
+        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;" data-i18n="privacy_sec1_p1">
+          SODIE opera exclusivamente como un software de segmentación de audiencia para plataformas digitales Ads. Su despliegue inicial comprende una fase de evaluación con 10 evaluadores y un cupo limitado de 10 usuarios para la V4.
         </p>
-        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;">
-          No es una agencia de Facebook Ads donde tardan 3 semanas en pedir todos los datos y no tienes una supervisión real de las métricas ni notificaciones en tiempo real.
+        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;" data-i18n="privacy_sec1_p2">
+          A diferencia de una agencia tradicional de publicidad donde los procesos de gestión se extienden durante semanas, SODIE ofrece supervisión directa y métricas en tiempo real.
         </p>
-        <p class="step-desc" style="line-height: 1.6;">
-          No se necesita otra cosa más que el acceso como evaluador en Meta y los datos de ventas anteriores.
+        <p class="step-desc" style="line-height: 1.6;" data-i18n="privacy_sec1_p3">
+          El funcionamiento requiere únicamente la provisión de los datos de act_id, pixel_id y ventas correspondientes.
         </p>
       </section>
 
       <!-- SECCIÓN 2 -->
       <section class="privacy-block" style="margin-bottom: 2rem;">
-        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;">2. SEGURIDAD Y CREDENCIALES</h3>
-        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;">
-          Jamás se pedirán número de cuenta, contraseña o visuales para las campañas. El inicio de sesión y aceptación de ser evaluador al igual que subir los visuales y monto requerido para cada campaña es mediante la plataforma de Meta, no mediante SODIE.
+        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;" data-i18n="privacy_sec2_title">2. SEGURIDAD Y CREDENCIALES</h3>
+        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;" data-i18n="privacy_sec2_p1">
+          Bajo ninguna circunstancia se solicitarán números de cuenta bancaria, contraseñas de acceso ni control directo sobre las campañas. Todo proceso de autenticación, validación de permisos de evaluador, carga de recursos multimedia y definición de presupuestos se realiza de forma nativa a través de la interfaz oficial de Meta, sin intermediación de credenciales por parte de SODIE.
         </p>
       </section>
 
       <!-- SECCIÓN 3 -->
       <section class="privacy-block" style="margin-bottom: 2rem;">
-        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;">3. LOS ÚNICOS DATOS REQUERIDOS</h3>
+        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;" data-i18n="privacy_sec3_title">3. DATOS REQUERIDOS</h3>
         <ul style="color: rgba(255, 255, 255, 0.85); line-height: 1.6; padding-left: 1.2rem; font-size: 0.95rem;">
           <li style="margin-bottom: 0.8rem;">
-            <strong class="mint-txt">Aceptar ser evaluador:</strong> Extrayendo el <code class="fuchsia-txt">act_id</code> y <code class="fuchsia-txt">pixel_id</code> de tu cuenta publicitaria para inyectar segmentación directamente desde el panel de Meta. No antes de llenar el formulario o pagar.
+            <strong class="mint-txt" data-i18n="privacy_sec3_li1_strong">Permiso de Evaluador:</strong> <span data-i18n="privacy_sec3_li1_text">Extracción exclusiva del identificador de cuenta publicitaria (<code class="fuchsia-txt">act_id</code>) y del píxel (<code class="fuchsia-txt">pixel_id</code>) para la inyección directa de segmentación desde el panel de Meta, tras completarse el registro y la validación de pago.</span>
           </li>
           <li style="margin-bottom: 0.8rem;">
-            <strong class="mint-txt">Excel con datos de clientes:</strong> (En v4 serán solo API de Shopify / Hotmart que actualizará las campañas automáticamente).
+            <strong class="mint-txt" data-i18n="privacy_sec3_li2_strong">Historial de Transacciones:</strong> <span data-i18n="privacy_sec3_li2_text">Dataset con registros de compradores (en la versión V4 se automatizará mediante integración directa con API de Shopify y Hotmart).</span>
           </li>
         </ul>
-        <p class="step-desc" style="line-height: 1.6; margin-top: 1rem;">
-          No se necesitan más datos. SODIE es creada para ahorrar tiempo y miles de dólares donde el usuario SIEMPRE ingresará su monto a invertir en la campaña y sus visuales.
+        <p class="step-desc" style="line-height: 1.6; margin-top: 1rem;" data-i18n="privacy_sec3_p2">
+          El sistema está diseñado para optimizar la eficiencia operativa. El usuario conserva en todo momento el control sobre los presupuestos de inversión y los elementos multimedia de sus campañas.
         </p>
       </section>
 
       <!-- SECCIÓN 4 -->
       <section class="privacy-block" style="margin-bottom: 2rem;">
-        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;">4. REVOCACIÓN DE ACCESO Y ELIMINACIÓN DE DATOS</h3>
-        <p class="step-desc" style="line-height: 1.6;">
-          Al quitar el acceso de evaluador, automáticamente se eliminan los datos del <code class="fuchsia-txt">act_id</code> y el <code class="fuchsia-txt">pixel_id</code> donde ya no se podrá visualizar las métricas ni crear la segmentación adecuada para las campañas publicitarias de Facebook. SODIE no podrá hacer nada al respecto después de eliminar el acceso porque se necesita segmentación previa, visuales y tarjeta para invertir en alguna campaña del usuario; por ende, los datos se eliminan automáticamente del sistema.
+        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;" data-i18n="privacy_sec4_title">4. REVOCACIÓN DE ACCESO Y ELIMINACIÓN DE DATOS</h3>
+        <p class="step-desc" style="line-height: 1.6;" data-i18n="privacy_sec4_p1">
+          La revocación de los permisos de evaluador en la cuenta publicitaria conlleva la eliminación inmediata y automatizada de los registros asociados al <code class="fuchsia-txt">act_id</code> y <code class="fuchsia-txt">pixel_id</code> dentro del sistema. Como consecuencia de esta acción, la plataforma dejará de emitir métricas y de procesar la segmentación para las campañas publicitarias, debido a la interrupción de los accesos requeridos.
         </p>
       </section>
 
       <!-- SECCIÓN 5 -->
       <section class="privacy-block" style="margin-bottom: 2rem;">
-        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;">5. ¿POR QUÉ PLATAFORMAS CRIPTO?</h3>
-        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;">
-          Al ser 3 evaluadores, el camino más rápido al no ser una suscripción mensual para verificar el funcionamiento del SOFTWARE es mediante plataformas cripto porque agiliza los trámites, donde en la V4 sí será mediante pasarela y suscripción mensual de $5.000 al mes (podría subir el precio a $10K-$15K/mes por ROAS generado a los 3 evaluadores) mediante resultados de los 3 evaluadores y el mío principalmente en 3 nichos diferentes donde la V4 será más ágil y precisa. Teniendo que pagar 50K$ de acceso (48K$ si se reservo el cupo de 2.000$)
+        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;" data-i18n="privacy_sec5_title">5. INFRAESTRUCTURA DE PAGOS Y TRANSICIÓN A V4</h3>
+        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;" data-i18n="privacy_sec5_p1">
+          Durante esta fase inicial con los evaluadores, el procesamiento mediante activos digitales en red blockchain agiliza la validación técnica del software sin requerir compromisos de suscripción mensual prolongados. La futura versión V4 incorporará pasarelas de pago tradicionales con un esquema de licencia anual estimada en $50.000, condicionado al rendimiento generado y al modelo de despliegue en múltiples nichos.
         </p>
-        <p class="step-desc" style="line-height: 1.6;">
-          Con plataformas normales de pasarela tardaría la V4 entre 30 y 60 días para activarse. Con Pago Cripto es solo mínimo 7 días desde el último pago (Semana 3) hasta tener lista la V4. Las cuotas correspondientes fueron para verificar el software a largo plazo con constantes segmentaciones nuevas cada 24 horas. El pago respectivo para equipo y actualizaciones necesarias es un total de 150K$. por ende, el pago de reserva y evaluador es puramente inversión en la V4 lo antes posible y no 4 meses después. Cada semana se iran subiendo actualizaciones con nuevas funciones / diseños de los clientes, incluyendo chat directo con la persona que creo este software.
+        <p class="step-desc" style="line-height: 1.6;" data-i18n="privacy_sec5_p2">
+          El uso de pasarelas descentralizadas optimiza los tiempos de implementación técnica de la V4 de meses a semanas, destinando los recursos de forma directa al desarrollo de la infraestructura, auditorías de seguridad y actualizaciones continuas del sistema.
         </p>
       </section>
 
       <!-- SECCIÓN 6 -->
       <section class="privacy-block" style="margin-bottom: 2rem;">
-        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;">6. FORMULARIO PRE PAGO Y COMUNICACIONES</h3>
-        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;">
-          Este formulario es única y exclusivamente para mejorar la segmentación de SODIE hacia siguientes campañas. No se enviarán emails al correo o se escribirá por WhatsApp ofreciendo el servicio.
+        <h3 class="fuchsia-txt" style="font-size: 1.1rem; margin-bottom: 0.8rem;" data-i18n="privacy_sec6_title">6. COMUNICACIONES Y POLÍTICA DE DATOS</h3>
+        <p class="step-desc" style="line-height: 1.6; margin-bottom: 1rem;" data-i18n="privacy_sec6_p1">
+          La información recabada a través de los formularios se procesa de manera estrictamente interna para calibrar los algoritmos de segmentación. No se realizan campañas de prospección comercial automatizada por correo electrónico ni mensajería instantánea.
         </p>
-        <p class="step-desc" style="line-height: 1.6;">
-          La única forma de recibir algún Gmail de SODIE es que hayas accedido a la lista de espera, donde ni siquiera hace falta porque activas las notificaciones push en la web y sabes cuando se activa la versión 4.
+        <p class="step-desc" style="line-height: 1.6;" data-i18n="privacy_sec6_p2">
+          Las notificaciones sobre actualizaciones o disponibilidad de nuevas versiones se gestionan mediante canales oficiales de difusión y avisos directos en la plataforma.
         </p>
       </section>
 
-      <!-- FOOTER COPYRIGHT (CON EL SÍMBOLO ©) -->
+      <!-- FOOTER COPYRIGHT -->
       <footer style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem; text-align: center; margin-top: 3rem;">
         <p class="mint-txt" style="font-size: 0.85rem; letter-spacing: 1px;">
-          © SODIE V3.5. SEPTIEMBRE 2026
+          © SODIE V3.5. OCTUBRE 2026
         </p>
       </footer>
 
