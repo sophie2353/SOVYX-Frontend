@@ -6,6 +6,10 @@ function getBaseUrl() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  if (window.SODIE_CONFIG_READY) {
+    await window.SODIE_CONFIG_READY;
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const step = urlParams.get('step');
   const campaignId = urlParams.get('campaignId');
@@ -35,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (savedId) return savedId;
 
     try {
-      const res = await fetch('/api/v1/clients/next-id');
+      const res = await fetch(`${getBaseUrl()}/api/v1/clients/next-id`);
       if (res.ok) {
         const data = await res.json();
         const newId = data.clientId || 'CLIENT-#01';
@@ -96,8 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // =========================================================================
   // PASO 1: CONFIGURACIÓN POST-PAGO DE CREDENCIALES (ACT_ID & PIXEL_ID)
   // =========================================================================
-  // confirmacion.html (Sección JS de configuración y procesamiento)
-else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
+  else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
 
@@ -105,7 +108,6 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
     titleEl.textContent = 'Configuración de Cuenta Publicitaria';
     bodyEl.textContent = `Ingresa los datos de tu cuenta publicitaria de Meta para vincular la automatización de IA1 con el cliente ${activeClientId}. Solo se requiere una vez.`;
 
-    // Inyectar el formulario de configuración + Contenedor de Alerta para Error #100
     stepsContainer.innerHTML = `
       <div id="ltv-warning-banner" style="display: none; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #fff;">
         <h4 style="margin: 0 0 8px 0; color: #facc15; font-weight: 600;">Requisito de Meta Detectado (Error #100)</h4>
@@ -129,6 +131,9 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
       </div>
     `;
 
+    verifyBtn.style.display = 'inline-flex';
+    verifyBtn.textContent = 'Guardar y Vincular Credenciales';
+
     const ltvBanner = document.getElementById('ltv-warning-banner');
     const ltvText = document.getElementById('ltv-warning-text');
     const btnReintentarLtv = document.getElementById('btn-reintentar-ltv');
@@ -142,12 +147,11 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
         return;
       }
 
-      // Ocultar banner previo si existía
       if (ltvBanner) ltvBanner.style.display = 'none';
 
       verifyBtn.textContent = 'Guardando y Validando en Meta...';
       try {
-        const res = await fetch('/api/v1/facebook/configurar', {
+        const res = await fetch(`${getBaseUrl()}/api/v1/facebook/configurar`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -159,7 +163,6 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
 
         const data = await res.json();
 
-        // 1. Interceptar si devuelve el error de Value / LTV Terms Required
         if (!data.success && (data.errorCode === 'VALUE_TERMS_REQUIRED' || data.error?.includes('Términos de Valor'))) {
           ltvText.textContent = data.instructions || 'Debes activar la segmentación por Value subiendo un archivo CSV de prueba en tu panel de Meta y aceptar los términos.';
           ltvBanner.style.display = 'block';
@@ -167,7 +170,6 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
           return;
         }
 
-        // 2. Éxito: Continuar al siguiente paso
         if (data.success) {
           window.location.href = `/confirmacion.html?step=procesar_excel&clientId=${encodeURIComponent(activeClientId)}&actId=${encodeURIComponent(data.act_id)}&sessionId=${sessionId || ''}`;
         } else {
@@ -180,6 +182,12 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
         verifyBtn.textContent = 'Guardar y Vincular Credenciales';
       }
     };
+
+    verifyBtn.onclick = submitCredentials;
+    if (btnReintentarLtv) {
+      btnReintentarLtv.onclick = submitCredentials;
+    }
+  }
 
   // =========================================================================
   // PASO 2: ACTIVACIÓN Y PUBLICACIÓN DE CAMPAÑA (POST-CONFIGURACIÓN)
@@ -220,30 +228,6 @@ else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conec
     verifyBtn.onclick = () => {
       window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=verifying`;
     };
-  }
-
-  // =========================================================================
-  // PASO 3: REDIRECCIÓN POST-PAGO SEMANAL -> CLIENT.HTML
-  // =========================================================================
-  else if (step === 'pago_semanal') {
-    loaderEl.style.display = 'none';
-    const activeClientId = await resolveClientId();
-
-    localStorage.setItem('sodie_weekly_payment_completed', 'true');
-    localStorage.setItem(`sodie_paid_week_${weekNumber}_${activeClientId}`, 'true');
-
-    if (typeof fbq === 'function') {
-      fbq('track', 'Purchase', { value: 6000.00, currency: 'USD', content_name: `Cuota Semanal ${weekNumber} SODIE` });
-    }
-
-    badgeEl.textContent = `Cuota Semanal ${weekNumber} • ${activeClientId}`;
-    titleEl.textContent = '¡Pago Semanal Confirmado!';
-    bodyEl.textContent = `Hemos validado tu pago de $6,000 USDT para la Semana ${weekNumber}. Redirigiendo a tu Panel de Cliente...`;
-
-    setTimeout(() => {
-      const targetUrl = `/client.html?clientId=${encodeURIComponent(activeClientId)}&status=weekly_paid_success&week=${weekNumber}&paid=true`;
-      window.location.href = targetUrl;
-    }, 2000);
   }
 
   // =========================================================================
