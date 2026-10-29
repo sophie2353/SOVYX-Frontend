@@ -103,10 +103,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
+    
+    // 🔥 TU ID DE BUSINESS MANAGER (Para que el cliente lo asigne como Socio)
+    const SODIE_BM_ID = "123456789012345"; // <-- REEMPLAZA ESTO CON TU ID REAL 👺
 
     badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
-    titleEl.textContent = 'Configuración de Cuenta Publicitaria';
-    bodyEl.textContent = `Ingresa los datos de tu cuenta publicitaria de Meta para vincular la automatización de IA1 con el cliente ${activeClientId}. Solo se requiere una vez.`;
+    titleEl.textContent = 'Configuración de Campaña en Meta';
+    bodyEl.textContent = `Asigna permisos a SODIE en tu Business Manager y coloca los datos de tu cuenta publicitaria para inyectar la automatización.`;
 
     stepsContainer.innerHTML = `
       <div id="ltv-warning-banner" style="display: none; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #fff;">
@@ -119,14 +122,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
 
-      <div class="credentials-form">
-        <div class="form-group">
-          <label for="input-act-id">ID de Cuenta Publicitaria (act_id)</label>
-          <input type="text" id="input-act-id" placeholder="Ej: act_123456789 o 123456789" value="${actId || ''}">
+      <!-- Tarjeta de Instrucción: Business Manager -->
+      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #fff;">1. Asígnanos como Socio en Meta</h4>
+        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #a1a1aa; line-height: 1.5;">
+          Ve a "Configuración del Negocio > Socios" en Meta y agrega a SODIE dándole permisos sobre tu Cuenta Publicitaria, Página y Píxel usando nuestro ID.
+        </p>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <code id="sodie-bm-id" style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; color: #34d399; font-weight: 600; font-size: 0.95rem; letter-spacing: 1px; flex: 1;">${SODIE_BM_ID}</code>
+          <button type="button" onclick="navigator.clipboard.writeText('${SODIE_BM_ID}'); alert('ID de SODIE copiado.');" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">
+            Copiar ID
+          </button>
         </div>
-        <div class="form-group" style="margin-top: 14px;">
-          <label for="input-pixel-id">ID del Píxel de Meta (pixel_id - Opcional)</label>
-          <input type="text" id="input-pixel-id" placeholder="Ej: 987654321012345">
+      </div>
+
+      <!-- Formulario de Credenciales -->
+      <div class="credentials-form">
+        <h4 style="margin: 0 0 14px 0; font-size: 1rem; color: #fff;">2. Ingresa tus datos</h4>
+        
+        <div class="form-group">
+          <label for="input-act-id" style="color: #cbd5e1; font-size: 0.9rem;">ID de Cuenta Publicitaria (act_id)</label>
+          <input type="text" id="input-act-id" placeholder="Ej: 123456789" value="${actId || ''}" style="width: 100%; padding: 12px; margin-top: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+        </div>
+        
+        <div class="form-group" style="margin-top: 18px;">
+          <label for="input-website-url" style="color: #cbd5e1; font-size: 0.9rem;">URL de tu Sitio Web</label>
+          <input type="url" id="input-website-url" placeholder="https://tu-sitio.com" style="width: 100%; padding: 12px; margin-top: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
         </div>
       </div>
     `;
@@ -140,10 +161,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const submitCredentials = async () => {
       const actInput = document.getElementById('input-act-id').value.trim();
-      const pixelInput = document.getElementById('input-pixel-id').value.trim();
+      const websiteInput = document.getElementById('input-website-url').value.trim();
 
       if (!actInput) {
         alert('⚠️ Por favor ingresa el ID de tu cuenta publicitaria.');
+        return;
+      }
+      
+      if (!websiteInput || !websiteInput.startsWith('http')) {
+        alert('⚠️ Por favor ingresa una URL válida (ej. https://tusitio.com).');
         return;
       }
 
@@ -151,13 +177,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       verifyBtn.textContent = 'Guardando y Validando en Meta...';
       try {
+        // Hacemos la llamada al backend pasando ACT_ID y WEBSITE_URL
         const res = await fetch(`${getBaseUrl()}/api/v1/facebook/configurar`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             clientId: activeClientId,
             actId: actInput,
-            pixelId: pixelInput || null
+            websiteUrl: websiteInput
           })
         });
 
@@ -171,6 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (data.success) {
+          // Si todo va bien, pasamos al siguiente paso en el flujo (crear el borrador en la nube/meta)
           window.location.href = `/confirmacion.html?step=procesar_excel&clientId=${encodeURIComponent(activeClientId)}&actId=${encodeURIComponent(data.act_id)}&sessionId=${sessionId || ''}`;
         } else {
           alert(`⚠️ Error: ${data.error || 'No se pudieron guardar las credenciales.'}`);
