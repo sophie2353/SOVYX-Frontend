@@ -116,10 +116,12 @@
         <p class="step-desc">El sistema opera automáticamente con el Token Maestro de Administración configurado en entorno.</p>
         
         <div class="input-group-flow margin-v-sm" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-          <!-- Botón único para activar campaña e inyectar segmentación -->
-          <button type="button" id="btn-trigger-active-campaign" class="btn-pf-action btn-mint-solid">
-            Activar Campaña Directa
+                    <!-- Botón único para activar campaña e inyectar segmentación con contador -->
+          <button type="button" id="btn-trigger-active-campaign" class="btn-pf-action btn-mint-solid" style="position: relative; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <span id="btn-trigger-text">Activar Campaña Directa</span>
+            <span id="btn-trigger-timer" class="hidden" style="font-family: 'Orbitron', monospace; font-size: 0.9em; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">00:00:00</span>
           </button>
+          
           <button type="button" id="btn-trigger-v4-14days" class="btn-pf-action btn-fuchsia-solid">
             Cerrar Lista y Disparar V4 (14 días)
           </button>
