@@ -407,28 +407,13 @@ function initIA3Engine() {
 /* ==========================================================================
    7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS
    ========================================================================== */
-function mostrarPasoConexion() {
-  const introCard = document.getElementById('pf-intro-card');
-  const stepBilling = document.getElementById('pf-step-billing');
-  if (introCard) introCard.classList.add('hidden');
-  if (stepBilling) stepBilling.classList.remove('hidden');
-}
 
 function desplegarIframePago() {
-  const fbUserInput = document.getElementById('fbUserId');
-  const fbUser = fbUserInput ? fbUserInput.value.trim() : '';
-
-  if (!fbUser) {
-    alert('Por favor ingresa tu User de Facebook para continuar.');
-    return;
-  }
-  
-  localStorage.setItem('sodie_fb_user', fbUser);
-
-  const stepBilling = document.getElementById('pf-step-billing');
+  const introCard = document.getElementById('pf-intro-card');
   const iframeBox = document.getElementById('pf-step-iframe');
 
-  if (stepBilling) stepBilling.classList.add('hidden');
+  // Ocultar el botón principal de pago y mostrar el iframe
+  if (introCard) introCard.classList.add('hidden');
   if (iframeBox) iframeBox.classList.remove('hidden');
 }
 
@@ -451,15 +436,16 @@ function initPaymentFlowEvents() {
     });
   }
 
-  const btnIniciarPago = document.getElementById('btn-iniciar-pago');
-  if (btnIniciarPago) {
-    btnIniciarPago.addEventListener('click', (e) => {
+  // 1. Botón principal de pago
+  const btnProcesarPago = document.getElementById('btn-procesar-pago-pasarela');
+  if (btnProcesarPago) {
+    btnProcesarPago.addEventListener('click', (e) => {
       e.preventDefault();
-      mostrarPasoConexion();
+      desplegarIframePago();
     });
   }
   
-  // 1. Botón de finalizar y confirmar
+  // 2. Botón de finalizar y confirmar
   const btnClientUploadFile = document.getElementById('btn-client-upload-file');
   if (btnClientUploadFile) {
     btnClientUploadFile.addEventListener('click', (e) => {
@@ -468,7 +454,7 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // 2. Escuchar el pago desde NOWPayments
+  // 3. Escuchar el pago desde NOWPayments
   window.addEventListener('message', (event) => {
     if (event.origin && event.origin.includes('nowpayments.io')) {
       if (event.data && (event.data.status === 'finished' || event.data.paymentStatus === 'confirmed' || event.data.type === 'PAYMENT_SUCCESS')) {
@@ -478,16 +464,14 @@ function initPaymentFlowEvents() {
     }
   });
 
-  // 3. Validar estado de contrato/firma
+  // 4. Validar estado de contrato/firma
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
     const introCard = document.getElementById('pf-intro-card');
-    const stepBilling = document.getElementById('pf-step-billing');
     const iframeBox = document.getElementById('pf-step-iframe');
     const stepExcel = document.getElementById('pf-step-excel');
 
     if (introCard) introCard.classList.add('hidden');
-    if (stepBilling) stepBilling.classList.add('hidden');
     if (iframeBox) iframeBox.classList.add('hidden');
     if (stepExcel) stepExcel.classList.remove('hidden');
   }
@@ -596,9 +580,6 @@ function initTimer30d() {
   }, 1000);
 }
 
-/* ==========================================================================
-   11. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
-   ========================================================================== */
 /* ==========================================================================
    11. MANEJADORES GLOBALES Y ORQUESTADOR DE BOTONES
    ========================================================================== */
