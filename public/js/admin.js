@@ -245,7 +245,32 @@ function sodieReiniciarCronometro() {
    ========================================================================== */
 async function sodieConfirmarActivacion() {
   const btn = document.getElementById('btn-trigger-active-campaign');
-  if (btn) btn.textContent = 'Inyectando borrador con Token Maestro... ⏳';
+  const textSpan = document.getElementById('btn-trigger-text');
+  const timerSpan = document.getElementById('btn-trigger-timer');
+  
+  let startTime;
+  let timerInterval;
+
+  if (btn) btn.disabled = true;
+
+  if (textSpan) textSpan.textContent = 'Inyectando borrador con Token Maestro... ⏳';
+  if (timerSpan) {
+    timerSpan.classList.remove('hidden');
+    timerSpan.textContent = '00:00:00';
+    startTime = Date.now();
+    
+    // Función para actualizar el cronómetro en el botón
+    timerInterval = setInterval(() => {
+      const elapsedTime = Date.now() - startTime;
+      const hours = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
+      const minutes = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
+      const seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+      const milliseconds = Math.floor((elapsedTime % 1000) / 10).toString().padStart(2, '0'); 
+      
+      // Mostramos mm:ss:ms para que se vea rápido (ya que dices que tarda < 1.5s)
+      timerSpan.textContent = `${minutes}:${seconds}:${milliseconds}`;
+    }, 10); // Actualiza cada 10ms para dar sensación de velocidad
+  }
 
   try {
     // Apuntamos al endpoint oficial de creación de borrador pasando el clientId de ADMIN
@@ -260,22 +285,39 @@ async function sodieConfirmarActivacion() {
     });
 
     const data = await res.json();
+    clearInterval(timerInterval); // Detenemos el cronómetro
 
     if (data.success) {
       alert('🚀 ¡Borrador inyectado en Meta con éxito usando el Token Maestro!');
-      if (btn) btn.textContent = '✓ Campaña Activa / Borrador Listo';
+      
+      if (textSpan) {
+         textSpan.textContent = '✓ Listo. Tiempo total: ';
+      }
+      
+      if (btn) {
+         btn.classList.remove('btn-mint-solid');
+         btn.style.background = 'rgba(0, 255, 204, 0.2)'; // Estilo de completado
+      }
 
       if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+        // Opcional: Pequeño delay antes de redirigir para que alcancen a ver el tiempo
+        setTimeout(() => {
+            window.location.href = data.redirectUrl;
+        }, 1500);
       }
     } else {
       alert(`❌ Error al activar en Meta: ${data.error || 'Error en el servidor'}`);
-      if (btn) btn.textContent = 'Activar Campaña Directa 🚀';
+      if (textSpan) textSpan.textContent = 'Activar Campaña Directa';
+      if (timerSpan) timerSpan.classList.add('hidden');
+      if (btn) btn.disabled = false;
     }
   } catch (error) {
+    clearInterval(timerInterval); // Detenemos en caso de error
     console.error('💥 Error enviando activación:', error);
-    alert('⚠️ Ocurrió un error al procesar la solicitud con Meta.');
-    if (btn) btn.textContent = 'Activar Campaña Directa 🚀';
+    alert('Ocurrió un error al procesar la solicitud con Meta.');
+    if (textSpan) textSpan.textContent = 'Activar Campaña Directa';
+    if (timerSpan) timerSpan.classList.add('hidden');
+    if (btn) btn.disabled = false;
   }
 }
 
