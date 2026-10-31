@@ -424,9 +424,30 @@ function checkCallbackStatus() {}
 
 async function sodieConfirmarActivacionCliente() {
   const btnActivate = document.getElementById('btn-client-activate-campaign');
-  if (btnActivate) {
-    btnActivate.textContent = 'Activando en Meta Ads...';
-    btnActivate.disabled = true;
+  const textSpan = document.getElementById('btn-client-trigger-text');
+  const timerSpan = document.getElementById('btn-client-trigger-timer');
+  
+  let startTime;
+  let timerInterval;
+
+  if (btnActivate) btnActivate.disabled = true;
+  
+  if (textSpan) textSpan.textContent = 'Activando en Meta Ads... ⏳';
+  
+  if (timerSpan) {
+    timerSpan.classList.remove('hidden');
+    timerSpan.textContent = '00:00:00';
+    startTime = Date.now();
+    
+    // Función para actualizar el cronómetro (mm:ss:ms)
+    timerInterval = setInterval(() => {
+      const elapsedTime = Date.now() - startTime;
+      const minutes = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
+      const seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+      const milliseconds = Math.floor((elapsedTime % 1000) / 10).toString().padStart(2, '0'); 
+      
+      timerSpan.textContent = `${minutes}:${seconds}:${milliseconds}`;
+    }, 10);
   }
 
   try {
@@ -441,16 +462,32 @@ async function sodieConfirmarActivacionCliente() {
     });
 
     if (!res.ok) throw new Error('Error al activar');
+    
+    // Detenemos el cronómetro al tener éxito
+    clearInterval(timerInterval);
+    
     showToast('Éxito', 'Campaña activada correctamente en Meta Ads.');
-    if (btnActivate) btnActivate.textContent = '✓ Campaña Activa';
-  } catch (error) {
-    showToast('Error', 'No se pudo activar la campaña.', true);
-    if (btnActivate) {
-      btnActivate.textContent = 'Activar Campaña';
-      btnActivate.disabled = false;
+    
+    if (textSpan) {
+      textSpan.textContent = '✓ Listo. Tiempo total: ';
     }
+    
+    if (btnActivate) {
+      btnActivate.classList.remove('btn-activate-gradient');
+      btnActivate.style.background = 'rgba(0, 255, 204, 0.2)'; // Estilo de completado
+    }
+    
+  } catch (error) {
+    // Detenemos el cronómetro si falla
+    clearInterval(timerInterval);
+    showToast('Error', 'No se pudo activar la campaña.', true);
+    
+    if (textSpan) textSpan.textContent = 'Activar Campaña';
+    if (timerSpan) timerSpan.classList.add('hidden');
+    if (btnActivate) btnActivate.disabled = false;
   }
 }
+
 
 /* ==========================================================================
    9. TEMPORIZADORES (72H Y CICLO GLOBAL 28 DÍAS)
