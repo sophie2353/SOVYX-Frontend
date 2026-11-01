@@ -177,26 +177,54 @@ async function initFacebookMetrics() {
   };
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/facebook/metrics`);
+    // 1. Gestionar el contador de visitas en localStorage para el ciclo de 50
+    let visitasAcumuladas = parseInt(localStorage.getItem('sodie_visitas_counter') || '0', 10);
+    visitasAcumuladas++;
+    localStorage.setItem('sodie_visitas_counter', visitasAcumuladas);
+
+    // 2. Comprobar caché local
+    const cacheMetricas = sessionStorage.getItem('sodie_cached_metrics');
+    const ultimaConsultaVisita = parseInt(localStorage.getItem('sodie_ultima_consulta_en') || '0', 10);
+
+    if (cacheMetricas && (visitasAcumuladas - ultimaConsultaVisita < 50)) {
+      const data = JSON.parse(cacheMetricas);
+      renderizarDatosEnPantalla(data, { elSpend, elSpendStatus, elReach, elReachStatus, elVisitors, elActivos, elPayClicks });
+      return;
+    }
+
+    // 3. Petición al backend enviando explícitamente el rol ADMIN como parámetro
+    const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?role=ADMIN`);
     if (!res.ok) throw new Error('Campaña no activa');
     const data = await res.json();
 
     if (data && data.hasActiveCampaign) {
-      if (elSpend) elSpend.textContent = `$${data.spend || 0}`;
-      if (elSpendStatus) elSpendStatus.textContent = 'Conectado Meta Ads';
-      if (elReach) elReach.textContent = (data.reach || 0).toLocaleString();
-      if (elReachStatus) elReachStatus.textContent = (data.impressions || 0).toLocaleString();
-      if (elVisitors) elVisitors.textContent = data.visitors || 0;
-      if (elActivos) elActivos.textContent = data.activos || 0;
-      if (elPayClicks) elPayClicks.textContent = data.payClicks || 0;
+      sessionStorage.setItem('sodie_cached_metrics', JSON.stringify(data));
+      localStorage.setItem('sodie_ultima_consulta_en', visitasAcumuladas);
+
+      renderizarDatosEnPantalla(data, { elSpend, elSpendStatus, elReach, elReachStatus, elVisitors, elActivos, elPayClicks });
     } else {
       setZeroMetrics();
     }
   } catch (error) {
-    setZeroMetrics();
+    const cacheFallback = sessionStorage.getItem('sodie_cached_metrics');
+    if (cacheFallback) {
+      const data = JSON.parse(cacheFallback);
+      renderizarDatosEnPantalla(data, { elSpend, elSpendStatus, elReach, elReachStatus, elVisitors, elActivos, elPayClicks });
+    } else {
+      setZeroMetrics();
+    }
   }
 }
 
+function renderizarDatosEnPantalla(data, els) {
+  if (els.elSpend) els.elSpend.textContent = `$${data.spend || 0}`;
+  if (els.elSpendStatus) els.elSpendStatus.textContent = 'Conectado Meta Ads';
+  if (els.elReach) els.elReach.textContent = (data.reach || 0).toLocaleString();
+  if (els.elReachStatus) els.elReachStatus.textContent = (data.impressions || 0).toLocaleString();
+  if (els.elVisitors) els.elVisitors.textContent = data.visitors || 0;
+  if (els.elActivos) els.elActivos.textContent = data.activos || 0;
+  if (els.elPayClicks) els.elPayClicks.textContent = data.payClicks || 0;
+}
 /* ==========================================================================
    5. CHAT & ASISTENTE IA2
    ========================================================================== */
