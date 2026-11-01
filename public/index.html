@@ -445,14 +445,22 @@
               <input type="number" id="sodie-edad-max" class="file-input-custom full-width" placeholder="Edad Max (ej: 55)" data-i18n-placeholder="placeholder_max_age" value="55" />
             </div>
 
+            <!-- Casilla de Aceptación de Términos y Privacidad -->
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; font-size: 0.82rem; color: rgba(255, 255, 255, 0.7); text-align: left;">
+              <input type="checkbox" id="sodie-terms" required style="margin-top: 3px; accent-color: #00ffcc; cursor: pointer;" />
+              <label for="sodie-terms" style="cursor: pointer; line-height: 1.4;">
+                Acepto los <a href="privacidad y datos.html" target="_blank" style="color: #00ffcc; text-decoration: underline;">términos de privacidad y tratamiento de datos</a> para la automatización publicitaria.
+              </label>
+            </div>
+
             <button type="button" id="btn-client-upload-file" onclick="ejecutarBotonSODIE(event, 'cargar-excel')" class="btn-pf-action btn-pay-gradient btn-upload-finish" data-sodie-event="Excel_Upload" data-i18n="btn_save_confirmation">
               Guardar (Ir a Confirmación)
             </button>
           </div>
         </div>
       </div>
-
-      <div id="pf-waitlist-block" class="hidden text-center margin-v-sm waitlist-container-styled">
+        
+     <div id="pf-waitlist-block" class="hidden text-center margin-v-sm waitlist-container-styled">
         <span class="badge-client badge-soldout" data-i18n="badge_sold_out">CUPOS AGOTADOS</span>
         <h3 class="section-title fuchsia-txt waitlist-title" style="margin-top: 10px;" data-i18n="title_waitlist_v4">Unirse a la Lista de Espera Exclusiva V4</h3>
         <p class="step-desc waitlist-desc" style="margin-bottom: 16px;" data-i18n="waitlist_desc">
