@@ -105,11 +105,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const activeClientId = await resolveClientId();
     
     // 🔥 TU ID DE BUSINESS MANAGER (Para que el cliente lo asigne como Socio)
-    const SODIE_BM_ID = "123456789012345"; // <-- REEMPLAZA ESTO CON TU ID REAL 👺
+    const SODIE_BM_ID = "2918454448354968";
 
     badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
     titleEl.textContent = 'Configuración de Campaña en Meta';
-    bodyEl.textContent = `Asigna permisos a SODIE en tu Business Manager y coloca los datos de tu cuenta publicitaria para inyectar la automatización.`;
+    bodyEl.textContent = `Asigna permisos a SODIE (sovyx en Bussiness) en tu Business Manager y coloca los datos de tu cuenta publicitaria para inyectar la automatización.`;
 
     stepsContainer.innerHTML = `
       <div id="ltv-warning-banner" style="display: none; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #fff;">
