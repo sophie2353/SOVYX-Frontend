@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // =========================================================================
   // PASO 0: CONFIRMAR PAGO, ASIGNAR ID Y SALTAR A CONTRATO.HTML
   // =========================================================================
-  if (step === 'confirmar_pago' || step === 'generar_id' || step === 'aceptar_rol' || paymentType === 'hora0') {
+  if (step === 'confirmar_pago' || step === 'generar_id' || step === 'aceptar_rol' || paymentType === 'RESERVA') {
     loaderEl.style.display = 'none';
     
     const activeClientId = await resolveClientId();
 
     localStorage.setItem('sodie_payment_completed', 'true');
     if (typeof fbq === 'function') {
-      fbq('track', 'Purchase', { value: 25000.00, currency: 'USD', content_name: 'Reserva Inicial SODIE' });
+      fbq('track', 'Purchase', { value: 25000.00, currency: 'USD', content_name: 'Reserva SODIE' });
     }
 
     badgeEl.textContent = `Paso 1 de 3 • Cliente ${activeClientId}`;
@@ -86,13 +86,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
 
     actionBtn.style.display = 'none';
-    verifyBtn.style.display = 'inline-flex';
+        verifyBtn.style.display = 'inline-flex';
     verifyBtn.textContent = 'Firmar Contrato Digital ➔';
     verifyBtn.onclick = () => {
       verifyBtn.textContent = 'Redirigiendo a contrato.html...';
-      const targetUrl = role === 'admin'
-        ? `/admin.html?sessionId=${sessionId || ''}&status=paid_success`
-        : `/contrato.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=paid_success`;
+      // Siempre enviamos al flujo normal de cliente con su ID generado
+      const targetUrl = `/contrato.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=paid_success`;
       window.location.href = targetUrl;
     };
   }
@@ -104,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
     
-    // 🔥 TU ID DE BUSINESS MANAGER (Para que el cliente lo asigne como Socio)
+    // ID DE BUSINESS MANAGER (Para que el cliente lo asigne como Socio)
     const SODIE_BM_ID = "2918454448354968";
 
     badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
@@ -226,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     badgeEl.textContent = `Paso 3 de 3 • Cliente ${activeClientId}`;
     titleEl.textContent = '¡Borrador Generado en Meta Ads!';
-    bodyEl.textContent = 'Tu campaña y segmentación de 24 horas han sido inyectadas exitosamente en tu cuenta. Abre Ads Manager para confirmar presupuesto y publicar tus visuales.';
+    bodyEl.textContent = 'Tu campaña y segmentación de 72 horas han sido inyectadas exitosamente en tu cuenta. Abre Ads Manager para confirmar presupuesto y publicar tus visuales.';
 
     stepsContainer.innerHTML = `
       <ul class="steps-list">
@@ -254,9 +253,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     verifyBtn.style.display = 'inline-flex';
     verifyBtn.textContent = '2. Ir a mi Dashboard';
     verifyBtn.onclick = () => {
-      window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=verifying`;
+      // Validamos si es el administrador maestro o un cliente regular
+      const isAdminUser = activeClientId === 'ADMIN' || role === 'admin';
+      
+      if (isAdminUser) {
+        window.location.href = `/admin.html?clientId=ADMIN&sessionId=${sessionId || ''}&status=verifying`;
+      } else {
+        window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=verifying`;
+      }
     };
-  }
 
   // =========================================================================
   // FALLBACK POR DEFECTO
