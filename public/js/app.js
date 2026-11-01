@@ -193,7 +193,8 @@ async function initFacebookMetrics() {
     }
 
     // 3. Petición al backend enviando explícitamente el rol ADMIN como parámetro
-    const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?role=ADMIN`);
+    // En tu app.js: se pasa clientId=ADMIN en el query parameter
+const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?clientId=ADMIN`);
     if (!res.ok) throw new Error('Campaña no activa');
     const data = await res.json();
 
