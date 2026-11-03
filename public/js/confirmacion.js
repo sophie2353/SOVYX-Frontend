@@ -250,18 +250,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.open(webUrl, '_blank');
     };
 
-    verifyBtn.style.display = 'inline-flex';
-    verifyBtn.textContent = '2. Ir a mi Dashboard';
-    verifyBtn.onclick = () => {
-      // Validamos si es el administrador maestro o un cliente regular
-      const isAdminUser = activeClientId === 'ADMIN' || role === 'admin';
-      
-      if (isAdminUser) {
-        window.location.href = `/admin.html?clientId=ADMIN&sessionId=${sessionId || ''}&status=verifying`;
-      } else {
-        window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=verifying`;
-      }
-    };
+    // ⚡ Capturamos de forma segura los parámetros de la URL que inyectó el backend
+const activeClientId = (urlParams.get('clientId') || 'ADMIN').trim().toUpperCase();
+
+// Configuración del botón de redirección al finalizar
+verifyBtn.textContent = '2. Ir a mi Dashboard';
+verifyBtn.onclick = () => {
+  // Validamos de forma estricta si es el administrador maestro
+  const isAdminUser = activeClientId === 'ADMIN' || activeClientId.includes('ADMIN');
+  
+  if (isAdminUser) {
+    window.location.href = `/admin.html?clientId=ADMIN&sessionId=${encodeURIComponent(sessionId)}&status=verifying`;
+  } else {
+    window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${encodeURIComponent(sessionId)}&status=verifying`;
+  }
+};
 
   // =========================================================================
   // FALLBACK POR DEFECTO
