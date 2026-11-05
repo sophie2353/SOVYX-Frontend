@@ -202,6 +202,7 @@ window.sodieRegistrarPasswordCliente = async function() {
     updateClientSessionUI();
     fetchClientMetrics();
     initGlobalAndWeeklyTimers();
+    activarNotificacionesPush(selectedClientId);
 
     showToast('Acceso Admin Maestro', 'Iniciaste sesión como CLIENT-0 👑');
     return;
