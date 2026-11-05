@@ -86,29 +86,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
 
     actionBtn.style.display = 'none';
-        verifyBtn.style.display = 'inline-flex';
+    verifyBtn.style.display = 'inline-flex';
     verifyBtn.textContent = 'Firmar Contrato Digital ➔';
     verifyBtn.onclick = () => {
       verifyBtn.textContent = 'Redirigiendo a contrato.html...';
-      // Siempre enviamos al flujo normal de cliente con su ID generado
       const targetUrl = `/contrato.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${sessionId || ''}&status=paid_success`;
       window.location.href = targetUrl;
     };
   }
 
   // =========================================================================
-  // PASO 1: CONFIGURACIÓN POST-PAGO DE CREDENCIALES (ACT_ID & PIXEL_ID)
+  // PASO 1: CONFIGURACIÓN POST-PAGO DE CREDENCIALES (ACT_ID & WEBSITE_URL)
   // =========================================================================
   else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
     
-    // ID DE BUSINESS MANAGER (Para que el cliente lo asigne como Socio)
     const SODIE_BM_ID = "2918454448354968";
 
     badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
-    titleEl.textContent = 'Configuración de Campaña en Meta';
-    bodyEl.textContent = `Asigna permisos a SODIE (sovyx en Bussiness) en tu Business Manager y coloca los datos de tu cuenta publicitaria para inyectar la automatización.`;
+    titleEl.textContent = 'Configuración de Cuenta en Meta';
+    bodyEl.textContent = `Asigna permisos a SODIE en tu Business Manager y coloca los datos de tu cuenta publicitaria para inyectar la automatización.`;
 
     stepsContainer.innerHTML = `
       <div id="ltv-warning-banner" style="display: none; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #fff;">
@@ -121,21 +119,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
 
-      <!-- Tarjeta de Instrucción: Business Manager -->
       <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
         <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #fff;">1. Asígnanos como Socio en Meta</h4>
         <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #a1a1aa; line-height: 1.5;">
-          Ve a "Configuración del Negocio > Socios" en Meta y agrega a SODIE dándole permisos sobre tu Cuenta Publicitaria, Página y Píxel usando nuestro ID.
+          Ve a "Configuración del Negocio > Socios" en Meta y agrega a SODIE dándole permisos sobre tu Cuenta Publicitaria y Píxel.
         </p>
         <div style="display: flex; gap: 10px; align-items: center;">
           <code id="sodie-bm-id" style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; color: #34d399; font-weight: 600; font-size: 0.95rem; letter-spacing: 1px; flex: 1;">${SODIE_BM_ID}</code>
-          <button type="button" onclick="navigator.clipboard.writeText('${SODIE_BM_ID}'); alert('ID de SODIE copiado.');" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">
+          <button type="button" onclick="navigator.clipboard.writeText('${SODIE_BM_ID}'); alert('ID de SODIE copiado.');" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
             Copiar ID
           </button>
         </div>
       </div>
 
-      <!-- Formulario de Credenciales -->
       <div class="credentials-form">
         <h4 style="margin: 0 0 14px 0; font-size: 1rem; color: #fff;">2. Ingresa tus datos</h4>
         
@@ -174,9 +170,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (ltvBanner) ltvBanner.style.display = 'none';
 
-      verifyBtn.textContent = 'Guardando y Validando en Meta...';
+      verifyBtn.textContent = 'Guardando credenciales...';
       try {
-        // Hacemos la llamada al backend pasando ACT_ID y WEBSITE_URL
+        // Llamada a /configurar del nuevo flujo
         const res = await fetch(`${getBaseUrl()}/api/v1/facebook/configurar`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -189,15 +185,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const data = await res.json();
 
-        if (!data.success && (data.errorCode === 'VALUE_TERMS_REQUIRED' || data.error?.includes('Términos de Valor'))) {
-          ltvText.textContent = data.instructions || 'Debes activar la segmentación por Value subiendo un archivo CSV de prueba en tu panel de Meta y aceptar los términos.';
-          ltvBanner.style.display = 'block';
-          verifyBtn.textContent = 'Guardar y Vincular Credenciales';
-          return;
-        }
-
         if (data.success) {
-          // Si todo va bien, pasamos al siguiente paso en el flujo (crear el borrador en la nube/meta)
+          // Una vez guardadas las credenciales, saltamos automáticamente a crear el borrador en Meta
           window.location.href = `/confirmacion.html?step=procesar_excel&clientId=${encodeURIComponent(activeClientId)}&actId=${encodeURIComponent(data.act_id)}&sessionId=${sessionId || ''}`;
         } else {
           alert(`⚠️ Error: ${data.error || 'No se pudieron guardar las credenciales.'}`);
@@ -217,31 +206,93 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // =========================================================================
-  // PASO 2: ACTIVACIÓN Y PUBLICACIÓN DE CAMPAÑA (POST-CONFIGURACIÓN)
+  // PASO 1.5: CREACIÓN DE BORRADOR (INYECCIÓN AUTOMÁTICA EN SEGUNDO PLANO)
   // =========================================================================
-  else if (step === 'procesar_excel' || step === 'activar_campana') {
+  else if (step === 'procesar_excel') {
+    loaderEl.style.display = 'inline-block';
+    const activeClientId = await resolveClientId();
+
+    badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
+    titleEl.textContent = 'Inyectando Borrador en Meta...';
+    bodyEl.textContent = 'El motor SODIE está generando los Lookalikes Value-Based de forma segura y configurando la campaña en pausa.';
+
+    stepsContainer.innerHTML = `
+      <p style="color: #a1a1aa; text-align: center; font-size: 0.95rem;">
+        Esto puede tomar unos segundos mientras la API procesa los hashes y el presupuesto de $33/día...
+      </p>
+    `;
+
+    actionBtn.style.display = 'none';
+    verifyBtn.style.display = 'none';
+
+    try {
+      // Invocamos el endpoint de creación de borrador adaptado al nuevo flujo
+      const res = await fetch(`${getBaseUrl()}/api/v1/facebook/crear-borrador`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: activeClientId,
+          actId: actId,
+          sessionId: sessionId || ''
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Redirigimos al paso de espera de maduración (Radar 4h)
+        window.location.href = `/confirmacion.html?step=esperar_maduracion&clientId=${encodeURIComponent(activeClientId)}&campaignId=${encodeURIComponent(data.campaignId)}&actId=${encodeURIComponent(actId)}&sessionId=${sessionId || ''}`;
+      } else {
+        loaderEl.style.display = 'none';
+        titleEl.textContent = '⚠️ Error en la Inyección';
+        bodyEl.textContent = data.error || 'No se pudo crear el borrador en Meta.';
+        verifyBtn.style.display = 'inline-flex';
+        verifyBtn.textContent = 'Reintentar Inyección';
+        verifyBtn.onclick = () => window.location.reload();
+      }
+    } catch (err) {
+      console.error('💥 Error crítico creando borrador:', err);
+      loaderEl.style.display = 'none';
+      titleEl.textContent = '💥 Error de Conexión';
+      bodyEl.textContent = 'Hubo un fallo comunicándose con el motor de Meta.';
+      verifyBtn.style.display = 'inline-flex';
+      verifyBtn.textContent = 'Reintentar';
+      verifyBtn.onclick = () => window.location.reload();
+    }
+  }
+
+  // =========================================================================
+  // PASO 2: ESPERAR MADURACIÓN / RADAR 4H & ACTIVACIÓN
+  // =========================================================================
+  else if (step === 'esperar_maduracion' || step === 'activar_campana') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
 
     badgeEl.textContent = `Paso 3 de 3 • Cliente ${activeClientId}`;
-    titleEl.textContent = '¡Borrador Generado en Meta Ads!';
-    bodyEl.textContent = 'Tu campaña y segmentación de 72 horas han sido inyectadas exitosamente en tu cuenta. Abre Ads Manager para confirmar presupuesto y publicar tus visuales.';
+    titleEl.textContent = 'Borrador Creado y en Maduración';
+    bodyEl.textContent = 'Tu campaña ha nacido en estado PAUSADO para evitar congelamientos. El Radar SODIE vigila la indexación en Meta y te avisará por notificación push cuando esté lista.';
 
     stepsContainer.innerHTML = `
+      <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #fff;">
+        <h4 style="margin: 0 0 6px 0; color: #34d399; font-size: 0.95rem;">🛡️ Protección Activa contra Congelamientos</h4>
+        <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4;">
+          El motor mantiene la pauta protegida mientras la audiencia se procesa. Puedes abrir tu Ads Manager o dirigirte directamente a tu Dashboard de control.
+        </p>
+      </div>
       <ul class="steps-list">
         <li>
           <span class="step-number">1</span>
-          <div>Ingresa a Meta Ads Manager para asignar presupuesto/imagen y activar.</div>
+          <div>Espera la alerta push o revisa tu panel de control.</div>
         </li>
         <li>
           <span class="step-number">2</span>
-          <div>Pasa a tu Dashboard mientras el sistema verifica las métricas.</div>
+          <div>Activa el anuncio una vez el radar confirme la indexación óptima.</div>
         </li>
       </ul>
     `;
 
     actionBtn.style.display = 'inline-flex';
-    actionBtn.textContent = '1. Abrir Meta Ads Manager ↗';
+    actionBtn.textContent = 'Abrir Meta Ads Manager ↗';
     actionBtn.onclick = () => {
       const cleanAct = actId ? actId.replace(/^act_/, '') : '';
       const webUrl = cleanAct 
@@ -250,21 +301,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.open(webUrl, '_blank');
     };
 
-    // ⚡ Capturamos de forma segura los parámetros de la URL que inyectó el backend
-const activeClientId = (urlParams.get('clientId') || 'ADMIN').trim().toUpperCase();
+    const cleanClientId = activeClientId.trim().toUpperCase();
+    const isAdminUser = cleanClientId === 'ADMIN' || cleanClientId.includes('ADMIN');
 
-// Configuración del botón de redirección al finalizar
-verifyBtn.textContent = '2. Ir a mi Dashboard';
-verifyBtn.onclick = () => {
-  // Validamos de forma estricta si es el administrador maestro
-  const isAdminUser = activeClientId === 'ADMIN' || activeClientId.includes('ADMIN');
-  
-  if (isAdminUser) {
-    window.location.href = `/admin.html?clientId=ADMIN&sessionId=${encodeURIComponent(sessionId)}&status=verifying`;
-  } else {
-    window.location.href = `/client.html?clientId=${encodeURIComponent(activeClientId)}&sessionId=${encodeURIComponent(sessionId)}&status=verifying`;
+    verifyBtn.style.display = 'inline-flex';
+    verifyBtn.textContent = 'Ir a mi Dashboard ➔';
+    verifyBtn.onclick = () => {
+      if (isAdminUser) {
+        window.location.href = `/admin.html?clientId=ADMIN&sessionId=${encodeURIComponent(sessionId || '')}&status=verifying`;
+      } else {
+        window.location.href = `/client.html?clientId=${encodeURIComponent(cleanClientId)}&sessionId=${encodeURIComponent(sessionId || '')}&status=verifying`;
+      }
+    };
   }
-};
 
   // =========================================================================
   // FALLBACK POR DEFECTO
