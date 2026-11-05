@@ -415,3 +415,44 @@ async function sodieCerrarListaEspera() {
     if (btn) btn.textContent = '✓ V4 Disparado (14 Días)';
   }
 }
+/* ==========================================================================
+   NOTIFICACIONES PUSH PARA ADMIN
+   ========================================================================== */
+async function activarNotificacionesPushAdmin() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('Este navegador no soporta notificaciones Push nativas');
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('Permiso de notificaciones denegado por el administrador.');
+      return;
+    }
+
+    const resKey = await fetch(`${getBaseUrl()}/api/webhook-client/vapid-public-key`);
+    if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
+    const { publicKey } = await resKey.json();
+
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: publicKey
+    });
+
+    const responseSave = await fetch(`${getBaseUrl()}/api/webhook-client/save-subscription`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: 'ADMIN', subscription })
+    });
+
+    const dataSave = await responseSave.json();
+    if (!responseSave.ok || !dataSave.success) throw new Error(dataSave.error || 'Error al guardar suscripción de admin.');
+
+    console.log('✅ Notificaciones nativas activadas con éxito para: ADMIN');
+  } catch (error) {
+    console.error('💥 Error activando notificaciones Push Admin:', error.message);
+  }
+}
+
