@@ -26,7 +26,7 @@ self.addEventListener('push', function(event) {
       const opciones = {
         body: pushData.body,
         icon: pushData.icon || '/assets/icon-sodie.png', // Ajusta la ruta de tu logo
-        badge: '/sodie.jpg', // Iconito pequeño para la barra de estado en Android
+        badge: '/icono.jpg', // Iconito pequeño para la barra de estado en Android
         vibrate: [200, 100, 200, 100, 200], // Vibración sci-fi 👺
         data: pushData.data // Aquí viene el clientId y campaignId
       };
