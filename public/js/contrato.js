@@ -1,3 +1,8 @@
+/**
+ * SODIE V4 - Motor de Firma Digital y Registro Legal de IP (contrato.js)
+ * Sincronizado con app.js y confirmacion.js (Soporta Modo Test / ADMIN)
+ */
+
 function getBaseUrl() {
   if (window.SODIE_CONFIG && window.SODIE_CONFIG.API_URL) {
     return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
@@ -6,22 +11,31 @@ function getBaseUrl() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Extraer y Persistir Parámetros URL (clientId y fbUser)
   const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('clientId') || localStorage.getItem('sodie_client_id') || 'CLIENT-#01';
-  const fbUser = urlParams.get('fbUser') || localStorage.getItem('sodie_fb_user') || 'Evaluador';
+  const isAdminOrTest = (
+    sessionStorage.getItem('sodie_admin_session') === 'active' ||
+    localStorage.getItem('sodie_admin_session') === 'active' ||
+    localStorage.getItem('sodie_admin_bypass') === 'true' ||
+    urlParams.get('admin') === 'true' ||
+    urlParams.get('test') === 'true'
+  );
 
-  // Guardar en almacenamiento local para consistencia entre pantallas
+  // 1. Extraer y persistir clientId (Si es Admin/Test y no viene forzado otro en URL, usa ADMIN)
+  const clientId = urlParams.get('clientId') || (isAdminOrTest ? 'ADMIN' : (localStorage.getItem('sodie_client_id') || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01'));
+  const fbUser = urlParams.get('fbUser') || localStorage.getItem('sodie_fb_user') || 'Evaluador';
+  const sessionId = urlParams.get('sessionId') || '';
+
   localStorage.setItem('sodie_client_id', clientId);
+  localStorage.setItem('sodie_active_client_id', clientId);
   localStorage.setItem('sodie_fb_user', fbUser);
 
-  // Asignar Timestamp
+  // Asignar Timestamp ISO
   const timestampInput = document.getElementById('timestamp');
   if (timestampInput) {
     timestampInput.value = new Date().toISOString();
   }
 
-  // Obtener la IP pública mediante API
+  // Obtener IP pública para el respaldo legal
   const ipInput = document.getElementById('ip_address');
   if (ipInput) {
     fetch('https://api.ipify.org?format=json')
@@ -30,13 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ipInput.value = data.ip;
       })
       .catch(() => {
-        ipInput.value = "127.0.0.1 (Local/Simulado)";
+        ipInput.value = '127.0.0.1 (Local/Simulado)';
       });
   }
 
-  // Redirección centralizada a confirmacion.html
+  // Redirección al siguiente paso del flujo
   function redirectToConfirmation() {
-    const nextUrl = `confirmacion.html?step=excel_and_fb&clientId=${encodeURIComponent(clientId)}&fbUser=${encodeURIComponent(fbUser)}`;
+    const adminSuffix = isAdminOrTest ? '&admin=true' : '';
+    const nextUrl = `confirmacion.html?step=excel_and_fb&clientId=${encodeURIComponent(clientId)}&fbUser=${encodeURIComponent(fbUser)}&sessionId=${encodeURIComponent(sessionId)}${adminSuffix}`;
     window.location.href = nextUrl;
   }
 
@@ -46,22 +61,26 @@ document.addEventListener('DOMContentLoaded', () => {
     contractForm.addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const btnSubmit = e.target.querySelector('.btn-submit');
+      const btnSubmit = e.target.querySelector('.btn-submit') || e.target.querySelector('button[type="submit"]');
       if (btnSubmit) {
         btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Procesando firma y vinculando evaluador...';
+        btnSubmit.textContent = 'Procesando firma legal y registrando IP...';
       }
+
+      const fullNameEl = document.getElementById('user_fullname');
+      const emailEl = document.getElementById('user_email');
+      const termsEl = document.getElementById('accept_terms');
 
       const payload = {
         clientId: clientId,
         fbUser: fbUser,
-        fullName: document.getElementById('user_fullname').value,
-        email: document.getElementById('user_email').value,
-        ipAddress: document.getElementById('ip_address') ? document.getElementById('ip_address').value : '127.0.0.1',
-        timestamp: document.getElementById('timestamp') ? document.getElementById('timestamp').value : new Date().toISOString(),
-        acceptedTerms: document.getElementById('accept_terms').checked,
+        fullName: fullNameEl ? fullNameEl.value.trim() : 'Admin Test',
+        email: emailEl ? emailEl.value.trim() : 'admin@socredi.com',
+        ipAddress: ipInput ? ipInput.value : '127.0.0.1',
+        timestamp: timestampInput ? timestampInput.value : new Date().toISOString(),
+        acceptedTerms: termsEl ? termsEl.checked : true,
         softwareName: 'SODIE',
-        softwareVersion: '3.5.0'
+        softwareVersion: '4.0.0'
       };
 
       try {
@@ -71,13 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify(payload)
         });
       } catch (error) {
-        console.warn('Webhook no disponible, continuando flujo local...', error);
+        console.warn('Webhook no disponible en este entorno, continuando flujo...', error);
       }
 
-      // Marcar contrato firmado localmente
+      // Sincroniza ambas llaves de contrato firmado (para contrato.js y para app.js)
       localStorage.setItem('sodie_contract_signed', 'true');
+      localStorage.setItem('sodie_contract_completed', 'true');
 
-      // Redirigir a confirmacion.html?step=excel_and_fb
       redirectToConfirmation();
     });
   }
