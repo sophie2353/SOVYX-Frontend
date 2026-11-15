@@ -1087,51 +1087,61 @@ button:disabled,
 
 .ia3-float-card {
   position: fixed !important;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
   width: 92%;
-  max-width: 480px;
-  max-height: 85vh;
+  max-width: 460px;
+  max-height: 84vh;
   overflow-y: auto;
-  z-index: 99999;
-  background: linear-gradient(145deg, rgba(22, 6, 44, 0.88) 0%, rgba(6, 2, 14, 0.94) 100%);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1.5px solid var(--glass-border-strong);
+  z-index: 999999 !important;
+  background: linear-gradient(160deg, rgba(16, 4, 32, 0.98) 0%, rgba(5, 1, 12, 0.99) 100%) !important;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid var(--neon-mint);
   border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 28px rgba(0, 255, 204, 0.2);
+  padding: 20px;
+  box-shadow: 0 0 0 100vmax rgba(3, 0, 8, 0.78), 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(0, 255, 204, 0.25);
 }
 
-.ia3-float-card.hidden {
-  display: none !important;
-}
-
-.ia3-modal-header {
+.ia3-arrow-progress {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 6px 10px;
+  background: rgba(0, 255, 204, 0.06);
+  border: 1px solid rgba(0, 255, 204, 0.25);
+  border-radius: 999px;
 }
 
-.ia3-close-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
-  font-size: 1.4rem;
-  line-height: 1;
-  padding: 4px 0;
-  cursor: pointer;
+.ia3-arrow-icon {
+  color: var(--neon-mint);
+  font-weight: 900;
+  font-size: 0.95rem;
+  animation: bounceArrowDown 0.8s infinite alternate;
 }
 
-.ia3-val-text {
-  color: #e2e8f0;
-  font-size: 0.94rem;
-  line-height: 1.5;
-  margin-top: 6px;
+@keyframes bounceArrowDown {
+  from { transform: translateY(-2px); }
+  to { transform: translateY(3px); }
 }
 
+.ia3-arrow-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ia3-arrow-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon-fuchsia), var(--neon-mint));
+  box-shadow: 0 0 10px var(--neon-mint);
+  transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
 /* ========================================================= */
 /* 11. ADAPTACIÓN RESPONSIVE PARA LAPTOP & DESKTOP           */
 /* ========================================================= */
