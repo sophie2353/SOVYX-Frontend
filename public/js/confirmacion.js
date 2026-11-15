@@ -101,8 +101,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   else if (step === 'excel_and_fb' || step === 'excel_uploaded' || step === 'conectar_meta' || step === 'configurar_meta') {
     loaderEl.style.display = 'none';
     const activeClientId = await resolveClientId();
-    
-    const SODIE_BM_ID = "2918454448354968";
 
     badgeEl.textContent = `Paso 2 de 3 • Cliente ${activeClientId}`;
     titleEl.textContent = 'Configuración de Cuenta en Meta';
@@ -115,19 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div style="margin-top: 14px;">
           <button id="btn-reintentar-ltv" type="button" style="background: #facc15; color: #000; font-weight: 600; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
             Reintentar Vinculación
-          </button>
-        </div>
-      </div>
-
-      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-        <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #fff;">1. Asígnanos como Socio en Meta</h4>
-        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #a1a1aa; line-height: 1.5;">
-          Ve a "Configuración del Negocio > Socios" en Meta y agrega a SODIE dándole permisos sobre tu Cuenta Publicitaria y Píxel.
-        </p>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <code id="sodie-bm-id" style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; color: #34d399; font-weight: 600; font-size: 0.95rem; letter-spacing: 1px; flex: 1;">${SODIE_BM_ID}</code>
-          <button type="button" onclick="navigator.clipboard.writeText('${SODIE_BM_ID}'); alert('ID de SODIE copiado.');" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-            Copiar ID
           </button>
         </div>
       </div>
@@ -295,9 +280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     actionBtn.textContent = 'Abrir Meta Ads Manager ↗';
     actionBtn.onclick = () => {
       const cleanAct = actId ? actId.replace(/^act_/, '') : '';
-      const webUrl = cleanAct 
-        ? `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${cleanAct}${campaignId ? `&selected_campaign_ids=${campaignId}` : ''}`
-        : 'https://adsmanager.facebook.com/adsmanager/manage/campaigns';
+      const webUrl = cleanAct
       window.open(webUrl, '_blank');
     };
 
