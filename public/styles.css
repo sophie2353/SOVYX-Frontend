@@ -1208,3 +1208,128 @@ button:disabled,
     font-size: 3rem !important;
   }
 }
+/* ========================================================= */
+/* BENTO GRID V4 (2 COLUMNAS LAPTOP + DUAL VIDEO 9:16)       */
+/* ========================================================= */
+
+.bento-col-left,
+.bento-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  width: 100%;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.card-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 900;
+  color: #ffffff;
+  margin: 4px 0;
+}
+
+.calc-v4-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.calc-v4-cta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.calc-savings-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(0, 255, 204, 0.06);
+  border: 1px solid rgba(0, 255, 204, 0.28);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.checkout-v4-price-box {
+  background: rgba(8, 2, 18, 0.55);
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+/* CONTENEDOR DE LOS 2 VIDEOS VERTICALES 9:16 */
+.dual-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.video-card-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.video-item-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* En móviles muy angostos permite deslizar los 2 videos en vertical 9:16 grandes */
+@media (max-width: 520px) {
+  .dual-video-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 14px;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+  .dual-video-grid::-webkit-scrollbar { display: none; }
+
+  .video-card-item {
+    flex: 0 0 78%;
+    scroll-snap-align: start;
+  }
+}
+
+/* En Laptop: Columna Izquierda (60%) y Columna Derecha (40%) */
+@media (min-width: 840px) {
+  .dashboard-container {
+    grid-template-columns: 1.35fr 1fr;
+    align-items: start;
+  }
+
+  .bento-col-left {
+    grid-column: 1 / 2;
+  }
+
+  .bento-col-right {
+    grid-column: 2 / 3;
+    position: sticky;
+    top: 24px;
+  }
+
+  .glass-card-dash {
+    height: auto;
+  }
+
+  .calc-v4-layout {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 16px;
+    align-items: end;
+  }
+}
