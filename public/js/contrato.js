@@ -1,6 +1,6 @@
 /**
  * SODIE V4 - Motor de Firma Digital y Registro Legal de IP (contrato.js)
- * Sincronizado con app.js y confirmacion.js (Soporta Modo Test / ADMIN)
+ * Incluye generación automática de ID de Contrato (C-#01) vinculado al Client ID
  */
 
 function getBaseUrl() {
@@ -8,6 +8,20 @@ function getBaseUrl() {
     return window.SODIE_CONFIG.API_URL.replace(/\/$/, '');
   }
   return window.location.origin;
+}
+
+// Genera el ID de contrato sincronizado con el ID del cliente (ej: CLIENT-#01 -> C-#01)
+function generateContractId(clientId) {
+  const cleanId = (clientId || 'CLIENT-#01').trim().toUpperCase();
+  if (cleanId === 'ADMIN' || cleanId.includes('ADMIN')) {
+    return 'C-ADMIN';
+  }
+  const match = cleanId.match(/#?\d+/);
+  if (match) {
+    const numPart = match[0].startsWith('#') ? match[0] : `#${match[0]}`;
+    return `C-${numPart}`;
+  }
+  return 'C-#01';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,16 +34,28 @@ document.addEventListener('DOMContentLoaded', () => {
     urlParams.get('test') === 'true'
   );
 
-  // 1. Extraer y persistir clientId (Si es Admin/Test y no viene forzado otro en URL, usa ADMIN)
+  // 1. Extraer y persistir clientId y contractId
   const clientId = urlParams.get('clientId') || (isAdminOrTest ? 'ADMIN' : (localStorage.getItem('sodie_client_id') || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01'));
+  const contractId = urlParams.get('contractId') || generateContractId(clientId);
   const fbUser = urlParams.get('fbUser') || localStorage.getItem('sodie_fb_user') || 'Evaluador';
   const sessionId = urlParams.get('sessionId') || '';
 
   localStorage.setItem('sodie_client_id', clientId);
   localStorage.setItem('sodie_active_client_id', clientId);
+  localStorage.setItem('sodie_contract_id', contractId);
   localStorage.setItem('sodie_fb_user', fbUser);
 
-  // Asignar Timestamp ISO
+  // Si tienes algún input o etiqueta en contrato.html para mostrar el ID del contrato, lo llena en automático
+  const contractIdInput = document.getElementById('contract_id');
+  if (contractIdInput) {
+    contractIdInput.value = contractId;
+  }
+  const contractBadge = document.getElementById('contract-id-display');
+  if (contractBadge) {
+    contractBadge.textContent = `${clientId} • ${contractId}`;
+  }
+
+  // Asignar Timestamp ISO (Hora exacta)
   const timestampInput = document.getElementById('timestamp');
   if (timestampInput) {
     timestampInput.value = new Date().toISOString();
@@ -48,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // Redirección al siguiente paso del flujo
+  // Redirección al siguiente paso del flujo pasando también el contractId
   function redirectToConfirmation() {
     const adminSuffix = isAdminOrTest ? '&admin=true' : '';
-    const nextUrl = `confirmacion.html?step=excel_and_fb&clientId=${encodeURIComponent(clientId)}&fbUser=${encodeURIComponent(fbUser)}&sessionId=${encodeURIComponent(sessionId)}${adminSuffix}`;
+    const nextUrl = `confirmacion.html?step=excel_and_fb&clientId=${encodeURIComponent(clientId)}&contractId=${encodeURIComponent(contractId)}&fbUser=${encodeURIComponent(fbUser)}&sessionId=${encodeURIComponent(sessionId)}${adminSuffix}`;
     window.location.href = nextUrl;
   }
 
@@ -64,20 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const btnSubmit = e.target.querySelector('.btn-submit') || e.target.querySelector('button[type="submit"]');
       if (btnSubmit) {
         btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Procesando firma legal y registrando IP...';
+        btnSubmit.textContent = `Registrando ${contractId} y vinculando IP...`;
       }
 
       const fullNameEl = document.getElementById('user_fullname');
       const emailEl = document.getElementById('user_email');
       const termsEl = document.getElementById('accept_terms');
+      const exactTime = timestampInput && timestampInput.value ? timestampInput.value : new Date().toISOString();
 
       const payload = {
-        clientId: clientId,
+        clientId: clientId,         // Ej: "CLIENT-#01" o "ADMIN"
+        contractId: contractId,     // Ej: "C-#01" o "C-ADMIN"
         fbUser: fbUser,
         fullName: fullNameEl ? fullNameEl.value.trim() : 'Admin Test',
         email: emailEl ? emailEl.value.trim() : 'admin@socredi.com',
-        ipAddress: ipInput ? ipInput.value : '127.0.0.1',
-        timestamp: timestampInput ? timestampInput.value : new Date().toISOString(),
+        ipAddress: ipInput && ipInput.value ? ipInput.value : '127.0.0.1',
+        timestamp: exactTime,
+        signedAt: exactTime,
         acceptedTerms: termsEl ? termsEl.checked : true,
         softwareName: 'SODIE',
         softwareVersion: '4.0.0'
@@ -93,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Webhook no disponible en este entorno, continuando flujo...', error);
       }
 
-      // Sincroniza ambas llaves de contrato firmado (para contrato.js y para app.js)
       localStorage.setItem('sodie_contract_signed', 'true');
       localStorage.setItem('sodie_contract_completed', 'true');
 
