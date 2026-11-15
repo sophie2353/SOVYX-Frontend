@@ -42,9 +42,25 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAdminEventListeners();
 });
 
-/* ==========================================================================
-   1. AUTENTICACIÓN Y SESIÓN
+  /* ==========================================================================
+   1. AUTENTICACIÓN Y SESIÓN (SINCRONIZADO CON APP.JS PARA BYPASS DE PAGO)
    ========================================================================== */
+function activarFlagsAdminGlobal() {
+  sessionStorage.setItem("sodie_admin_session", "active");
+  localStorage.setItem("sodie_admin_session", "active");
+  localStorage.setItem("sodie_admin_bypass", "true");
+  localStorage.setItem("sodie_active_client_id", "ADMIN");
+}
+
+function limpiarFlagsAdminGlobal() {
+  sessionStorage.removeItem("sodie_admin_session");
+  localStorage.removeItem("sodie_admin_session");
+  localStorage.removeItem("sodie_admin_bypass");
+  if (localStorage.getItem("sodie_active_client_id") === "ADMIN") {
+    localStorage.removeItem("sodie_active_client_id");
+  }
+}
+
 async function sodieValidarPasswordDirecta() {
   const inputPass = document.getElementById("admin-pass-input");
   const errorElem = document.getElementById("admin-auth-error");
@@ -68,7 +84,7 @@ async function sodieValidarPasswordDirecta() {
     const data = await response.json();
 
     if (data.success) {
-      sessionStorage.setItem("sodie_admin_session", "active");
+      activarFlagsAdminGlobal();
       mostrarDashboard();
     } else {
       if (errorElem) {
@@ -78,12 +94,13 @@ async function sodieValidarPasswordDirecta() {
     }
   } catch (err) {
     // Fallback de desarrollo
-    sessionStorage.setItem("sodie_admin_session", "active");
+    activarFlagsAdminGlobal();
     mostrarDashboard();
   }
 }
 
 function mostrarDashboard() {
+  activarFlagsAdminGlobal();
   const loginCard = document.getElementById("admin-auth-card");
   const dashContent = document.getElementById("admin-dashboard-content");
 
@@ -94,7 +111,7 @@ function mostrarDashboard() {
 }
 
 function sodieCerrarSesionAdmin() {
-  sessionStorage.removeItem("sodie_admin_session");
+  limpiarFlagsAdminGlobal();
   window.location.reload();
 }
 
