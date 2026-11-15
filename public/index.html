@@ -431,49 +431,60 @@
             </div>
           </div>
         </div>
+      </section>
 
-    <!-- MODAL EMERGENTE DE DIAGNÓSTICO DETALLADO IA3 -->
-    <div id="ia3-modal-result" class="ia3-float-card hidden">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h4 class="fuchsia-txt" style="font-size: 1.1rem; margin: 0;" data-i18n="ia3_diag_title">Diagnóstico Ejecutivo IA3</h4>
-        <button type="button" id="btn-close-ia3-modal" class="ia3-close-btn">✕</button>
-      </div>
-      
-      <div style="margin-bottom: 12px;">
-        <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_current_metrics">Métricas Actuales:</strong>
-        <p id="ia3-val-user" class="ia3-val-text"></p>
-      </div>
-
-      <div style="margin-bottom: 12px;">
-        <strong class="fuchsia-txt" style="font-size: 0.85rem;" data-i18n="ia3_detected_problems">Fugas de Capital Detectadas:</strong>
-        <p id="ia3-val-problems" class="ia3-val-text"></p>
-      </div>
-
-      <div style="margin-bottom: 12px;">
-        <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_sodie_solution">Proyección de Escalado con SODIE v4:</strong>
-        <div id="ia3-val-solution" class="ia3-val-text"></div>
-      </div>
-
-      <div style="margin-bottom: 16px;">
-        <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_estimated_savings">Capital Mensual Retenido:</strong>
-        <p id="ia3-val-savings" class="ia3-val-text font-bold" style="font-size: 1.15rem; color: var(--neon-mint);"></p>
-      </div>
-
-      <div class="form-row-2">
-        <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action" data-i18n="btn_go_to_chat">
-          Ir a Chat IA
-        </button>
-        <button type="button" id="btn-scroll-pago-ia3" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient" data-i18n="btn_go_to_payment">
-          Reservar Cupo
-        </button>
-      </div>
-    </div>
-
+        </main>
+        
     <footer class="dash-footer text-center full-width-card" style="margin-top: 12px; opacity: 0.7; font-size: 0.8rem;">
       <p data-i18n="footer_rights">© SODIE v4. 2026. TODOS LOS DERECHOS RESERVADOS</p>
     </footer>
-  </main>
-  
+
+          <!-- MODAL EJECUTIVO IA3 CENTRADO (FUERA DE MAIN) -->
+  <div id="ia3-modal-result" class="ia3-float-card hidden">
+    <!-- Barra/Flecha futurista de progreso al abrir -->
+    <div id="ia3-arrow-loader" class="ia3-arrow-progress">
+      <span class="ia3-arrow-icon">↓</span>
+      <div class="ia3-arrow-track">
+        <div id="ia3-arrow-fill" class="ia3-arrow-fill"></div>
+      </div>
+      <span class="mint-txt" style="font-size: 0.72rem; font-family: 'Orbitron', sans-serif;">IA3</span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h4 class="fuchsia-txt" style="font-size: 1.15rem; margin: 0;" data-i18n="ia3_diag_title">Diagnóstico Ejecutivo IA3</h4>
+      <button type="button" id="btn-close-ia3-modal" class="ia3-close-btn">✕</button>
+    </div>
+    
+    <div style="margin-bottom: 12px;">
+      <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_current_metrics">Métricas Actuales:</strong>
+      <p id="ia3-val-user" class="ia3-val-text"></p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <strong class="fuchsia-txt" style="font-size: 0.85rem;" data-i18n="ia3_detected_problems">Fugas de Capital Detectadas:</strong>
+      <p id="ia3-val-problems" class="ia3-val-text"></p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_sodie_solution">Proyección de Escalado con SODIE v4:</strong>
+      <div id="ia3-val-solution" class="ia3-val-text"></div>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_estimated_savings">Capital Mensual Retenido:</strong>
+      <p id="ia3-val-savings" class="ia3-val-text font-bold" style="font-size: 1.2rem; color: var(--neon-mint);"></p>
+    </div>
+
+    <div class="form-row-2">
+      <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action" data-i18n="btn_go_to_chat">
+        Ir a Chat IA
+      </button>
+      <button type="button" id="btn-scroll-pago-ia3" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient" data-i18n="btn_go_to_payment">
+        Reservar Cupo
+      </button>
+    </div>
+  </div>
+     
   <script src="/js/i18n.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/app.js"></script>
