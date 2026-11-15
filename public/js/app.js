@@ -1,6 +1,6 @@
 /**
  * SODIE - Core Application Script (app.js)
- * Versión Restaurada, Estabilizada & Flujos Ajustados (v4 Spec)
+ * Versión V4: Auto-Slider, Motor Numérico IA3, Dual Video & Bypass Automático ADMIN
  */
 
 function getBaseUrl() {
@@ -10,6 +10,14 @@ function getBaseUrl() {
   return window.location.origin;
 }
 
+window.CLIENT_STATE = {
+  clientId: localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01',
+  isAdmin: false,
+  excelUploaded: false,
+  connected: false,
+  status: 'PENDING'
+};
+
 let currentPaymentState = {
   hours: 0,
   currentStep: 1,
@@ -17,6 +25,7 @@ let currentPaymentState = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  detectAndApplyAdminSession();
   initSplashGauges();
   checkAvailableSlots();
   initSSEMetrics();
@@ -28,7 +37,49 @@ document.addEventListener('DOMContentLoaded', () => {
   initWaitlistEvents();
   initVideoAndConfirm();
   initNuevosComponentesV4();
+  initMetricsAutoSlider();
+  initIA3ModalObserver();
 });
+
+/* ==========================================================================
+   0. DETECCIÓN AUTOMÁTICA DE SESIÓN ADMIN (SALTO DE PAGO DIRECTO A PASOS)
+   ========================================================================== */
+function isAdminAuthenticated() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return (
+    sessionStorage.getItem('sodie_admin_session') === 'active' ||
+    localStorage.getItem('sodie_admin_session') === 'active' ||
+    localStorage.getItem('sodie_admin_bypass') === 'true' ||
+    urlParams.get('admin') === 'true'
+  );
+}
+
+function detectAndApplyAdminSession() {
+  if (!isAdminAuthenticated()) return;
+
+  window.CLIENT_STATE.clientId = 'ADMIN';
+  window.CLIENT_STATE.isAdmin = true;
+  window.CLIENT_STATE.connected = true;
+  window.CLIENT_STATE.status = 'ACTIVE';
+  localStorage.setItem('sodie_active_client_id', 'ADMIN');
+
+  const introCard = document.getElementById('pf-intro-card');
+  const iframeBox = document.getElementById('pf-step-iframe');
+  const stepExcel = document.getElementById('pf-step-excel');
+  const pfActive = document.getElementById('pf-active-payment-flow');
+  const pfWaitlist = document.getElementById('pf-waitlist-block');
+
+  // Asegura que el contenedor principal esté activo aunque haya 0 cupos para clientes
+  if (pfActive) pfActive.classList.remove('hidden');
+  if (pfWaitlist) pfWaitlist.classList.add('hidden');
+
+  // Salta la pasarela de pago y habilita de inmediato el Paso 1 post-pago
+  if (introCard) introCard.classList.add('hidden');
+  if (iframeBox) iframeBox.classList.add('hidden');
+  if (stepExcel) stepExcel.classList.remove('hidden');
+
+  console.log('👑 [SODIE V4] Sesión ADMIN detectada automáticamente. Paso de pago omitido (ID: ADMIN).');
+}
 
 /* ==========================================================================
    1. TOAST & NOTIFICACIONES
@@ -50,10 +101,12 @@ function showToast(title, body, isError = false) {
   }, 4000);
 }
 
-navigator.serviceWorker.register('/sw.js')
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 
 /* ==========================================================================
-   2. SPLASH SCREEN & SSE METRICS
+   2. SPLASH SCREEN & GAUGES HUD
    ========================================================================== */
 function initSplashGauges() {
   const pctNum = document.getElementById('splash-pct');
@@ -74,7 +127,10 @@ function initSplashGauges() {
     if (progress > 100) progress = 100;
 
     if (pctNum) pctNum.textContent = `${progress}%`;
-    if (welcomeFill) welcomeFill.style.width = `${progress}%`;
+    if (welcomeFill) {
+      welcomeFill.style.width = `${progress}%`;
+      welcomeFill.style.height = `${progress}%`;
+    }
 
     if (gauge1Val) gauge1Val.textContent = `${progress}%`;
     if (gauge1Circle) gauge1Circle.setAttribute('stroke-dasharray', `${progress}, 100`);
@@ -117,7 +173,7 @@ function initSplashGauges() {
    3. CONTADOR DE CUPOS & DISPONIBILIDAD DINÁMICA DE PRECIOS
    ========================================================================== */
 async function checkAvailableSlots() {
-  let slots = 10;
+  let slots = 4;
   try {
     const res = await fetch(`${getBaseUrl()}/api/clientes/disponibles`);
     if (res.ok) {
@@ -126,7 +182,7 @@ async function checkAvailableSlots() {
       if (!isNaN(parsed)) slots = parsed;
     }
   } catch (error) {
-    slots = 10;
+    slots = 4;
   }
   actualizarInterfazCupos(slots);
 }
@@ -138,7 +194,18 @@ function actualizarInterfazCupos(slots) {
   const pfActive = document.getElementById('pf-active-payment-flow');
   const pfWaitlist = document.getElementById('pf-waitlist-block');
 
-  if (cuposVal) cuposVal.textContent = slots;
+  if (cuposVal) {
+    cuposVal.textContent = slots;
+    animateValue(cuposVal, slots, { duration: 1200, decimals: 0 });
+  }
+
+  // Si es ADMIN, nunca se le bloquea el flujo aunque haya 0 cupos
+  if (window.CLIENT_STATE && window.CLIENT_STATE.isAdmin) {
+    if (cuposBadge) cuposBadge.textContent = `MODO ADMIN (${slots} cupos públicos)`;
+    if (pfActive) pfActive.classList.remove('hidden');
+    if (pfWaitlist) pfWaitlist.classList.add('hidden');
+    return;
+  }
 
   if (slots >= 1) {
     if (cuposSub) cuposSub.textContent = `Cupos Disponibles: ${slots}`;
@@ -174,15 +241,14 @@ async function initFacebookMetrics() {
     if (elVisitors) elVisitors.textContent = '0';
     if (elActivos) elActivos.textContent = '0';
     if (elPayClicks) elPayClicks.textContent = '0';
+    animateDashboardMetrics();
   };
 
   try {
-    // 1. Gestionar el contador de visitas en localStorage para el ciclo de 50
     let visitasAcumuladas = parseInt(localStorage.getItem('sodie_visitas_counter') || '0', 10);
     visitasAcumuladas++;
     localStorage.setItem('sodie_visitas_counter', visitasAcumuladas);
 
-    // 2. Comprobar caché local
     const cacheMetricas = sessionStorage.getItem('sodie_cached_metrics');
     const ultimaConsultaVisita = parseInt(localStorage.getItem('sodie_ultima_consulta_en') || '0', 10);
 
@@ -192,9 +258,7 @@ async function initFacebookMetrics() {
       return;
     }
 
-    // 3. Petición al backend enviando explícitamente el rol ADMIN como parámetro
-    // En tu app.js: se pasa clientId=ADMIN en el query parameter
-const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?clientId=ADMIN`);
+    const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?clientId=ADMIN`);
     if (!res.ok) throw new Error('Campaña no activa');
     const data = await res.json();
 
@@ -220,12 +284,15 @@ const res = await fetch(`${getBaseUrl()}/api/facebook/metrics?clientId=ADMIN`);
 function renderizarDatosEnPantalla(data, els) {
   if (els.elSpend) els.elSpend.textContent = `$${data.spend || 0}`;
   if (els.elSpendStatus) els.elSpendStatus.textContent = 'Conectado Meta Ads';
-  if (els.elReach) els.elReach.textContent = (data.reach || 0).toLocaleString();
-  if (els.elReachStatus) els.elReachStatus.textContent = (data.impressions || 0).toLocaleString();
+  if (els.elReach) els.elReach.textContent = (data.reach || 0).toLocaleString('en-US');
+  if (els.elReachStatus) els.elReachStatus.textContent = (data.impressions || 0).toLocaleString('en-US');
   if (els.elVisitors) els.elVisitors.textContent = data.visitors || 0;
   if (els.elActivos) els.elActivos.textContent = data.activos || 0;
   if (els.elPayClicks) els.elPayClicks.textContent = data.payClicks || 0;
+
+  animateDashboardMetrics();
 }
+
 /* ==========================================================================
    5. CHAT & ASISTENTE IA2
    ========================================================================== */
@@ -310,14 +377,13 @@ async function sendChatMessage(messageText, payload = null) {
     const data = await res.json();
     loadingBubble.remove();
 
-    // Soportar tanto array de mensajes como string plano por retrocompatibilidad
     const rawMessages = data.messages || [data.reply || data.respuesta || 'Mensaje procesado correctamente.'];
 
     let totalDelay = 0;
-    rawMessages.forEach((msgBlock, msgIndex) => {
+    rawMessages.forEach((msgBlock) => {
       const messageChunks = splitTextIntoChunks(msgBlock);
 
-      messageChunks.forEach((chunk, chunkIndex) => {
+      messageChunks.forEach((chunk) => {
         const currentDelay = totalDelay;
         setTimeout(() => {
           const ia2Bubble = document.createElement('div');
@@ -333,7 +399,7 @@ async function sendChatMessage(messageText, payload = null) {
           ia2Bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, currentDelay);
 
-        totalDelay += 800; // Incrementa el intervalo entre bloques de texto
+        totalDelay += 800;
       });
     });
 
@@ -348,16 +414,44 @@ async function sendChatMessage(messageText, payload = null) {
 }
 
 /* ==========================================================================
-   6. IA3 ANALYZER ENGINE
+   6. IA3 ANALYZER ENGINE + VISTA PREVIA EN TIEMPO REAL
    ========================================================================== */
+function triggerIA3ArrowProgress() {
+  const arrowFill = document.getElementById('ia3-arrow-fill');
+  if (arrowFill) {
+    arrowFill.style.width = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        arrowFill.style.width = '100%';
+      });
+    });
+  }
+}
+
 function initIA3Engine() {
+  const spendInput = document.getElementById('ia3-ad-spend');
+  const roasInput = document.getElementById('ia3-roas');
+  const inlinePreview = document.getElementById('ia3-inline-savings-preview');
   const btnAnalizar = document.getElementById('btn-ia3-analizar');
+
+  // Actualiza la vista previa de ahorro en vivo mientras el usuario escribe
+  const updateInlinePreview = () => {
+    if (!inlinePreview) return;
+    const spendVal = parseFloat(spendInput?.value || '0');
+    const roasVal = parseFloat(roasInput?.value || '1.5');
+    if (spendVal > 0) {
+      const monthlySpend = spendVal * 30;
+      const estimatedRetained = Math.round(monthlySpend * Math.max(0.45, Math.min(1.25, (3.0 - Math.min(roasVal, 2.5)))));
+      inlinePreview.innerHTML = `$${estimatedRetained.toLocaleString('en-US')} <small style="font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: #c0b4d8;">USD/mes retenidos</small>`;
+    }
+  };
+
+  if (spendInput) spendInput.addEventListener('input', updateInlinePreview);
+  if (roasInput) roasInput.addEventListener('input', updateInlinePreview);
+
   if (!btnAnalizar) return;
 
   btnAnalizar.addEventListener('click', async () => {
-    const spendInput = document.getElementById('ia3-ad-spend');
-    const roasInput = document.getElementById('ia3-roas');
-
     const spend = spendInput ? spendInput.value : '';
     const roas = roasInput ? roasInput.value : '';
 
@@ -377,10 +471,12 @@ function initIA3Engine() {
       modal.scrollTop = 0;
     }
 
+    triggerIA3ArrowProgress();
+
     if (valUser) valUser.innerText = `$${spend} USD / ROAS ${roas}`;
-    if (valProblems) valProblems.innerText = "Analizando fuga de capital en Meta Ads...";
-    if (valSolution) valSolution.innerText = "IA3 procesando solución algorítmica...";
-    if (valSavings) valSavings.innerText = "Calculando optimización...";
+    if (valProblems) valProblems.innerText = 'Analizando fuga de capital publicitario...';
+    if (valSolution) valSolution.innerText = 'IA3 procesando solución algorítmica...';
+    if (valSavings) valSavings.innerText = 'Calculando optimización...';
 
     showToast('Procesando IA3', 'Analizando métricas con el backend...', false);
 
@@ -399,11 +495,15 @@ function initIA3Engine() {
       if (valSolution) valSolution.innerHTML = data.solucion || data.solution;
       if (valSavings) valSavings.innerText = data.ahorro || data.savings;
 
+      if (modal) {
+        animateIA3DiagnosticNumbers(modal);
+      }
+
       showToast('Análisis IA3 Listo', 'El diagnóstico se ha generado correctamente.');
 
     } catch (error) {
       console.error(error);
-      if (valSolution) valSolution.innerText = "Error en el servidor al generar diagnóstico IA3.";
+      if (valSolution) valSolution.innerText = 'Error en el servidor al generar diagnóstico IA3.';
       showToast('Error IA3', 'No se pudo obtener la respuesta del backend de IA3.', true);
     }
   });
@@ -436,24 +536,35 @@ function initIA3Engine() {
 /* ==========================================================================
    7. EVENTOS DE FLUJO DE PAGO, CONEXIÓN Y CARDS
    ========================================================================== */
-
 function desplegarIframePago() {
+  // Si es ADMIN, salta el iframe directo al Paso 1 de segmentación
+  if (window.CLIENT_STATE && window.CLIENT_STATE.isAdmin) {
+    detectAndApplyAdminSession();
+    return;
+  }
+
   const introCard = document.getElementById('pf-intro-card');
   const iframeBox = document.getElementById('pf-step-iframe');
 
-  // Ocultar el botón principal de pago y mostrar el iframe
   if (introCard) introCard.classList.add('hidden');
   if (iframeBox) iframeBox.classList.remove('hidden');
 }
 
-function finalizarYConfirmar() {
+function finalizarYConfirmar(event) {
   const fileInput = document.getElementById('client-file-input');
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    alert('Por favor selecciona tu archivo Excel antes de continuar.');
+  if (fileInput) {
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert('Por favor selecciona tu archivo Excel antes de continuar.');
+      return;
+    }
+    window.location.href = 'confirmacion.html?step=excel_and_fb';
     return;
   }
 
-  window.location.href = 'confirmacion.html?step=excel_and_fb';
+  // En el flujo de inputs de segmentación (V4), delega a ejecutarBotonSODIE
+  if (typeof window.ejecutarBotonSODIE === 'function') {
+    window.ejecutarBotonSODIE(event, 'cargar-excel');
+  }
 }
 
 function initPaymentFlowEvents() {
@@ -474,12 +585,12 @@ function initPaymentFlowEvents() {
     });
   }
   
-  // 2. Botón de finalizar y confirmar
+  // 2. Botón de guardar / cargar segmentación (si no tiene onclick inline)
   const btnClientUploadFile = document.getElementById('btn-client-upload-file');
-  if (btnClientUploadFile) {
+  if (btnClientUploadFile && !btnClientUploadFile.getAttribute('onclick')) {
     btnClientUploadFile.addEventListener('click', (e) => {
       e.preventDefault();
-      finalizarYConfirmar();
+      finalizarYConfirmar(e);
     });
   }
 
@@ -493,9 +604,13 @@ function initPaymentFlowEvents() {
     }
   });
 
-  // 4. Validar estado de contrato/firma
+  // 4. Validar estado de contrato/firma o sesión ADMIN
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('status') === 'signed' || localStorage.getItem('sodie_contract_completed') === 'true') {
+  if (
+    isAdminAuthenticated() ||
+    urlParams.get('status') === 'signed' ||
+    localStorage.getItem('sodie_contract_completed') === 'true'
+  ) {
     const introCard = document.getElementById('pf-intro-card');
     const iframeBox = document.getElementById('pf-step-iframe');
     const stepExcel = document.getElementById('pf-step-excel');
@@ -507,7 +622,7 @@ function initPaymentFlowEvents() {
 }
 
 /* ==========================================================================
-   8. MANEJO DE VIDEO DE DEMOSTRACIÓN Y CONFIRMACIONES
+   8. MANEJO DE LOS 2 VIDEOS DE DEMOSTRACIÓN (video.mp4 y video2.mp4)
    ========================================================================== */
 function initVideoAndConfirm() {
   const btnConfirmAction = document.getElementById('btn-confirm-action');
@@ -517,16 +632,17 @@ function initVideoAndConfirm() {
     });
   }
 
+  const backendUrl = getBaseUrl();
+
+  // Video 1: Demostración en Vivo (video.mp4)
   const demoVideo = document.getElementById('sodie-demo-video');
   const videoSource = document.getElementById('video-source-mp4');
   const playOverlay = document.getElementById('video-play-overlay');
 
   if (demoVideo && videoSource) {
-    const backendUrl = getBaseUrl();
-    const videoUrl = `${backendUrl}/video/video.mp4`;
-
-    videoSource.src = videoUrl;
-    demoVideo.src = videoUrl;
+    const videoUrl1 = `${backendUrl}/video/video.mp4`;
+    videoSource.src = videoUrl1;
+    demoVideo.src = videoUrl1;
     demoVideo.load();
 
     if (playOverlay) {
@@ -540,6 +656,17 @@ function initVideoAndConfirm() {
       demoVideo.addEventListener('pause', () => playOverlay.classList.remove('hidden'));
       demoVideo.addEventListener('ended', () => playOverlay.classList.remove('hidden'));
     }
+  }
+
+  // Video 2: Flujo Post-Pago NOWPayments (video2.mp4)
+  const postpayVideo = document.getElementById('sodie-postpay-video');
+  const postpaySource = document.getElementById('video-source-postpay-mp4');
+
+  if (postpayVideo && postpaySource) {
+    const videoUrl2 = `${backendUrl}/video/video2.mp4`;
+    postpaySource.src = videoUrl2;
+    postpayVideo.src = videoUrl2;
+    postpayVideo.load();
   }
 }
 
@@ -629,20 +756,21 @@ window.ejecutarBotonSODIE = async function(event, accion) {
   try {
     switch (accion) {
       case 'cargar-excel': {
-        // 1. Obtener valores de los 4 campos
         const paises = document.getElementById('sodie-paises')?.value || 'MX, CO';
         const nicho = document.getElementById('sodie-nicho')?.value || 'infoproductos';
         const value = document.getElementById('sodie-value')?.value || '1000';
         const edadMin = document.getElementById('sodie-edad-min')?.value || '22';
         const edadMax = document.getElementById('sodie-edad-max')?.value || '55';
 
-        // 2. Extraer ID del cliente
-        const clientId = window.CLIENT_STATE?.clientId || 'CLIENT-#01';
+        // Si es ADMIN detectado automáticamente, envía 'ADMIN'; si es cliente, su ID asignado
+        const clientId = isAdminAuthenticated()
+          ? 'ADMIN'
+          : (window.CLIENT_STATE?.clientId || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01');
+
         const btn = document.getElementById('btn-client-upload-file') || document.getElementById('btn-client-upload-excel');
 
         if (btn) btn.textContent = 'Generando Segmentación (72h)...';
 
-        // 3. Petición POST a segmentacionRoutes
         const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
         const response = await fetch(`${baseUrl}/api/v1/segmentacion/procesar`, {
           method: 'POST',
@@ -663,7 +791,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
           throw new Error(data.error || 'Error al procesar la segmentación.');
         }
 
-        // 4. Actualizar interfaz y estado
         if (window.CLIENT_STATE) {
           window.CLIENT_STATE.excelUploaded = true;
         }
@@ -679,14 +806,20 @@ window.ejecutarBotonSODIE = async function(event, accion) {
 
         localStorage.setItem(`sodie_last_excel_time_${clientId}`, Date.now().toString());
         console.log('✅ [APP] Segmentación procesada correctamente:', data);
+
+        // Avanza a confirmacion.html conservando el rol (ADMIN o Cliente)
+        setTimeout(() => {
+          const targetRole = clientId === 'ADMIN' ? '&admin=true&clientId=ADMIN' : `&clientId=${encodeURIComponent(clientId)}`;
+          window.location.href = `confirmacion.html?step=excel_and_fb${targetRole}`;
+        }, 900);
         break;
       }
 
       case 'activar-campana': {
-        // 1. Obtener el clientId del estado global (post-pago)
-        const clientId = window.CLIENT_STATE?.clientId || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01';
+        const clientId = isAdminAuthenticated()
+          ? 'ADMIN'
+          : (window.CLIENT_STATE?.clientId || localStorage.getItem('sodie_active_client_id') || 'CLIENT-#01');
 
-        // 2. Preparar el payload
         const payload = {
           clientId: clientId,
           sessionId: `sess_${clientId.toLowerCase()}_${Date.now()}`,
@@ -694,7 +827,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
           timestamp: Date.now()
         };
 
-        // 3. Feedback visual en el botón de activación
         const btnActivar = document.getElementById('btn-activar-campana') || document.getElementById('btn-activate');
         if (btnActivar) {
           btnActivar.disabled = true;
@@ -703,7 +835,6 @@ window.ejecutarBotonSODIE = async function(event, accion) {
 
         const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
 
-        // 4. Intentar autenticar / conectar con el backend
         let response = await fetch(`${baseUrl}/api/v1/connect`, {
           method: 'POST',
           headers: {
@@ -766,35 +897,25 @@ window.ejecutarBotonSODIE = async function(event, accion) {
 };
 
 /* ==========================================================================
-   12. COMPONENTES V4: MODAL AVISO, COOKIES & SCROLL IA3
+   12. COMPONENTES V4: MODAL AVISO & COOKIES
    ========================================================================== */
 function initNuevosComponentesV4() {
-  console.log('🔍 [SODIE V4] Inicializando componentes de UI (Modal y Cookies)...');
-
-  // 1. Modal de Aviso / Notificación
+  // 1. Modal de Aviso (Oculto por defecto en V4 porque ya soporta Laptop y Móvil)
   const mobileNoticeModal = document.getElementById('mobile-notice-modal');
   const btnCloseMobileNotice = document.getElementById('btn-close-mobile-notice');
 
   if (mobileNoticeModal) {
-    // Lógica de visualización según pantalla
-    if (window.innerWidth > 768) {
-      // Ojo: Si es desktop y se llama "mobile-notice", revisa si querías ocultarlo o mostrarlo
-      mobileNoticeModal.classList.add('active');
-      mobileNoticeModal.style.display = 'flex';
-    } else {
-      mobileNoticeModal.classList.remove('active');
-      mobileNoticeModal.style.display = 'none';
-    }
+    mobileNoticeModal.classList.add('hidden');
+    mobileNoticeModal.style.display = 'none';
 
     if (btnCloseMobileNotice && !btnCloseMobileNotice.dataset.bound) {
       btnCloseMobileNotice.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        mobileNoticeModal.classList.remove('active');
+        mobileNoticeModal.classList.add('hidden');
         mobileNoticeModal.style.display = 'none';
-        console.log('✅ Modal cerrado por el usuario.');
       });
-      btnCloseMobileNotice.dataset.bound = "true";
+      btnCloseMobileNotice.dataset.bound = 'true';
     }
   }
 
@@ -806,7 +927,7 @@ function initNuevosComponentesV4() {
     const cookiesAccepted = localStorage.getItem('cookiesAccepted');
     if (!cookiesAccepted) {
       cookieBanner.classList.remove('hidden');
-      cookieBanner.style.display = 'block';
+      cookieBanner.style.display = 'flex';
     } else {
       cookieBanner.classList.add('hidden');
       cookieBanner.style.display = 'none';
@@ -819,22 +940,17 @@ function initNuevosComponentesV4() {
         localStorage.setItem('cookiesAccepted', 'true');
         cookieBanner.classList.add('hidden');
         cookieBanner.style.display = 'none';
-        console.log('✅ Cookies aceptadas y guardadas en localStorage.');
       });
-      btnAcceptCookies.dataset.bound = "true";
+      btnAcceptCookies.dataset.bound = 'true';
     }
   }
 }
-
 
 /* ==========================================================================
    13. SISTEMA DE MÉTRICAS EN TIEMPO REAL (SSE)
    ========================================================================== */
 function initSSEMetrics() {
-  if (!window.EventSource) {
-    console.warn('SSE no es soportado por este navegador.');
-    return;
-  }
+  if (!window.EventSource) return;
 
   try {
     const eventSource = new EventSource(`${getBaseUrl()}/api/v1/metrics/sse`);
@@ -856,4 +972,206 @@ function initSSEMetrics() {
   } catch (error) {
     console.warn('No se pudo inicializar la conexión SSE:', error);
   }
+}
+
+/* ==========================================================================
+   14. AUTO-SLIDER INTELIGENTE PARA MÉTRICAS EN TIEMPO REAL
+   ========================================================================== */
+function initMetricsAutoSlider() {
+  const slider = document.querySelector('.metrics-slider');
+  const cards = document.querySelectorAll('.metrics-slider .metric-square');
+  const dots = document.querySelectorAll('.slider-dots-indicator .dot');
+
+  if (!slider || cards.length === 0) return;
+
+  let currentIndex = 0;
+  let autoSlideInterval = null;
+  const SLIDE_DELAY = 2800;
+
+  function updateDots(index) {
+    if (!dots.length) return;
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index % dots.length);
+    });
+  }
+
+  function slideToNextCard() {
+    const firstCard = cards[0];
+    const gap = parseFloat(window.getComputedStyle(slider).gap) || 14;
+    const stepWidth = firstCard.offsetWidth + gap;
+    const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
+
+    if (slider.scrollLeft >= maxScrollLeft - 10) {
+      currentIndex = 0;
+      slider.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      currentIndex++;
+      slider.scrollBy({ left: stepWidth, behavior: 'smooth' });
+    }
+
+    updateDots(currentIndex);
+  }
+
+  function startAutoSlide() {
+    stopAutoSlide();
+    autoSlideInterval = setInterval(slideToNextCard, SLIDE_DELAY);
+  }
+
+  function stopAutoSlide() {
+    if (autoSlideInterval) {
+      clearInterval(autoSlideInterval);
+      autoSlideInterval = null;
+    }
+  }
+
+  slider.addEventListener('scroll', () => {
+    const firstCard = cards[0];
+    const gap = parseFloat(window.getComputedStyle(slider).gap) || 14;
+    const stepWidth = firstCard.offsetWidth + gap;
+    const approxIndex = Math.round(slider.scrollLeft / stepWidth);
+    updateDots(approxIndex);
+  }, { passive: true });
+
+  slider.addEventListener('mouseenter', stopAutoSlide);
+  slider.addEventListener('mouseleave', startAutoSlide);
+  slider.addEventListener('touchstart', stopAutoSlide, { passive: true });
+  slider.addEventListener('touchend', startAutoSlide, { passive: true });
+
+  dots.forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      stopAutoSlide();
+      const firstCard = cards[0];
+      const gap = parseFloat(window.getComputedStyle(slider).gap) || 14;
+      currentIndex = idx;
+      slider.scrollTo({ left: idx * (firstCard.offsetWidth + gap), behavior: 'smooth' });
+      updateDots(currentIndex);
+      startAutoSlide();
+    });
+  });
+
+  startAutoSlide();
+}
+
+/* ==========================================================================
+   15. MOTOR DE ANIMACIÓN NUMÉRICA (MÉTRICAS + MODAL IA3)
+   ========================================================================== */
+function easeOutExpo(x) {
+  return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+}
+
+function animateValue(element, targetNumber, options = {}) {
+  const {
+    duration = 1400,
+    prefix = '',
+    suffix = '',
+    decimals = 0,
+    useCommas = true
+  } = options;
+
+  const startTime = performance.now();
+
+  function updateFrame(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutExpo(progress);
+    const currentVal = targetNumber * eased;
+
+    let formatted = currentVal.toFixed(decimals);
+    if (useCommas) {
+      const parts = formatted.split('.');
+      parts[0] = Number(parts[0]).toLocaleString('en-US');
+      formatted = parts.join('.');
+    }
+
+    element.textContent = `${prefix}${formatted}${suffix}`;
+
+    if (progress < 1) {
+      requestAnimationFrame(updateFrame);
+    }
+  }
+
+  requestAnimationFrame(updateFrame);
+}
+
+function animateDashboardMetrics() {
+  const metricCards = document.querySelectorAll('.metrics-slider .metric-square');
+
+  metricCards.forEach((card) => {
+    const textNodes = card.querySelectorAll('.card-value, span, p, strong, h3, h4, div');
+    textNodes.forEach((el) => {
+      if (el.children.length > 0) return;
+      const rawText = el.textContent.trim();
+
+      const match = rawText.match(/^(\$?)(\d+(?:[.,]\d+)?)$/);
+      if (match) {
+        const hasDollar = match[1] === '$';
+        const cleanNumber = parseFloat(match[2].replace(/,/g, ''));
+        const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
+
+        animateValue(el, cleanNumber, {
+          duration: 1500,
+          prefix: hasDollar ? '$' : '',
+          decimals
+        });
+      }
+    });
+  });
+}
+
+function animateIA3DiagnosticNumbers(modalElement) {
+  if (!modalElement) return;
+
+  const textBlocks = modalElement.querySelectorAll('.ia3-val-text, p, span, strong');
+
+  textBlocks.forEach((block) => {
+    if (block.querySelector('.ia3-anim-num')) return;
+    if (block.children.length > 0 && !block.classList.contains('ia3-val-text')) return;
+
+    const originalHTML = block.innerHTML;
+
+    const parsedHTML = originalHTML
+      .replace(/\$([0-9]{1,3}(?:,[0-9]{3})+|[0-9]+(?:\.[0-9]+)?)/g, (full, numStr) => {
+        const cleanVal = numStr.replace(/,/g, '');
+        const dec = numStr.includes('.') ? numStr.split('.')[1].length : 0;
+        return `<span class="ia3-anim-num mint-txt font-bold" data-target="${cleanVal}" data-prefix="$" data-decimals="${dec}">$0</span>`;
+      })
+      .replace(/(ROAS\s+)([0-9]+(?:\.[0-9]+)?)/gi, (full, label, numStr) => {
+        const dec = numStr.includes('.') ? numStr.split('.')[1].length : 1;
+        return `${label}<span class="ia3-anim-num fuchsia-txt font-bold" data-target="${numStr}" data-prefix="" data-decimals="${dec}">0.0</span>`;
+      });
+
+    if (parsedHTML !== originalHTML) {
+      block.innerHTML = parsedHTML;
+    }
+  });
+
+  const animatedSpans = modalElement.querySelectorAll('.ia3-anim-num');
+  animatedSpans.forEach((span) => {
+    const target = parseFloat(span.getAttribute('data-target')) || 0;
+    const prefix = span.getAttribute('data-prefix') || '';
+    const decimals = parseInt(span.getAttribute('data-decimals') || '0', 10);
+
+    animateValue(span, target, {
+      duration: 1600,
+      prefix,
+      decimals,
+      useCommas: true
+    });
+  });
+}
+
+function initIA3ModalObserver() {
+  const ia3Modal = document.querySelector('.ia3-float-card');
+  if (!ia3Modal) return;
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class' && !ia3Modal.classList.contains('hidden')) {
+        triggerIA3ArrowProgress();
+        animateIA3DiagnosticNumbers(ia3Modal);
+      }
+    });
+  });
+
+  observer.observe(ia3Modal, { attributes: true });
 }
