@@ -470,41 +470,115 @@ async function sodieCerrarListaEspera() {
 /* ==========================================================================
    NOTIFICACIONES PUSH PARA ADMIN
    ========================================================================== */
-async function activarNotificacionesPushAdmin() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('Este navegador no soporta notificaciones Push nativas');
-    return;
+// =========================================================================
+// 🔔 REGISTRO DE NOTIFICACIONES PUSH VAPID (ADMIN & RADAR 4H)
+// =========================================================================
+
+// Reemplaza con tu Public Key de tu .env (o déjala vacía si tu backend la entrega por GET)
+const SODIE_VAPID_PUBLIC_KEY = 'TU_VAPID_PUBLIC_KEY_AQUI';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
   }
+  return outputArray;
+}
+
+async function suscribirNotificacionesPush(clientId = 'ADMIN') {
+  const btnPush = document.getElementById('btn-enable-admin-push');
+  const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
 
   try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.warn('Permiso de notificaciones denegado por el administrador.');
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      alert('Tu navegador o dispositivo no soporta Notificaciones Push Web.');
       return;
     }
 
-    const resKey = await fetch(`${getBaseUrl()}/api/webhook-client/vapid-public-key`);
-    if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
-    const { publicKey } = await resKey.json();
+    if (btnPush) {
+      btnPush.innerHTML = '<span>⏳</span> Vinculando Radar Push...';
+      btnPush.style.opacity = '0.7';
+    }
 
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: publicKey
-    });
+    // 1. Pedir permiso nativo al sistema operativo (Android / iOS PWA / Desktop)
+    const permiso = await Notification.requestPermission();
+    if (permiso !== 'granted') {
+      throw new Error('Permiso de notificaciones denegado en el navegador.');
+    }
 
-    const responseSave = await fetch(`${getBaseUrl()}/api/webhook-client/save-subscription`, {
+    // 2. Registrar o recuperar el Service Worker activo
+    let registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      try {
+        registration = await navigator.serviceWorker.register('/js/sw.js');
+      } catch (swErr) {
+        registration = await navigator.serviceWorker.register('/sw.js');
+      }
+    }
+    await navigator.serviceWorker.ready;
+
+    // 3. Obtener la VAPID Public Key (desde constante o endpoint del backend)
+    let publicKey = SODIE_VAPID_PUBLIC_KEY;
+    if (!publicKey || publicKey === 'TU_VAPID_PUBLIC_KEY_AQUI') {
+      const keyRes = await fetch(`${baseUrl}/api/v1/push/public-key`);
+      const keyData = await keyRes.json();
+      publicKey = keyData.publicKey;
+    }
+
+    if (!publicKey) {
+      throw new Error('Falta configurar la VAPID Public Key.');
+    }
+
+    // 4. Crear o recuperar la suscripción en el PushManager del navegador
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+    }
+
+    // 5. Guardar la suscripción en MongoDB (vinculada a clientId: 'ADMIN')
+    const saveRes = await fetch(`${baseUrl}/api/v1/push/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: 'ADMIN', subscription })
+      body: JSON.stringify({
+        clientId: String(clientId).trim().toUpperCase(),
+        subscription: subscription
+      })
     });
 
-    const dataSave = await responseSave.json();
-    if (!responseSave.ok || !dataSave.success) throw new Error(dataSave.error || 'Error al guardar suscripción de admin.');
+    const saveData = await saveRes.json();
+    if (!saveRes.ok || saveData.error) {
+      throw new Error(saveData.error || 'No se pudo guardar la suscripción en MongoDB.');
+    }
 
-    console.log('✅ Notificaciones nativas activadas con éxito para: ADMIN');
-  } catch (error) {
-    console.error('💥 Error activando notificaciones Push Admin:', error.message);
+    // 6. Confirmación visual estilo neón en el botón de Admin
+    if (btnPush) {
+      btnPush.innerHTML = '<span>✅</span> Radar Push Activo (ADMIN)';
+      btnPush.style.opacity = '1';
+      btnPush.style.background = 'rgba(0, 245, 160, 0.15)';
+      btnPush.style.color = '#00f5a0';
+      btnPush.style.borderColor = '#00f5a0';
+    }
+
+    console.log('✅ [SODIE Push] Suscripción VAPID sincronizada con éxito para:', clientId);
+
+  } catch (err) {
+    console.error('💥 Error activando Push VAPID:', err);
+    if (btnPush) {
+      btnPush.innerHTML = '<span>⚠️</span> Reintentar Sincronización Push';
+      btnPush.style.opacity = '1';
+      btnPush.style.borderColor = '#ff007f';
+      btnPush.style.color = '#ff80bf';
+    }
   }
 }
 
+// Alias directo para el botón de admin.html
+function registrarPushAdmin() {
+  return suscribirNotificacionesPush('ADMIN');
+}
