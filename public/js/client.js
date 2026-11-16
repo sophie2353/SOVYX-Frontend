@@ -493,25 +493,45 @@ async function sodieConfirmarActivacionCliente() {
 /* ==========================================================================
    9. TEMPORIZADORES (72H Y CICLO GLOBAL 28 DÍAS)
    ========================================================================== */
-function initGlobalAndWeeklyTimers() {
+async function initGlobalAndWeeklyTimers() {
   try {
     const globalTimerDisplay = document.getElementById('global-timer-display');
-    const timer72hDisplay = document.getElementById('timer-24h-display'); // Asumiendo el ID del DOM actual
+    const timer72hDisplay = document.getElementById('timer-24h-display');
     
     if (CLIENT_STATE.timerInterval) clearInterval(CLIENT_STATE.timerInterval);
 
-    CLIENT_STATE.startTimeStamp = Date.now();
-    const totalCycleTime = 28 * 24 * 3600; // 28 días en segundos
+    const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+    const clientId = CLIENT_STATE.clientId || localStorage.getItem('sodie_client_id') || 'CLIENT';
 
-    CLIENT_STATE.timerInterval = setInterval(() => {
+    // Consultamos el timestamp persistente en MongoDB
+    try {
+      const res = await fetch(`${baseUrl}/api/v1/timer/get-timer?clientId=${encodeURIComponent(clientId)}`);
+      const data = await res.json();
+      if (data.success && data.startTimeStamp) {
+        CLIENT_STATE.startTimeStamp = data.startTimeStamp;
+        CLIENT_STATE.durationSeconds = data.durationSeconds || (72 * 3600);
+      } else {
+        CLIENT_STATE.startTimeStamp = CLIENT_STATE.startTimeStamp || Date.now();
+        CLIENT_STATE.durationSeconds = 72 * 3600;
+      }
+    } catch (errNet) {
+      console.warn('Fallback local activado para timer de cliente:', errNet);
+      CLIENT_STATE.startTimeStamp = CLIENT_STATE.startTimeStamp || Date.now();
+      CLIENT_STATE.durationSeconds = 72 * 3600;
+    }
+
+    const totalCycleTime = 28 * 24 * 3600; // 28 días en segundos
+    const cycleWindow = CLIENT_STATE.durationSeconds;
+
+    const tickClientTimer = () => {
       const now = Date.now();
-      const elapsed = Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000);
+      const elapsed = Math.max(0, Math.floor((now - CLIENT_STATE.startTimeStamp) / 1000));
       
-      // Temporizador 72h (reiniciable cada 72 horas)
-      const remaining72h = Math.max(0, (72 * 3600) - (elapsed % (72 * 3600)));
-      const h72 = String(Math.floor(remaining72h / 3600)).padStart(2, '0');
-      const m72 = String(Math.floor((remaining72h % 3600) / 60)).padStart(2, '0');
-      const s72 = String(remaining72h % 60).padStart(2, '0');
+      // Temporizador de ciclo de maduración (72h / 96h según DB)
+      const remainingCycle = Math.max(0, cycleWindow - (elapsed % cycleWindow));
+      const h72 = String(Math.floor(remainingCycle / 3600)).padStart(2, '0');
+      const m72 = String(Math.floor((remainingCycle % 3600) / 60)).padStart(2, '0');
+      const s72 = String(remainingCycle % 60).padStart(2, '0');
 
       if (timer72hDisplay) timer72hDisplay.textContent = `${h72}:${m72}:${s72}`;
 
@@ -531,8 +551,10 @@ function initGlobalAndWeeklyTimers() {
         const week4Section = document.getElementById('section-week-4-complete');
         if (week4Section) week4Section.classList.remove('hidden');
       }
+    };
 
-    }, 1000);
+    tickClientTimer();
+    CLIENT_STATE.timerInterval = setInterval(tickClientTimer, 1000);
   } catch (e) {
     console.warn('Error en temporizadores:', e);
   }
