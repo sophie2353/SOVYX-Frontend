@@ -228,8 +228,27 @@ function actualizarDisplayCronometro() {
   timerDisplay.textContent = `${h}:${m}:${s}`;
 }
 
-function sodieIniciarCronometro24h() {
+async function sodieIniciarCronometro24h() {
   if (ADMIN_STATE.timer24Interval) clearInterval(ADMIN_STATE.timer24Interval);
+
+  const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+
+  try {
+    const res = await fetch(`${baseUrl}/api/v1/timer/get-timer?clientId=ADMIN`);
+    const data = await res.json();
+
+    if (data.success && data.startTimeStamp) {
+      ADMIN_STATE.startTimeStamp = data.startTimeStamp;
+      const maxDuration = data.durationSeconds || (24 * 3600);
+      const elapsed = Math.max(0, Math.floor((Date.now() - data.startTimeStamp) / 1000));
+      ADMIN_STATE.timer24Seconds = Math.max(0, maxDuration - (elapsed % maxDuration));
+    }
+  } catch (e) {
+    console.warn('Error sincronizando timer Admin con la nube, usando estado local:', e);
+    if (typeof ADMIN_STATE.timer24Seconds !== 'number') {
+      ADMIN_STATE.timer24Seconds = 24 * 3600;
+    }
+  }
 
   actualizarDisplayCronometro();
   ADMIN_STATE.timer24Interval = setInterval(() => {
@@ -251,12 +270,28 @@ function sodiePausarCronometro() {
   }
 }
 
-function sodieReiniciarCronometro() {
+async function sodieReiniciarCronometro() {
   sodiePausarCronometro();
+  const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+
+  try {
+    const res = await fetch(`${baseUrl}/api/v1/timer/reset-timer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: 'ADMIN' })
+    });
+    const data = await res.json();
+    if (data.success && data.startTimeStamp) {
+      ADMIN_STATE.startTimeStamp = data.startTimeStamp;
+    }
+  } catch (e) {
+    console.warn('No se pudo reiniciar el timer en la nube:', e);
+  }
+
   ADMIN_STATE.timer24Seconds = 24 * 3600;
   actualizarDisplayCronometro();
+  sodieIniciarCronometro24h();
 }
-
 /* ==========================================================================
    4. ACCIONES BACKEND: ACTIVACIÓN Y CARGA DE ARCHIVOS
    ========================================================================== */
