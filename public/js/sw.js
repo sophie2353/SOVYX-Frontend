@@ -1,5 +1,5 @@
 // public/js/sw.js
-const CACHE_NAME = 'sodie-v3.5';
+const CACHE_NAME = 'sodie-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -10,29 +10,27 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Manejo de peticiones de red
   event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
 
 // =========================================================================
-// 🔔 ESCUCHADOR DE NOTIFICACIONES PUSH (Radar SODIE)
+// ESCUCHADOR DE NOTIFICACIONES PUSH (Radar SODIE)
 // =========================================================================
 self.addEventListener('push', function(event) {
   if (event.data) {
     try {
-      // Leemos el payload que mandamos desde el backend
       const pushData = event.data.json();
       
       const opciones = {
         body: pushData.body,
-        icon: pushData.icon || '/icono.jpg', // Ajusta la ruta de tu logo
-        badge: '/icono.jpg', // Iconito pequeño para la barra de estado en Android
-        vibrate: [200, 100, 200, 100, 200], // Vibración sci-fi 👺
-        data: pushData.data // Aquí viene el clientId y campaignId
+        icon: pushData.icon || '/icono.jpg',
+        badge: '/icono.jpg',
+        vibrate: [200, 100, 200, 100, 200],
+        data: pushData.data || {} // Contiene clientId, campaignId y/o url destino
       };
 
       event.waitUntil(
-        self.registration.showNotification(pushData.title, opciones)
+        self.registration.showNotification(pushData.title || 'SODIE Radar', opciones)
       );
     } catch (e) {
       console.error('Error procesando el payload de la Push:', e);
@@ -41,24 +39,27 @@ self.addEventListener('push', function(event) {
 });
 
 // =========================================================================
-// 🖱️ QUÉ PASA CUANDO HACES CLIC EN LA NOTIFICACIÓN
+// REDIRECCIÓN INTELIGENTE AL HACER CLIC EN LA NOTIFICACIÓN
 // =========================================================================
 self.addEventListener('notificationclick', function(event) {
-  event.notification.close(); // Cierra la tarjetita
+  event.notification.close();
 
-  // Al hacer clic, te abre la pestaña del panel de Admin para que actives la campaña
+  const payload = event.notification.data || {};
+  // Si el payload especifica url la usa; si el clientId es ADMIN va a /admin, sino al panel del cliente
+  let targetPath = payload.url || ((payload.clientId === 'ADMIN' || !payload.clientId) ? '/admin' : '/client');
+
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(windowClients => {
-      // Si ya tienes el panel abierto, lo enfoca
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // 1. Si ya hay una pestaña abierta con el panel (/admin o /client), la enfocamos
       for (let i = 0; i < windowClients.length; i++) {
-        let client = windowClients[i];
-        if (client.url.includes('/admin') && 'focus' in client) {
+        const client = windowClients[i];
+        if ((client.url.includes('/admin') || client.url.includes('/client')) && 'focus' in client) {
           return client.focus();
         }
       }
-      // Si estaba cerrado, lo abre en una pestaña nueva
+      // 2. Si estaba cerrado, abre directamente la ruta correspondiente en la app
       if (clients.openWindow) {
-        return clients.openWindow('/admin'); 
+        return clients.openWindow(targetPath);
       }
     })
   );
