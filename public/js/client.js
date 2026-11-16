@@ -563,11 +563,7 @@ async function initGlobalAndWeeklyTimers() {
 // =========================================================================
 // NOTIFICACIONES PUSH CLIENTE (VAPID DIRECTA + FALLBACK BACKEND)
 // =========================================================================
-
-// Coloca aquí tu VAPID Public Key de tu .env
-const SODIE_VAPID_PUBLIC_KEY = 'TU_VAPID_PUBLIC_KEY_AQUI';
-
-function urlBase64ToUint8ArrayClient(base64String) {
+function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
@@ -594,16 +590,13 @@ async function activarNotificacionesPush(clientIdOverride = null) {
     const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
     const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' && CLIENT_STATE.clientId ? CLIENT_STATE.clientId : 'CLIENT-#01');
 
-    // 1. Usa la VAPID pública directa; si no la has puesto, la pide al backend
-    let publicKey = SODIE_VAPID_PUBLIC_KEY;
-    if (!publicKey || publicKey === 'TU_VAPID_PUBLIC_KEY_AQUI') {
-      const resKey = await fetch(`${baseUrl}/api/webhook-client/vapid-public-key`);
-      if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
-      const keyData = await resKey.json();
-      publicKey = keyData.publicKey;
-    }
+    // 1. Obtiene la VAPID pública directamente desde tu .env vía backend
+    const resKey = await fetch(`${baseUrl}/api/webhook-client/vapid-public-key`);
+    if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
+    const { publicKey } = await resKey.json();
+    if (!publicKey) throw new Error('VAPID_PUBLIC_KEY está vacía en el servidor.');
 
-    // 2. Asegura que el Service Worker esté registrado antes de esperar .ready
+    // 2. Garantiza que el Service Worker esté activo
     let registration = await navigator.serviceWorker.getRegistration();
     if (!registration) {
       try {
@@ -614,16 +607,16 @@ async function activarNotificacionesPush(clientIdOverride = null) {
     }
     await navigator.serviceWorker.ready;
 
-    // 3. Reutiliza suscripción activa o crea una nueva convirtiendo la VAPID a Uint8Array
+    // 3. Suscribe el navegador convirtiendo la llave a Uint8Array
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8ArrayClient(publicKey)
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
     }
 
-    // 4. Guarda la suscripción en MongoDB
+    // 4. Guarda como push_CLIENT-#XX en MongoDB
     const responseSave = await fetch(`${baseUrl}/api/webhook-client/save-subscription`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -631,9 +624,7 @@ async function activarNotificacionesPush(clientIdOverride = null) {
     });
 
     const dataSave = await responseSave.json();
-    if (!responseSave.ok || !dataSave.success) {
-      throw new Error(dataSave.error || 'Error al guardar suscripción.');
-    }
+    if (!responseSave.ok || !dataSave.success) throw new Error(dataSave.error || 'Error al guardar suscripción.');
 
     console.log('✅ Notificaciones nativas activadas con éxito para:', clientId);
     if (typeof showToast === 'function') {
@@ -642,26 +633,5 @@ async function activarNotificacionesPush(clientIdOverride = null) {
 
   } catch (error) {
     console.error('💥 Error activando notificaciones Push:', error.message);
-  }
-}
-
-async function dispararNotificacion72h(clientIdOverride = null) {
-  try {
-    const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
-    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' && CLIENT_STATE.clientId ? CLIENT_STATE.clientId : 'CLIENT-#01');
-    
-    const res = await fetch(`${baseUrl}/api/webhook-client/timer/push-72h`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clientId,
-        timerId: `timer_72h_${clientId}_${Date.now()}`
-      })
-    });
-
-    const data = await res.json();
-    console.log('📡 Respuesta Push 72h:', data);
-  } catch (err) {
-    console.error('💥 Error en llamada Push 72h:', err.message);
   }
 }
