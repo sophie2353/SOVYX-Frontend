@@ -560,9 +560,24 @@ async function initGlobalAndWeeklyTimers() {
   }
 }
 
-/* ==========================================================================
-   10. NOTIFICACIONES PUSH
-   ========================================================================== */
+// =========================================================================
+// NOTIFICACIONES PUSH CLIENTE (VAPID DIRECTA + FALLBACK BACKEND)
+// =========================================================================
+
+// Coloca aquí tu VAPID Public Key de tu .env
+const SODIE_VAPID_PUBLIC_KEY = 'TU_VAPID_PUBLIC_KEY_AQUI';
+
+function urlBase64ToUint8ArrayClient(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 async function activarNotificacionesPush(clientIdOverride = null) {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.warn('Este navegador no soporta notificaciones Push nativas');
@@ -576,26 +591,49 @@ async function activarNotificacionesPush(clientIdOverride = null) {
       return;
     }
 
-    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
+    const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' && CLIENT_STATE.clientId ? CLIENT_STATE.clientId : 'CLIENT-#01');
 
-    const resKey = await fetch(`${getBaseUrl()}/api/webhook-client/vapid-public-key`);
-    if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
-    const { publicKey } = await resKey.json();
+    // 1. Usa la VAPID pública directa; si no la has puesto, la pide al backend
+    let publicKey = SODIE_VAPID_PUBLIC_KEY;
+    if (!publicKey || publicKey === 'TU_VAPID_PUBLIC_KEY_AQUI') {
+      const resKey = await fetch(`${baseUrl}/api/webhook-client/vapid-public-key`);
+      if (!resKey.ok) throw new Error('No se pudo obtener la clave VAPID pública.');
+      const keyData = await resKey.json();
+      publicKey = keyData.publicKey;
+    }
 
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: publicKey
-    });
+    // 2. Asegura que el Service Worker esté registrado antes de esperar .ready
+    let registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      try {
+        registration = await navigator.serviceWorker.register('/js/sw.js');
+      } catch (e) {
+        registration = await navigator.serviceWorker.register('/sw.js');
+      }
+    }
+    await navigator.serviceWorker.ready;
 
-    const responseSave = await fetch(`${getBaseUrl()}/api/webhook-client/save-subscription`, {
+    // 3. Reutiliza suscripción activa o crea una nueva convirtiendo la VAPID a Uint8Array
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8ArrayClient(publicKey)
+      });
+    }
+
+    // 4. Guarda la suscripción en MongoDB
+    const responseSave = await fetch(`${baseUrl}/api/webhook-client/save-subscription`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clientId, subscription })
     });
 
     const dataSave = await responseSave.json();
-    if (!responseSave.ok || !dataSave.success) throw new Error(dataSave.error || 'Error al guardar suscripción.');
+    if (!responseSave.ok || !dataSave.success) {
+      throw new Error(dataSave.error || 'Error al guardar suscripción.');
+    }
 
     console.log('✅ Notificaciones nativas activadas con éxito para:', clientId);
     if (typeof showToast === 'function') {
@@ -609,9 +647,10 @@ async function activarNotificacionesPush(clientIdOverride = null) {
 
 async function dispararNotificacion72h(clientIdOverride = null) {
   try {
-    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' ? CLIENT_STATE.clientId : 'CLIENT-#01');
+    const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : '';
+    const clientId = clientIdOverride || (typeof CLIENT_STATE !== 'undefined' && CLIENT_STATE.clientId ? CLIENT_STATE.clientId : 'CLIENT-#01');
     
-    const res = await fetch(`${getBaseUrl()}/api/webhook-client/timer/push-72h`, {
+    const res = await fetch(`${baseUrl}/api/webhook-client/timer/push-72h`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
