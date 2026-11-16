@@ -523,7 +523,7 @@ async function suscribirNotificacionesPush(clientId = 'ADMIN') {
     // 3. Obtener la VAPID Public Key (desde constante o endpoint del backend)
     let publicKey = SODIE_VAPID_PUBLIC_KEY;
     if (!publicKey || publicKey === 'TU_VAPID_PUBLIC_KEY_AQUI') {
-      const keyRes = await fetch(`${baseUrl}/api/v1/push/public-key`);
+      const keyRes = await fetch(`${baseUrl}/api/webhook-client/vapid-public-key`);
       const keyData = await keyRes.json();
       publicKey = keyData.publicKey;
     }
@@ -542,7 +542,7 @@ async function suscribirNotificacionesPush(clientId = 'ADMIN') {
     }
 
     // 5. Guardar la suscripción en MongoDB (vinculada a clientId: 'ADMIN')
-    const saveRes = await fetch(`${baseUrl}/api/v1/push/subscribe`, {
+    const saveRes = await fetch(`${baseUrl}/api/webhook-client/save-subscription`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
