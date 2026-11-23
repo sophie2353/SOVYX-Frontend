@@ -612,13 +612,6 @@ function initPaymentFlowEvents() {
         existing.unshift(paymentNotif);
         localStorage.setItem('sodie_admin_payment_notifications', JSON.stringify(existing.slice(0, 30)));
 
-        // Notificación opcional al backend (no bloquea la redirección si aún no existe la ruta)
-        fetch(`${getBaseUrl()}/api/admin/payment-notification`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(paymentNotif)
-        }).catch(() => {});
-
         console.log('🎉 ¡Pago exitoso detectado y notificado al Panel Admin!');
         window.location.href = 'confirmacion.html?step=generar_id';
       }
