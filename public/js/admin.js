@@ -572,19 +572,33 @@ function showAdminToast(title, body) {
   setTimeout(() => toast.classList.add('hidden'), 4500);
 }
 
-function renderAdminPaymentsFeed() {
+async function renderAdminPaymentsFeed() {
   const feedEl = document.getElementById('admin-payments-feed');
   const countBadge = document.getElementById('admin-payments-count');
   if (!feedEl) return;
 
-  const list = JSON.parse(localStorage.getItem('sodie_admin_payment_notifications') || '[]');
+  let backendPayments = [];
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/webhook/admin/payments`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.payments)) {
+        backendPayments = data.payments;
+      }
+    }
+  } catch (err) {
+    console.warn('Cargando fallback local de pagos...');
+  }
+
+  const localMocks = JSON.parse(localStorage.getItem('sodie_admin_payment_notifications') || '[]');
+  const list = [...backendPayments, ...localMocks];
 
   if (countBadge) {
     countBadge.textContent = `${list.length} registro${list.length === 1 ? '' : 's'}`;
   }
 
   if (list.length === 0) {
-    feedEl.innerHTML = `<div class="payment-empty">Esperando confirmaciones de pago desde app.js / NOWPayments...</div>`;
+    feedEl.innerHTML = `<div class="payment-empty">Esperando confirmaciones reales de NOWPayments...</div>`;
     return;
   }
 
@@ -598,9 +612,6 @@ function renderAdminPaymentsFeed() {
     </div>
   `).join('');
 }
-
-function initAdminPaymentNotifications() {
-  renderAdminPaymentsFeed();
 
   // Escucha en tiempo real si app.js registra un pago en otra pestaña
   window.addEventListener('storage', (e) => {
