@@ -556,3 +556,89 @@ async function suscribirNotificacionesPush(clientId = 'ADMIN') {
 function registrarPushAdmin() {
   return suscribirNotificacionesPush('ADMIN');
 }
+
+/* ==========================================================================
+   5. RECEPCIÓN Y PANEL EN VIVO DE PAGOS DESDE APP.JS (NOWPAYMENTS)
+   ========================================================================== */
+function showAdminToast(title, body) {
+  const toast = document.getElementById('toast-notification');
+  const tTitle = document.getElementById('toast-title');
+  const tBody = document.getElementById('toast-body');
+  if (!toast || !tTitle || !tBody) return;
+
+  tTitle.textContent = title;
+  tBody.textContent = body;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 4500);
+}
+
+function renderAdminPaymentsFeed() {
+  const feedEl = document.getElementById('admin-payments-feed');
+  const countBadge = document.getElementById('admin-payments-count');
+  if (!feedEl) return;
+
+  const list = JSON.parse(localStorage.getItem('sodie_admin_payment_notifications') || '[]');
+
+  if (countBadge) {
+    countBadge.textContent = `${list.length} registro${list.length === 1 ? '' : 's'}`;
+  }
+
+  if (list.length === 0) {
+    feedEl.innerHTML = `<div class="payment-empty">Esperando confirmaciones de pago desde app.js / NOWPayments...</div>`;
+    return;
+  }
+
+  feedEl.innerHTML = list.map((p) => `
+    <div class="payment-item">
+      <div>
+        <strong class="mint-txt" style="font-size: 0.95rem;">${p.amount} • ${p.clientId}</strong>
+        <p class="text-sub" style="font-size: 0.78rem; margin-top: 2px;">${p.network} • ${p.timestamp}</p>
+      </div>
+      <span class="badge-client">${p.status}</span>
+    </div>
+  `).join('');
+}
+
+function initAdminPaymentNotifications() {
+  renderAdminPaymentsFeed();
+
+  // Escucha en tiempo real si app.js registra un pago en otra pestaña
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sodie_admin_payment_notifications') {
+      renderAdminPaymentsFeed();
+      showAdminToast('Nuevo Pago Confirmado', 'Se recibió un pago desde NOWPayments.');
+    }
+  });
+
+  // Botón para limpiar el historial
+  const btnClear = document.getElementById('btn-clear-payments');
+  if (btnClear && !btnClear.dataset.bound) {
+    btnClear.addEventListener('click', () => {
+      localStorage.removeItem('sodie_admin_payment_notifications');
+      renderAdminPaymentsFeed();
+      showAdminToast('Panel Limpio', 'Historial de pagos borrado.');
+    });
+    btnClear.dataset.bound = 'true';
+  }
+
+  // Botón de prueba rápida para verificar la alerta en el panel
+  const btnTest = document.getElementById('btn-test-payment-notif');
+  if (btnTest && !btnTest.dataset.bound) {
+    btnTest.addEventListener('click', () => {
+      const mock = {
+        id: `PAY-TEST-${Date.now()}`,
+        clientId: 'CLIENT-#01',
+        amount: '$50,000 USDC',
+        network: 'Polygon (Test)',
+        status: 'CONFIRMADO',
+        timestamp: new Date().toLocaleString('es-VE')
+      };
+      const existing = JSON.parse(localStorage.getItem('sodie_admin_payment_notifications') || '[]');
+      existing.unshift(mock);
+      localStorage.setItem('sodie_admin_payment_notifications', JSON.stringify(existing.slice(0, 30)));
+      renderAdminPaymentsFeed();
+      showAdminToast('Pago Simulado', 'CLIENT-#01 • $50,000 USDC confirmado.');
+    });
+    btnTest.dataset.bound = 'true';
+  }
+}
