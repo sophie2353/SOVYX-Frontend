@@ -594,11 +594,32 @@ function initPaymentFlowEvents() {
     });
   }
 
-  // 3. Escuchar el pago desde NOWPayments
+  // 3. Escuchar el pago y notificar a admin.js
   window.addEventListener('message', (event) => {
     if (event.origin && event.origin.includes('nowpayments.io')) {
       if (event.data && (event.data.status === 'finished' || event.data.paymentStatus === 'confirmed' || event.data.type === 'PAYMENT_SUCCESS')) {
-        console.log('🎉 ¡Pago exitoso detectado desde el widget iframe!');
+        const paymentNotif = {
+          id: `PAY-${Date.now()}`,
+          clientId: window.CLIENT_STATE?.clientId || localStorage.getItem('sodie_active_client_id') || 'NUEVO-CLIENTE',
+          amount: event.data.price_amount ? `$${event.data.price_amount} USDC` : '$50,000 USDC',
+          network: event.data.pay_currency ? event.data.pay_currency.toUpperCase() : 'NOWPayments',
+          status: 'CONFIRMADO',
+          timestamp: new Date().toLocaleString('es-VE')
+        };
+
+        // Guarda en localStorage para que admin.html lo cargue al instante (y dispare el evento 'storage' en vivo)
+        const existing = JSON.parse(localStorage.getItem('sodie_admin_payment_notifications') || '[]');
+        existing.unshift(paymentNotif);
+        localStorage.setItem('sodie_admin_payment_notifications', JSON.stringify(existing.slice(0, 30)));
+
+        // Notificación opcional al backend (no bloquea la redirección si aún no existe la ruta)
+        fetch(`${getBaseUrl()}/api/admin/payment-notification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paymentNotif)
+        }).catch(() => {});
+
+        console.log('🎉 ¡Pago exitoso detectado y notificado al Panel Admin!');
         window.location.href = 'confirmacion.html?step=generar_id';
       }
     }
