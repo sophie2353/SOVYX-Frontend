@@ -579,7 +579,7 @@ async function renderAdminPaymentsFeed() {
 
   let backendPayments = [];
   try {
-    const res = await fetch(`${getBaseUrl()}/api/webhook/admin/payments`);
+    const res = await fetch(`${getBaseUrl()}/api/v1/webhook-payment/admin/payments`);
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.payments)) {
