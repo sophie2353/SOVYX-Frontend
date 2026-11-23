@@ -12,7 +12,8 @@ function getBaseUrl() {
 
 const ADMIN_STATE = {
   timer24Interval: null,
-  timer24Seconds: 24 * 3600
+  timer24Seconds: 24 * 3600,
+  startTimeStamp: null
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,9 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setupAdminEventListeners();
+  initAdminPaymentNotifications();
 });
 
-  /* ==========================================================================
+/* ==========================================================================
    1. AUTENTICACIÓN Y SESIÓN (SINCRONIZADO CON APP.JS PARA BYPASS DE PAGO)
    ========================================================================== */
 function activarFlagsAdminGlobal() {
@@ -108,6 +110,7 @@ function mostrarDashboard() {
   if (dashContent) dashContent.classList.remove("hidden");
 
   sodieIniciarCronometro24h();
+  renderAdminPaymentsFeed();
 }
 
 function sodieCerrarSesionAdmin() {
@@ -157,13 +160,14 @@ function setupAdminEventListeners() {
 
   // Inyectar Excel / CSV
   const btnExcel = document.getElementById('btn-inject-database');
-if (btnExcel && !btnExcel.dataset.bound) {
-  btnExcel.addEventListener('click', (e) => {
-    e.preventDefault();
-    sodieSubirSegmentacionAdmin('ADMIN');
-  });
-  btnExcel.dataset.bound = "true";
-}
+  if (btnExcel && !btnExcel.dataset.bound) {
+    btnExcel.addEventListener('click', (e) => {
+      e.preventDefault();
+      sodieSubirSegmentacionAdmin('ADMIN');
+    });
+    btnExcel.dataset.bound = "true";
+  }
+
   // Activar Campaña Directa (Usa Token Maestro)
   const btnActivate = document.getElementById('btn-trigger-active-campaign');
   if (btnActivate && !btnActivate.dataset.bound) {
@@ -292,6 +296,7 @@ async function sodieReiniciarCronometro() {
   actualizarDisplayCronometro();
   sodieIniciarCronometro24h();
 }
+
 /* ==========================================================================
    4. ACCIONES BACKEND: ACTIVACIÓN Y CARGA DE ARCHIVOS
    ========================================================================== */
@@ -311,21 +316,17 @@ async function sodieConfirmarActivacion() {
     timerSpan.textContent = '00:00:00';
     startTime = Date.now();
     
-    // Función para actualizar el cronómetro en el botón
     timerInterval = setInterval(() => {
       const elapsedTime = Date.now() - startTime;
-      const hours = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
       const minutes = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
       const seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
       const milliseconds = Math.floor((elapsedTime % 1000) / 10).toString().padStart(2, '0'); 
       
-      // Mostramos mm:ss:ms para que se vea rápido (ya que dices que tarda < 1.5s)
       timerSpan.textContent = `${minutes}:${seconds}:${milliseconds}`;
-    }, 10); // Actualiza cada 10ms para dar sensación de velocidad
+    }, 10);
   }
 
   try {
-    // Apuntamos al endpoint oficial de creación de borrador pasando el clientId de ADMIN
     const res = await fetch(`${getBaseUrl()}/api/v1/facebook/crear-borrador`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -337,24 +338,23 @@ async function sodieConfirmarActivacion() {
     });
 
     const data = await res.json();
-    clearInterval(timerInterval); // Detenemos el cronómetro
+    clearInterval(timerInterval);
 
     if (data.success) {
       alert('🚀 ¡Borrador inyectado en Meta con éxito usando el Token Maestro!');
       
       if (textSpan) {
-         textSpan.textContent = '✓ Listo. Tiempo total: ';
+        textSpan.textContent = '✓ Listo. Tiempo total: ';
       }
       
       if (btn) {
-         btn.classList.remove('btn-mint-solid');
-         btn.style.background = 'rgba(0, 255, 204, 0.2)'; // Estilo de completado
+        btn.classList.remove('btn-mint-solid');
+        btn.style.background = 'rgba(0, 255, 204, 0.2)';
       }
 
       if (data.redirectUrl) {
-        // Opcional: Pequeño delay antes de redirigir para que alcancen a ver el tiempo
         setTimeout(() => {
-            window.location.href = data.redirectUrl;
+          window.location.href = data.redirectUrl;
         }, 1500);
       }
     } else {
@@ -364,7 +364,7 @@ async function sodieConfirmarActivacion() {
       if (btn) btn.disabled = false;
     }
   } catch (error) {
-    clearInterval(timerInterval); // Detenemos en caso de error
+    clearInterval(timerInterval);
     console.error('💥 Error enviando activación:', error);
     alert('Ocurrió un error al procesar la solicitud con Meta.');
     if (textSpan) textSpan.textContent = 'Activar Campaña Directa';
@@ -467,6 +467,7 @@ async function sodieCerrarListaEspera() {
     if (btn) btn.textContent = '✓ V4 Disparado (14 Días)';
   }
 }
+
 /* ==========================================================================
    NOTIFICACIONES PUSH PARA ADMIN
    ========================================================================== */
@@ -612,6 +613,9 @@ async function renderAdminPaymentsFeed() {
     </div>
   `).join('');
 }
+
+function initAdminPaymentNotifications() {
+  renderAdminPaymentsFeed();
 
   // Escucha en tiempo real si app.js registra un pago en otra pestaña
   window.addEventListener('storage', (e) => {
