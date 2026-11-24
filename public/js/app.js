@@ -543,11 +543,22 @@ function desplegarIframePago() {
     return;
   }
 
-  const introCard = document.getElementById('pf-intro-card');
   const iframeBox = document.getElementById('pf-step-iframe');
+  const btnPago = document.getElementById('btn-procesar-pago-pasarela');
 
-  if (introCard) introCard.classList.add('hidden');
-  if (iframeBox) iframeBox.classList.remove('hidden');
+  if (!iframeBox) return;
+
+  const estaOculta = iframeBox.classList.toggle('hidden');
+
+  if (btnPago) {
+    btnPago.textContent = estaOculta ? 'PAGAR CUPO V4' : 'OCULTAR PASARELA V4';
+  }
+
+  if (!estaOculta) {
+    requestAnimationFrame(() => {
+      iframeBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
 }
 
 function finalizarYConfirmar(event) {
