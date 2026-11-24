@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SODIE v4</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icono.jpg">
+  <link rel="apple-touch-icon" href="icono.jpg">
+  <meta name="theme-color" content="#00ffcc">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/js/sw.js')
+          .then(reg => console.log('SODIE PWA Lista:', reg.scope))
+          .catch(err => console.error('Error registrando PWA:', err));
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <!-- Modal Aviso Dispositivos Móviles (Oculto con .hidden para permitir Laptop en V4 sin romper app.js) -->
+  <div id="mobile-notice-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card-dash text-center">
+      <h4 class="fuchsia-txt mb-small" style="font-size: 1.1rem; font-weight: bold;" data-i18n="mobile_notice_title">Optimización de Dispositivo</h4>
+      <p class="step-desc" style="font-size: 0.88rem; margin-bottom: 16px;" data-i18n="mobile_notice_desc">
+        Interfaz optimizada para móviles y terminales de escritorio en SODIE v4.
+      </p>
+      <button type="button" id="btn-close-mobile-notice" class="btn-pf-action btn-pay-gradient full-width" data-i18n="btn_understood">
+        ENTENDIDO
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner Cookie Consent -->
+  <div id="cookie-consent-banner" class="cookie-banner-box hidden">
+    <div class="cookie-content">
+      <p style="font-size: 0.8rem; line-height: 1.4; margin-bottom: 10px;" data-i18n="cookie_notice_desc">
+        Utilizamos cookies y telemetría de sesión para optimizar la inyección automatizada de segmentación en SODIE v4.
+      </p>
+      <button type="button" id="btn-accept-cookies" class="btn-pf-action btn-pay-gradient full-width" style="padding: 8px 12px; font-size: 0.85rem;" data-i18n="btn_accept_continue">
+        Aceptar y Continuar
+      </button>
+    </div>
+  </div>
+
+  <!-- Notificación Toast Flotante -->
+  <div id="toast-notification" class="toast-bubble hidden">
+    <div class="toast-content">
+      <span class="toast-icon"></span>
+      <div class="toast-text">
+        <strong id="toast-title" data-i18n="toast_default_title">Notificación SODIE v4</strong>
+        <p id="toast-body" data-i18n="toast_default_body">Solo 2 Cupos Disponibles</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPLASH SCREEN -->
+  <div id="view-splash" class="full-screen">
+    <div class="splash-content">
+      <div class="logo-wrapper">
+        <h1 class="logo-title logo-no-transform"><span class="serif-s">S</span>ODIE</h1>
+      </div>
+      <div class="hud-percentage-wrapper">
+        <span id="splash-pct" class="splash-pct-num">0%</span>
+        <div class="hud-pointer-line"></div>
+      </div>
+      <div class="cpu-liquid-box">
+        <div id="capsules-track" class="capsules-track">
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+          <div class="capsule cap-dark"><div class="cap-glint"></div></div>
+        </div>
+      </div>
+      <div class="splash-gauges">
+        <div class="gauge-card">
+          <svg class="gauge-ring" viewBox="0 0 36 36">
+            <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
+            <circle id="gauge-circle-1" class="ring-thin-fill mint-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="0, 100" />
+          </svg>
+          <div class="gauge-content">
+            <span class="gauge-label" data-i18n="gauge_processed_data">DATOS PROCESADOS</span>
+            <span id="gauge-val-1" class="gauge-val mint-txt">0%</span>
+          </div>
+        </div>
+        <div class="hud-center-node"></div>
+        <div class="gauge-card">
+          <svg class="gauge-ring" viewBox="0 0 36 36">
+            <circle class="ring-thin-bg" cx="18" cy="18" r="15.9155" />
+            <circle id="gauge-circle-2" class="ring-thin-fill fuchsia-stroke" cx="18" cy="18" r="15.9155" stroke-dasharray="0, 100" />
+          </svg>
+          <div class="gauge-content">
+            <span class="gauge-label" data-i18n="gauge_market_analysis">ANÁLISIS MERCADO</span>
+            <span id="gauge-val-2" class="gauge-val fuchsia-txt">0%</span>
+          </div>
+        </div>
+      </div>
+      <div class="welcome-sign-glass">
+        <div id="welcome-fill" class="welcome-fill"></div>
+        <span class="welcome-text" data-i18n="welcome_text">BIENVENIDO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PRINCIPAL SODIE V4 -->
+  <main id="app-dashboard" class="dashboard-container">
+    <!-- HEADER -->
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <div id="sodie-logo-trigger" data-sodie-event="toques-admin" class="clickable-node" style="display: flex; align-items: baseline; gap: 8px;">
+          <h1 class="logo-title header-logo" style="font-size: clamp(1.8rem, 4vw, 2.4rem) !important;">
+            <span class="serif-s" style="font-size: clamp(2.1rem, 4.5vw, 2.8rem) !important;">S</span>ODIE
+          </h1>
+          <span class="mint-txt font-bold" style="font-family: 'Orbitron', sans-serif; font-size: 1rem;">v4</span>
+        </div>
+      </div>
+      <div class="dash-header-right">
+        <div class="cupos-badge">
+          <span class="purple-neon-dot"></span>
+          <span class="cupos-text" data-i18n="badge_slots_available">solo 4 cupos disponibles</span>
+        </div>
+        <a href="admin.html" class="admin-btn-link text-sub" style="font-size: 0.85rem; text-decoration: none;">Admin</a>
+        <button type="button" class="btn-icon btn-admin-trigger" id="btn-sodie-logo-trigger" data-sodie-event="toques-admin">☰</button>
+      </div>
+    </header>
+
+    <!-- COLUMNA IZQUIERDA EN LAPTOP (Métricas + Calculadora ROI + 2 Videos) -->
+    <div class="bento-col-left">
+      <!-- 1. MÉTRICAS EN TIEMPO REAL -->
+      <section class="glass-card-dash metrics-section">
+        <div class="chat-header" style="margin-bottom: 10px;">
+          <div>
+            <h3 class="section-title" style="margin-bottom: 2px;" data-i18n="title_realtime_metrics">Métricas de Rendimiento en Tiempo Real</h3>
+            <p class="text-sub" style="font-size: 0.78rem;">Telemetría en vivo e inyección para cuentas corporativas ($50,000 USD/año)</p>
+          </div>
+        </div>
+
+        <!-- Definición de degradados SVG para las curvas -->
+        <svg width="0" height="0" style="position: absolute;">
+          <defs>
+            <linearGradient id="mintGlowGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.38"/>
+              <stop offset="100%" stop-color="#00ffcc" stop-opacity="0.0"/>
+            </linearGradient>
+            <linearGradient id="fuchsiaGlowGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff007a" stop-opacity="0.38"/>
+              <stop offset="100%" stop-color="#ff007a" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <div class="metrics-slider" id="metrics-slider">
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_spend">Inversión</span></div>
+            <div class="card-value" id="metric-spend">$0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,48 Q35,42 65,28 T135,32 T200,12 L200,60 L0,60 Z" fill="url(#mintGlowGrad)" />
+                <path d="M0,48 Q35,42 65,28 T135,32 T200,12" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </article>
+
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_reach">Alcance</span></div>
+            <div class="card-value" id="metric-reach">0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,50 Q45,35 90,38 T155,20 T200,14 L200,60 L0,60 Z" fill="url(#mintGlowGrad)" />
+                <path d="M0,50 Q45,35 90,38 T155,20 T200,14" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </article>
+
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_visitors">Visitas</span></div>
+            <div class="card-value" id="metric-visitors">0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,46 Q30,24 65,36 T125,16 T200,22 L200,60 L0,60 Z" fill="url(#mintGlowGrad)" />
+                <path d="M0,46 Q30,24 65,36 T125,16 T200,22" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </article>
+
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_active">Activos</span></div>
+            <div class="card-value" id="metric-activos">0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,44 Q50,40 95,24 T200,18 L200,60 L0,60 Z" fill="url(#mintGlowGrad)" />
+                <path d="M0,44 Q50,40 95,24 T200,18" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </article>
+
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_pay_clicks">Clics "Ir a Pagar"</span></div>
+            <div class="card-value" id="metric-pay-clicks">0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,48 Q60,34 110,28 T200,14 L200,60 L0,60 Z" fill="url(#fuchsiaGlowGrad)" />
+                <path d="M0,48 Q60,34 110,28 T200,14" fill="none" stroke="#ff007a" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </article>
+
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_available_slots">Cupos Disponibles</span></div>
+            <div class="card-value fuchsia-txt" id="metric-cupos-val">2</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,14 Q50,28 100,22 T200,48 L200,60 L0,60 Z" fill="url(#fuchsiaGlowGrad)" />
+                <path d="M0,14 Q50,28 100,22 T200,48" fill="none" stroke="#ff007a" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </article>
+        </div>
+
+        <div class="slider-dots-indicator">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </section>
+
+      <!-- 2. CALCULADORA DE ROI Y DIAGNÓSTICO IA3 -->
+      <section id="ia3-calculator-analyzer" class="glass-card-dash metrics-analyzer-section">
+        <h3 class="section-title" style="margin-bottom: 4px;" data-i18n="title_ia3_analyzer">Calculadora de ROI y Diagnóstico IA3</h3>
+        <p class="step-desc" style="margin-bottom: 14px;" data-i18n="ia3_analyzer_desc">
+          Ingresa tu inversión publicitaria actual para calcular la fuga de capital mensual y proyectar la retención con SODIE v4.
+        </p>
+
+        <div class="calc-v4-layout">
+          <div class="form-row-2">
+            <div>
+              <label class="text-sub" style="font-size: 0.78rem; display: block; margin-bottom: 4px;" data-i18n="label_ia3_ad_spend">Inversión Diaria ($ USDC)</label>
+              <input type="number" id="ia3-ad-spend" placeholder="ej. 2500" />
+            </div>
+            <div>
+              <label class="text-sub" style="font-size: 0.78rem; display: block; margin-bottom: 4px;" data-i18n="label_ia3_roas">ROAS Mensual Actual</label>
+              <input type="number" step="0.1" id="ia3-roas" placeholder="ej. 1.5" />
+            </div>
+          </div>
+
+          <div class="calc-v4-cta-box">
+            <div class="calc-savings-preview">
+              <span class="text-sub" style="font-size: 0.76rem;">Ahorro estimado con SODIE v4:</span>
+              <strong id="ia3-inline-savings-preview" class="mint-txt" style="font-family: 'Orbitron', sans-serif; font-size: 1.25rem;">$70,500 <small style="font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: #c0b4d8;">USD/mes retenidos</small></strong>
+            </div>
+
+            <button type="button" id="btn-ia3-analizar" class="btn-pf-action btn-pay-gradient" data-sodie-event="calculater_metrics" data-i18n="btn_analyze_ia3">
+              ANALIZAR CON IA3
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. DEMOSTRACIONES EN VIVO (LOS 2 VIDEOS VERTICALES 9:16) -->
+      <section id="card-demo-video" class="glass-card-dash video-section">
+        <div class="chat-header" style="margin-bottom: 10px;">
+          <h3 class="section-title mint-txt" style="margin-bottom: 0;" data-i18n="title_live_demo">Demostraciones en Vivo</h3>
+          <span class="badge-client" data-i18n="badge_video_duration">Formato Vertical 9:16</span>
+        </div>
+
+        <div class="dual-video-grid">
+          <!-- Video 1: Subida de Data y Creación de Borrador -->
+          <div class="video-card-item">
+            <div class="video-item-head">
+              <strong style="font-size: 0.9rem; color: #fff;">1. Inyección y Borrador (30-40s)</strong>
+              <span class="text-sub" style="font-size: 0.75rem;" data-i18n="video_demo_desc">Subida de data hasta anuncio en panel</span>
+            </div>
+            <div class="video-container-glass">
+              <video id="sodie-demo-video" controls playsinline preload="metadata" class="demo-video-player">
+                <source id="video-source-mp4" src="" type="video/mp4">
+              </video>
+            </div>
+          </div>
+
+          <!-- Video 2: Flujo Post-Pago con NOWPayments ($1-$2 Test) -->
+          <div class="video-card-item">
+            <div class="video-item-head">
+              <strong style="font-size: 0.9rem; color: #fff;">2. Flujo Post-Pago NOWPayments</strong>
+              <span class="text-sub" style="font-size: 0.75rem;">Validación en blockchain y asignación de ID</span>
+            </div>
+            <div class="video-container-glass">
+              <video id="sodie-postpay-video" controls playsinline preload="metadata" class="demo-video-player">
+                <source id="video-source-postpay-mp4" src="postpago-demo.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- COLUMNA DERECHA EN LAPTOP (Chat IA + Checkout $50K con Temporizador) -->
+    <div class="bento-col-right">
+      <!-- 4. CHAT DE SOPORTE IA -->
+      <section id="chat-section-anchor" class="glass-card-dash chat-section">
+        <div class="chat-header" style="margin-bottom: 10px;">
+          <h3 class="section-title" style="margin-bottom: 0;" data-i18n="title_web_chat">Chat de Soporte IA</h3>
+          <div class="cupos-badge">
+            <span class="purple-neon-dot"></span>
+            <span id="cupos-count-badge" class="cupos-text" data-i18n="badge_slots_available">solo 2 cupos disponibles</span>
+          </div>
+        </div>
+        
+        <div id="chat-body" class="chat-body">
+          <div class="incoming-simple">
+            <p id="chat-welcome-msg" data-i18n="chat_welcome_msg">
+              SODIE v4 está dirigido a empresas que escalan campañas de alto presupuesto. Solo 2 Cupos anuales disponibles ($50,000 USDC/año). Inyección automatizada con contrato firmado y activación inmediata post-confirmación. Selecciona una opción para consultar detalles técnicos:
+            </p>
+          </div>
+        </div>
+
+        <div id="quick-replies" class="chat-quick-options">
+          <button type="button" class="opt-btn" data-payload="como_funciona" data-i18n="opt_how_it_works">¿Cómo funciona?</button>
+          <button type="button" class="opt-btn" data-payload="metodos_pago" data-i18n="opt_payment_methods">Pasarela Cripto</button>
+          <button type="button" class="opt-btn" data-payload="acceder" data-i18n="opt_vs_agencies">SODIE v4 vs Agencias</button>
+          <button type="button" class="opt-btn" data-payload="ecommerce" data-i18n="opt_ecommerce">Escalado B2B / E-commerce</button>
+          <button type="button" class="opt-btn" data-payload="cupo_11" data-i18n="opt_slot_11">¿Qué ocurre al agotar los 20 cupos?</button>
+          <button type="button" class="opt-btn" data-payload="comparacion" data-i18n="opt_reserve_slot">Reservar Slot</button>
+        </div>
+
+        <div class="chat-input-bar">
+          <input id="chat-input" type="text" placeholder="Escribe un mensaje..." data-i18n-placeholder="placeholder_chat_input" />
+          <button type="button" id="chat-send" class="chat-send-btn" data-sodie-event="enviar-chat">➤</button>
+        </div>
+      </section>
+
+      <!-- 5. CHECKOUT $50.000 USDC + TEMPORIZADOR INTEGRADO -->
+      <section id="pf-card" class="glass-card-dash pf-section">
+        <div id="pf-active-payment-flow">
+          <div id="pf-intro-card" class="text-center">
+            <h3 id="pf-main-title" class="section-title mint-txt" style="justify-content: center; margin-bottom: 6px;" data-i18n="title_slot_reservation">
+              Reserva de Slot e Inyección Automatizada
+            </h3>
+            <p class="step-desc" style="margin-bottom: 16px;">
+              Licencia anual de infraestructura SODIE v4 con despliegue directo e inyección automatizada de audiencias.
+            </p>
+
+            <div class="checkout-v4-price-box">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span class="mint-txt font-bold" style="font-size: 0.95rem;">Pago Único Anual SODIE v4</span>
+                <span class="badge-client" data-i18n="badge_10_slots">2 Cupos</span>
+              </div>
+
+              <div style="font-family: 'Orbitron', sans-serif; font-size: clamp(1.7rem, 4vw, 2.2rem); font-weight: 900; color: #fff; margin: 6px 0;">
+                $50.000 <small style="font-size: 0.95rem; color: var(--neon-mint); font-weight: 700;">USDC / año</small>
+              </div>
+
+              <div style="margin-bottom: 14px;">
+                <span class="fuchsia-txt font-bold" style="font-size: 0.85rem;">Red: Polygon / Ethereum / TRC20 (NOWPayments)</span>
+              </div>
+
+              <!-- Temporizador integrado en la tarjeta de cierre como en el mockup -->
+              <div class="timer-section" style="padding: 12px; background: rgba(4, 1, 10, 0.55); border: 1px solid rgba(0, 255, 204, 0.25); border-radius: 12px; margin-bottom: 16px;">
+                <span class="timer-label" id="timer-status-title" style="display: block; font-size: 0.72rem;" data-i18n="timer_title">TIEMPO PARA CIERRE DE VENTANA V4</span>
+                <div id="timer-main-display" class="timer-digits">720:00:00</div>
+                <span class="timer-sub" id="timer-status-sub" style="display: block;" data-i18n="timer_sub">Capacidad limitada a 4 licencias corporativas activas</span>
+              </div>
+
+              <button type="button" id="btn-procesar-pago-pasarela" class="btn-pf-action btn-pay-gradient full-width" data-sodie-event="desplegar_iframe" data-i18n="btn_pay_main">
+                PAGAR CUPO V4
+              </button>
+            </div>
+          </div>
+
+          <!-- Iframe NOWPayments (Se despliega al dar clic en PAGAR) -->
+          <div id="pf-step-iframe" class="iframe-payment-box hidden" style="margin-top: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h4 class="mint-txt" style="font-size: 0.9rem;" data-i18n="title_secure_gateway">Pasarela Cripto Non-Custodial (Liquidación Instantánea)</h4>
+              <span class="badge-client">SSL 256-bit</span>
+            </div>
+            <div class="iframe-container">
+              <iframe src="https://nowpayments.io/embeds/payment-widget?iid=4928691633" width="100%" height="680" frameborder="0" scrolling="no" style="width: 100%; max-width: 100%; border: none; overflow-y: hidden; border-radius: 12px;">
+                No se puede cargar el widget
+              </iframe>
+            </div>
+          </div>
+
+          <!-- Paso Post-Pago: Segmentación Objetivo -->
+          <div id="pf-step-excel" class="upload-excel-box hidden">
+            <h4 class="mint-txt" data-i18n="title_step2_targeting">Paso 1: Parámetros de Segmentación Objetivo</h4>
+            <p class="step-desc" data-i18n="step2_targeting_desc">
+              Ingresa los parámetros corporativos para generar el dataset e iniciar la inyección automatizada (Usa código ISO: US, MX, CO, ES):
+            </p>
+            
+            <div class="input-group-flow">
+              <input type="text" id="sodie-paises" placeholder="País y Ciudad (ej: US, MX, CO)" data-i18n-placeholder="placeholder_country_city" required />
+              <input type="text" id="sodie-nicho" placeholder="Nicho / Industria (ej: SaaS B2B, FinTech)" data-i18n-placeholder="placeholder_niche" required />
+              <input type="number" id="sodie-value" placeholder="Ticket Promedio en USD (sin centavos)" data-i18n-placeholder="placeholder_avg_ticket" required />
+              
+              <div class="form-row-2">
+                <input type="number" id="sodie-edad-min" placeholder="Edad Min (ej: 25)" data-i18n-placeholder="placeholder_min_age" value="25" />
+                <input type="number" id="sodie-edad-max" placeholder="Edad Max (ej: 55)" data-i18n-placeholder="placeholder_max_age" value="55" />
+              </div>
+
+              <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; font-size: 0.82rem; color: rgba(255, 255, 255, 0.75); text-align: left;">
+                <input type="checkbox" id="sodie-terms" required style="margin-top: 3px; accent-color: #00ffcc; cursor: pointer;" />
+                <label for="sodie-terms" style="cursor: pointer; line-height: 1.4;">
+                  Acepto los <a href="privacidad y datos.html" target="_blank" style="color: #00ffcc; text-decoration: underline;">términos de privacidad, registro de IP y contrato B2B</a>.
+                </label>
+              </div>
+
+              <button type="button" id="btn-client-upload-file" onclick="ejecutarBotonSODIE(event, 'cargar-excel')" class="btn-pf-action btn-pay-gradient" data-sodie-event="Excel_Upload" data-i18n="btn_save_confirmation">
+                Guardar e Inyectar Audiencia
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+        </main>
+        
+    <footer class="dash-footer text-center full-width-card" style="margin-top: 12px; opacity: 0.7; font-size: 0.8rem;">
+      <p data-i18n="footer_rights">© SODIE v4. 2026. TODOS LOS DERECHOS RESERVADOS</p>
+    </footer>
+
+          <!-- MODAL EJECUTIVO IA3 CENTRADO (FUERA DE MAIN) -->
+  <div id="ia3-modal-result" class="ia3-float-card hidden">
+    <!-- Barra/Flecha futurista de progreso al abrir -->
+    <div id="ia3-arrow-loader" class="ia3-arrow-progress">
+      <span class="ia3-arrow-icon">↓</span>
+      <div class="ia3-arrow-track">
+        <div id="ia3-arrow-fill" class="ia3-arrow-fill"></div>
+      </div>
+      <span class="mint-txt" style="font-size: 0.72rem; font-family: 'Orbitron', sans-serif;">IA3</span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h4 class="fuchsia-txt" style="font-size: 1.15rem; margin: 0;" data-i18n="ia3_diag_title">Diagnóstico Ejecutivo IA3</h4>
+      <button type="button" id="btn-close-ia3-modal" class="ia3-close-btn">✕</button>
+    </div>
+    
+    <div style="margin-bottom: 12px;">
+      <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_current_metrics">Métricas Actuales:</strong>
+      <p id="ia3-val-user" class="ia3-val-text"></p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <strong class="fuchsia-txt" style="font-size: 0.85rem;" data-i18n="ia3_detected_problems">Fugas de Capital Detectadas:</strong>
+      <p id="ia3-val-problems" class="ia3-val-text"></p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_sodie_solution">Proyección de Escalado con SODIE v4:</strong>
+      <div id="ia3-val-solution" class="ia3-val-text"></div>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <strong class="mint-txt" style="font-size: 0.85rem;" data-i18n="ia3_estimated_savings">Capital Mensual Retenido:</strong>
+      <p id="ia3-val-savings" class="ia3-val-text font-bold" style="font-size: 1.2rem; color: var(--neon-mint);"></p>
+    </div>
+
+    <div class="form-row-2">
+      <button type="button" id="btn-scroll-chat-ia3" data-sodie-event="scroll-chat" class="btn-pf-action" data-i18n="btn_go_to_chat">
+        Ir a Chat IA
+      </button>
+      <button type="button" id="btn-scroll-pago-ia3" data-sodie-event="scroll-pago" class="btn-pf-action btn-pay-gradient" data-i18n="btn_go_to_payment">
+        Reservar Cupo
+      </button>
+    </div>
+  </div>
+     
+  <script src="/js/i18n..js"></script>
+  <script src="/js/config..js"></script>
+  <script src="/js/app..js"></script>
+  <script src="/js/sw..js"></script>
+</body>
+</html>
