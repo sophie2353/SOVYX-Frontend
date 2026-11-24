@@ -910,19 +910,23 @@ button:disabled,
 /* ========================================================= */
 /* 8. SISTEMA UNIVERSAL DE BOTONES Y VARIANTES               */
 /* ========================================================= */
-
 .btn-pf-action { 
   width: 100%; 
-  padding: 13px 16px; 
-  background: linear-gradient(180deg, rgba(0, 255, 204, 0.22) 0%, rgba(0, 180, 140, 0.07) 100%); 
-  border: 1.5px solid var(--neon-mint); 
-  border-radius: 12px; 
+  padding: 13px 18px; 
+  background: linear-gradient(180deg, rgba(0, 255, 204, 0.14) 0%, rgba(16, 4, 34, 0.65) 100%);
+  border: 1px solid rgba(0, 255, 204, 0.52);
+  border-top: 1px solid rgba(0, 255, 204, 0.85);
+  border-radius: 14px; 
   color: var(--neon-mint); 
   font-weight: 700; 
-  font-size: 0.96rem; 
+  font-size: 0.94rem; 
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer; 
-  box-shadow: 0 0 14px rgba(0, 255, 204, 0.18); 
-  transition: all 0.25s ease; 
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -931,21 +935,43 @@ button:disabled,
 }
 
 .btn-pf-action:hover { 
-  box-shadow: 0 0 22px rgba(0, 255, 204, 0.45); 
+  background: linear-gradient(180deg, rgba(0, 255, 204, 0.24) 0%, rgba(24, 6, 48, 0.78) 100%);
+  border-color: var(--neon-mint);
+  box-shadow: 
+    0 8px 24px rgba(0, 255, 204, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
   transform: translateY(-1px); 
 }
 
+.btn-pf-action:active {
+  transform: scale(0.985);
+}
+
 .btn-pay-gradient {
-  background: linear-gradient(135deg, #00ffcc 0%, #00b894 100%) !important;
+  background: linear-gradient(135deg, #2affd5 0%, #00e6b8 50%, #00a884 100%) !important;
   color: #040109 !important;
-  border: none !important;
+  border: 1px solid rgba(168, 255, 238, 0.65) !important;
+  border-radius: 14px !important;
   font-weight: 800 !important;
-  font-size: 1.05rem !important;
-  letter-spacing: 1px;
+  font-size: 1rem !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow:
+    0 8px 24px rgba(0, 255, 204, 0.32),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 6px rgba(0, 77, 58, 0.35) !important;
 }
 
 .btn-pay-gradient:hover {
-  box-shadow: 0 0 25px rgba(0, 255, 204, 0.75) !important;
+  filter: brightness(1.06);
+  box-shadow:
+    0 10px 30px rgba(0, 255, 204, 0.55),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.7) !important;
+  transform: translateY(-1px);
+}
+
+.btn-pay-gradient:active {
+  transform: scale(0.985);
 }
 
 .btn-mint-solid {
