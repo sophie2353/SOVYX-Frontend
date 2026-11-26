@@ -169,6 +169,24 @@
         <span id="client-id-badge" class="badge-client" data-i18n="badge_active_client">Cliente Activo</span>
       </div>
 
+          <!-- BARRA EXCLUSIVA ADMIN: SELECTOR DE 4 CLIENTES + TEST CONCURRENTE -->
+    <section id="admin-client-switcher" class="glass-card-dash hidden" style="padding: 12px 16px; border-color: var(--neon-fuchsia);">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="fuchsia-txt font-bold" style="font-size: 0.78rem; letter-spacing: 0.5px;">MODO ADMIN:</span>
+          <button type="button" class="btn-pf-action admin-slot-btn" data-slot="CLIENT-#01" style="width: auto; padding: 6px 12px; font-size: 0.78rem;">CLIENT 1</button>
+          <button type="button" class="btn-pf-action admin-slot-btn" data-slot="CLIENT-#02" style="width: auto; padding: 6px 12px; font-size: 0.78rem;">CLIENT 2</button>
+          <button type="button" class="btn-pf-action admin-slot-btn" data-slot="CLIENT-#03" style="width: auto; padding: 6px 12px; font-size: 0.78rem;">CLIENT 3</button>
+          <button type="button" class="btn-pf-action admin-slot-btn" data-slot="CLIENT-#04" style="width: auto; padding: 6px 12px; font-size: 0.78rem;">CLIENT 4</button>
+        </div>
+
+        <button type="button" id="btn-run-4client-sim" class="btn-pf-action btn-pay-gradient" style="width: auto; padding: 7px 14px; font-size: 0.78rem;">
+          Simular 4 a la vez
+        </button>
+      </div>
+      <div id="sim-4clients-output" class="text-sub hidden" style="margin-top: 10px; font-size: 0.78rem; padding: 8px 10px; background: rgba(0,0,0,0.35); border-radius: 8px; border: 1px solid rgba(0,255,204,0.2);"></div>
+    </section>
+
       <div style="display: flex; align-items: center; gap: 10px;">
         <div class="cupos-badge">
           <span class="purple-neon-dot"></span>
