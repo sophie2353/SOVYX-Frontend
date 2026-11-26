@@ -632,6 +632,143 @@ async function activarNotificacionesPush(clientIdOverride = null) {
     }
 
   } catch (error) {
-    console.error('💥 Error activando notificaciones Push:', error.message);
-  }
+    console.error('💥 Error activando notificaciones Push:',window.sodieValidarPassw
+/* ==========================================================================
+   MODO ADMIN: SELECTOR CLIENT 1-4 + SIMULADOR DE CONCURRENCIA (V4)
+   ========================================================================== */
+const MOCK_CLIENT_PROFILES = {
+  'CLIENT-#01': { spend: 4250, reach: 68400, impressions: 91200, visitors: 1420, activos: 38, paises: 'US, CA', nicho: 'SaaS B2B', value: 2500 },
+  'CLIENT-#02': { spend: 1890, reach: 31500, impressions: 44100, visitors: 780,  activos: 19, paises: 'ES, MX', nicho: 'FinTech', value: 1800 },
+  'CLIENT-#03': { spend: 7600, reach: 124000, impressions: 168900, visitors: 3110, activos: 74, paises: 'US, UK', nicho: 'E-commerce High-Ticket', value: 3200 },
+  'CLIENT-#04': { spend: 950,  reach: 15200, impressions: 21400, visitors: 410,  activos: 11, paises: 'CO, CL', nicho: 'Inmobiliaria', value: 1200 }
+};
+
+function isAdminModeClientView() {
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get('admin') === 'true' ||
+    sessionStorage.getItem('sodie_admin_session') === 'active' ||
+    localStorage.getItem('sodie_admin_session') === 'active' ||
+    localStorage.getItem('sodie_admin_bypass') === 'true'
+  );
 }
+
+async function switchSimulatedClient(clientId) {
+  localStorage.setItem('sodie_client_id', clientId);
+  localStorage.setItem('sodie_active_client_id', clientId);
+
+  // Actualiza URL sin recargar la página
+  const url = new URL(window.location.href);
+  url.searchParams.set('clientId', clientId);
+  url.searchParams.set('admin', 'true');
+  window.history.replaceState({}, '', url);
+
+  // Marca el botón activo y el badge superior
+  const badge = document.getElementById('client-id-badge');
+  if (badge) badge.textContent = clientId;
+
+  document.querySelectorAll('.admin-slot-btn').forEach((btn) => {
+    const active = btn.getAttribute('data-slot') === clientId;
+    btn.style.borderColor = active ? '#00ffcc' : '';
+    btn.style.background = active ? 'rgba(0, 255, 204, 0.18)' : '';
+    btn.style.color = active ? '#00ffcc' : '';
+  });
+
+  // Intenta cargar métricas reales del backend para ese clientId; si está vacío, usa el perfil simulado
+  const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : window.location.origin;
+  let metrics = MOCK_CLIENT_PROFILES[clientId] || MOCK_CLIENT_PROFILES['CLIENT-#01'];
+
+  try {
+    const res = await fetch(`${baseUrl}/api/facebook/metrics?clientId=${encodeURIComponent(clientId)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.hasActiveCampaign) {
+        metrics = { ...metrics, ...data };
+      }
+    }
+  } catch (err) {
+    // Mantiene perfil simulado para inspección visual
+  }
+
+  // Pinta métricas aisladas de ese cliente
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+  setTxt('metric-spend', `$${Number(metrics.spend || 0).toLocaleString('en-US')}`);
+  setTxt('metric-reach', Number(metrics.reach || 0).toLocaleString('en-US'));
+  setTxt('metric-reach-status', Number(metrics.impressions || 0).toLocaleString('en-US'));
+  setTxt('metric-visitors', Number(metrics.visitors || 0).toLocaleString('en-US'));
+  setTxt('metric-activos', Number(metrics.activos || 0).toLocaleString('en-US'));
+
+  // Rellena los inputs de segmentación para verificar que cada cliente tiene su propia data
+  setVal('client-paises', metrics.paises || '');
+  setVal('client-nicho', metrics.nicho || '');
+  setVal('client-value', metrics.value || '');
+}
+
+async function runConcurrent4ClientTest() {
+  const outputEl = document.getElementById('sim-4clients-output');
+  const btn = document.getElementById('btn-run-4client-sim');
+  const baseUrl = typeof getBaseUrl === 'function' ? getBaseUrl() : window.location.origin;
+  const ids = ['CLIENT-#01', 'CLIENT-#02', 'CLIENT-#03', 'CLIENT-#04'];
+
+  if (btn) btn.disabled = true;
+  if (outputEl) {
+    outputEl.classList.remove('hidden');
+    outputEl.innerHTML = 'Disparando 4 sesiones simultáneas al backend...';
+  }
+
+  const t0 = performance.now();
+
+  const results = await Promise.all(
+    ids.map(async (id) => {
+      const start = performance.now();
+      try {
+        const [timerRes, metricsRes] = await Promise.all([
+          fetch(`${baseUrl}/api/v1/timer/get-timer?clientId=${encodeURIComponent(id)}`),
+          fetch(`${baseUrl}/api/facebook/metrics?clientId=${encodeURIComponent(id)}`)
+        ]);
+        const ms = Math.round(performance.now() - start);
+        const ok = timerRes.ok || metricsRes.ok;
+        return { id, ok, ms, status: ok ? 'AISLADO OK' : `HTTP ${timerRes.status}/${metricsRes.status}` };
+      } catch (e) {
+        return { id, ok: false, ms: Math.round(performance.now() - start), status: 'SIN CONEXIÓN' };
+      }
+    })
+  );
+
+  const totalMs = Math.round(performance.now() - t0);
+
+  if (outputEl) {
+    outputEl.innerHTML = `
+      <div style="margin-bottom: 6px; color: #00ffcc;"><strong>Test Concurrente (4 clientes a la vez • ${totalMs}ms):</strong></div>
+      ${results.map(r => `<div>• <strong>${r.id}</strong>: ${r.ok ? '✅' : '⚠️'} ${r.status} (${r.ms}ms)</div>`).join('')}
+    `;
+  }
+  if (btn) btn.disabled = false;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!isAdminModeClientView()) return;
+
+  // Abre el dashboard directo sin pedir login de cliente
+  document.getElementById('client-auth-view')?.classList.add('hidden');
+  document.getElementById('app-dashboard')?.classList.remove('hidden');
+
+  const switcher = document.getElementById('admin-client-switcher');
+  if (switcher) switcher.classList.remove('hidden');
+
+  document.querySelectorAll('.admin-slot-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      switchSimulatedClient(btn.getAttribute('data-slot'));
+    });
+  });
+
+  const btnSim = document.getElementById('btn-run-4client-sim');
+  if (btnSim) btnSim.addEventListener('click', runConcurrent4ClientTest);
+
+  // Carga el cliente indicado en la URL o arranca en CLIENT-#01
+  const initialId = new URLSearchParams(window.location.search).get('clientId');
+  const validInitial = MOCK_CLIENT_PROFILES[initialId] ? initialId : 'CLIENT-#01';
+  switchSimulatedClient(validInitial);
+});
