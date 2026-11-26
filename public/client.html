@@ -3,9 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cliente | SODIE</title>
+  <title>Panel Cliente | SODIE v4</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    /* Layout Bento V4 para Panel Cliente */
+    .client-auth-overlay {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+
+    .client-auth-card {
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .client-shell {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px 16px 48px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .client-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+
+    .client-bento-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      width: 100%;
+      align-items: start;
+    }
+
+    .client-col-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 0;
+    }
+
+    .card-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .timer-pill-box {
+      background: rgba(4, 1, 10, 0.55);
+      border: 1px solid rgba(0, 255, 204, 0.28);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      margin: 12px 0 16px 0;
+    }
+
+    .v4-status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .v4-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      font-size: 0.84rem;
+    }
+
+    @media (min-width: 860px) {
+      .client-bento-grid {
+        grid-template-columns: 1.3fr 1fr;
+      }
+      .bento-span-2 {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
 </head>
 <body class="client-body">
 
@@ -20,159 +116,233 @@
     </div>
   </div>
 
-  <!-- INICIAR SESIÓN -->
+  <!-- VISTA DE ACCESO CLIENTE -->
   <main id="client-auth-view" class="client-auth-overlay">
-  <div class="client-auth-card">
-    <h2 class="auth-title" data-i18n="auth_client_title">Acceso Cliente SODIE</h2>
-    <p class="auth-subtitle" data-i18n="auth_client_subtitle">Ingresa tu ID de cliente y tu contraseña para acceder al panel</p>
-
-    <div id="client-login-box" class="auth-form-group">
-      <div class="form-field margin-v-sm">
-        <label for="client-id-input" class="label-mint" data-i18n="label_client_id">ID de Cliente</label>
-        <input type="text" id="client-id-input" placeholder="Ej. CLIENT-01 o CLIENT-0" data-i18n-placeholder="placeholder_client_id" class="input-custom" />
+    <div class="glass-card-dash client-auth-card">
+      <div style="text-align: center; margin-bottom: 18px;">
+        <h1 class="logo-title" style="font-size: 2rem !important;">
+          <span class="serif-s" style="font-size: 2.3rem !important;">S</span>ODIE
+          <span class="mint-txt" style="font-family: 'Orbitron', sans-serif; font-size: 0.95rem; margin-left: 4px;">v4</span>
+        </h1>
+        <span class="badge-client" style="display: inline-block; margin-top: 6px;">TERMINAL CORPORATIVA</span>
       </div>
 
-      <div class="form-field margin-v-sm">
-        <label for="client-pass-input" class="label-mint" data-i18n="label_client_pass">Contraseña de Acceso</label>
-        <input type="password" id="client-pass-input" placeholder="••••••••" class="input-custom" />
+      <h2 class="section-title mint-txt" style="justify-content: center; margin-bottom: 6px;" data-i18n="auth_client_title">Acceso Cliente SODIE</h2>
+      <p class="step-desc text-center" style="margin-bottom: 18px;" data-i18n="auth_client_subtitle">
+        Ingresa tu ID de cliente y contraseña para acceder al panel
+      </p>
+
+      <div id="client-login-box" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label for="client-id-input" class="mint-txt" style="font-size: 0.8rem; display: block; margin-bottom: 6px;" data-i18n="label_client_id">ID de Cliente</label>
+          <input type="text" id="client-id-input" placeholder="Ej. CLIENT-#01" data-i18n-placeholder="placeholder_client_id" />
+        </div>
+
+        <div>
+          <label for="client-pass-input" class="mint-txt" style="font-size: 0.8rem; display: block; margin-bottom: 6px;" data-i18n="label_client_pass">Contraseña de Acceso</label>
+          <input type="password" id="client-pass-input" placeholder="••••••••" />
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+          <button type="button" id="btn-client-pass-login" onclick="sodieValidarPasswordCliente()" class="btn-pf-action btn-pay-gradient" data-i18n="btn_enter_panel">
+            Ingresar al Panel
+          </button>
+          <button type="button" id="btn-client-register" onclick="sodieRegistrarPasswordCliente()" class="btn-pf-action btn-fuchsia-solid" data-i18n="btn_register_first">
+            Registrar por Primera Vez
+          </button>
+        </div>
       </div>
 
-      <div class="auth-actions-group margin-v-sm">
-        <button type="button" id="btn-client-pass-login" onclick="sodieValidarPasswordCliente()" class="btn-pf-action btn-mint-solid" data-i18n="btn_enter_panel">
-          Ingresar al Panel
-        </button>
-        <button type="button" id="btn-client-register" onclick="sodieRegistrarPasswordCliente()" class="btn-pf-action btn-fuchsia-solid margin-v-xs" data-i18n="btn_register_first">
-          Registrar por Primera Vez
-        </button>
-      </div>
+      <div id="client-auth-error" class="fuchsia-txt text-center hidden" style="margin-top: 12px; font-size: 0.85rem;"></div>
     </div>
+  </main>
 
-    <div id="client-auth-error" class="auth-error-msg hidden"></div>
-  </div>
-</main>
-
-  <!-- DASHBOARD CLIENTE (OCULTO HASTA AUTENTICAR O BYPASS ADMIN) -->
-  <main id="app-dashboard" class="dashboard-container hidden">
-    <header class="dash-header">
-      <div class="dash-header-left">
-        <span id="header-brand-title" class="brand-text">
-          <span class="brand-pink">S</span>ODIE
-        </span>
-        <span id="client-id-badge" class="badge-client badge-mint-border" data-i18n="badge_active_client">Cliente Activo</span>
+  <!-- DASHBOARD CLIENTE V4 (OCULTO HASTA AUTENTICAR O BYPASS ADMIN) -->
+  <main id="app-dashboard" class="client-shell hidden">
+    <!-- BARRA SUPERIOR -->
+    <header class="glass-card-dash client-topbar">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <h1 id="header-brand-title" class="logo-title" style="font-size: 1.55rem !important;">
+          <span class="serif-s" style="font-size: 1.85rem !important;">S</span>ODIE
+        </h1>
+        <span class="mint-txt font-bold" style="font-family: 'Orbitron', sans-serif; font-size: 0.9rem;">v4</span>
+        <span id="client-id-badge" class="badge-client" data-i18n="badge_active_client">Cliente Activo</span>
       </div>
-      <div class="dash-header-right">
-        <button type="button" class="btn-icon" data-sodie-event="nav-admin" title="Acceso Admin"></button>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="cupos-badge">
+          <span class="purple-neon-dot"></span>
+          <span class="cupos-text">Sincronización Activa</span>
+        </div>
+        <button type="button" class="btn-icon" data-sodie-event="nav-admin" title="Acceso Admin">☰</button>
       </div>
     </header>
 
-    <!-- 1. MÉTRICAS CLIENTE -->
-    <section class="metrics-section">
-      <h3 class="section-title" data-i18n="title_performance_metrics">Métricas de Rendimiento</h3>
-      <div class="metrics-slider" id="metrics-slider">
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span data-i18n="metric_spend">Inversión</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-spend">$0</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
-          </div>
-        </article>
+    <!-- BENTO GRID CLIENTE -->
+    <div class="client-bento-grid">
 
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span data-i18n="metric_reach">Alcance</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-reach">0</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
+      <!-- 1. MÉTRICAS DE RENDIMIENTO (ANCHO COMPLETO) -->
+      <section class="glass-card-dash metrics-section bento-span-2">
+        <div class="chat-header" style="margin-bottom: 12px;">
+          <div>
+            <h3 class="section-title" style="margin-bottom: 2px;" data-i18n="title_performance_metrics">Métricas de Rendimiento</h3>
+            <p class="text-sub" style="font-size: 0.78rem;">Telemetría consolidada en ciclos automáticos de 24 horas</p>
           </div>
-          <div class="card-foot"><span data-i18n="metric_impressions">Impresiones</span><span id="metric-reach-status" class="mint-txt">0</span></div>
-        </article>
-
-        <article class="glass-card-dash metric-square">
-          <div class="card-head"><span data-i18n="metric_visitors">Visitas</span><span class="dots">•••</span></div>
-          <div class="card-value" id="metric-visitors">0</div>
-          <div class="card-chart">
-            <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0,50 L200,50" fill="none" stroke="#00ffcc" stroke-width="2" /></svg>
-          </div>
-          <div class="card-foot"><span data-i18n="metric_active_traffic">Tráfico Activo</span><span id="metric-activos" class="mint-txt">0</span></div>
-        </article>
-      </div>
-      
-      <div style="margin-top: 14px; padding: 10px 14px; background: rgba(0, 255, 204, 0.03); border: 1px solid rgba(0, 255, 204, 0.12); border-radius: 10px; display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 0.9rem; line-height: 1;">⏳</span>
-        <p style="margin: 0; font-size: 0.73rem; color: rgba(255, 255, 255, 0.65); line-height: 1.35;" data-i18n="meta_sync_notice">
-          <strong style="color: #00ffcc; font-weight: 500;">Sincronización en curso:</strong> Las métricas del API de Meta se consolidan en ciclos de hasta 24 horas. Los resultados continuarán actualizándose, los numeros actuales si es antes de las 24 horas de Meta, son métricas automáticas para llenar las tarjetas del frontend. Pero la campaña esta activa.
-        </p>
-      </div>
-    </section>
-
-    <!-- 2. BLOQUE DE INYECCIÓN -->
-    <section id="card-injection-flow" class="glass-card-dash margin-v-sm">
-      <h3 class="section-title mint-txt" data-i18n="title_audience_injection">Inyección de Audiencia (Cada 72h)</h3>
-      <div id="timer-24h-display" class="timer-digits mint-txt">72:00:00</div>
-      
-      <div class="input-group-flow margin-v-sm flex-col-gap" style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" id="client-paises" class="file-input-custom" placeholder="País y Ciudad (ej: MX, CO, US)" data-i18n-placeholder="placeholder_country_city" />
-        <input type="text" id="client-nicho" class="file-input-custom" placeholder="Nicho Objetivo" data-i18n-placeholder="placeholder_niche" />
-        <input type="number" id="client-value" class="file-input-custom" placeholder="Value de Público Objetivo sin centavos (USD)" data-i18n-placeholder="placeholder_avg_ticket" />
-        
-        <div style="display: flex; gap: 10px;">
-          <input type="number" id="client-edad-min" class="file-input-custom" placeholder="Edad Min" data-i18n-placeholder="placeholder_min_age" value="22" />
-          <input type="number" id="client-edad-max" class="file-input-custom" placeholder="Edad Max" data-i18n-placeholder="placeholder_max_age" value="55" />
         </div>
 
-        <button type="button" id="btn-client-upload-excel" onclick="sodieFlujoInyeccionCliente()" data-sodie-event="client-upload-excel" class="btn-pf-action btn-mint-solid" data-i18n="btn_update_segmentation">
-          Actualizar Segmentación
-        </button>
-      </div>
+        <svg width="0" height="0" style="position: absolute;">
+          <defs>
+            <linearGradient id="clientMintGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.38"/>
+              <stop offset="100%" stop-color="#00ffcc" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+        </svg>
 
-            <!-- Botón único para activar campaña con contador -->
-      <button type="button" id="btn-client-activate-campaign" data-sodie-event="client-activate-campaign" class="btn-pf-action btn-activate-gradient hidden margin-v-sm" style="position: relative; display: flex; justify-content: center; align-items: center; gap: 8px;">
-        <span id="btn-client-trigger-text" data-i18n="btn_activate_campaign">Activar Campaña</span>
-        <span id="btn-client-trigger-timer" class="hidden" style="font-family: 'Orbitron', monospace; font-size: 0.9em; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">00:00:00</span>
-      </button>
-    </section>
+        <div class="metrics-slider" id="metrics-slider">
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_spend">Inversión</span></div>
+            <div class="card-value" id="metric-spend">$0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,48 Q35,42 65,28 T135,32 T200,12 L200,60 L0,60 Z" fill="url(#clientMintGrad)" />
+                <path d="M0,48 Q35,42 65,28 T135,32 T200,12" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="card-foot"><span>Estado</span><span class="mint-txt">En línea</span></div>
+          </article>
 
-    <!-- 3. CIERRE DE CICLO FINAL EN SEMANA 4 (DÍA 28) -->
-    <section id="section-week-4-complete" class="glass-card-dash hidden text-center margin-v-sm">
-      <h3 class="section-title mint-txt" data-i18n="title_cycle_complete">¡Ciclo de 4 Semanas Completado!</h3>
-      <p class="step-desc" data-i18n="cycle_complete_desc">Has finalizado satisfactoriamente las 4 semanas de ejecución, optimización de audiencia y despliegue del sistema.</p>
-      <button type="button" class="btn-pf-action btn-fuchsia-solid margin-v-sm" data-sodie-event="renovar-cupo" data-i18n="btn_join_waitlist">
-        Unirse a Lista de Espera / Renovar Cupo
-      </button>
-    </section>
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_reach">Alcance</span></div>
+            <div class="card-value" id="metric-reach">0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,50 Q45,35 90,38 T155,20 T200,14 L200,60 L0,60 Z" fill="url(#clientMintGrad)" />
+                <path d="M0,50 Q45,35 90,38 T155,20 T200,14" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="card-foot"><span data-i18n="metric_impressions">Impresiones</span><span id="metric-reach-status" class="mint-txt">0</span></div>
+          </article>
 
-    <!-- DESGLOSE GLOBAL DE FUNCIONES V3.5 Y MENSAJE DE CIERRE -->
-    <section class="glass-card-dash margin-v-sm structure-card">
-      <h3 class="section-title mint-txt" data-i18n="title_sodie_v35_features">SODIE V3.5: Especificaciones del Sistema</h3>
-      <div class="timeline-container" style="margin-top: 14px;">
-        <div class="time-step active" style="margin-bottom: 16px;">
-          <span class="step-desc" style="line-height: 1.6; display: block; color: var(--text-main);">
-            1. Acceso rápido<br>
-            2. Activar borrador mediante data en pocos minutos<br>
-            3. Control total en tu panel de ADS Manager<br>
-            4. Notificaciones para actualizar segmentación<br>
-            5. Hasta 5 países para registrar la segmentación preferida<br>
-            6. Actualización de Campañas cada 72 horas<br>
-            7. Aumento de ROAS cada semana<br>
-            8. Miles de dólares ahorrados con buena segmentación
+          <article class="metric-square">
+            <div class="card-head"><span class="text-sub" data-i18n="metric_visitors">Visitas</span></div>
+            <div class="card-value" id="metric-visitors">0</div>
+            <div class="card-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none" style="width:100%; height:42px;">
+                <path d="M0,46 Q30,24 65,36 T125,16 T200,22 L200,60 L0,60 Z" fill="url(#clientMintGrad)" />
+                <path d="M0,46 Q30,24 65,36 T125,16 T200,22" fill="none" stroke="#00ffcc" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="card-foot"><span data-i18n="metric_active_traffic">Tráfico Activo</span><span id="metric-activos" class="mint-txt">0</span></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 2. COLUMNA IZQUIERDA: BLOQUE DE INYECCIÓN (72H) -->
+      <section id="card-injection-flow" class="glass-card-dash">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+          <h3 class="section-title mint-txt" style="margin-bottom: 0;" data-i18n="title_audience_injection">Inyección de Audiencia</h3>
+          <span class="badge-client">Ciclo 72h</span>
+        </div>
+
+        <div class="timer-pill-box">
+          <span class="text-sub" style="font-size: 0.72rem; letter-spacing: 1px; display: block; margin-bottom: 4px;">PRÓXIMA VENTANA DE ACTUALIZACIÓN</span>
+          <div id="timer-24h-display" class="timer-digits mint-txt">72:00:00</div>
+        </div>
+
+        <div class="input-group-flow" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-row-2">
+            <div>
+              <label class="text-sub" style="font-size: 0.76rem; display: block; margin-bottom: 4px;">Países / Ciudades (ISO)</label>
+              <input type="text" id="client-paises" placeholder="Ej: US, MX, CO" data-i18n-placeholder="placeholder_country_city" />
+            </div>
+            <div>
+              <label class="text-sub" style="font-size: 0.76rem; display: block; margin-bottom: 4px;">Nicho Objetivo</label>
+              <input type="text" id="client-nicho" placeholder="Ej: SaaS B2B, FinTech" data-i18n-placeholder="placeholder_niche" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div>
+              <label class="text-sub" style="font-size: 0.76rem; display: block; margin-bottom: 4px;">Ticket Objetivo (USD)</label>
+              <input type="number" id="client-value" placeholder="Sin centavos (ej: 1500)" data-i18n-placeholder="placeholder_avg_ticket" />
+            </div>
+            <div class="form-row-2">
+              <div>
+                <label class="text-sub" style="font-size: 0.76rem; display: block; margin-bottom: 4px;">Edad Min</label>
+                <input type="number" id="client-edad-min" placeholder="22" data-i18n-placeholder="placeholder_min_age" value="22" />
+              </div>
+              <div>
+                <label class="text-sub" style="font-size: 0.76rem; display: block; margin-bottom: 4px;">Edad Max</label>
+                <input type="number" id="client-edad-max" placeholder="55" data-i18n-placeholder="placeholder_max_age" value="55" />
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="btn-client-upload-excel" onclick="sodieFlujoInyeccionCliente()" data-sodie-event="client-upload-excel" class="btn-pf-action btn-pay-gradient" data-i18n="btn_update_segmentation">
+            Actualizar Segmentación
+          </button>
+
+          <!-- Botón de activación de campaña con cronómetro -->
+          <button type="button" id="btn-client-activate-campaign" data-sodie-event="client-activate-campaign" class="btn-pf-action btn-fuchsia-solid hidden" style="position: relative; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <span id="btn-client-trigger-text" data-i18n="btn_activate_campaign">Activar Campaña</span>
+            <span id="btn-client-trigger-timer" class="hidden" style="font-family: 'Orbitron', monospace; font-size: 0.88em; background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px;">00:00:00</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 3. COLUMNA DERECHA: CICLO GLOBAL + ESTADO DE LICENCIA V4 -->
+      <div class="client-col-stack">
+        <!-- TEMPORIZADOR GLOBAL DE CICLO -->
+        <section class="glass-card-dash timer-section text-center">
+          <span class="timer-label" style="display: block; margin-bottom: 8px;" data-i18n="timer_global_cycle_title">ACCESO ACTIVO • CICLO DE EJECUCIÓN V4</span>
+          <div id="global-timer-display" class="timer-digits mint-txt" style="margin-bottom: 8px;">672:00:00</div>
+          <span class="timer-sub" style="display: block; font-size: 0.78rem; color: var(--text-sub);" data-i18n="timer_global_cycle_sub">
+            INFRAESTRUCTURA CORPORATIVA SODIE V4 EN OPERACIÓN
           </span>
-        </div>
-      </div>
-      <p class="step-desc" style="line-height: 1.6; margin-top: 14px;" data-i18n="closing_message_sodie">
-        Se trabaja diariamente en mejorar el sistema y en siguientes versiones, activando la V4 en mínimo 28 días. Llegar a este panel fueron 18 meses de trabajo sin descanso y miles de horas invertidas en llegar. Gracias por cerrar esta V3.5 y empezar oficialmente la instalación de la V4.
-      </p>
-    </section>
+        </section>
 
-    <!-- TEMPORIZADOR GLOBAL DE CICLO (28 DÍAS) -->
-    <section class="glass-card-dash timer-section">
-      <span class="timer-label" data-i18n="timer_global_cycle_title">ACCESO ACTIVO • CICLO DE 4 SEMANAS (28 DÍAS)</span>
-      <div id="global-timer-display" class="timer-digits">672:00:00</div>
-      <span class="timer-sub" data-i18n="timer_global_cycle_sub">
-        TIEMPO TOTAL DE OPTIMIZACIÓN Y EJECUCIÓN V3.5
-      </span>
-    </section>
-    
-    <footer class="dash-footer text-center margin-v-md">
-      <p data-i18n="footer_rights">© SODIE v3.5. 2026</p>
+        <!-- ESTADO DEL SISTEMA V4 -->
+        <section class="glass-card-dash">
+          <h3 class="section-title mint-txt" style="margin-bottom: 4px;" data-i18n="title_sodie_v35_features">Infraestructura SODIE v4</h3>
+          <p class="step-desc">Parámetros activos de tu licencia corporativa.</p>
+
+          <div class="v4-status-list">
+            <div class="v4-status-row">
+              <span class="text-sub">Protocolo de Maduración</span>
+              <span class="mint-txt font-bold">Radar 4h Activo</span>
+            </div>
+            <div class="v4-status-row">
+              <span class="text-sub">Frecuencia de Inyección</span>
+              <span class="mint-txt font-bold">Cada 72 horas</span>
+            </div>
+            <div class="v4-status-row">
+              <span class="text-sub">Cobertura Geográfica</span>
+              <span class="text-main font-bold">Hasta 5 países ISO</span>
+            </div>
+            <div class="v4-status-row">
+              <span class="text-sub">Control de Activos</span>
+              <span class="fuchsia-txt font-bold">100% Cuenta Cliente</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- CIERRE DE CICLO FINAL (OCULTO HASTA COMPLETAR) -->
+        <section id="section-week-4-complete" class="glass-card-dash hidden text-center">
+          <h3 class="section-title mint-txt" style="justify-content: center;" data-i18n="title_cycle_complete">¡Ciclo Completado!</h3>
+          <p class="step-desc" style="margin-bottom: 14px;" data-i18n="cycle_complete_desc">
+            Has finalizado satisfactoriamente el ciclo de ejecución y optimización de audiencia.
+          </p>
+          <button type="button" class="btn-pf-action btn-fuchsia-solid" data-sodie-event="renovar-cupo" data-i18n="btn_join_waitlist">
+            Renovar Cupo / Extender Licencia
+          </button>
+        </section>
+      </div>
+
+    </div>
+
+    <footer class="dash-footer text-center" style="opacity: 0.65; font-size: 0.78rem; margin-top: 8px;">
+      <p data-i18n="footer_rights">© SODIE v4. 2026. TODOS LOS DERECHOS RESERVADOS</p>
     </footer>
   </main>
 
